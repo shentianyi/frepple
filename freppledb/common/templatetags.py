@@ -383,6 +383,7 @@ class MenuNode(Node):
   def __init__(self, varname):
       self.varname = varname
 
+  # CMARK 菜单权限
   def render(self, context):
     from freppledb.menu import menu
     try:
@@ -424,8 +425,11 @@ class MenuNode(Node):
                   ok = False
                 if ok is False:
                   break
-              elif dep._meta.db_table not in present:
-                ok = False
+              # elif dep._meta.db_table not in present:
+              #   ok = False
+              # CMARK 无论数据库表是否有数据，都显示
+                elif (dep._meta.db_table not in present) or (dep._meta.db_table in present):
+                  ok = True
                 break
           emptytable = not j[2].model or j[2].model._meta.db_table in present
           if j[2].separator:

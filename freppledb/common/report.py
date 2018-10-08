@@ -296,6 +296,13 @@ class GridFieldBool(GridField):
   width = 60
 
 
+class GridFieldCreateOrUpdateDate(GridField):
+  formatter = 'date'
+  extra = '"formatoptions":{"srcformat":"Y-m-d H:i:s","newformat":"Y-m-d H:i:s"}'
+  editable = False
+  width = 140
+
+
 class GridFieldLastModified(GridField):
   formatter = 'date'
   extra = '"formatoptions":{"srcformat":"Y-m-d H:i:s","newformat":"Y-m-d H:i:s"}'

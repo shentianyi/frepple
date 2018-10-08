@@ -110,6 +110,22 @@ msgstr "关于frePPLe"
 msgid "Unique identifier"
 msgstr "唯一标识符"
 
+# CMARK 翻译
+msgid "id"
+msgstr "Id"
+
+msgid "nr"
+msgstr "代码"
+
+msgid "name"
+msgstr "名称"
+
+msgid "created_at"
+msgstr "创建时间"
+
+msgid "updated_at"
+msgstr "修改时间"
+
 #: common/models.py:41 input/models.py:1111 input/views.py:721
 #: input/views.py:752 input/views.py:774 input/views.py:796 input/views.py:879
 #: input/views.py:1010 input/views.py:1029 input/views.py:1059

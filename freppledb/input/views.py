@@ -43,7 +43,7 @@ from freppledb.input.models import Calendar, CalendarBucket, ManufacturingOrder,
 from freppledb.input.models import ResourceSkill, Supplier, ItemSupplier, searchmode
 from freppledb.input.models import ItemDistribution, DistributionOrder, PurchaseOrder
 from freppledb.input.models import OperationPlan, OperationPlanMaterial, OperationPlanResource
-from freppledb.common.report import GridReport, GridFieldBool, GridFieldLastModified
+from freppledb.common.report import GridReport, GridFieldBool, GridFieldLastModified, GridFieldCreateOrUpdateDate
 from freppledb.common.report import GridFieldDateTime, GridFieldTime, GridFieldText
 from freppledb.common.report import GridFieldNumber, GridFieldInteger, GridFieldCurrency
 from freppledb.common.report import GridFieldChoice, GridFieldDuration
@@ -795,16 +795,28 @@ class LocationList(GridReport):
   help_url = 'user-guide/modeling-wizard/master-data/locations.html'
 
   rows = (
-    #. Translators: Translation included with Django
-    GridFieldText('name', title=_('name'), key=True, formatter='detail', extra='"role":"input/location"'),
+    # . Translators: Translation included with Django
+    # TODO CMARK id 的key作为连接到详情页面, 如何在nr这个属性上做链接,并且传递的不是nr的值, 而是id的值
+    # key 表示链接的关键字
+    # formatter 表示链接的动作
+    # extra 表示其它的内容
+
+    GridFieldText('id', title=_('id'), key=True, formatter='detail', extra='"role":"input/location"'),
+    # GridFieldText('nr', title=_('nr')),
+    GridFieldText('name', title=_('name')),
+    # GridFieldText('name', title=_('name'), key=True, formatter='detail', extra='"role":"input/location"'),
     GridFieldText('description', title=_('description')),
     GridFieldText('category', title=_('category'), initially_hidden=True),
     GridFieldText('subcategory', title=_('subcategory'), initially_hidden=True),
-    GridFieldText('available', title=_('available'), field_name='available__name', formatter='detail', extra='"role":"input/calendar"'),
-    GridFieldText('owner', title=_('owner'), field_name='owner__name', formatter='detail', extra='"role":"input/location"'),
+    GridFieldText('available', title=_('available'), field_name='available__name', formatter='detail',
+                  extra='"role":"input/calendar"'),
+    GridFieldText('owner', title=_('owner'), field_name='owner__name', formatter='detail',
+                  extra='"role":"input/location"'),
     GridFieldText('source', title=_('source')),
-    GridFieldLastModified('lastmodified'),
-    )
+    # GridFieldLastModified('lastmodified'),
+    GridFieldCreateOrUpdateDate('created_at', title=_('created_at')),
+    GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at')),
+  )
 
 
 class CustomerList(GridReport):
