@@ -78,3 +78,6 @@ build
 *.rpm
 *.tar.gz
 *.tgz
+.idea
+.idea/
+.idea/*.iml
