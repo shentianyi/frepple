@@ -121,7 +121,8 @@ def parseExcelWorksheet(model, data, user=None, database=DEFAULT_DB_ALIAS, ping=
       return self.headers.keys()
 
     def values(self):
-      return [ i.value for i in self.data ]
+      values =  [i.value for i in self.data]
+      return values
 
     def items(self):
       return { col: self.__getitem__(col) for col in self.headers.keys() }
@@ -280,6 +281,9 @@ def _parseData(model, data, rowmapper, user, database, ping):
         ok = False
         for i in model._meta.fields:
           # Try with translated field names
+          # CMARK 验证名称是否在模型的属性中
+          tname = ("%s - %s" % (model.__name__, i.verbose_name)).lower()
+
           if col == i.name.lower() \
             or col == i.verbose_name.lower() \
             or col == ("%s - %s" % (model.__name__, i.verbose_name)).lower():

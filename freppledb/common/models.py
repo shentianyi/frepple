@@ -38,6 +38,8 @@ logger = logging.getLogger(__name__)
 
 
 class HierarchyModel(models.Model):
+    owner_display_key = None
+
     lft = models.PositiveIntegerField(db_index=True, editable=False, null=True, blank=True)
     rght = models.PositiveIntegerField(null=True, editable=False, blank=True)
     lvl = models.PositiveIntegerField(null=True, editable=False, blank=True)
@@ -107,21 +109,21 @@ class HierarchyModel(models.Model):
 
             # Return the right value of this node + 1
             return right + 1
-
+        owner_display_key = cls.owner_display_key if cls.owner_display_key else 'name'
         # Load all nodes in memory
-        for i in cls.objects.using(database).values('name', 'owner'):
-            if i['name'] == i['owner']:
-                logging.error("Data error: '%s' points to itself as owner" % i['name'])
-                nodes[i['name']] = None
+        for i in cls.objects.using(database).values(owner_display_key, 'owner'):
+            if i[owner_display_key] == i['owner']:
+                logging.error("Data error: '%s' points to itself as owner" % i[owner_display_key])
+                nodes[i[owner_display_key]] = None
             else:
-                nodes[i['name']] = i['owner']
+                nodes[i[owner_display_key]] = i['owner']
                 if i['owner']:
                     if not i['owner'] in children:
                         children[i['owner']] = set()
-                    children[i['owner']].add(i['name'])
+                    children[i['owner']].add(i[owner_display_key])
         keys = sorted(nodes.items())
 
-        # Loop over nodes without parent
+        # Loop over nodes without parentLEFT OUTER JOIN
         cnt = 1
         for i, j in keys:
             if j is None:
@@ -204,8 +206,8 @@ class AuditModel(models.Model):
     # Database fields
     source = models.CharField(_('source'), db_index=True, max_length=300, null=True, blank=True)
     lastmodified = models.DateTimeField(_('last modified'), editable=False, db_index=True, default=timezone.now)
-    created_at = models.DateTimeField(_('created at'), editable=False, db_index=True, default=timezone.now)
-    updated_at = models.DateTimeField(_('updated at'), editable=False, db_index=True, default=timezone.now)
+    created_at = models.DateTimeField(_('created_at'), editable=False, db_index=True, default=timezone.now)
+    updated_at = models.DateTimeField(_('updated_at'), editable=False, db_index=True, default=timezone.now)
 
     objects = MultiDBManager()  # The default manager.
 

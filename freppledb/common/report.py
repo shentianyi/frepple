@@ -1395,6 +1395,7 @@ class GridReport(View):
     return models
 
 
+  # CMARK 上传清空所有数据
   @classmethod
   def erase(reportclass, request):
     # Build a list of dependencies
@@ -1518,6 +1519,7 @@ class GridReport(View):
         pass
 
 
+  # CMARK 解析excel
   @classmethod
   def parseSpreadsheetUpload(reportclass, request):
     '''
@@ -1570,7 +1572,8 @@ class GridReport(View):
           for ws_name in wb.sheetnames:
             rowprefix = '' if numsheets == 1 else "%s " % ws_name
             ws = wb[ws_name]
-            for error in parseExcelWorksheet(reportclass.model, ws, user=request.user, database=request.database, ping=True):
+            errors = parseExcelWorksheet(reportclass.model, ws, user=request.user, database=request.database, ping=True)
+            for error in errors:
               if error[0] == DEBUG:
                 # Yield some result so we can detect disconnect clients and interrupt the upload
                 yield ' '

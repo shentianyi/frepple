@@ -122,9 +122,12 @@ class CalendarBucket(AuditModel):
 
 
 class Location(AuditModel, HierarchyModel):
+    # 设置owner显示的值
+    owner_display_key = 'nr'
+
     # Database fields
     # 添加自增列
-    id = models.AutoField(_('identifier'), primary_key=True)
+    id = models.AutoField(_('id'), primary_key=True)
 
     nr = models.CharField(_('nr'), max_length=300, db_index=True, help_text=_('Unique identifier'))
 

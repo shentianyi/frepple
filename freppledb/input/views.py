@@ -802,7 +802,7 @@ class LocationList(GridReport):
     # extra 表示其它的内容
 
     GridFieldText('id', title=_('id'), key=True, formatter='detail', extra='"role":"input/location"'),
-    # GridFieldText('nr', title=_('nr')),
+    GridFieldText('nr', title=_('nr')),
     GridFieldText('name', title=_('name')),
     # GridFieldText('name', title=_('name'), key=True, formatter='detail', extra='"role":"input/location"'),
     GridFieldText('description', title=_('description')),
@@ -810,8 +810,11 @@ class LocationList(GridReport):
     GridFieldText('subcategory', title=_('subcategory'), initially_hidden=True),
     GridFieldText('available', title=_('available'), field_name='available__name', formatter='detail',
                   extra='"role":"input/calendar"'),
-    GridFieldText('owner', title=_('owner'), field_name='owner__name', formatter='detail',
-                  extra='"role":"input/location"'),
+    # GridFieldText('owner', title=_('owner'), field_name='owner__name', formatter='detail',
+    #               extra='"role":"input/location"'),
+
+    GridFieldText('owner', title=_('owner'), field_name='owner__nr'),
+
     GridFieldText('source', title=_('source')),
     # GridFieldLastModified('lastmodified'),
     GridFieldCreateOrUpdateDate('created_at', title=_('created_at')),
