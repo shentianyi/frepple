@@ -4,7 +4,7 @@
 {% block title %}{% if title %}{{title|capfirst}} - {% endif %}frePPLe{% endblock %}
 
 <!--{{STATIC_URL}}img/frepple.svg这是logol图片位置-->
-{% block branding %}<img src="{{STATIC_URL}}img/frepple.svg" alt="frePPLe&nbsp;{% version %}">{% endblock %}
+{% block branding %}<img src="{{STATIC_URL}}img/logo.png" alt="frePPLe&nbsp;{% version %}">{% endblock %}
 {% block extrastyle %}{{block.super}}
 <link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/font-awesome.min.css" />
 <link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/opensans.css" />
@@ -12,6 +12,8 @@
 <link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/{{request.theme}}/bootstrap.min.css" />
 <link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/bootstrap-datetimepicker.css" />
 <link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/frepple-laura.css" />
+
+<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/base.css" />
 
 <link rel="shortcut icon" href="{{STATIC_URL}}favicon.ico"/>
 {% endblock %}
@@ -27,6 +29,7 @@
 <script type="text/javascript" src="{{STATIC_URL}}js/frepple{% if not debug_js %}.min{% endif %}.js"></script>
 <script type="text/javascript" src="{{STATIC_URL}}js/Sortable.min.js"></script>
 <script type="text/javascript" src="{{STATIC_URL}}js/i18n/intro.en.js"></script>
+<script type="text/javascript" src="{{STATIC_URL}}js/base.js"></script>
 <script type="text/javascript">
 
   var url_prefix = '{{request.prefix}}';
