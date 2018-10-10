@@ -292,7 +292,7 @@ class export:
               str(j.start), str(j.end), round(j.criticality, 8), j.delay,
               self.getPegging(j), j.source or '\\N', self.timestamp,
               '\\N', j.owner.id if j.owner and not j.owner.operation.hidden else '\\N',
-              j.operation.buffer.item.name, j.operation.buffer.location.name, '\\N', '\\N', '\\N',
+              j.operation.buffer.item.name, j.operation.buffer.location.nr, '\\N', '\\N', '\\N',
               j.demand.name if j.demand else j.owner.demand.name if j.owner and j.owner.demand else '\\N',
               j.demand.due if j.demand else j.owner.demand.due if j.owner and j.owner.demand else '\\N',
               color, j.id
@@ -304,8 +304,8 @@ class export:
               str(j.start), str(j.end), round(j.criticality, 8), j.delay,
               self.getPegging(j), j.source or '\\N', self.timestamp,
               '\\N', j.owner.id if j.owner and not j.owner.operation.hidden else '\\N',
-              j.operation.destination.item.name, j.operation.destination.location.name,
-              j.operation.origin.location.name,
+              j.operation.destination.item.name, j.operation.destination.location.nr,
+              j.operation.origin.location.nr,
               '\\N', '\\N',
               j.demand.name if j.demand else j.owner.demand.name if j.owner and j.owner.demand else '\\N',
               j.demand.due if j.demand else j.owner.demand.due if j.owner and j.owner.demand else '\\N',
@@ -319,7 +319,7 @@ class export:
               self.getPegging(j), j.source or '\\N', self.timestamp,
               '\\N', j.owner.id if j.owner and not j.owner.operation.hidden else '\\N',
               j.operation.buffer.item.name, '\\N', '\\N',
-              j.operation.buffer.location.name, j.operation.itemsupplier.supplier.name,
+              j.operation.buffer.location.nr, j.operation.itemsupplier.supplier.name,
               j.demand.name if j.demand else j.owner.demand.name if j.owner and j.owner.demand else '\\N',
               j.demand.due if j.demand else j.owner.demand.due if j.owner and j.owner.demand else '\\N',
               color, j.id
@@ -332,7 +332,7 @@ class export:
               self.getPegging(j), j.source or '\\N', self.timestamp,
               i.name, j.owner.id if j.owner and not j.owner.operation.hidden else '\\N',
               i.item.name if i.item else '\\N', '\\N', '\\N',
-              i.location.name if i.location else '\\N', '\\N',
+              i.location.nr if i.location else '\\N', '\\N',
               j.demand.name if j.demand else j.owner.demand.name if j.owner and j.owner.demand else '\\N',
               j.demand.due if j.demand else j.owner.demand.due if j.owner and j.owner.demand else '\\N',
               color, j.id
@@ -344,7 +344,7 @@ class export:
               str(j.start), str(j.end), round(j.criticality, 8), j.delay,
               self.getPegging(j), j.source or '\\N', self.timestamp,
               '\\N', j.owner.id if j.owner and not j.owner.operation.hidden else '\\N',
-              j.operation.buffer.item.name, '\\N', '\\N', j.operation.buffer.location.name, '\\N',
+              j.operation.buffer.item.name, '\\N', '\\N', j.operation.buffer.location.nr, '\\N',
               j.demand.name if j.demand else j.owner.demand.name if j.owner and j.owner.demand else '\\N',
               j.demand.due if j.demand else j.owner.demand.due if j.owner and j.owner.demand else '\\N',
               color, j.id
@@ -501,10 +501,10 @@ class export:
             where status = 'confirmed' and item_id = %s
               and location_id = %s and operationplan_id = %s;
             ''' % (round(j.onhand, 8), str(j.date), adapt(j.buffer.item.name),
-                   adapt(j.buffer.location.name), j.operationplan.id ))
+                   adapt(j.buffer.location.nr), j.operationplan.id ))
           else:
             print(("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s" % (
-               j.operationplan.id, j.buffer.item.name, j.buffer.location.name,
+               j.operationplan.id, j.buffer.item.name, j.buffer.location.nr,
                round(j.quantity, 8),
                str(j.date), round(j.onhand, 8), round(j.minimum, 8), round(j.period_of_cover, 8), j.status, currentTime
                )), file=tmp)

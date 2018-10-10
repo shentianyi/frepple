@@ -456,7 +456,7 @@ class Simulator(object):
     '''
     for po in PurchaseOrder.objects.select_for_update().using(self.database).filter(status="confirmed", enddate__lte=nd):
       if self.verbosity > 2:
-        print("      Closing PO %s - %d of %s@%s" % (po.id, po.quantity, po.item.name, po.location.name))
+        print("      Closing PO %s - %d of %s@%s" % (po.id, po.quantity, po.item.name, po.location.nr))
       try:
         buf = Buffer.objects.select_for_update().using(self.database).get(item=po.item, location=po.location)
         buf.onhand += po.quantity
@@ -475,7 +475,7 @@ class Simulator(object):
     '''
     for po in PurchaseOrder.objects.select_for_update().using(self.database).filter(status="proposed", startdate__lte=nd):
       if self.verbosity > 2:
-        print("      Opening PO %s - %d of %s@%s" % (po.id, po.quantity, po.item.name, po.location.name))
+        print("      Opening PO %s - %d of %s@%s" % (po.id, po.quantity, po.item.name, po.location.nr))
       po.status = 'confirmed'
       po.save(using=self.database)
 
@@ -545,7 +545,7 @@ class Simulator(object):
       due=strt + timedelta(days=14)
       )
     if self.verbosity > 2:
-      print("      Opening demand %s - %d of %s@%s due on %s" % (dmd.name, dmd.quantity, dmd.item.name, dmd.location.name, dmd.due))
+      print("      Opening demand %s - %d of %s@%s due on %s" % (dmd.name, dmd.quantity, dmd.item.name, dmd.location.nr, dmd.due))
 
 
   def checkAvailable(self, qty, min_qty, oper, consume):
@@ -633,7 +633,7 @@ class Simulator(object):
       if self.verbosity > 2:
         print("      Closing demand %s - %d of %s@%s due on %s - unsatisfied quantity" % (
           dmd.name, dmd.quantity, dmd.item.name,
-          dmd.location.name if dmd.location else None, dmd.due
+          dmd.location.nr if dmd.location else None, dmd.due
           ))
       dmd.save(using=self.database)
 
@@ -707,7 +707,7 @@ class Simulator(object):
             if self.verbosity > 2:
               print("      Partially shipping demand %s - %d of %s@%s due on %s - delay %s" % (
                 dmd.name, dmd.quantity, dmd.item.name,
-                dmd.location.name if dmd.location else None, dmd.due,
+                dmd.location.nr if dmd.location else None, dmd.due,
                 max(strt - dmd.due.date(), timedelta(0))
                 ))
             self.checkDemandExpired(dmd, nd)
@@ -725,7 +725,7 @@ class Simulator(object):
       if self.verbosity > 2:
         print("      Closing demand %s - %d of %s@%s due on %s - delay %s" % (
           dmd.name, dmd.quantity, dmd.item.name,
-          dmd.location.name if dmd.location else None, dmd.due,
+          dmd.location.nr if dmd.location else None, dmd.due,
           max(strt - dmd.due.date(), timedelta(0))
           ))
       dmd.save(using=self.database)
@@ -745,11 +745,11 @@ class Simulator(object):
     print("  Current status:")
     for dmd in Demand.objects.all().using(self.database).filter(status='open').order_by('due', 'name'):
       print("    Demand '%s': %d %s@%s due on %s" % (
-        dmd.name, dmd.quantity, dmd.item.name, dmd.location.name if dmd.location else 'None', dmd.due
+        dmd.name, dmd.quantity, dmd.item.name, dmd.location.nr if dmd.location else 'None', dmd.due
         ))
     for po in PurchaseOrder.objects.all().using(self.database).filter(status='confirmed').order_by('enddate', 'startdate'):
       print("    Purchase order '%s': %d %s@%s delivery on %s" % (
-        po.id, po.quantity, po.item.name, po.location.name, po.enddate
+        po.id, po.quantity, po.item.name, po.location.nr, po.enddate
         ))
     for do in DistributionOrder.objects.all().using(self.database).filter(status='confirmed').order_by('enddate', 'startdate'):
       print("    Distribution order '%s': %d %s@%s arriving on %s" % (

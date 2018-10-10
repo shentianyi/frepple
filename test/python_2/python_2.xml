@@ -37,7 +37,7 @@ def printmodel():
     print("\nBuffers:", file=out)
     for i in frepple.buffers():
       print(i.name, i.category, i.subcategory,
-        i.description, i.onhand, i.location and i.location.name or None,
+        i.description, i.onhand, i.location and i.location.nr or None,
         i.item and i.item.name or None,
         i.maximum_calendar and i.maximum_calendar.name or i.maximum,
         i.minimum_calendar and i.minimum_calendar.name or i.minimum,
@@ -50,7 +50,7 @@ def printmodel():
     print("\nResources:", file=out)
     for i in frepple.resources():
       print(i.name, i.category, i.subcategory, i.description,
-        i.location and i.location.name or None,
+        i.location and i.location.nr or None,
         i.maximum_calendar and i.maximum_calendar.name or i.maximum,
         i.owner and i.owner.name or None, file=out)
       for j in i.loadplans:

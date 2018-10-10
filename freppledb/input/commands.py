@@ -1418,7 +1418,7 @@ class loadOperationPlanMaterials(LoadTask):
             pass
           for fl in opplan.flowplans:
             if fl.buffer.item and fl.buffer.item.name == i[3] \
-              and fl.buffer.location and fl.buffer.location.name == i[4]:
+              and fl.buffer.location and fl.buffer.location.nr == i[4]:
                 fl.status = "confirmed"
                 if i[1]:
                   fl.date = i[1]

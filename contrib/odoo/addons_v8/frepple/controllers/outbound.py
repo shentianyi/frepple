@@ -267,7 +267,7 @@ This methods also populates a map dictionary between these locations and
 warehouse they belong to.
 
 Mapping:
-stock.warehouse.name -> location.name
+stock.warehouse.name -> location.nr
 stock.warehouse.id -> location.subcategory
 '''
         self.map_locations = {}

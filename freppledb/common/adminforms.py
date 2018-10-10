@@ -53,6 +53,7 @@ csrf_protect_m = method_decorator(csrf_protect)
 
 
 class MultiDBModelAdmin(admin.ModelAdmin):
+
   r'''
   This class is an enhanced version of the django regular admin model.
   It adds:
@@ -67,6 +68,8 @@ class MultiDBModelAdmin(admin.ModelAdmin):
   The level of customization is relatively high, and this code is a bit of a
   concern for future upgrades of Django...
   '''
+
+
 
   formfield_overrides = {
     # Django by default uses the value of decimal_places to compute a step.
@@ -87,6 +90,7 @@ class MultiDBModelAdmin(admin.ModelAdmin):
     return my_urls + urls
 
 
+  # CMARK 基础数据保存表单
   def save_form(self, request, form, change):
     # Execute the standard behavior
     obj = super().save_form(request, form, change)
@@ -613,7 +617,6 @@ class MultiDBModelAdmin(admin.ModelAdmin):
     context.update(extra_context or {})
 
     return self.render_delete_form(request, context)
-
 
 class MultiDBTabularInline(admin.TabularInline):
 

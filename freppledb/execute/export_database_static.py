@@ -200,7 +200,7 @@ class exportStaticModel(object):
             i.__class__.__name__[10:],
             isinstance(i, (frepple.operation_fixed_time, frepple.operation_time_per)) and i.duration or None,
             isinstance(i, frepple.operation_time_per) and i.duration_per or None,
-            i.location and i.location.name or None, round(i.cost, 8),
+            i.location and i.location.nr or None, round(i.cost, 8),
             isinstance(i, frepple.operation_alternate) and i.search or None,
             i.description, i.category, i.subcategory, i.source,
             i.item.name if i.item else None, i.priority if i.priority != 1 else None,
@@ -228,7 +228,7 @@ class exportStaticModel(object):
             i.__class__.__name__[10:],
             isinstance(i, (frepple.operation_fixed_time, frepple.operation_time_per)) and i.duration or None,
             isinstance(i, frepple.operation_time_per) and i.duration_per or None,
-            i.location and i.location.name or None, round(i.cost, 8),
+            i.location and i.location.nr or None, round(i.cost, 8),
             isinstance(i, frepple.operation_alternate) and i.search or None,
             i.description, i.category, i.subcategory, i.source, self.timestamp,
             i.item.name if i.item else None, i.priority,
@@ -414,7 +414,7 @@ class exportStaticModel(object):
         values(%s,%s,%s,%s,%s,%s,%s,%s,%s * interval '1 second',%s,%s,%s,%s)",
         [
           (
-            i.name, i.description, i.location and i.location.name or None,
+            i.name, i.description, i.location and i.location.nr or None,
             i.item and i.item.name or None,
             round(i.onhand, 8), round(i.minimum, 8),
             i.minimum_calendar and i.minimum_calendar.name or None,
@@ -433,7 +433,7 @@ class exportStaticModel(object):
          where name=%s",
         [
           (
-            i.description, i.location and i.location.name or None, i.item and i.item.name or None,
+            i.description, i.location and i.location.nr or None, i.item and i.item.name or None,
             round(i.onhand, 8), round(i.minimum, 8),
             i.minimum_calendar and i.minimum_calendar.name or None,
             i.__class__.__name__[7:],
@@ -542,14 +542,14 @@ class exportStaticModel(object):
          cost,priority,effective_start,effective_end,resource_id,resource_qty,source,lastmodified) \
         values(%s,%s,%s,%s * interval '1 second',%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
         [
-          (i.supplier.name, i.item.name, i.location.name if i.location else None,
+          (i.supplier.name, i.item.name, i.location.nr if i.location else None,
            i.leadtime, i.size_minimum, i.size_multiple, i.cost, i.priority,
            i.effective_start if i.effective_start != default_start else None,
            i.effective_end if i.effective_end != default_end else None,
            i.resource.name if i.resource else None, i.resource_qty,
            i.source, self.timestamp)
           for i in itemsuppliers()
-          if (i.supplier.name, i.item.name, i.location.name if i.location else None, i.effective_start) not in primary_keys and (not self.source or self.source == i.source)
+          if (i.supplier.name, i.item.name, i.location.nr if i.location else None, i.effective_start) not in primary_keys and (not self.source or self.source == i.source)
         ])
       cursor.executemany(
         "update itemsupplier \
@@ -561,10 +561,10 @@ class exportStaticModel(object):
           (i.leadtime, i.size_minimum, i.size_multiple, i.cost, i.priority,
            i.effective_end if i.effective_end != default_end else None,
            i.source, self.timestamp,
-           i.supplier.name, i.item.name, i.location.name if i.location else None,
+           i.supplier.name, i.item.name, i.location.nr if i.location else None,
            i.effective_start)
           for i in itemsuppliers()
-          if (i.supplier.name, i.item.name, i.location.name if i.location else None, i.effective_start) in primary_keys \
+          if (i.supplier.name, i.item.name, i.location.nr if i.location else None, i.effective_start) in primary_keys \
             and i.location is not None \
             and i.effective_start != default_start \
             and (not self.source or self.source == i.source)
@@ -579,9 +579,9 @@ class exportStaticModel(object):
           (i.leadtime, i.size_minimum, i.size_multiple, i.cost, i.priority,
            i.effective_end if i.effective_end != default_end else None,
            i.source, self.timestamp,
-           i.supplier.name, i.item.name, i.location.name if i.location else None)
+           i.supplier.name, i.item.name, i.location.nr if i.location else None)
           for i in itemsuppliers()
-          if (i.supplier.name, i.item.name, i.location.name if i.location else None, i.effective_start) in primary_keys \
+          if (i.supplier.name, i.item.name, i.location.nr if i.location else None, i.effective_start) in primary_keys \
             and i.location is not None \
             and i.effective_start == default_start \
             and (not self.source or self.source == i.source)
@@ -598,7 +598,7 @@ class exportStaticModel(object):
            i.source, self.timestamp,
            i.supplier.name, i.item.name, i.effective_start)
           for i in itemsuppliers()
-          if (i.supplier.name, i.item.name, i.location.name if i.location else None, i.effective_start) in primary_keys \
+          if (i.supplier.name, i.item.name, i.location.nr if i.location else None, i.effective_start) in primary_keys \
             and i.location is None \
             and i.effective_start != default_start \
             and (not self.source or self.source == i.source)
@@ -698,7 +698,7 @@ class exportStaticModel(object):
         [
           (
             i.name, str(i.due), round(i.quantity, 8), i.priority, i.item.name,
-            i.location.name if i.location else None, i.operation.name if i.operation and not i.operation.hidden else None,
+            i.location.nr if i.location else None, i.operation.name if i.operation and not i.operation.hidden else None,
             i.customer.name if i.customer else None,
             round(i.minshipment, 8), i.maxlateness,
             i.category, i.subcategory, i.source, self.timestamp, i.status
@@ -715,7 +715,7 @@ class exportStaticModel(object):
         [
           (
             str(i.due), round(i.quantity, 8), i.priority,
-            i.item.name, i.location.name if i.location else None,
+            i.item.name, i.location.nr if i.location else None,
             i.operation.name if i.operation and not i.operation.hidden else None,
             i.customer.name if i.customer else None,
             round(i.minshipment, 8),
@@ -752,7 +752,7 @@ class exportStaticModel(object):
           (
             i.name, i.description, i.maximum,
             i.maximum_calendar.name if i.maximum_calendar else None,
-            i.location and i.location.name or None, i.__class__.__name__[9:],
+            i.location and i.location.nr or None, i.__class__.__name__[9:],
             round(i.cost, 8), i.maxearly,
             i.setup, i.setupmatrix and i.setupmatrix.name or None,
             i.category, i.subcategory, i.efficiency,
@@ -773,7 +773,7 @@ class exportStaticModel(object):
           (
             i.description, i.maximum,
             i.maximum_calendar and i.maximum_calendar.name or None,
-            i.location and i.location.name or None, i.__class__.__name__[9:],
+            i.location and i.location.nr or None, i.__class__.__name__[9:],
             round(i.cost, 8), round(i.maxearly, 8),
             i.setup, i.setupmatrix and i.setupmatrix.name or None,
             i.category, i.subcategory, round(i.efficiency, 8),

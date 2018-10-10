@@ -319,7 +319,7 @@ LOGGING = {
              'level': 'DEBUG',
              'class': 'logging.handlers.RotatingFileHandler',
              # 'class': 'freppledb.common.logging.MakeFileHandler',
-             'filename': os.path.normpath(os.path.join(FREPPLE_LOGDIR,'frepple.log')),
+            'filename': os.path.normpath(os.path.join(FREPPLE_LOGDIR, 'frepple.log')),
              'formatter': 'file',
              'maxBytes': 1024 * 1024 * 150,  # 150MB
              'backupCount': 10,
@@ -329,17 +329,17 @@ LOGGING = {
         # A handler to log all SQL queries.
         # The setting "DEBUG" also needs to be set to True higher up in this file.
         'django.db.backends': {
-           'handlers': ['console'],
+           'handlers': ['console', 'file_handler'],
            'level': 'DEBUG',
            'propagate': False,
         },
         'django': {
-            'handlers': ['console'],
-            'level': 'DEBUG',
+            'handlers': ['console', 'file_handler'],
+            'level': 'INFO',
         },
         'freppledb': {
             'handlers': ['console', 'file_handler'],
-            'level': 'DEBUG',
+            'level': 'INFO',
         }
     }
 }

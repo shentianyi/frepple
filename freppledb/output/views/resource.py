@@ -128,7 +128,7 @@ class OverviewReport(GridPivot):
     query = '''
       select res.name, res.description, res.category, res.subcategory,
         res.type, res.maximum, res.maximum_calendar_id, res.cost, res.maxearly,
-        res.setupmatrix_id, res.setup, location.name, location.description,
+        res.setupmatrix_id, res.setup, location.nr, location.description,
         location.category, location.subcategory, location.available_id,
         coalesce(max(plan_summary.avg_util),0) as avgutil, res.available_id available_calendar, 
         %s
@@ -139,7 +139,7 @@ class OverviewReport(GridPivot):
         coalesce(sum(out_resourceplan.setup),0) * (case when res.type = 'buckets' then 1 else %f end) as setup
       from (%s) res
       left outer join location
-        on res.location_id = location.name
+        on res.location_id = location.nr
       -- Multiply with buckets
       cross join (
                    select name as bucket, startdate, enddate
@@ -168,7 +168,7 @@ class OverviewReport(GridPivot):
       -- Grouping and sorting
       group by res.name, res.description, res.category, res.subcategory,
         res.type, res.maximum, res.maximum_calendar_id, res.available_id, res.cost, res.maxearly,
-        res.setupmatrix_id, res.setup, location.name, location.description,
+        res.setupmatrix_id, res.setup, location.nr, location.description,
         location.category, location.subcategory, location.available_id,
         %s d.bucket, d.startdate
       order by %s, d.startdate

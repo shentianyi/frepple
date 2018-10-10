@@ -120,16 +120,16 @@ class CalendarBucket(AuditModel):
         verbose_name_plural = _('calendar buckets')
         unique_together = (('calendar', 'startdate', 'enddate', 'priority'),)
 
-
+# TODO CHARLOT
 class Location(AuditModel, HierarchyModel):
     # 设置owner显示的值
     owner_display_key = 'nr'
 
     # Database fields
     # 添加自增列
-    id = models.AutoField(_('id'), primary_key=True)
+    id = models.AutoField(_('id'),  help_text=_('Unique identifier'), primary_key=True)
 
-    nr = models.CharField(_('nr'), max_length=300, db_index=True, help_text=_('Unique identifier'))
+    nr = models.CharField(_('nr'), max_length=300, db_index=True)
 
     # 设置name为非主键
     name = models.CharField(_('name'), max_length=300, primary_key=False, db_index=True)
@@ -155,8 +155,9 @@ class Location(AuditModel, HierarchyModel):
         _('description'), max_length=500, null=True, blank=True
     )
 
+    # CMARK 下拉框的显示值是这个返回的
     def __str__(self):
-        return self.name
+        return self.nr
 
     class Meta(AuditModel.Meta):
         db_table = 'location'
@@ -419,7 +420,7 @@ class Buffer(AuditModel):
 
     def save(self, *args, **kwargs):
         self.name = "%s @ %s" % (
-            self.item.name if self.item else "NULL", self.location.name if self.location else "NULL")
+            self.item.name if self.item else "NULL", self.location.nr if self.location else "NULL")
         # Call the real save() method
         super(Buffer, self).save(*args, **kwargs)
 
@@ -895,7 +896,7 @@ class ItemSupplier(AuditModel):
         return '%s - %s - %s' % (
             self.supplier.name if self.supplier else 'No supplier',
             self.item.name if self.item else 'No item',
-            self.location.name if self.location else 'Any location'
+            self.location.nr if self.location else 'Any location'
         )
 
     class Meta(AuditModel.Meta):
@@ -979,7 +980,7 @@ class ItemDistribution(AuditModel):
 
     def __str__(self):
         return '%s - %s - %s' % (
-            self.location.name if self.location else 'Any destination',
+            self.location.nr if self.location else 'Any destination',
             self.item.name if self.item else 'No item',
             self.origin.name if self.origin else 'No origin'
         )

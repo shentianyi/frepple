@@ -14,7 +14,7 @@ description      string            A free text description.
 query            string            | A SQL-like expression to identify the item-locations belonging to 
                                      the segment. All item attributes and location attributes are 
                                      available to define the filter expression
-                                   | For example : item.cost between 10 and 100 and location.name 
+                                   | For example : item.cost between 10 and 100 and location.nr
                                      like '%shop%'
 sku_count        integer           | The number of item-location combinations in the segment. 
                                    | The value is read-only and is automatically updated when a 

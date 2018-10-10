@@ -262,7 +262,7 @@ class exporter(object):
         warehouse they belong to.
 
         Mapping:
-        stock.warehouse.name -> location.name
+        stock.warehouse.name -> location.nr
         stock.warehouse.id -> location.subcategory
         '''
         self.map_locations = {}

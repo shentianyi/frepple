@@ -98,7 +98,7 @@ def Upload(request):
           obj.append(po)
           data_odoo.append(
             '<operationplan ordertype="PO" id="%s" item=%s location=%s supplier=%s start="%s" end="%s" quantity="%s" location_id=%s item_id=%s criticality="%d"/>' % (
-            po.id, quoteattr(po.item.name), quoteattr(po.location.name), 
+            po.id, quoteattr(po.item.name), quoteattr(po.location.nr),
             quoteattr(po.supplier.name), po.startdate, po.enddate, po.quantity,
             quoteattr(po.location.subcategory), quoteattr(po.item.subcategory),
             int(po.criticality)
@@ -112,7 +112,7 @@ def Upload(request):
           data_odoo.append(
             '<operationplan ordertype="DO" id="%s" item=%s origin=%s location=%s start="%s" end="%s" quantity="%s" location_id=%s item_id=%s criticality="%d"/>' % (
             do.id, quoteattr(do.item.name), quoteattr(do.origin.name), 
-            quoteattr(do.location.name), do.startdate, do.enddate, do.quantity,
+            quoteattr(do.location.nr), do.startdate, do.enddate, do.quantity,
             quoteattr(do.location.subcategory), quoteattr(do.item.subcategory),
             int(do.criticality)
             ))
@@ -125,7 +125,7 @@ def Upload(request):
           data_odoo.append(
             '<operationplan ordertype="MO" id="%s" item=%s location=%s operation=%s start="%s" end="%s" quantity="%s" location_id=%s item_id=%s criticality="%d"/>' % (
               op.id, quoteattr(op.operation.item.name),
-              quoteattr(op.operation.location.name), quoteattr(op.operation.name),
+              quoteattr(op.operation.location.nr), quoteattr(op.operation.name),
               op.startdate, op.enddate, op.quantity,
               quoteattr(op.operation.location.subcategory), quoteattr(op.operation.item.subcategory),
               int(op.criticality)

@@ -135,9 +135,9 @@ class OverviewReport(GridPivot):
 
     # Execute the actual query
     query = '''
-       select item.name||' @ '||location.name,
+       select item.name||' @ '||location.nr,
        item.name item_id,
-       location.name location_id,
+       location.nr location_id,
        item.description,
        item.category,
        item.subcategory,
@@ -153,30 +153,30 @@ class OverviewReport(GridPivot):
        location.lastmodified,
        %s
        coalesce((select onhand from operationplanmaterial where item_id = item.name and
-       location_id = location.name and flowdate < greatest(d.startdate,%%s)
+       location_id = location.nr and flowdate < greatest(d.startdate,%%s)
        order by flowdate desc, id desc limit 1),0) startoh,
-       coalesce((select onhand from operationplanmaterial where item_id = item.name and location_id = location.name
+       coalesce((select onhand from operationplanmaterial where item_id = item.name and location_id = location.nr
        and flowdate < greatest(d.startdate,%%s)
        order by flowdate desc, id desc limit 1),0) - coalesce(-sum(least(operationplanmaterial.quantity, 0)),0)
        + coalesce(sum(greatest(operationplanmaterial.quantity, 0)),0) endoh,
        case when coalesce((select onhand from operationplanmaterial where item_id = item.name and
-       location_id = location.name and flowdate < greatest(d.startdate,%%s)
+       location_id = location.nr and flowdate < greatest(d.startdate,%%s)
        order by flowdate desc, id desc limit 1),0) = 0 then 0 
        when (select to_char(flowdate,'YYYY-MM-DD')||' '||round(periodofcover/86400) from operationplanmaterial where item_id = item.name and
-       location_id = location.name and flowdate < greatest(d.startdate,%%s)
+       location_id = location.nr and flowdate < greatest(d.startdate,%%s)
        order by flowdate desc, id desc limit 1) = '1971-01-01 999' then 999 else
        extract( epoch from (select flowdate from operationplanmaterial where item_id = item.name and
-       location_id = location.name and flowdate < greatest(d.startdate,%%s)
+       location_id = location.nr and flowdate < greatest(d.startdate,%%s)
        order by flowdate desc, id desc limit 1)
        + coalesce((select periodofcover from operationplanmaterial where item_id = item.name and
-       location_id = location.name and flowdate < greatest(d.startdate,%%s)
+       location_id = location.nr and flowdate < greatest(d.startdate,%%s)
        order by flowdate desc, id desc limit 1),0) * interval '1 second'
        - greatest(d.startdate,%%s))/86400 end startohdoc,
        d.bucket,
        d.startdate,
        d.enddate,
        coalesce((select minimum from operationplanmaterial where item_id = item.name and
-       location_id = location.name and flowdate < greatest(d.startdate,%%s)
+       location_id = location.nr and flowdate < greatest(d.startdate,%%s)
        order by flowdate desc, id desc limit 1),0) safetystock,
        coalesce(-sum(least(operationplanmaterial.quantity, 0)),0) as consumed,
        coalesce(-sum(least(case when operationplan.type = 'MO' then operationplanmaterial.quantity else 0 end, 0)),0) as consumedMO,
@@ -189,7 +189,7 @@ class OverviewReport(GridPivot):
        from
        (%s) opplanmat
        inner join item on item.name = opplanmat.item_id
-       inner join location on location.name = opplanmat.location_id
+       inner join location on location.nr = opplanmat.location_id
        -- Multiply with buckets
       cross join (
          select name as bucket, startdate, enddate
@@ -207,7 +207,7 @@ class OverviewReport(GridPivot):
       left outer join operationplan on operationplan.id = operationplanmaterial.operationplan_id
       group by
        item.name,
-       location.name,
+       location.nr,
        item.description, 
        item.category, 
        item.subcategory, 

@@ -117,7 +117,7 @@ function DemandFactory ($http, getURLprefix, Location, Item, Customer) {
     if (this.item !== undefined && this.item)
       fields.item = {name: this.item.name};
     if (this.location !== undefined && this.location)
-      fields.location = {name: this.location.name};
+      fields.location = {name: this.location.nr};
     if (this.customer !== undefined && this.customer)
       fields.customer = {name: this.customer.name};
     if (this.minshipment !== undefined)

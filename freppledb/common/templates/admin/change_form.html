@@ -86,6 +86,7 @@ fieldset th {
 
 {% block field_sets %}
 {% for fieldset in adminform %}
+  <!--CMARK 表单内容, 使用的是fieldset.html-->
   {% include "admin/includes/fieldset.html" %}
 {% endfor %}
 {% endblock %}

@@ -196,7 +196,7 @@ class OverviewReport(GridPivot):
     cursor = connections[request.database].cursor()
     query = '''
       select
-        operation.name, location.name, operation.item_id, operation.description,
+        operation.name, location.nr, operation.item_id, operation.description,
         operation.category, operation.subcategory, operation.type, operation.duration,
         operation.duration_per, operation.fence, operation.posttime, operation.sizeminimum,
         operation.sizemultiple, operation.sizemaximum, operation.priority, operation.effective_start,
@@ -210,7 +210,7 @@ class OverviewReport(GridPivot):
       left outer join item
       on operation.item_id = item.name
       left outer join location
-      on operation.location_id = location.name
+      on operation.location_id = location.nr
       inner join (
         select oper.name as operation_id, d.bucket, d.startdate, d.enddate,
          coalesce(sum(
@@ -502,7 +502,7 @@ class PurchaseReport(GridPivot):
         res.total_on_order as total_on_order
       from combinations
       inner join item on combinations.item_id = item.name
-      left outer join location on combinations.location_id = location.name
+      left outer join location on combinations.location_id = location.nr
       left outer join supplier on combinations.supplier_id = supplier.name
       inner join (
         select

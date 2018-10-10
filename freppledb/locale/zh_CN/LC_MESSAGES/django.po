@@ -129,6 +129,13 @@ msgstr "创建时间"
 msgid "updated_at"
 msgstr "修改时间"
 
+msgid "owner_display"
+msgstr "拥有者"
+
+msgid "owner_id"
+msgstr "拥有者id"
+
+
 #: common/models.py:41 input/models.py:1111 input/views.py:721
 #: input/views.py:752 input/views.py:774 input/views.py:796 input/views.py:879
 #: input/views.py:1010 input/views.py:1029 input/views.py:1059

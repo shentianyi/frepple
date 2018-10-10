@@ -68,8 +68,12 @@ data_site.register(Calendar, Calendar_admin)
 
 
 class Location_admin(MultiDBModelAdmin):
+
   model = Location
-  raw_id_fields = ('available', 'owner',)
+#  raw_id_fields = ('available', 'owner',)
+  # CMARK 使用弹出框选择; 注意最后的逗号不能丢
+  raw_id_fields = ('available',)
+
   save_on_top = True
   exclude = ('source',)
   tabs = [
@@ -82,6 +86,7 @@ class Location_admin(MultiDBModelAdmin):
     #. Translators: Translation included with Django
     {"name": 'history', "label": _("History"), "view": "admin:input_location_history"},
     ]
+
 data_site.register(Location, Location_admin)
 
 

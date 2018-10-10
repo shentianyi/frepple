@@ -250,6 +250,9 @@ class GridField(object):
   sortable = True
   search = True
   key = False
+  # CMARK pop key 用来显示的键
+  pop_fkey = False
+
   unformat = None
   title = None
   extra = None
@@ -648,16 +651,31 @@ class GridReport(View):
     for (index, hidden, width) in rows:
       count += 1
       try:
+        # result.append('{%s,"width":%s,"counter":%d%s%s%s,"searchoptions":{"searchhidden": true}}' % (
+        #    cls.rows[index], width, index,
+        #    count < frozencolumns and ',"frozen":true' or '',
+        #    is_popup and ',"popup":true' or '',
+        #    hidden and not cls.rows[index].hidden and ',"hidden":true' or ''
+        #    ))
         result.append('{%s,"width":%s,"counter":%d%s%s%s,"searchoptions":{"searchhidden": true}}' % (
-           cls.rows[index], width, index,
-           count < frozencolumns and ',"frozen":true' or '',
-           is_popup and ',"popup":true' or '',
-           hidden and not cls.rows[index].hidden and ',"hidden":true' or ''
-           ))
+            cls.get_rows(index), width, index,
+            count < frozencolumns and ',"frozen":true' or '',
+            is_popup and ',"popup":true' or '',
+            hidden and not cls.rows[index].hidden and ',"hidden":true' or ''
+        ))
       except IndexError:
         logger.warning('Invalid preference value for %s: %s' % (cls.getKey(), prefs))
     return ',\n'.join(result)
 
+  # CMARK 对外键显示特殊处理
+  @classmethod
+  def get_rows(cls, i):
+    row = cls.rows[i]
+    if row.pop_fkey and row.key is False:
+        row.key = True
+    elif row.key and row.pop_fkey is False:
+        row.key = False
+    return row
 
   @classmethod
   def _generate_spreadsheet_data(reportclass, request, output, *args, **kwargs):
@@ -1153,6 +1171,7 @@ class GridReport(View):
       is_popup = '_popup' in request.GET
       sidx, sord = reportclass.getSortName(request)
 
+      # CMARK jqgrid的属性
       context = {
         'reportclass': reportclass,
         'title': (args and args[0] and _('%(title)s for %(entity)s') % {'title': force_text(reportclass.title), 'entity': force_text(args[0])}) or reportclass.title,
@@ -1180,6 +1199,7 @@ class GridReport(View):
         }
       for k, v in reportclass.extra_context(request, *args, **kwargs).items():
         context[k] = v
+      # CMARK 返回数据list页面
       return render(request, reportclass.template, context)
     elif fmt == 'json':
       # Return JSON data to fill the grid.

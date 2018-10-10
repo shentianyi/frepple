@@ -172,15 +172,15 @@ class PathReport(GridReport):
   @classmethod
   def findUsage(reportclass, buffer, db, level, curqty, realdepth, pushsuper):
     result = [
-      (level - 1, None, i.operation, curqty, 0, None, realdepth, pushsuper, buffer.location.name if buffer.location else None)
-      for i in buffer.item.operationmaterials.filter(quantity__lt=0).filter(operation__location__name=buffer.location.name).only('operation').using(db)
+      (level - 1, None, i.operation, curqty, 0, None, realdepth, pushsuper, buffer.location.nr if buffer.location else None)
+      for i in buffer.item.operationmaterials.filter(quantity__lt=0).filter(operation__location__name=buffer.location.nr).only('operation').using(db)
       ]
     for i in ItemDistribution.objects.using(db).filter(
         item__lft__lte=buffer.item.lft, item__rght__gt=buffer.item.lft,
-        origin__name=buffer.location.name
+        origin__name=buffer.location.nr
         ):
       i.item = buffer.item
-      result.append( (level - 1, None, i, curqty, 0, None, realdepth - 1, pushsuper, i.location.name if i.location else None) )
+      result.append( (level - 1, None, i, curqty, 0, None, realdepth - 1, pushsuper, i.location.nr if i.location else None) )
     return result
 
 
@@ -196,31 +196,31 @@ class PathReport(GridReport):
     if Location.objects.using(db).count() > 1:
       # Multiple locations
       for i in ItemSupplier.objects.using(db).filter(
-        Q(location__isnull=True) | Q(location__name=buffer.location.name),
+        Q(location__isnull=True) | Q(location__name=buffer.location.nr),
         item__lft__lte=buffer.item.lft, item__rght__gt=buffer.item.lft
         ):
           i.item = buffer.item
           i.location = buffer.location
           result.append(
-            (level, None, i, curqty, 0, None, realdepth, pushsuper, buffer.location.name if buffer.location else None)
+            (level, None, i, curqty, 0, None, realdepth, pushsuper, buffer.location.nr if buffer.location else None)
             )
       for i in ItemDistribution.objects.using(db).filter(
-        Q(location__isnull=True) | Q(location__name=buffer.location.name),
+        Q(location__isnull=True) | Q(location__name=buffer.location.nr),
         item__lft__lte=buffer.item.lft, item__rght__gt=buffer.item.lft
         ):
           i.item = buffer.item
           i.location = buffer.location
           result.append(
-            (level, None, i, curqty, 0, None, realdepth, pushsuper, i.location.name if i.location else None)
+            (level, None, i, curqty, 0, None, realdepth, pushsuper, i.location.nr if i.location else None)
             )
       for i in Operation.objects.using(db).filter(
-        Q(location__isnull=True) | Q(location__name=buffer.location.name),
+        Q(location__isnull=True) | Q(location__name=buffer.location.nr),
         item__lft__lte=buffer.item.lft, item__rght__gt=buffer.item.lft
         ):
           i.item = buffer.item
           i.location = buffer.location
           result.append(
-            (level, None, i, curqty, 0, None, realdepth, pushsuper, i.location.name if i.location else None)
+            (level, None, i, curqty, 0, None, realdepth, pushsuper, i.location.nr if i.location else None)
             )
     else:
       # Single location
@@ -230,7 +230,7 @@ class PathReport(GridReport):
         i.item = buffer.item
         i.location = buffer.location
         result.append(
-          (level, None, i, curqty, 0, None, realdepth, pushsuper, buffer.location.name if buffer.location else None)
+          (level, None, i, curqty, 0, None, realdepth, pushsuper, buffer.location.nr if buffer.location else None)
           )
       for i in Operation.objects.using(db).filter(
         item__lft__lte=buffer.item.lft, item__rght__gt=buffer.item.lft
@@ -238,7 +238,7 @@ class PathReport(GridReport):
           i.item = buffer.item
           i.location = buffer.location
           result.append(
-            (level, None, i, curqty, 0, None, realdepth, pushsuper, buffer.location.name if buffer.location else None)
+            (level, None, i, curqty, 0, None, realdepth, pushsuper, buffer.location.nr if buffer.location else None)
             )
     return result
 
@@ -302,25 +302,25 @@ class PathReport(GridReport):
           optype = "purchase"
           duration = curoperation.leadtime
           duration_per = None
-          buffers = [ ("%s @ %s" % (curoperation.item.name, curoperation.location.name), 1), ]
+          buffers = [ ("%s @ %s" % (curoperation.item.name, curoperation.location.nr), 1), ]
           if curoperation.resource:
             resources = [ (curoperation.resource.name, float(curoperation.resource_qty)) ]
           else:
             resources = None
           try:
-            downstr = Buffer.objects.using(request.database).get(name="%s @ %s" % (curoperation.item.name, curoperation.location.name))
+            downstr = Buffer.objects.using(request.database).get(name="%s @ %s" % (curoperation.item.name, curoperation.location.nr))
             root.extend( reportclass.findUsage(downstr, request.database, level, curqty, realdepth + 1, True) )
           except Buffer.DoesNotExist:
-            downstr = Buffer(name="%s @ %s" % (curoperation.item.name, curoperation.location.name), item=curoperation.item, location=curlocation)
+            downstr = Buffer(name="%s @ %s" % (curoperation.item.name, curoperation.location.nr), item=curoperation.item, location=curlocation)
             root.extend( reportclass.findUsage(downstr, request.database, level, curqty, realdepth + 1, True) )
         elif isinstance(curoperation, ItemDistribution):
-          name = 'Ship %s from %s to %s' % (curoperation.item.name, curoperation.origin.name, curoperation.location.name)
+          name = 'Ship %s from %s to %s' % (curoperation.item.name, curoperation.origin.name, curoperation.location.nr)
           optype = "distribution"
           duration = curoperation.leadtime
           duration_per = None
           buffers = [
             ("%s @ %s" % (curoperation.item.name, curoperation.origin.name), -1),
-            ("%s @ %s" % (curoperation.item.name, curoperation.location.name), 1)
+            ("%s @ %s" % (curoperation.item.name, curoperation.location.nr), 1)
             ]
           if curoperation.resource:
             resources = [ (curoperation.resource.name, float(curoperation.resource_qty)) ]
@@ -337,13 +337,13 @@ class PathReport(GridReport):
           optype = curoperation.type
           duration = curoperation.duration
           duration_per = curoperation.duration_per
-          buffers = [ ('%s @ %s' % (x.item.name, curoperation.location.name), float(x.quantity)) for x in curoperation.operationmaterials.only('item', 'quantity').using(request.database) ]
+          buffers = [ ('%s @ %s' % (x.item.name, curoperation.location.nr), float(x.quantity)) for x in curoperation.operationmaterials.only('item', 'quantity').using(request.database) ]
           resources = [ (x.resource.name, float(x.quantity)) for x in curoperation.operationresources.only('resource', 'quantity').using(request.database) ]
           for x in curoperation.operationmaterials.filter(quantity__gt=0).only('item').using(request.database):
-            curflows = x.item.operationmaterials.filter(quantity__lt=0, operation__location=curoperation.location.name).only('operation', 'quantity').using(request.database)
+            curflows = x.item.operationmaterials.filter(quantity__lt=0, operation__location=curoperation.location.nr).only('operation', 'quantity').using(request.database)
             for y in curflows:
               hasChildren = True
-              root.append( (level - 1, curnode, y.operation, - curqty * y.quantity, subcount, None, realdepth - 1, pushsuper, x.operation.location.name if x.operation.location else None) )
+              root.append( (level - 1, curnode, y.operation, - curqty * y.quantity, subcount, None, realdepth - 1, pushsuper, x.operation.location.nr if x.operation.location else None) )
             try:
               downstr = Buffer.objects.using(request.database).get(name="%s @ %s" % (x.item.name, location))
               root.extend( reportclass.findUsage(downstr, request.database, level - 1, curqty, realdepth - 1, True) )
@@ -373,7 +373,7 @@ class PathReport(GridReport):
           duration_per = None
           buffers = [
             ("%s @ %s" % (curoperation.item.name, curoperation.origin.name), -1),
-            ("%s @ %s" % (curoperation.item.name, curoperation.location.name), 1)
+            ("%s @ %s" % (curoperation.item.name, curoperation.location.nr), 1)
             ]
           if curoperation.resource:
             resources = [ (curoperation.resource.name, float(curoperation.resource_qty)) ]
@@ -390,12 +390,12 @@ class PathReport(GridReport):
           optype = curoperation.type
           duration = curoperation.duration
           duration_per = curoperation.duration_per
-          buffers = [ ('%s @ %s' % (x.item.name, curoperation.location.name), float(x.quantity)) for x in curoperation.operationmaterials.only('item', 'quantity').using(request.database) ]
+          buffers = [ ('%s @ %s' % (x.item.name, curoperation.location.nr), float(x.quantity)) for x in curoperation.operationmaterials.only('item', 'quantity').using(request.database) ]
           resources = [ (x.resource.name, float(x.quantity)) for x in curoperation.operationresources.only('resource', 'quantity').using(request.database) ]
           curflows = curoperation.operationmaterials.filter(quantity__lt=0).only('item', 'quantity').using(request.database)
           for y in curflows:
             b = Buffer(
-              name='%s @ %s' % (y.item.name, curoperation.location.name),
+              name='%s @ %s' % (y.item.name, curoperation.location.nr),
               item=y.item,
               location=curoperation.location
               )
@@ -411,7 +411,7 @@ class PathReport(GridReport):
         'id': curnode,
         'operation': name,
         'type': optype,
-        'location': curoperation.location and curoperation.location.name or '',
+        'location': curoperation.location and curoperation.location.nr or '',
         'duration': duration,
         'duration_per': duration_per,
         'quantity': curqty,
@@ -465,29 +465,29 @@ class UpstreamItemPath(PathReport):
       if reportclass.downstream:
         # Find all buffers where the item is being stored and walk downstream
         for b in Buffer.objects.filter(item=it).using(request.database):
-          locs.add(b.location.name)
+          locs.add(b.location.nr)
           result.extend( reportclass.findUsage(b, request.database, 0, 1, 0, True) )
         # Add item locations that can be replenished
         for itmdist in ItemDistribution.objects.using(request.database).filter(
           item__lft__lte=it.lft, item__rght__gt=it.lft
           ):
-            if itmdist.location.name in locs:
+            if itmdist.location.nr in locs:
               continue
-            locs.add(itmdist.location.name)
+            locs.add(itmdist.location.nr)
             itmdist.item = it
             result.append(
-              (0, None, itmdist, 1, 0, None, 0, False, itmdist.location.name)
+              (0, None, itmdist, 1, 0, None, 0, False, itmdist.location.nr)
               )
         # Add item locations that can be replenished
         for itmsup in Operation.objects.using(request.database).filter(
           item__lft__lte=it.lft, item__rght__gt=it.lft
           ):
-            if itmsup.location.name in locs:
+            if itmsup.location.nr in locs:
               continue
-            locs.add(itmsup.location.name)
+            locs.add(itmsup.location.nr)
             itmsup.item = it
             result.append(
-              (0, None, itmsup, 1, 0, None, 0, False, itmsup.location.name)
+              (0, None, itmsup, 1, 0, None, 0, False, itmsup.location.nr)
               )
         return result
       else:
@@ -498,23 +498,23 @@ class UpstreamItemPath(PathReport):
         for itmdist in ItemDistribution.objects.using(request.database).filter(
           item__lft__lte=it.lft, item__rght__gt=it.lft
           ):
-            if itmdist.location.name in locs:
+            if itmdist.location.nr in locs:
               continue
-            locs.add(itmdist.location.name)
+            locs.add(itmdist.location.nr)
             itmdist.item = it
             result.append(
-              (0, None, itmdist, 1, 0, None, 0, False, itmdist.location.name)
+              (0, None, itmdist, 1, 0, None, 0, False, itmdist.location.nr)
               )
         # Add item locations that can be replenished
         for itmsup in Operation.objects.using(request.database).filter(
           item__lft__lte=it.lft, item__rght__gt=it.lft
           ):
-            if itmsup.location.name in locs:
+            if itmsup.location.nr in locs:
               continue
-            locs.add(itmsup.location.name)
+            locs.add(itmsup.location.nr)
             itmsup.item = it
             result.append(
-              (0, None, itmsup, 1, 0, None, 0, False, itmsup.location.name)
+              (0, None, itmsup, 1, 0, None, 0, False, itmsup.location.nr)
               )
         return result
     except ObjectDoesNotExist:
@@ -550,7 +550,7 @@ class UpstreamResourcePath(PathReport):
     except ObjectDoesNotExist:
       raise Http404("resource %s doesn't exist" % entity)
     return [
-      (0, None, i.operation, 1, 0, None, 0, True, i.operation.location.name if i.operation.location else None)
+      (0, None, i.operation, 1, 0, None, 0, True, i.operation.location.nr if i.operation.location else None)
       for i in root.operationresources.using(request.database).all()
       ]
 
@@ -564,7 +564,7 @@ class UpstreamOperationPath(PathReport):
     from django.core.exceptions import ObjectDoesNotExist
     try:
       oper = Operation.objects.using(request.database).get(name=entity)
-      return [ (0, None, oper, 1, 0, None, 0, True, oper.location.name if oper.location else None) ]
+      return [ (0, None, oper, 1, 0, None, 0, True, oper.location.nr if oper.location else None) ]
     except ObjectDoesNotExist:
       raise Http404("operation %s doesn't exist" % entity)
 
@@ -802,21 +802,26 @@ class LocationList(GridReport):
     # extra 表示其它的内容
 
     GridFieldText('id', title=_('id'), key=True, formatter='detail', extra='"role":"input/location"'),
-    GridFieldText('nr', title=_('nr')),
-    GridFieldText('name', title=_('name')),
+    GridFieldText('nr', title=_('nr'), editable=False),
+    GridFieldText('name', title=_('name'), editable=False),
     # GridFieldText('name', title=_('name'), key=True, formatter='detail', extra='"role":"input/location"'),
 
-    GridFieldText('area', title=_('area')),
-    GridFieldText('source', title=_('source')),
+    GridFieldText('area', title=_('area'), editable=False),
+    GridFieldText('source', title=_('source'), editable=False),
     GridFieldText('available', title=_('available'), field_name='available__name', formatter='detail',
-                  extra='"role":"input/calendar"'),
-    GridFieldText('owner', title=_('owner'), field_name='owner__nr', editable=False),
+                  extra='"role":"input/calendar"', editable=False),
 
-    GridFieldText('category', title=_('category'), initially_hidden=True),
-    GridFieldText('subcategory', title=_('subcategory'), initially_hidden=True),
+    # 新建一个显示列
+    GridFieldText('owner_display', title=_('owner_display'), field_name='owner__nr', editable=False),
+
+    # 因为是id 让外键永远不显示
+    GridFieldText('owner', title=_('owner_id'), field_name='owner_id', editable=False, hidden=True),
+
+    GridFieldText('category', title=_('category'), initially_hidden=True, editable=False),
+    GridFieldText('subcategory', title=_('subcategory'), initially_hidden=True, editable=False),
     # GridFieldText('owner', title=_('owner'), field_name='owner__name', formatter='detail',
     #               extra='"role":"input/location"'),
-    GridFieldText('description', title=_('description')),
+    GridFieldText('description', title=_('description'), editable=False),
     # GridFieldLastModified('lastmodified'),
     GridFieldCreateOrUpdateDate('created_at', title=_('created_at')),
     GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at')),
@@ -1555,7 +1560,7 @@ class OperationPlanMixin:
         try:
           segment = Segment.objects.all().using(request.database).get(pk=segmentname)
           query = query.extra(
-            where=["exists ( %s and operationplan.item_id = item.name and operationplan.destination_id = location.name)" % segment.getQuery()]
+            where=["exists ( %s and operationplan.item_id = item.name and operationplan.destination_id = location.nr)" % segment.getQuery()]
           )
         except Segment.DoesNotExist:
           pass
@@ -2541,7 +2546,7 @@ class OperationPlanDetail(View):
                select name from item where name = %s
                )
             select
-              items.name, false, location.name, onhand.qty, orders_plus.PO,
+              items.name, false, location.nr, onhand.qty, orders_plus.PO,
               coalesce(orders_plus.DO, 0) - coalesce(orders_minus.DO, 0),
               orders_plus.MO, sales.BO, sales.SO
             from items
@@ -2551,7 +2556,7 @@ class OperationPlanDetail(View):
               from buffer
               inner join items on items.name = buffer.item_id
               ) onhand
-            on onhand.item_id = items.name and onhand.location_id = location.name
+            on onhand.item_id = items.name and onhand.location_id = location.nr
             left outer join (
               select item_id, coalesce(location_id, destination_id) as location_id,
               sum(case when type = 'MO' then quantity end) as MO,
@@ -2562,7 +2567,7 @@ class OperationPlanDetail(View):
               and status in ('approved', 'confirmed')
               group by item_id, coalesce(location_id, destination_id)
               ) orders_plus
-            on orders_plus.item_id = items.name and orders_plus.location_id = location.name
+            on orders_plus.item_id = items.name and orders_plus.location_id = location.nr
             left outer join (
               select item_id, origin_id as location_id,
               sum(quantity) as DO
@@ -2572,7 +2577,7 @@ class OperationPlanDetail(View):
               and type = 'DO'
               group by item_id, origin_id
               ) orders_minus
-            on orders_minus.item_id = items.name and orders_minus.location_id = location.name
+            on orders_minus.item_id = items.name and orders_minus.location_id = location.nr
             left outer join (
               select item_id, location_id,
               sum(case when due < %s then quantity end) as BO,
@@ -2582,7 +2587,7 @@ class OperationPlanDetail(View):
               where status in ('open', 'quote')
               group by item_id, location_id
               ) sales
-            on sales.item_id = items.name and sales.location_id = location.name
+            on sales.item_id = items.name and sales.location_id = location.nr
             where
               onhand.qty is not null
               or orders_plus.MO is not null
@@ -2591,7 +2596,7 @@ class OperationPlanDetail(View):
               or orders_minus.DO is not null
               or sales.BO is not null
               or sales.SO is not null
-            order by items.name, location.name
+            order by items.name, location.nr
             ''', (opplan.item_id, current_date, current_date))
           res['network'] = []
           for a in cursor.fetchall():

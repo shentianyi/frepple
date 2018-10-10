@@ -297,7 +297,7 @@ class OdooWritePlan(PlanTask):
             continue
           cls.exported.append(i)
           yield '<operationplan id="%s" ordertype="PO" item=%s location=%s supplier=%s start="%s" end="%s" quantity="%s" location_id=%s item_id=%s criticality="%d"/>' % (
-            i.id, quoteattr(i.item.name), quoteattr(i.location.name),
+            i.id, quoteattr(i.item.name), quoteattr(i.location.nr),
             quoteattr(i.supplier.name), i.start, i.end, i.quantity,
             quoteattr(i.location.subcategory), quoteattr(i.item.subcategory),
             int(i.criticality)
@@ -307,7 +307,7 @@ class OdooWritePlan(PlanTask):
             continue
           cls.exported.append(i)
           yield '<operationplan id="%s" ordertype="MO" item=%s location=%s operation=%s start="%s" end="%s" quantity="%s" location_id=%s item_id=%s criticality="%d"/>' % (
-            i.id, quoteattr(i.operation.item.name), quoteattr(i.operation.location.name),
+            i.id, quoteattr(i.operation.item.name), quoteattr(i.operation.location.nr),
             quoteattr(i.operation.name), i.start, i.end, i.quantity,
             quoteattr(i.operation.location.subcategory), quoteattr(i.operation.item.subcategory),
             int(i.criticality)
