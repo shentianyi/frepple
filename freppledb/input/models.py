@@ -132,21 +132,27 @@ class Location(AuditModel, HierarchyModel):
     nr = models.CharField(_('nr'), max_length=300, db_index=True, help_text=_('Unique identifier'))
 
     # 设置name为非主键
-    name = models.CharField(_('name'), max_length=300, primary_key=False)
+    name = models.CharField(_('name'), max_length=300, primary_key=False, db_index=True)
 
-    description = models.CharField(
-        _('description'), max_length=500, null=True, blank=True
-    )
-    category = models.CharField(
-        _('category'), max_length=300, null=True, blank=True, db_index=True
-    )
-    subcategory = models.CharField(
-        _('subcategory'), max_length=300, null=True, blank=True, db_index=True
-    )
+    # 地区
+    area = models.CharField(_('area'), max_length=200, db_index=True)
+
     available = models.ForeignKey(
         Calendar, verbose_name=_('available'),
         null=True, blank=True, on_delete=models.CASCADE,
         help_text=_('Calendar defining the working hours and holidays')
+    )
+
+    category = models.CharField(
+        _('category'), max_length=300, null=True, blank=True, db_index=True
+    )
+
+    subcategory = models.CharField(
+        _('subcategory'), max_length=300, null=True, blank=True, db_index=True
+    )
+
+    description = models.CharField(
+        _('description'), max_length=500, null=True, blank=True
     )
 
     def __str__(self):
@@ -413,7 +419,7 @@ class Buffer(AuditModel):
 
     def save(self, *args, **kwargs):
         self.name = "%s @ %s" % (
-        self.item.name if self.item else "NULL", self.location.name if self.location else "NULL")
+            self.item.name if self.item else "NULL", self.location.name if self.location else "NULL")
         # Call the real save() method
         super(Buffer, self).save(*args, **kwargs)
 

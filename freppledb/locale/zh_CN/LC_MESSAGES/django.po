@@ -120,6 +120,9 @@ msgstr "代码"
 msgid "name"
 msgstr "名称"
 
+msgid "area"
+msgstr "地区"
+
 msgid "created_at"
 msgstr "创建时间"
 

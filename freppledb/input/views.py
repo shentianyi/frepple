@@ -805,17 +805,18 @@ class LocationList(GridReport):
     GridFieldText('nr', title=_('nr')),
     GridFieldText('name', title=_('name')),
     # GridFieldText('name', title=_('name'), key=True, formatter='detail', extra='"role":"input/location"'),
-    GridFieldText('description', title=_('description')),
-    GridFieldText('category', title=_('category'), initially_hidden=True),
-    GridFieldText('subcategory', title=_('subcategory'), initially_hidden=True),
+
+    GridFieldText('area', title=_('area')),
+    GridFieldText('source', title=_('source')),
     GridFieldText('available', title=_('available'), field_name='available__name', formatter='detail',
                   extra='"role":"input/calendar"'),
+    GridFieldText('owner', title=_('owner'), field_name='owner__nr', editable=False),
+
+    GridFieldText('category', title=_('category'), initially_hidden=True),
+    GridFieldText('subcategory', title=_('subcategory'), initially_hidden=True),
     # GridFieldText('owner', title=_('owner'), field_name='owner__name', formatter='detail',
     #               extra='"role":"input/location"'),
-
-    GridFieldText('owner', title=_('owner'), field_name='owner__nr'),
-
-    GridFieldText('source', title=_('source')),
+    GridFieldText('description', title=_('description')),
     # GridFieldLastModified('lastmodified'),
     GridFieldCreateOrUpdateDate('created_at', title=_('created_at')),
     GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at')),
