@@ -532,7 +532,9 @@ var grid = {
      $(this).jqGrid('setCell', id, 'select', '<input type="checkbox" onClick="opener.dismissRelatedLookupPopup(window, grid.selected);" class="btn btn-primary" style="width: 18px; height: 18px;" data-toggle="tooltip" title="'+gettext('Click to select record')+'"></input>');
    },
 
-   runAction: function(next_action) {
+   runAction: function(next_action) {setSelectedRow
+
+
     if ($("#actions").val() != "no_action")
        actions[$("#actions").val()]();
    },
