@@ -128,7 +128,12 @@ class ResetPasswordRequestView(FormView):
             pass
           else:
             email_message.attach_alternative(message_html, 'text/html')
-          email_message.send()
+
+          try:
+            email_message.send()
+          except Exception as e:
+            i=e
+
         result = self.form_valid(form)
         messages.success(request, 'Email has been sent to ' + data + "'s email address. Please check your inbox to continue resetting your password.")
         return result

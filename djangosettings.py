@@ -441,7 +441,7 @@ AUTH_PASSWORD_VALIDATORS = [
   },
 ]
 
-EMAIL_USE_TLS = True
+EMAIL_USE_SSL = True
 DEFAULT_FROM_EMAIL = 'info@cz-tek.com'
 SERVER_EMAIL = 'info@cz-tek.com'
 EMAIL_HOST = 'smtp.exmail.qq.com'

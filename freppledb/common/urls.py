@@ -80,5 +80,6 @@ urlpatterns = [
   # Forgotten password
   url(r'^reset_password_confirm/(?P<uidb64>[0-9A-Za-z]+)-(?P<token>.+)/$', PasswordResetConfirmView.as_view(), name='reset_password_confirm'),
   url(r'^reset_password/$', ResetPasswordRequestView.as_view(), name="reset_password"),
+  # url(r'^reset_password/$', ResetPasswordRequestView.as_view(), name="reset_password"),
 
   ]

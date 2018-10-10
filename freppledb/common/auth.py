@@ -18,6 +18,7 @@
 import base64
 import jwt
 import time
+import json
 
 from django.conf import settings
 from django.contrib.auth import authenticate, login
@@ -28,7 +29,6 @@ from django.core.exceptions import ValidationError
 from django.db import DEFAULT_DB_ALIAS
 from django.db.models import Q
 from django.http import HttpResponse
-
 from freppledb.common.models import User, Scenario
 
 import logging
@@ -46,6 +46,7 @@ class MultiDBBackend(ModelBackend):
   This authentication backend relies on the MultiDBMiddleware class
   to assure that the user object refers to the correct database.
   '''
+
   def authenticate(self, username=None, password=None):
     try:
       validate_email(username)
@@ -69,7 +70,6 @@ class MultiDBBackend(ModelBackend):
         # difference between an existing and a non-existing user.
         # See django ticket #20760
         User().set_password(password)
-
 
   def _get_user_permissions(self, user_obj):
     return user_obj.user_permissions.all()
