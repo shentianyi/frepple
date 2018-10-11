@@ -612,6 +612,9 @@ msgstr "驾驶舱"
 msgid "Only %(limit)s out of %(count)s records are shown."
 msgstr ""
 
+msgid "Login"
+msgstr "登陆"
+
 #: common/templates/admin/login.html:116
 msgid "Forgot your password?"
 msgstr "忘记密码吗？"
@@ -623,6 +626,14 @@ msgstr "请更正以下错误"
 #: common/templates/admin/login.html:116
 msgid "Please enter the correct username and password for a staff account. Note that both fields may be case-sensitive."
 msgstr "请输入员工帐户的正确用户名和密码,注意大小写"
+
+
+msgid "Please input username"
+msgstr "请输入账号"
+
+msgid "Please input password"
+msgstr "请输入密码"
+
 
 #: common/templates/admin/login.html:126
 msgid ""

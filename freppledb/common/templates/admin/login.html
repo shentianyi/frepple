@@ -72,20 +72,21 @@ The changes are:
             {% comment %}Translators: Translation included with Django {% endcomment %}
             {% if form.errors.items|length == 1 %}{% trans "Please correct the error below." %}{% else %}
                 {% comment %}Translators: Translation included with Django {% endcomment %}
-                {% trans "Please correct the errors below." %}{% endif %}
+                {% trans "Please correct the error below." %}
+            {% endif %}
         </p>
     {% endif %}
 
     {% if form.non_field_errors or form.this_is_the_login_form.errors %}
         {% for error in form.non_field_errors %}
             <p class="errornote">
-                {% blocktrans %}{{ error }}{% endblocktrans %}
+                {% trans error%}
             </p>
         {% endfor %}
 
         {% for error in form.this_is_the_login_form.errors %}
             <p class="errornote">
-                {% blocktrans %}{{ error }}{% endblocktrans %}
+              {% trans error%}
             </p>
         {% endfor %}
     {% endif %}
@@ -105,16 +106,15 @@ The changes are:
                     {% if not form.this_is_the_login_form.errors %}{% blocktrans %}{{ form.username.errors }}{% endblocktrans %}{% endif %}
                     <span id="basic_id_username" class="input-group-addon required">{% trans 'Username'|capfirst %}:</span>
 
-                    <input id="id_username" class="form-control" maxlength="254" placeholder="请输入账号" name="username"
-                           type="text" aria-describedby="basic_id_username" value="admin">
+                    <input id="id_username" class="form-control" maxlength="254" placeholder="{% trans 'Please input username'|capfirst %}" name="username"
+                           type="text" aria-describedby="basic_id_username">
                 </div>
-
                 <div class="input-group" style="margin-top: 20px;">
                     {% if not form.this_is_the_login_form.errors %}{{ form.password.errors }}{% endif %}
                     {% comment %}Translators: Translation included with Django {% endcomment %}
                     <span id="basic_id_password" class="input-group-addon required">{% trans 'Password'|capfirst %}:</span>
-                    <input id="id_password" class="form-control" placeholder="请输入密码" name="password" type="password"
-                           aria-describedby="basic_id_password" value="admin">
+                    <input id="id_password" class="form-control" placeholder="{% trans 'Please input password'|capfirst %}" name="password" type="password"
+                           aria-describedby="basic_id_password">
 
                     <input type="hidden" name="this_is_the_login_form" value="1"/>
                     <input type="hidden" name="next" value="{{ request.prefix }}{{ next }}"/>
@@ -122,7 +122,7 @@ The changes are:
 
                 <div class="form-group text-center" style="margin-top: 20px;">
                     {% comment %}Translators: Translation included with Django {% endcomment %}
-                    <input type="submit" class="btn btn-lg btn-primary btn-lg-primary-aps" value="{% trans '登陆' %}"/>
+                    <input type="submit" class="btn btn-lg btn-primary btn-lg-primary-aps" value="{% trans 'Login'|capfirst %}"/>
                 </div>
                 <div style="text-align: center; margin-bottom: 10px">
                     <a href="/reset_password/"><u>{% trans "Forgot your password?" %}</u></a>
