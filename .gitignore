@@ -81,3 +81,6 @@ build
 .idea
 .idea/
 .idea/*.iml
+
+# Some Files
+djangosettings.py
