@@ -616,6 +616,14 @@ msgstr ""
 msgid "Forgot your password?"
 msgstr "忘记密码吗？"
 
+#: common/templates/admin/login.html:116
+msgid "Please correct the error below."
+msgstr "请更正以下错误"
+
+#: common/templates/admin/login.html:116
+msgid "Please enter the correct username and password for a staff account. Note that both fields may be case-sensitive."
+msgstr "请输入员工帐户的正确用户名和密码,注意大小写"
+
 #: common/templates/admin/login.html:126
 msgid ""
 "The user \"admin\" has password \"admin\".<br/>\n"

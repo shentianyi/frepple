@@ -102,8 +102,8 @@ The changes are:
 
             <form role="form" action="{{ request.prefix }}{{ app_path }}" method="post" id="login-form">{% csrf_token %}
                 <div class="input-group">
-                    {% if not form.this_is_the_login_form.errors %}{{ form.username.errors }}{% endif %}
-                    <span id="basic_id_username" class="input-group-addon required">{{ form.username.label }}:</span>
+                    {% if not form.this_is_the_login_form.errors %}{% blocktrans %}{{ form.username.errors }}{% endblocktrans %}{% endif %}
+                    <span id="basic_id_username" class="input-group-addon required">{% trans 'Username'|capfirst %}:</span>
 
                     <input id="id_username" class="form-control" maxlength="254" placeholder="请输入账号" name="username"
                            type="text" aria-describedby="basic_id_username" value="admin">
