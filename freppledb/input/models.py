@@ -135,7 +135,7 @@ class Location(AuditModel, HierarchyModel):
     name = models.CharField(_('name'), max_length=300, primary_key=False, db_index=True)
 
     # 地区
-    area = models.CharField(_('area'), max_length=200, db_index=True)
+    area = models.CharField(_('area'), max_length=300, db_index=True)
 
     available = models.ForeignKey(
         Calendar, verbose_name=_('available'),
@@ -168,6 +168,19 @@ class Location(AuditModel, HierarchyModel):
 
 class Customer(AuditModel, HierarchyModel):
     # Database fields
+    # 设置owner显示的值
+    owner_display_key = 'nr'
+    id = models.AutoField(_('id'), help_text=_('Unique identifier'), primary_key=True)
+    nr = models.CharField(_('nr'), max_length=300, db_index=True, unique=True)
+    name = models.CharField(_('name'), max_length=300, primary_key=False, db_index=True)
+    area = models.CharField(_('area'), max_length=300, db_index=True, null=True, blank=True)
+    address = models.CharField(_('address'), max_length=300, db_index=True, null=True, blank=True)
+    ship_address = models.CharField(_('ship_address'), max_length=300, db_index=True, null=True, blank=True)
+    available = models.ForeignKey(
+        Calendar, verbose_name=_('available'),
+        null=True, blank=True, on_delete=models.CASCADE,
+        help_text=_('Calendar defining the working hours and holidays')
+    )
     description = models.CharField(
         _('description'), max_length=500, null=True, blank=True
     )
@@ -806,6 +819,21 @@ class OperationResource(AuditModel):
 
 class Supplier(AuditModel, HierarchyModel):
     # Database fields
+    # 设置owner显示的值
+    owner_display_key = 'nr'
+    # 添加自增列
+    id = models.AutoField(_('id'), help_text=_('Unique identifier'), primary_key=True)
+    nr = models.CharField(_('nr'), max_length=300, db_index=True)
+    # 设置name为非主键
+    name = models.CharField(_('name'), max_length=300, primary_key=False, db_index=True)
+    area = models.CharField(_('area'), max_length=300, db_index=True, null=True, blank=True)
+    address = models.CharField(_('address'), max_length=300, db_index=True, null=True, blank=True)
+    ship_address = models.CharField(_('ship_address'), max_length=300, db_index=True, null=True, blank=True)
+    available = models.ForeignKey(
+        Calendar, verbose_name=_('available'),
+        null=True, blank=True, on_delete=models.CASCADE,
+        help_text=_('Calendar defining the working hours and holidays')
+    )
     description = models.CharField(_('description'), max_length=500, null=True, blank=True)
     category = models.CharField(_('category'), max_length=300, null=True, blank=True, db_index=True)
     subcategory = models.CharField(_('subcategory'), max_length=300, null=True, blank=True, db_index=True)

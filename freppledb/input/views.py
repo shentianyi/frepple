@@ -808,8 +808,7 @@ class LocationList(GridReport):
 
     GridFieldText('area', title=_('area'), editable=False),
     GridFieldText('source', title=_('source'), editable=False),
-    GridFieldText('available', title=_('available'), field_name='available__name', formatter='detail',
-                  extra='"role":"input/calendar"', editable=False),
+    GridFieldText('available', title=_('available'), field_name='available__name',editable=False),
 
     # 新建一个显示列
     GridFieldText('owner_display', title=_('owner_display'), field_name='owner__nr', editable=False),
@@ -840,13 +839,22 @@ class CustomerList(GridReport):
 
   rows = (
     #. Translators: Translation included with Django
-    GridFieldText('name', title=_('name'), key=True, formatter='detail', extra='"role":"input/customer"'),
-    GridFieldText('description', title=_('description')),
-    GridFieldText('category', title=_('category'), initially_hidden=True),
-    GridFieldText('subcategory', title=_('subcategory'), initially_hidden=True),
-    GridFieldText('owner', title=_('owner'), field_name='owner__name', formatter='detail', extra='"role":"input/customer"'),
-    GridFieldText('source', title=_('source')),
-    GridFieldLastModified('lastmodified'),
+    GridFieldText('id', title=_('id'), key=True, formatter='detail', extra='"role":"input/location"'),
+    GridFieldText('nr', title=_('nr'), editable=False),
+    GridFieldText('name', title=_('name'), editable=False),
+    GridFieldText('area', title=_('area'), editable=False),
+    GridFieldText('address', title=_('address'), editable=False),
+    GridFieldText('ship_address', title=_('ship_address'), editable=False),
+    GridFieldText('source', title=_('source'), editable=False),
+    GridFieldText('available', title=_('available'), field_name='available__name', editable=False),
+    GridFieldText('owner_display', title=_('owner_display'), field_name='owner__nr', editable=False),
+    GridFieldText('owner', title=_('owner_id'), field_name='owner_id', editable=False, hidden=True),
+    GridFieldText('category', title=_('category'), initially_hidden=True, editable=False),
+    GridFieldText('subcategory', title=_('subcategory'), initially_hidden=True, editable=False),
+    GridFieldText('description', title=_('description'), editable=False),
+    #GridFieldLastModified('lastmodified', title=_('lastmodified'), editable=False),
+    GridFieldCreateOrUpdateDate('created_at', title=_('created_at')),
+    GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at')),
     )
 
 
@@ -861,14 +869,24 @@ class SupplierList(GridReport):
   help_url = 'user-guide/modeling-wizard/purchasing/suppliers.html'
 
   rows = (
-    #. Translators: Translation included with Django
-    GridFieldText('name', title=_('name'), key=True, formatter='detail', extra='"role":"input/supplier"'),
-    GridFieldText('description', title=_('description')),
-    GridFieldText('category', title=_('category'), initially_hidden=True),
-    GridFieldText('subcategory', title=_('subcategory'), initially_hidden=True),
-    GridFieldText('owner', title=_('owner'), field_name='owner__name', formatter='detail', extra='"role":"input/supplier"', initially_hidden=True),
-    GridFieldText('source', title=_('source')),
-    GridFieldLastModified('lastmodified'),
+    # . Translators: Translation included with Django
+    GridFieldText('id', title=_('id'), key=True, formatter='detail', extra='"role":"input/supplier"'),
+    GridFieldText('nr', title=_('nr'), editable=False),
+    GridFieldText('name', title=_('name'), editable=False),
+    GridFieldText('area', title=_('area'), editable=False),
+    GridFieldText('address', title=_('address'), editable=False),
+    GridFieldText('ship_address', title=_('ship_address'), editable=False),
+    GridFieldText('source', title=_('source'), editable=False),
+    GridFieldText('available', title=_('available'), field_name='available__name', editable=False),
+    GridFieldText('owner_display', title=_('owner_display'), field_name='owner__nr', editable=False),
+    GridFieldText('owner', title=_('owner_id'), field_name='owner_id', editable=False, hidden=True),
+    GridFieldText('category', title=_('category'), initially_hidden=True, editable=False),
+    GridFieldText('subcategory', title=_('subcategory'), initially_hidden=True, editable=False),
+    GridFieldText('description', title=_('description'), editable=False),
+    # GridFieldLastModified('lastmodified', title=_('lastmodified'), editable=False),
+    GridFieldCreateOrUpdateDate('created_at', title=_('created_at')),
+    GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at')),
+    GridFieldLastModified('lastmodified', title=_('lastmodified')),
     )
 
 

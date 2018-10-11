@@ -135,6 +135,16 @@ msgstr "拥有者"
 msgid "owner_id"
 msgstr "拥有者id"
 
+msgid "ship_address"
+msgstr "目的地"
+
+msgid "address"
+msgstr "地址"
+
+msgid "lastmodified"
+msgstr "最后的修改"
+
+
 
 #: common/models.py:41 input/models.py:1111 input/views.py:721
 #: input/views.py:752 input/views.py:774 input/views.py:796 input/views.py:879
