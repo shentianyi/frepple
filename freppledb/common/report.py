@@ -671,10 +671,10 @@ class GridReport(View):
   @classmethod
   def get_rows(cls, i):
     row = cls.rows[i]
-    if row.pop_fkey and row.key is False:
-        row.key = True
-    elif row.key and row.pop_fkey is False:
-        row.key = False
+    # if row.pop_fkey and row.key is False:
+    #     row.key = True
+    # elif row.key and row.pop_fkey is False:
+    #     row.key = False
     return row
 
   @classmethod
