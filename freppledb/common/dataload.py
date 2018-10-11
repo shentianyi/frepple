@@ -121,8 +121,7 @@ def parseExcelWorksheet(model, data, user=None, database=DEFAULT_DB_ALIAS, ping=
       return self.headers.keys()
 
     def values(self):
-      values =  [i.value for i in self.data]
-      return values
+      return [ i.value for i in self.data ]
 
     def items(self):
       return { col: self.__getitem__(col) for col in self.headers.keys() }
@@ -281,9 +280,6 @@ def _parseData(model, data, rowmapper, user, database, ping):
         ok = False
         for i in model._meta.fields:
           # Try with translated field names
-          # CMARK 验证名称是否在模型的属性中
-          tname = ("%s - %s" % (model.__name__, i.verbose_name)).lower()
-
           if col == i.name.lower() \
             or col == i.verbose_name.lower() \
             or col == ("%s - %s" % (model.__name__, i.verbose_name)).lower():
@@ -450,7 +446,6 @@ def _parseData(model, data, rowmapper, user, database, ping):
     )
 
 
-# CMARK 上传或新建, 外键关系在这个方法中
 class BulkForeignKeyFormField(forms.fields.Field):
 
   def __init__(self, using=DEFAULT_DB_ALIAS, field=None, required=None,
@@ -464,7 +459,7 @@ class BulkForeignKeyFormField(forms.fields.Field):
     # Build a cache with the list of values - as long as it reasonable fits in memory
     self.model = field.remote_field.model
     field.remote_field.parent_link = True  # A trick to disable the model validation on foreign keys!
-    if field.remote_field.model._default_manager.all().using(using).count() > 0:
+    if field.remote_field.model._default_manager.all().using(using).count() > 20000:
       self.queryset = field.remote_field.model._default_manager.all().using(using)
       self.cache = None
     else:
