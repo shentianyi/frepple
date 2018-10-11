@@ -279,6 +279,7 @@ def _parseData(model, data, rowmapper, user, database, ping):
           continue
         ok = False
         for i in model._meta.fields:
+          # CMARK 验证名称是否在模型的属性中
           # Try with translated field names
           if col == i.name.lower() \
             or col == i.verbose_name.lower() \
@@ -445,7 +446,8 @@ def _parseData(model, data, rowmapper, user, database, ping):
       }
     )
 
-
+# CMARK 上传或新建, 外键关系在这个方法中
+# TODO 更好的判断方法
 class BulkForeignKeyFormField(forms.fields.Field):
 
   def __init__(self, using=DEFAULT_DB_ALIAS, field=None, required=None,
@@ -459,26 +461,35 @@ class BulkForeignKeyFormField(forms.fields.Field):
     # Build a cache with the list of values - as long as it reasonable fits in memory
     self.model = field.remote_field.model
     field.remote_field.parent_link = True  # A trick to disable the model validation on foreign keys!
-    if field.remote_field.model._default_manager.all().using(using).count() > 20000:
+    # CMARK 超出2000个不做缓存
+    if field.remote_field.model._default_manager.all().using(using).count() > 0:
       self.queryset = field.remote_field.model._default_manager.all().using(using)
       self.cache = None
     else:
       self.queryset = None
-      self.cache = { obj.pk: obj for obj in field.remote_field.model._default_manager.all().using(using) }
-
+      #self.cache = { obj.pk: obj for obj in field.remote_field.model._default_manager.all().using(using) }
+      # CMARK 通过模型定义的哪个键是作为其它模型的输入值来查询
+      # 默认通过pk
+      self.cache = { getattr(obj, obj.input_query_key()): obj for obj in field.remote_field.model._default_manager.all().using(using)}
 
   def to_python(self, value):
     if value in EMPTY_VALUES:
       return None
     if self.cache is not None:
       try:
+        # 通过缓存查询
         return self.cache[value]
       except KeyError:
         #. Translators: Translation included with Django
         raise forms.ValidationError(_('Select a valid choice. That choice is not one of the available choices.'))
     else:
       try:
-        return self.queryset.get(pk=value)
+        # 通过自定义的外键输入查询
+        kwargs = {
+          self.model.input_query_key(): value,
+        }
+        return self.queryset.get(**kwargs)
+        #return self.queryset.get(pk=value)
       except self.model.DoesNotExist:
         #. Translators: Translation included with Django
         raise forms.ValidationError(_('Select a valid choice. That choice is not one of the available choices.'))

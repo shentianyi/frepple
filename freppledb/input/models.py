@@ -122,8 +122,10 @@ class CalendarBucket(AuditModel):
 
 # TODO CHARLOT
 class Location(AuditModel, HierarchyModel):
-    # 设置owner显示的值
-    owner_display_key = 'nr'
+    # 设置外键显示的值
+    display_key = 'nr'
+    # 设置外键导入的值
+    foreign_input_key = 'nr'
 
     # Database fields
     # 添加自增列
