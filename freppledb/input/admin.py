@@ -92,7 +92,7 @@ data_site.register(Location, Location_admin)
 
 class Customer_admin(MultiDBModelAdmin):
   model = Customer
-  raw_id_fields = ('owner',)
+  raw_id_fields = ('available',)
   save_on_top = True
   exclude = ('source',)
   tabs = [
@@ -114,7 +114,7 @@ class ItemSupplier_inline(MultiDBTabularInline):
 
 class Supplier_admin(MultiDBModelAdmin):
   model = Supplier
-  raw_id_fields = ('owner',)
+  raw_id_fields = ('available',)
   save_on_top = True
   exclude = ('source',)
   tabs = [
