@@ -451,4 +451,3 @@ EMAIL_HOST_PASSWORD = 'Brilliantech123@'
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 # Port number for the CherryPy web server
 PORT = 8000
-
