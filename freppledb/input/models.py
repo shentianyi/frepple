@@ -161,11 +161,29 @@ class Location(AuditModel, HierarchyModel):
     def __str__(self):
         return self.nr
 
+
+    # CMARK 上传时,使用以下判断是否可以使用
+    class Manager(MultiDBManager):
+        def get_by_natural_key(self, nr):
+            return self.get(nr=nr)
+    #
+    # def natural_key(self):
+    #     return (self.nr,)
+
+
+    # CMARK 定义自然key, 在创建/编辑的过程中, 可以使用这个键来做查询
+    #　比如上传时，id(主键)是非必须的，所有通过natural_key 查询, 如果填写了id就使用id做查询
+    natural_key = ('nr', )
+
+    # 设置manager 这个要和get_by_natural_key一起使用!
+    objects = Manager()
+
     class Meta(AuditModel.Meta):
         db_table = 'location'
         verbose_name = _('location')
         verbose_name_plural = _('locations')
         ordering = ['name']
+
 
 
 class Customer(AuditModel, HierarchyModel):
