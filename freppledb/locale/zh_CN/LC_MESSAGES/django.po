@@ -145,7 +145,6 @@ msgid "lastmodified"
 msgstr "最后的修改"
 
 
-
 #: common/models.py:41 input/models.py:1111 input/views.py:721
 #: input/views.py:752 input/views.py:774 input/views.py:796 input/views.py:879
 #: input/views.py:1010 input/views.py:1029 input/views.py:1059
@@ -2159,6 +2158,45 @@ msgstr "最小罚款"
 msgid "minimum cost plus penalty"
 msgstr "最低成本加罚款"
 
+#: input/models.py:74 input/views.py:1415
+msgid "calendars"
+msgstr "日历"
+
+#: input/models.py:64
+msgid "calendar"
+msgstr "日历"
+
+#: input/models.py:86 input/views.py:1451
+msgid "Monday"
+msgstr "周一"
+
+#: input/models.py:88 input/views.py:1453
+msgid "Tuesday"
+msgstr "周二"
+
+#: input/models.py:90 input/views.py:1455
+msgid "Wednesday"
+msgstr "周三"
+
+#: input/models.py:92 input/views.py:1457
+msgid "Thursday"
+msgstr "周四"
+
+#: input/models.py:94 input/views.py:1459
+msgid "Friday"
+msgstr "周五"
+
+#: input/models.py:96 input/views.py:1461
+msgid "Saturday"
+msgstr "周六"
+
+#: input/models.py:98 input/views.py:1463
+msgid "Sunday"
+msgstr "周日"
+
+msgid "Delete?"
+msgstr "删除？"
+
 #: input/models.py:47 input/views.py:1150
 msgid "default value"
 msgstr "默认值"
@@ -2182,6 +2220,7 @@ msgstr "日历：排班表"
 #: input/models.py:116 input/views.py:1160
 msgid "calendar buckets"
 msgstr "日历：排班表"
+
 
 #: input/models.py:132 input/models.py:270 input/models.py:513
 #: input/views.py:725 input/views.py:751 input/views.py:1054

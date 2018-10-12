@@ -1426,7 +1426,7 @@ class CalendarList(GridReport):
     GridFieldText('subcategory', title=_('subcategory'), initially_hidden=True),
     GridFieldNumber('defaultvalue', title=_('default value')),
     GridFieldText('source', title=_('source')),
-    GridFieldLastModified('lastmodified'),
+    GridFieldLastModified('lastmodified', title=_('lastmodified')),
     )
 
 
@@ -1464,7 +1464,7 @@ class CalendarBucketList(GridReport):
     GridFieldTime('starttime', title=_('start time')),
     GridFieldTime('endtime', title=_('end time')),
     GridFieldText('source', title=_('source')),  # Not really right, since the engine doesn't read or store it
-    GridFieldLastModified('lastmodified'),
+    GridFieldLastModified('lastmodified', title=_('lastmodified')),
     )
 
 
