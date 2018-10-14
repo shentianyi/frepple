@@ -2465,8 +2465,6 @@ function import_show(title,paragraph,multiple,fxhr)
           '<form id="uploadform">' +
             '<p id="extra_text">'+gettext('Load an Excel file or a CSV-formatted text file.') + '<br>' +
               gettext('The first row should contain the field names.') + '<br><br>' +
-              '<input type="checkbox" autocomplete="off" name="erase" value="yes"/>&nbsp;&nbsp;'+
-              gettext('First delete all existing records AND ALL RELATED TABLES') + '<br><br>' +
             '</p>';
     if (isDragnDropUploadCapable()) {
       modalcontent += ''+

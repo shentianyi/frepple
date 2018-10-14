@@ -131,7 +131,7 @@ class Location(AuditModel, HierarchyModel):
     # 添加自增列
     id = models.AutoField(_('id'),  help_text=_('Unique identifier'), primary_key=True)
 
-    nr = models.CharField(_('nr'), max_length=300, db_index=True)
+    nr = models.CharField(_('nr'), max_length=300, db_index=True, unique=True)
 
     # 设置name为非主键
     name = models.CharField(_('name'), max_length=300, primary_key=False, db_index=True)
@@ -161,11 +161,20 @@ class Location(AuditModel, HierarchyModel):
     def __str__(self):
         return self.nr
 
+<<<<<<< HEAD
+=======
 
+>>>>>>> 5ae11790f4d387b623e14b8dc5d0bb87f40cf692
     # CMARK 上传时,使用以下判断是否可以使用
     class Manager(MultiDBManager):
         def get_by_natural_key(self, nr):
             return self.get(nr=nr)
+<<<<<<< HEAD
+
+    # CMARK 定义自然key, 在创建/编辑的过程中, 可以使用这个键来做查询
+    # 　比如上传时，id(主键)是非必须的，所有通过natural_key 查询, 如果填写了id就使用id做查询
+    natural_key = ('nr',)
+=======
     #
     # def natural_key(self):
     #     return (self.nr,)
@@ -177,6 +186,7 @@ class Location(AuditModel, HierarchyModel):
 
     # 设置manager 这个要和get_by_natural_key一起使用!
     objects = Manager()
+>>>>>>> 5ae11790f4d387b623e14b8dc5d0bb87f40cf692
 
     class Meta(AuditModel.Meta):
         db_table = 'location'
@@ -188,8 +198,12 @@ class Location(AuditModel, HierarchyModel):
 
 class Customer(AuditModel, HierarchyModel):
     # Database fields
+    # 设置外键显示的值
+    display_key = 'nr'
+    # 设置外键导入的值
+    foreign_input_key = 'nr'
     # 设置owner显示的值
-    owner_display_key = 'nr'
+    # owner_display_key = 'nr'
     id = models.AutoField(_('id'), help_text=_('Unique identifier'), primary_key=True)
     nr = models.CharField(_('nr'), max_length=300, db_index=True, unique=True)
     name = models.CharField(_('name'), max_length=300, primary_key=False, db_index=True)
@@ -213,6 +227,15 @@ class Customer(AuditModel, HierarchyModel):
 
     def __str__(self):
         return self.name
+
+    # CMARK 上传时,使用以下判断是否可以使用
+    class Manager(MultiDBManager):
+        def get_by_natural_key(self, nr):
+            return self.get(nr=nr)
+
+    # CMARK 定义自然key, 在创建/编辑的过程中, 可以使用这个键来做查询
+    # 　比如上传时，id(主键)是非必须的，所有通过natural_key 查询, 如果填写了id就使用id做查询
+    natural_key = ('nr',)
 
     class Meta(AuditModel.Meta):
         db_table = 'customer'
@@ -839,11 +862,15 @@ class OperationResource(AuditModel):
 
 class Supplier(AuditModel, HierarchyModel):
     # Database fields
+    # 设置外键显示的值
+    display_key = 'nr'
+    # 设置外键导入的值
+    foreign_input_key = 'nr'
     # 设置owner显示的值
-    owner_display_key = 'nr'
+    # owner_display_key = 'nr'
     # 添加自增列
     id = models.AutoField(_('id'), help_text=_('Unique identifier'), primary_key=True)
-    nr = models.CharField(_('nr'), max_length=300, db_index=True)
+    nr = models.CharField(_('nr'), max_length=300, db_index=True, unique=True)
     # 设置name为非主键
     name = models.CharField(_('name'), max_length=300, primary_key=False, db_index=True)
     area = models.CharField(_('area'), max_length=300, db_index=True, null=True, blank=True)
@@ -860,6 +887,15 @@ class Supplier(AuditModel, HierarchyModel):
 
     def __str__(self):
         return self.name
+
+    # CMARK 上传时,使用以下判断是否可以使用
+    class Manager(MultiDBManager):
+        def get_by_natural_key(self, nr):
+            return self.get(nr=nr)
+
+    # CMARK 定义自然key, 在创建/编辑的过程中, 可以使用这个键来做查询
+    # 　比如上传时，id(主键)是非必须的，所有通过natural_key 查询, 如果填写了id就使用id做查询
+    natural_key = ('nr',)
 
     class Meta(AuditModel.Meta):
         db_table = 'supplier'

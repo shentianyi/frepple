@@ -1719,7 +1719,7 @@ class GridReport(View):
         filter_fmt, exclude = reportclass._filter_map_jqgrid_django[op]
         reportrow = reportclass._getRowByName(field)
         if data == '' and not isinstance(reportrow, (GridFieldText, GridFieldChoice)):
-          # Filter value specified, which makes the filter invalid
+          # Filter value specified,1 which makes the filter invalid
           continue
         filter_str = smart_str(filter_fmt % {'field': reportrow.field_name})
         if filter_fmt.endswith('__in'):
