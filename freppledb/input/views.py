@@ -33,6 +33,7 @@ from django.utils.encoding import force_text
 from django.utils.text import format_lazy
 from django.views.generic import View
 from django.views.decorators.csrf import csrf_exempt
+from rest_framework.generics import ListAPIView
 
 from freppledb.boot import getAttributeFields
 from freppledb.common.models import Parameter
@@ -43,13 +44,16 @@ from freppledb.input.models import Calendar, CalendarBucket, ManufacturingOrder,
 from freppledb.input.models import ResourceSkill, Supplier, ItemSupplier, searchmode
 from freppledb.input.models import ItemDistribution, DistributionOrder, PurchaseOrder
 from freppledb.input.models import OperationPlan, OperationPlanMaterial, OperationPlanResource
-from freppledb.common.report import GridReport, GridFieldBool, GridFieldLastModified, GridFieldCreateOrUpdateDate
+from freppledb.common.report import GridReport, GridFieldBool, GridFieldLastModified, GridFieldCreateOrUpdateDate, \
+  GridFieldDate
 from freppledb.common.report import GridFieldDateTime, GridFieldTime, GridFieldText
 from freppledb.common.report import GridFieldNumber, GridFieldInteger, GridFieldCurrency
 from freppledb.common.report import GridFieldChoice, GridFieldDuration
 from freppledb.admin import data_site
 
 import logging
+
+
 logger = logging.getLogger(__name__)
 
 
@@ -839,7 +843,7 @@ class CustomerList(GridReport):
 
   rows = (
     #. Translators: Translation included with Django
-    GridFieldText('id', title=_('id'), key=True, formatter='detail', extra='"role":"input/location"'),
+    GridFieldText('id', title=_('id'), key=True, formatter='detail', extra='"role":"input/customer"'),
     GridFieldText('nr', title=_('nr'), editable=False),
     GridFieldText('name', title=_('name'), editable=False),
     GridFieldText('area', title=_('area'), editable=False),
@@ -1106,14 +1110,37 @@ class ItemList(GridReport):
 
   rows = (
     #. Translators: Translation included with Django
-    GridFieldText('name', title=_('name'), key=True, formatter='detail', extra='"role":"input/item"'),
-    GridFieldText('description', title=_('description')),
+    GridFieldText('id', title=_('id'), key=True, formatter='detail', extra='"role":"input/item"'),
+    GridFieldText('nr', title=_('nr'), editable=False),
+    GridFieldText('name', title=_('name'),editable=False, formatter='detail', extra='"role":"input/item"'),
+    GridFieldText('barcode', title=_('barcode'), formatter='detail', editable=False, extra='"role":"input/item"'),
+    GridFieldText('status', title=_('status'), formatter='detail',editable=False, extra='"role":"input/item"'),
+    GridFieldText('type', title=_('type'), formatter='detail', editable=False, extra='"role":"input/item"'),
+    GridFieldCurrency('cost', title=_('cost')),
+    GridFieldText('source', title=_('source'), hidden=True),
+    # 新建一个显示列
+    GridFieldText('owner_display', title=_('owner_display'), field_name='owner__nr', editable=False),
+    # 因为是id 让外键永远不显示
+    GridFieldText('owner', title=_('owner_id'), field_name='owner_id', editable=False, hidden=True),
+    GridFieldNumber('gross_weight', title=_('gross weight')),
+    GridFieldNumber('net_weight', title=_('net weight')),
+    GridFieldText('physical_unit', title=_('physical unit')),
+    GridFieldText('project_nr', title=_('project nr'), hidden=True),
+    GridFieldInteger('mpq', title=_('mpq')),
+    GridFieldInteger('outer_package_num', title=_('outer package num'), hidden=True),
+    GridFieldInteger('pallet_num', title=_('pallet num'), hidden=True),
+    GridFieldNumber('outer_package_gross_weight', title=_('outer package gross weight'), hidden=True),
+    GridFieldNumber('pallet_gross_weight', title=_('pallet gross weight'), hidden=True),
+    GridFieldNumber('outer_package_volume', title=_('outer package volume'), hidden=True),
+    GridFieldNumber('pallet_volume', title=_('pallet volume'), hidden=True),
+    GridFieldDate('plan_list_date', title=_('plan list date'), hidden=True),
+    GridFieldDate('plan_delist_date', title=_('plan delist date'), hidden=True),
     GridFieldText('category', title=_('category'), initially_hidden=True),
     GridFieldText('subcategory', title=_('subcategory'), initially_hidden=True),
-    GridFieldText('owner', title=_('owner'), field_name='owner__name', formatter='detail', extra='"role":"input/item"'),
-    GridFieldCurrency('cost', title=_('cost')),
-    GridFieldText('source', title=_('source')),
-    GridFieldLastModified('lastmodified'),
+    GridFieldText('description', title=_('description')),
+    GridFieldLastModified('lastmodified', title=_('lastmodified')),
+    GridFieldCreateOrUpdateDate('created_at', title=_('created_at')),
+    GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at')),
     )
 
 

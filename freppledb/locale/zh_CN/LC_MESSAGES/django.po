@@ -122,6 +122,58 @@ msgstr "关于frePPLe"
 msgid "Unique identifier"
 msgstr "唯一标识符"
 
+#: input/models.py:263 input/models.py:1125
+msgid "gross weight"
+msgstr "毛重"
+
+#: input/models.py:263 input/models.py:1125
+msgid "net weight"
+msgstr "净重"
+
+#: input/models.py:263 input/models.py:1125
+msgid "physical unit"
+msgstr "单位"
+
+#: input/models.py:263 input/models.py:1125
+msgid "project nr"
+msgstr "项目号"
+
+#: input/models.py:263 input/models.py:1125
+msgid "mpq"
+msgstr "最小包装数量"
+
+#: input/models.py:263 input/models.py:1125
+msgid "outer_package_num"
+msgstr "外包装数量"
+
+#: input/models.py:263 input/models.py:1125
+msgid "pallet num"
+msgstr "托盘数量"
+
+#: input/models.py:263 input/models.py:1125
+msgid "outer package gross weigh"
+msgstr "每箱毛重"
+
+#: input/models.py:263 input/models.py:1125
+msgid "pallet gross weight"
+msgstr "托盘毛重"
+
+#: input/models.py:263 input/models.py:1125
+msgid "outer package volumn"
+msgstr "外箱体积"
+
+#: input/models.py:263 input/models.py:1125
+msgid "pallet volumn"
+msgstr "托盘体积"
+
+#: input/models.py:263 input/models.py:1125
+msgid "plan list date"
+msgstr "上市计划"
+
+#: input/models.py:263 input/models.py:1125
+msgid "plan delist date"
+msgstr "退市计划"
+
 # CMARK 翻译
 msgid "id"
 msgstr "Id"
@@ -173,6 +225,10 @@ msgstr "最后的修改"
 #: output/views/resource.py:442 quoting/views.py:55
 msgid "owner"
 msgstr "拥有者"
+
+#: input/views.py:1145 input/models.py:260
+msgid "barcode"
+msgstr "条码"
 
 #: common/models.py:42 input/models.py:1112
 msgid "Hierarchical parent"

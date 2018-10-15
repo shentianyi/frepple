@@ -120,6 +120,7 @@ class CalendarBucket(AuditModel):
         verbose_name_plural = _('calendar buckets')
         unique_together = (('calendar', 'startdate', 'enddate', 'priority'),)
 
+
 # TODO CHARLOT
 class Location(AuditModel, HierarchyModel):
     # 设置外键显示的值
@@ -129,7 +130,7 @@ class Location(AuditModel, HierarchyModel):
 
     # Database fields
     # 添加自增列
-    id = models.AutoField(_('id'),  help_text=_('Unique identifier'), primary_key=True)
+    id = models.AutoField(_('id'), help_text=_('Unique identifier'), primary_key=True)
 
     nr = models.CharField(_('nr'), max_length=300, db_index=True, unique=True)
 
@@ -169,10 +170,9 @@ class Location(AuditModel, HierarchyModel):
     # def natural_key(self):
     #     return (self.nr,)
 
-
     # CMARK 定义自然key, 在创建/编辑的过程中, 可以使用这个键来做查询
-    #　比如上传时，id(主键)是非必须的，所有通过natural_key 查询, 如果填写了id就使用id做查询
-    natural_key = ('nr', )
+    # 　比如上传时，id(主键)是非必须的，所有通过natural_key 查询, 如果填写了id就使用id做查询
+    natural_key = ('nr',)
 
     # 设置manager 这个要和get_by_natural_key一起使用!
     objects = Manager()
@@ -182,7 +182,6 @@ class Location(AuditModel, HierarchyModel):
         verbose_name = _('location')
         verbose_name_plural = _('locations')
         ordering = ['name']
-
 
 
 class Customer(AuditModel, HierarchyModel):
@@ -237,10 +236,46 @@ class Customer(AuditModel, HierarchyModel):
 
 
 class Item(AuditModel, HierarchyModel):
+    status1 = (
+        ('S0', _('S0')),
+        ('S1', _('S1')),
+        ('S2', _('S1')),
+        ('S3', _('S2')),
+        ('S4', _('S3')),
+        ('S5', _('S4')),)
+    status2 = (
+        ('A0', _('A0')),
+        ('A1', _('A1')),
+        ('A2', _('A1')),
+        ('A3', _('A2')),)
+    types = (
+        ('FG', _('FG')),
+        ('WIP', _('WIP')),
+        ('RM', _('RM')),
+    )
     # Database fields
-    description = models.CharField(_('description'), max_length=500, null=True, blank=True)
+    id = models.AutoField(_('id'), help_text=_('Unique identifier'), primary_key=True)
+    nr = models.CharField(_('nr'), max_length=300, db_index=True, unique=True)
+    name = models.CharField(_('name'), max_length=300, primary_key=False, db_index=True)
+    barcode = models.CharField(_('barcode'), max_length=300, db_index=True, null=True, blank=True)
+    type = models.CharField(_('type'), max_length=20, null=True, blank=True, choices=types)
+    status = models.CharField(_('status'), max_length=20, null=True, blank=True, choices=status1)
+    gross_weight = models.DecimalField(_('gross weight'), max_digits=20,decimal_places=8, null=True, blank=True)
+    net_weight = models.DecimalField(_('net weight'), max_digits=20,decimal_places=8, null=True, blank=True)
+    physical_unit = models.CharField(_('physical unit'), max_length=20,null=True, blank=True)
+    project_nr = models.CharField(_('project nr'), max_length=300, primary_key=False, db_index=True)
+    mpq = models.IntegerField(_('mpq'), null=True, blank=True)
+    outer_package_num = models.IntegerField(_('outer package num'), null=True, blank=True)
+    pallet_num = models.IntegerField(_('pallet num'), null=True, blank=True)
+    outer_package_gross_weight = models.DecimalField(_('outer package gross weight'), max_digits=20,decimal_places=8, null=True, blank=True)
+    pallet_gross_weight = models.DecimalField(_('pallet gross weight'), max_digits=20,decimal_places=8, null=True, blank=True)
+    outer_package_volume = models.DecimalField(_('outer package volume'), max_digits=20,decimal_places=8, null=True, blank=True)
+    pallet_volume = models.DecimalField(_('pallet volume'), max_digits=20,decimal_places=8, null=True, blank=True)
+    plan_list_date = models.DateTimeField(_('plan list date'), editable=False, db_index=True)
+    plan_delist_date = models.DateTimeField(_('plan delist date'), editable=False, db_index=True)
     category = models.CharField(_('category'), max_length=300, null=True, blank=True, db_index=True)
     subcategory = models.CharField(_('subcategory'), max_length=300, null=True, blank=True, db_index=True)
+    description = models.CharField(_('description'), max_length=500, null=True, blank=True)
     cost = models.DecimalField(
         _('cost'), null=True, blank=True,
         max_digits=20, decimal_places=8,
