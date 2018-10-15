@@ -269,6 +269,7 @@ class Item(AuditModel, HierarchyModel):
 
 
     # Database fields
+    # TODO 字段类型\长度\可空等再对一遍!
     id = models.AutoField(_('id'), help_text=_('Unique identifier'), primary_key=True)
     nr = models.CharField(_('nr'), max_length=300, db_index=True, unique=True)
     name = models.CharField(_('name'), max_length=300, primary_key=False, db_index=True)
@@ -279,6 +280,7 @@ class Item(AuditModel, HierarchyModel):
     net_weight = models.DecimalField(_('net weight'), max_digits=20,decimal_places=8, null=True, blank=True)
     physical_unit = models.CharField(_('physical unit'), max_length=20,null=True, blank=True)
     project_nr = models.CharField(_('project nr'), max_length=300, primary_key=False, db_index=True)
+    # TODO 类型改为numeric
     mpq = models.IntegerField(_('mpq'), null=True, blank=True)
     outer_package_num = models.IntegerField(_('outer package num'), null=True, blank=True)
     pallet_num = models.IntegerField(_('pallet num'), null=True, blank=True)
@@ -286,6 +288,7 @@ class Item(AuditModel, HierarchyModel):
     pallet_gross_weight = models.DecimalField(_('pallet gross weight'), max_digits=20,decimal_places=8, null=True, blank=True)
     outer_package_volume = models.DecimalField(_('outer package volume'), max_digits=20,decimal_places=8, null=True, blank=True)
     pallet_volume = models.DecimalField(_('pallet volume'), max_digits=20,decimal_places=8, null=True, blank=True)
+    # TODO 这个两个值是空的
     plan_list_date = models.DateTimeField(_('plan list date'), editable=False, db_index=True)
     plan_delist_date = models.DateTimeField(_('plan delist date'), editable=False, db_index=True)
     category = models.CharField(_('category'), max_length=300, null=True, blank=True, db_index=True)

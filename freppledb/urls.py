@@ -58,5 +58,6 @@ urlpatterns += [
   url(r'^data/', data_site.urls),
   url(r'^data/jsi18n/$', JavaScriptCatalog.as_view(packages=['django.conf', 'freppledb'])),
   url(r'^admin/jsi18n/$', JavaScriptCatalog.as_view(packages=['django.conf', 'freppledb'])),
+  # CMARK rest_framework 路由
   url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
   ]

@@ -1029,16 +1029,26 @@ class GridReport(View):
       return "%s asc" % sort
 
 
+  # CAMRK 生成JSON, FOR API and View
   @classmethod
   def _generate_json_data(reportclass, request, *args, **kwargs):
+    # CMARK page 从1 开始
     page = 'page' in request.GET and int(request.GET['page']) or 1
+    pagesize = 100
+    if request.GET and ('pagesize' in request.GET) and (int(request.GET['pagesize']) > 0):
+       pagesize = int(request.GET['pagesize'])
+
+
+    if hasattr(request, 'pagesize') and request.pagesize:
+      pagesize = request.pagesize
+
     request.prefs = request.user.getPreference(reportclass.getKey(), database=request.database)
     if isinstance(reportclass.basequeryset, collections.Callable):
       query = reportclass.filter_items(request, reportclass.basequeryset(request, *args, **kwargs), False).using(request.database)
     else:
       query = reportclass.filter_items(request, reportclass.basequeryset).using(request.database)
     recs = query.count()
-    total_pages = math.ceil(float(recs) / request.pagesize)
+    total_pages = math.ceil(float(recs) / pagesize)
     if page > total_pages:
       page = total_pages
     if page < 1:
@@ -1054,12 +1064,12 @@ class GridReport(View):
       if tmp:
         yield tmp
     yield '"rows":[\n'
-    cnt = (page - 1) * request.pagesize + 1
+    cnt = (page - 1) * pagesize
     first = True
 
     # GridReport
     fields = [ i.field_name for i in reportclass.rows if i.field_name ]
-    for i in hasattr(reportclass, 'query') and reportclass.query(request, query[cnt - 1:cnt + request.pagesize]) or query[cnt - 1:cnt + request.pagesize].values(*fields):
+    for i in hasattr(reportclass, 'query') and reportclass.query(request, query[cnt - 1:cnt + request.pagesize]) or query[cnt:cnt + pagesize].values(*fields):
       if first:
         r = [ '{' ]
         first = False
@@ -1083,6 +1093,8 @@ class GridReport(View):
           first2 = False
         elif i[f.field_name] is not None:
           r.append(', "%s":%s' % (f.name, s))
+        else:
+          r.append(', "%s":%s' % (f.name, 'null'))
       r.append('}')
       yield ''.join(r)
     yield '\n]}\n'
@@ -1143,6 +1155,9 @@ class GridReport(View):
     else:
       bucketnames = None
     fmt = request.GET.get('format', None)
+    # 为了API准备
+    if hasattr(request,'content_type') and request.content_type.lower()=='application/json':
+      fmt = 'json'
     reportkey = reportclass.getKey()
     request.prefs = request.user.getPreference(reportkey, database=request.database)
     if request.prefs:

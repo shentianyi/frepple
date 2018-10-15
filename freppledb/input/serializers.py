@@ -20,7 +20,10 @@ import freppledb.input.models
 
 from rest_framework_bulk.drf3.serializers import BulkListSerializer, BulkSerializerMixin
 from django_filters import rest_framework as filters
+from rest_framework import serializers
 from freppledb.common.api.serializers import ModelSerializer
+from freppledb.common.report import GridReport, GridFieldText, GridFieldCreateOrUpdateDate
+from django.utils.translation import ugettext_lazy as _
 
 
 class CalendarFilter(filters.FilterSet):
@@ -111,18 +114,47 @@ class LocationFilter(filters.FilterSet):
 
 
 class LocationSerializer(BulkSerializerMixin, ModelSerializer):
+    # 这个方法不好, 不适用left join, 是查询出来结果再遍历查询
+    # owner_nr = serializers.CharField(source='owner.nr')
+
     class Meta:
         model = freppledb.input.models.Location
+        # fields = ('name', 'owner', 'owner_nr', 'description', 'category', 'subcategory', 'available', 'source', 'lastmodified')
         fields = ('name', 'owner', 'description', 'category', 'subcategory', 'available', 'source', 'lastmodified')
         list_serializer_class = BulkListSerializer
-        update_lookup_field = 'name'
+        update_lookup_field = 'nr'
         partial = True
 
 
-class LocationAPI(frePPleListCreateAPIView):
-    queryset = freppledb.input.models.Location.objects.all()
-    serializer_class = LocationSerializer
-    filter_class = LocationFilter
+class LocationAPI(GridReport):
+  '''
+  A list report to show locations.
+  '''
+  basequeryset = freppledb.input.models.Location.objects.all()
+  model = freppledb.input.models.Location
+
+  rows = (
+
+    GridFieldText('id'),
+    GridFieldText('nr'),
+    GridFieldText('name'),
+    GridFieldText('area'),
+    GridFieldText('source'),
+    GridFieldText('available', field_name='available__name'),
+    GridFieldText('owner_nr', field_name='owner__nr'),
+    GridFieldText('owner_id', field_name='owner_id'),
+    GridFieldText('category'),
+    GridFieldText('subcategory'),
+    GridFieldText('description'),
+    GridFieldCreateOrUpdateDate('created_at'),
+    GridFieldCreateOrUpdateDate('updated_at'),
+  )
+
+
+# class LocationAPI(frePPleListCreateAPIView):
+#     queryset = freppledb.input.models.Location.objects.all()
+#     serializer_class = LocationSerializer
+#     filter_class = LocationFilter
 
 
 class LocationdetailAPI(frePPleRetrieveUpdateDestroyAPIView):

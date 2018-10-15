@@ -263,7 +263,7 @@ class Migration(migrations.Migration):
                 ('created_at', models.DateTimeField(db_index=True, default=django.utils.timezone.now, editable=False, verbose_name='created_at')),
                 ('updated_at', models.DateTimeField(db_index=True, default=django.utils.timezone.now, editable=False, verbose_name='updated_at')),
                 ('id', models.AutoField(help_text='Unique identifier', primary_key=True, serialize=False, verbose_name='id')),
-                ('nr', models.CharField(db_index=True, max_length=300, unique=True, verbose_name='nr')),
+                ('nr', models.CharField()),
                 ('name', models.CharField(db_index=True, max_length=300, verbose_name='name')),
                 ('area', models.CharField(db_index=True, max_length=300, verbose_name='area')),
                 ('category', models.CharField(blank=True, db_index=True, max_length=300, null=True, verbose_name='category')),

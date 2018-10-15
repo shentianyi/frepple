@@ -31,6 +31,7 @@ from django.http import HttpResponseNotFound
 from django.http.response import HttpResponseForbidden
 
 from freppledb.common.models import Scenario, User
+import base64
 
 import logging
 logger = logging.getLogger(__name__)
@@ -56,9 +57,10 @@ class LocaleMiddleware(DjangoLocaleMiddleware):
     # with this structure:
     #    Authorization: Bearer <token>  (see https://jwt.io/introduction/
     # The token must have a "user" and "exp" field in the payload.
+    # OAUTH
     webtoken = request.GET.get('webtoken', None)
+    auth_header = request.META.get('HTTP_AUTHORIZATION', None)
     if not webtoken:
-      auth_header = request.META.get('HTTP_AUTHORIZATION', None)
       if auth_header:
         try:
           auth = auth_header.split()
@@ -66,6 +68,8 @@ class LocaleMiddleware(DjangoLocaleMiddleware):
             webtoken = auth[1]
         except:
           pass
+
+
     if webtoken:
       # Decode the web token
       try:
@@ -86,6 +90,26 @@ class LocaleMiddleware(DjangoLocaleMiddleware):
       language = request.user.language
       request.theme = request.user.theme or settings.DEFAULT_THEME
       request.pagesize = request.user.pagesize or settings.DEFAULT_PAGESIZE
+    elif auth_header:
+      # CMARK basic auth
+      try:
+        auth = auth_header.split()
+        if auth[0].lower() == 'basic':
+          webtoken = auth[1]
+      except:
+        pass
+
+      if webtoken:
+        webtoken=base64.b64decode(webtoken).decode("utf-8")
+        user = User.objects.get(username=webtoken.split(':')[0])
+        if user:
+          i=1
+          language = 'auto'
+          user.set_password(webtoken.split(':')[1])
+          login(request, user)
+          request.LANGUAGE_CODE = translation.get_language()
+          request.charset = settings.DEFAULT_CHARSET
+
     elif isinstance(request.user, AnonymousUser):
       # Anonymous users don't have preferences
       language = 'auto'

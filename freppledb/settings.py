@@ -309,6 +309,7 @@ MAXTOTALLOGFILESIZE = 200
 # Port number for the CherryPy web server
 PORT = 8000
 
+# CMARK API 权限
 REST_FRAMEWORK = {
   # Use Django's standard `django.contrib.auth` permissions,
   # or allow read-only access for unauthenticated users.
