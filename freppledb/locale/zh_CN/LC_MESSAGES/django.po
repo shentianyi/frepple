@@ -33,6 +33,14 @@ msgstr "针对此场景的权限"
 msgid "Important dates"
 msgstr "重要日期"
 
+#: common/templates/admin/submit_line.html:9
+msgid "Save and add another"
+msgstr "保存并添加"
+
+#: common/templates/admin/submit_line.html:11
+msgid "Save and continue editing"
+msgstr "保存继续编辑"
+
 #: common/admin.py:44 common/admin.py:72 common/admin.py:105
 #: common/admin.py:131 common/admin.py:145 common/adminforms.py:484
 #: common/models.py:570 common/views.py:345 common/widget.py:244
@@ -46,6 +54,10 @@ msgstr "重要日期"
 #: inventoryplanning/templates/inventoryplanning/drp.html:2084
 msgid "comments"
 msgstr "评论"
+
+#： common/adminforms.py:326
+msgid "The {name} '{obj}' was added successfully."
+msgstr "{name}'{obj}'添加成功"
 
 #: common/admin.py:93
 msgid "Invalid date: expecting YYYY-MM-DD HH:MM:SS"
@@ -522,6 +534,9 @@ msgstr "保存更改"
 #: inventoryplanning/templates/inventoryplanning/drp.html:2055
 msgid "Undo"
 msgstr "撤销"
+
+msgid "Save"
+msgstr "保存"
 
 #: common/templates/admin/base_site_grid.html:185
 #: common/templates/admin/base_site_gridpivot.html:147

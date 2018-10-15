@@ -323,7 +323,7 @@ class MultiDBModelAdmin(admin.ModelAdmin):
     else:
         msg = format_html(
             # Translators: Translation included with Django
-            _('The {name} "{obj}" was added successfully.'),
+            _("The {name} '{obj}' was added successfully."),
             **msg_dict
         )
         self.message_user(request, msg, messages.SUCCESS)
@@ -422,7 +422,7 @@ class MultiDBModelAdmin(admin.ModelAdmin):
     else:
         msg = format_html(
             # Translators: Translation included with Django
-            _('The {name} "{obj}" was changed successfully.'),
+            _("The {name} '{obj}' was changed successfully."),
             **msg_dict
         )
         self.message_user(request, msg, messages.SUCCESS)
