@@ -33,6 +33,14 @@ msgstr "针对此场景的权限"
 msgid "Important dates"
 msgstr "重要日期"
 
+#: common/templates/admin/submit_line.html:9
+msgid "Save and add another"
+msgstr "保存并添加"
+
+#: common/templates/admin/submit_line.html:11
+msgid "Save and continue editing"
+msgstr "保存继续编辑"
+
 #: common/admin.py:44 common/admin.py:72 common/admin.py:105
 #: common/admin.py:131 common/admin.py:145 common/adminforms.py:484
 #: common/models.py:570 common/views.py:345 common/widget.py:244
@@ -46,6 +54,10 @@ msgstr "重要日期"
 #: inventoryplanning/templates/inventoryplanning/drp.html:2084
 msgid "comments"
 msgstr "评论"
+
+#： common/adminforms.py:326
+msgid "The {name} '{obj}' was added successfully."
+msgstr "{name}'{obj}'添加成功"
 
 #: common/admin.py:93
 msgid "Invalid date: expecting YYYY-MM-DD HH:MM:SS"
@@ -110,6 +122,58 @@ msgstr "关于frePPLe"
 msgid "Unique identifier"
 msgstr "唯一标识符"
 
+#: input/models.py:263 input/models.py:1125
+msgid "gross weight"
+msgstr "毛重"
+
+#: input/models.py:263 input/models.py:1125
+msgid "net weight"
+msgstr "净重"
+
+#: input/models.py:263 input/models.py:1125
+msgid "physical unit"
+msgstr "单位"
+
+#: input/models.py:263 input/models.py:1125
+msgid "project nr"
+msgstr "项目号"
+
+#: input/models.py:263 input/models.py:1125
+msgid "mpq"
+msgstr "最小包装数量"
+
+#: input/models.py:263 input/models.py:1125
+msgid "outer_package_num"
+msgstr "外包装数量"
+
+#: input/models.py:263 input/models.py:1125
+msgid "pallet num"
+msgstr "托盘数量"
+
+#: input/models.py:263 input/models.py:1125
+msgid "outer package gross weigh"
+msgstr "每箱毛重"
+
+#: input/models.py:263 input/models.py:1125
+msgid "pallet gross weight"
+msgstr "托盘毛重"
+
+#: input/models.py:263 input/models.py:1125
+msgid "outer package volumn"
+msgstr "外箱体积"
+
+#: input/models.py:263 input/models.py:1125
+msgid "pallet volumn"
+msgstr "托盘体积"
+
+#: input/models.py:263 input/models.py:1125
+msgid "plan list date"
+msgstr "上市计划"
+
+#: input/models.py:263 input/models.py:1125
+msgid "plan delist date"
+msgstr "退市计划"
+
 # CMARK 翻译
 msgid "id"
 msgstr "Id"
@@ -161,6 +225,10 @@ msgstr "最后的修改"
 #: output/views/resource.py:442 quoting/views.py:55
 msgid "owner"
 msgstr "拥有者"
+
+#: input/views.py:1145 input/models.py:260
+msgid "barcode"
+msgstr "条码"
 
 #: common/models.py:42 input/models.py:1112
 msgid "Hierarchical parent"
@@ -522,6 +590,9 @@ msgstr "保存更改"
 #: inventoryplanning/templates/inventoryplanning/drp.html:2055
 msgid "Undo"
 msgstr "撤销"
+
+msgid "Save"
+msgstr "保存"
 
 #: common/templates/admin/base_site_grid.html:185
 #: common/templates/admin/base_site_gridpivot.html:147
