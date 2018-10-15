@@ -1114,7 +1114,7 @@ class ItemList(GridReport):
     GridFieldText('nr', title=_('nr'), editable=False),
     GridFieldText('name', title=_('name'),editable=False, formatter='detail', extra='"role":"input/item"'),
     GridFieldText('barcode', title=_('barcode'), formatter='detail', editable=False, extra='"role":"input/item"'),
-    GridFieldText('status', title=_('status'), formatter='detail',editable=False, extra='"role":"input/item"'),
+    GridFieldText('status', field_name='item__status', title=_('status'), formatter='detail',editable=False, extra='"role":"input/item"'),
     GridFieldText('type', title=_('type'), formatter='detail', editable=False, extra='"role":"input/item"'),
     GridFieldCurrency('cost', title=_('cost')),
     GridFieldText('source', title=_('source'), hidden=True),
