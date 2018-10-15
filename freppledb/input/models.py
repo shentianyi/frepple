@@ -165,7 +165,7 @@ class Location(AuditModel, HierarchyModel):
     class Manager(MultiDBManager):
         def get_by_natural_key(self, nr):
             return self.get(nr=nr)
-    #
+
     # def natural_key(self):
     #     return (self.nr,)
 

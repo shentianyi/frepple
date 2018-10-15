@@ -336,7 +336,7 @@ def _parseData(model, data, rowmapper, user, database, ping):
       rowWrapper = rowmapper(headers)
 
       # Get natural keys for the class
-      
+
       # CMARK 判断且获取自然键
       natural_key = None
       if hasattr(model.objects, 'get_by_natural_key'):
