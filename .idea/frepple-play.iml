@@ -4,8 +4,8 @@
     <facet type="django" name="Django">
       <configuration>
         <option name="rootFolder" value="$MODULE_DIR$" />
-        <option name="settingsModule" value="settings.py" />
-        <option name="manageScript" value="manage.py" />
+        <option name="settingsModule" value="djangosettings.py" />
+        <option name="manageScript" value="frepplectl.py" />
         <option name="environment" value="&lt;map/&gt;" />
       </configuration>
     </facet>
@@ -23,7 +23,6 @@
     </option>
   </component>
   <component name="TestRunnerService">
-    <option name="projectConfiguration" value="Nosetests" />
-    <option name="PROJECT_TEST_RUNNER" value="Nosetests" />
+    <option name="PROJECT_TEST_RUNNER" value="Unittests" />
   </component>
 </module>

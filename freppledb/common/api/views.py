@@ -73,6 +73,24 @@ class frepplePermissionClass(permissions.DjangoModelPermissions):
     return super(frepplePermissionClass, self).has_permission(request, view)
 
 
+# CMARK LIST API
+#class frePPleListAPIView(generics.ListAPIView):
+# 可以同时提供 列表.创建.更新.删除 api
+class frePPleListAPIView(ListBulkCreateUpdateDestroyAPIView):
+
+  filter_backends = (filters.DjangoFilterBackend,)
+  permission_classes = (frepplePermissionClass,)
+
+
+  def get_queryset(self):
+    queryset = super().get_queryset().using(self.request.database)
+    return queryset
+
+  def get_serializer(self, *args, **kwargs):
+    kwargs['partial'] = True
+    return super().get_serializer(*args, **kwargs)
+
+
 class frePPleListCreateAPIView(ListBulkCreateUpdateDestroyAPIView):
   '''
   Customized API view for the REST framework.:

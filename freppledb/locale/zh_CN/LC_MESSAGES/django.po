@@ -122,57 +122,110 @@ msgstr "关于frePPLe"
 msgid "Unique identifier"
 msgstr "唯一标识符"
 
-#: input/models.py:263 input/models.py:1125
+#: input/models.py:263 input/views.py:1155
 msgid "gross weight"
 msgstr "毛重"
 
-#: input/models.py:263 input/models.py:1125
+#: input/models.py:263 input/views.py:1155
 msgid "net weight"
 msgstr "净重"
 
-#: input/models.py:263 input/models.py:1125
+#: input/models.py:263 input/views.py:1155
 msgid "physical unit"
 msgstr "单位"
 
-#: input/models.py:263 input/models.py:1125
+#: input/models.py:263 input/views.py:1155
 msgid "project nr"
 msgstr "项目号"
 
-#: input/models.py:263 input/models.py:1125
+#: input/models.py:263 input/views.py:1155
+#: input/models.py:976 input/views.py:916
 msgid "mpq"
 msgstr "最小包装数量"
 
-#: input/models.py:263 input/models.py:1125
-msgid "outer_package_num"
+#: input/models.py:263 input/views.py:1160
+msgid "outer package num"
 msgstr "外包装数量"
 
-#: input/models.py:263 input/models.py:1125
+#: input/models.py:263 input/views.py:1161
 msgid "pallet num"
 msgstr "托盘数量"
 
-#: input/models.py:263 input/models.py:1125
-msgid "outer package gross weigh"
+#: input/models.py:992 input/models.py:263
+#: input/views.py:932 input/views.py:1162
+msgid "outer package gross weight"
 msgstr "每箱毛重"
 
-#: input/models.py:263 input/models.py:1125
+#: input/models.py:263 input/views.py:1163
 msgid "pallet gross weight"
 msgstr "托盘毛重"
 
-#: input/models.py:263 input/models.py:1125
-msgid "outer package volumn"
+#: input/models.py:293 input/views.py:1164
+#: input/models.py:990 input/views.py:934
+msgid "outer package volume"
 msgstr "外箱体积"
 
-#: input/models.py:263 input/models.py:1125
-msgid "pallet volumn"
+#: input/models.py:263 input/views.py:1165
+#: input/models.py:991 input/views.py:935
+msgid "pallet volume"
 msgstr "托盘体积"
 
-#: input/models.py:263 input/models.py:1125
+#: input/models.py:263 input/views.py:1166
 msgid "plan list date"
 msgstr "上市计划"
 
-#: input/models.py:263 input/models.py:1125
+#: input/models.py:263 input/views.py:1167
 msgid "plan delist date"
 msgstr "退市计划"
+
+#: input/view.py:910
+msgid "item_display"
+msgstr "物料"
+
+#: input/models.py:911
+msgid "supplier_display"
+msgstr "供应商"
+
+#: input/models.py:976 input/views.py:916
+msgid "supplier item nr"
+msgstr "供应商物料编号"
+
+#: input/models.py:976 input/views.py:916
+msgid "monetary unit"
+msgstr "货币单位"
+
+#: input/models.py:976 input/views.py:916
+msgid "cost unit"
+msgstr "计价单位"
+
+#: input/models.py:976 input/views.py:916
+msgid "ratio"
+msgstr "比重"
+
+#: input/models.py:976 input/views.py:916
+msgid "MOQ"
+msgstr "最小起订量"
+
+#: input/models.py:976 input/views.py:916
+msgid "product time"
+msgstr "生产周期"
+
+#: input/models.py:976 input/views.py:916
+msgid "load time"
+msgstr "发货周期"
+
+#: input/models.py:976 input/views.py:916
+msgid "transit time"
+msgstr "运输周期"
+
+#: input/models.py:976 input/views.py:916
+msgid "receive time"
+msgstr "收货周期"
+
+#: input/models.py:976 input/views.py:916
+msgid "earliest order date"
+msgstr "最早下单时间"
+
 
 # CMARK 翻译
 msgid "id"
@@ -693,11 +746,11 @@ msgid "Only %(limit)s out of %(count)s records are shown."
 msgstr ""
 
 msgid "Login"
-msgstr "登陆"
+msgstr "登录"
 
 #: common/templates/admin/login.html:116
 msgid "Forgot your password?"
-msgstr "忘记密码吗？"
+msgstr "忘记密码"
 
 #: common/templates/admin/login.html:116
 msgid "Please correct the error below."
@@ -2910,7 +2963,7 @@ msgstr "产品供应商"
 #: output/views/operation.py:612 output/views/operation.py:618
 #: output/widget.py:1070 output/widget.py:1110
 msgid "origin"
-msgstr "转出地点"
+msgstr "原产地"
 
 #: input/models.py:901
 msgid "A minimum shipping quantity"

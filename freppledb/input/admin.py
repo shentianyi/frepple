@@ -56,7 +56,7 @@ data_site.register(CalendarBucket, CalendarBucket_admin)
 class Calendar_admin(MultiDBModelAdmin):
   model = Calendar
   save_on_top = True
-  inlines = [ CalendarBucket_inline, ]
+  # inlines = [ CalendarBucket_inline, ]
   exclude = ('source',)
   tabs = [
     {"name": 'edit', "label": _("edit"), "view": "admin:input_calendar_change", "permissions": "input.change_calendar"},
@@ -107,7 +107,8 @@ data_site.register(Customer, Customer_admin)
 class ItemSupplier_inline(MultiDBTabularInline):
   model = ItemSupplier
   fk_name = 'item'
-  raw_id_fields = ('supplier', 'location', 'resource')
+  # raw_id_fields = ('supplier', 'location', 'resource')
+  raw_id_fields = ('supplier',)
   extra = 0
   exclude = ('source',)
 
@@ -147,7 +148,7 @@ class Item_admin(MultiDBModelAdmin):
   model = Item
   save_on_top = True
   raw_id_fields = ('owner',)
-  inlines = [ ItemSupplier_inline, OperationMaterial_inline ]
+  # inlines = [ ItemSupplier_inline, OperationMaterial_inline ]
   exclude = ('source',)
   tabs = [
     {"name": 'edit', "label": _("edit"), "view": "admin:input_item_change", "permissions": "input.change_item"},
@@ -166,7 +167,8 @@ data_site.register(Item, Item_admin)
 class ItemSupplier_admin(MultiDBModelAdmin):
   model = ItemSupplier
   save_on_top = True
-  raw_id_fields = ('item', 'supplier', 'resource')
+  # raw_id_fields = ('item', 'supplier', 'resource')
+  raw_id_fields = ('item', 'supplier')
   exclude = ('source', 'id')
   tabs = [
     {"name": 'edit', "label": _("edit"), "view": "admin:input_itemsupplier_change", "permissions": "input.change_itemsupplier"},
