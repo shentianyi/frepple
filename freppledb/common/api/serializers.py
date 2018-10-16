@@ -19,8 +19,9 @@ from rest_framework.serializers import ModelSerializer as DefaultModelSerializer
 from rest_framework.validators import UniqueValidator, UniqueTogetherValidator
 from rest_framework.fields import JSONField
 from freppledb.common.fields import JSONBField
-
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.fields import empty
+import collections
 
 DefaultModelSerializer.serializer_field_mapping[JSONBField] = JSONField
 
@@ -52,6 +53,14 @@ class CustomerNumberPagination(PageNumberPagination):
         # 数据
         'results': data
       })
+
+# # CMARK 关系模型的序列化
+# class RelationModelSerializer(DefaultModelSerializer):
+#   def __init__(self, instance=None, data=empty, **kwargs):
+#     self.is_relation = kwargs.pop('is_relation',False)
+#     super(RelationModelSerializer,self).__init__(instance, data, **kwargs)
+#
+
 
 class ModelSerializer(DefaultModelSerializer):
   '''
@@ -85,11 +94,19 @@ class ModelSerializer(DefaultModelSerializer):
     for i in self.fields:
       if i == self.pk or (self.natural_key and i in self.natural_key):
         self.fields[i].required = False
+
+      # CMARK 去掉主键的唯一性验证, 为了更新
       if i == self.pk:
         self.fields[i].validators = [
           i for i in self.fields[i].validators
           if not isinstance(i, UniqueValidator)
           ]
+      # CMARK 去掉naturalkey的唯一性验证, 为了更新
+      if self.natural_key and i in self.natural_key:
+        self.fields[i].validators = [
+          i for i in self.fields[i].validators
+          if not isinstance(i, UniqueValidator)
+        ]
 
     # Strip out the uniqueness validators on natural keys.
     # We don't need them with our find-or-create feature.
@@ -100,6 +117,14 @@ class ModelSerializer(DefaultModelSerializer):
 
 
   def create(self, validated_data):
+
+    for k,v in validated_data.items():
+      m=type(k)
+      n=type(v)
+      j=1
+      # if n is collections.OrderedDict:
+
+
 
     if self.pk in validated_data or not self.natural_key:
       # Find or create based on primary key or models without primary key

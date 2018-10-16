@@ -15,7 +15,7 @@
 # License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-from freppledb.common.api.views import frePPleListCreateAPIView, frePPleRetrieveUpdateDestroyAPIView
+from freppledb.common.api.views import frePPleListAPIView, frePPleListCreateAPIView, frePPleRetrieveUpdateDestroyAPIView
 import freppledb.input.models
 
 from rest_framework_bulk.drf3.serializers import BulkListSerializer, BulkSerializerMixin
@@ -23,7 +23,6 @@ from django_filters import rest_framework as filters
 from rest_framework import serializers
 from freppledb.common.api.serializers import ModelSerializer, CustomerNumberPagination
 from django.utils.translation import ugettext_lazy as _
-from rest_framework import status, mixins, generics, viewsets
 import django_filters
 
 
@@ -118,11 +117,27 @@ class LocationFilter(filters.FilterSet):
 #                "nr": "2-code",
 #                "name": "2-name"
 #            }
-
 class LocationOwnerSerializer(serializers.ModelSerializer):
+    # CMARK 外键字段名称
+    fk = None
+
+    # def __init__(self, *args, **kwargs):
+    #     super().__init__(*args, **kwargs)
+
     class Meta:
         model = freppledb.input.models.Location
         fields = ('id', 'nr', 'name')
+        # CMARK 写入参数, 用来更新外键, 如果没有这个配置, 那么
+        extra_kwargs = {
+            'id': {
+                'read_only': False,
+                'required': False,
+            },
+            'name': {
+                'read_only': False,
+                'required': False,
+            }
+        }
 
 
 class LocationSerializer(BulkSerializerMixin, ModelSerializer):
@@ -132,13 +147,14 @@ class LocationSerializer(BulkSerializerMixin, ModelSerializer):
 
     class Meta:
         model = freppledb.input.models.Location
-        fields = ('id', 'nr', 'name', 'area', 'owner', 'description', 'category', 'subcategory', 'available', 'source', 'created_at', 'updated_at')
+        fields = ('id', 'nr', 'name', 'area', 'owner', 'description', 'category', 'subcategory',
+                  'available', 'source', 'created_at', 'updated_at')
         list_serializer_class = BulkListSerializer
         update_lookup_field = 'nr'
         partial = True
 
 # CMARK LIST API
-class LocationAPI(generics.ListAPIView):
+class LocationAPI(frePPleListCreateAPIView):
     # 基础查询
     queryset = freppledb.input.models.Location.objects.all()
     # 序列化类-定义字段相关内容
