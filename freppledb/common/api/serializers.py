@@ -122,7 +122,7 @@ class ModelSerializer(DefaultModelSerializer):
       m=type(k)
       n=type(v)
       j=1
-      if n is collections.OrderedDict:
+      # if n is collections.OrderedDict:
 
 
 
