@@ -20,10 +20,10 @@ import freppledb.input.models
 
 from rest_framework_bulk.drf3.serializers import BulkListSerializer, BulkSerializerMixin
 from django_filters import rest_framework as filters
-from rest_framework import serializers
 from freppledb.common.api.serializers import ModelSerializer, CustomerNumberPagination
 from django.utils.translation import ugettext_lazy as _
 import django_filters
+from rest_framework import serializers
 
 
 class CalendarFilter(filters.FilterSet):
@@ -117,12 +117,7 @@ class LocationFilter(filters.FilterSet):
 #                "nr": "2-code",
 #                "name": "2-name"
 #            }
-class LocationOwnerSerializer(serializers.ModelSerializer):
-    # CMARK 外键字段名称
-    fk = None
-
-    # def __init__(self, *args, **kwargs):
-    #     super().__init__(*args, **kwargs)
+class LocationOwnerSerializer(ModelSerializer):
 
     class Meta:
         model = freppledb.input.models.Location
@@ -144,13 +139,15 @@ class LocationSerializer(BulkSerializerMixin, ModelSerializer):
     # 这个方法不好, 不适用left join, 是查询出来结果再遍历查询
     # owner_nr = serializers.CharField(source='owner.nr')
     owner = LocationOwnerSerializer(many=False)
+    # id readonly=False 不可以缺少
+    id = serializers.IntegerField(read_only=False)
 
     class Meta:
         model = freppledb.input.models.Location
         fields = ('id', 'nr', 'name', 'area', 'owner', 'description', 'category', 'subcategory',
                   'available', 'source', 'created_at', 'updated_at')
         list_serializer_class = BulkListSerializer
-        update_lookup_field = 'nr'
+        update_lookup_field = 'id'
         partial = True
 
 # CMARK LIST API

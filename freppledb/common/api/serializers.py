@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU Affero General Public
 # License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
+import django
 from rest_framework.response import Response
 from rest_framework.serializers import ModelSerializer as DefaultModelSerializer
 from rest_framework.validators import UniqueValidator, UniqueTogetherValidator
@@ -22,6 +23,7 @@ from freppledb.common.fields import JSONBField
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.fields import empty
 import collections
+from rest_framework.serializers import Serializer
 
 DefaultModelSerializer.serializer_field_mapping[JSONBField] = JSONField
 
@@ -122,11 +124,56 @@ class ModelSerializer(DefaultModelSerializer):
       m=type(k)
       n=type(v)
       j=1
-      # if n is collections.OrderedDict:
+      # CMARK 处理外键
+      error_foreign_object = []
 
+      for k,v in validated_data.items():
+        if isinstance(v, collections.OrderedDict):
+          #判断是否是外键
+          for f in self.Meta.model._meta.fields:
+            if f.name == k and isinstance(f, django.db.models.fields.related.ForeignKey):
+               #找到对应的serializer
+               if (k in self.fields.fields) and isinstance(self.fields.fields[k],Serializer):
+                 foreign_model = self.fields.fields[k].Meta.model
+                 # CMARK 主键
+                 if foreign_model._meta.pk and foreign_model._meta.pk.name in v:
+                   try:
+                     foreign_object = foreign_model.objects.using(self.context['request'].database).get(pk=v[foreign_model._meta.pk.name])
+                     validated_data[k] = foreign_object
+                   except foreign_model.DoesNotExist:
+                     # 删除键, 不进行更新
+                     # del validated_data[k]
+                     error_foreign_object.append(k)
+                 else:
+                   # 自然键
+                   natural_key = None
+                   if hasattr(foreign_model.objects, 'get_by_natural_key'):
+                     if foreign_model._meta.unique_together:
+                       natural_key = foreign_model._meta.unique_together[0]
+                     elif hasattr(foreign_model, 'natural_key'):
+                       natural_key = foreign_model.natural_key
+                     else:
+                       natural_key = None
+                   else:
+                     natural_key = None
+                   if natural_key:
+                     key = []
+                     for x in self.natural_key:
+                       key.append(v.get(x, None))
+                     try:
+                       foreign_object = foreign_model.objects.get_by_natural_key(*key)
+                       validated_data[k] = foreign_object
+                     except foreign_model.DoesNotExist:
+                       # 删除键, 不进行更新
+                       # del validated_data[k]
+                       error_foreign_object.append(k)
 
+    # 删除错误的外键对象,不进行更新
+    for fk in error_foreign_object:
+      del validated_data[fk]
 
-    if self.pk in validated_data or not self.natural_key:
+    # if self.pk in validated_data or not self.natural_key:
+    if self.pk in validated_data:
       # Find or create based on primary key or models without primary key
       try:
         instance = self.Meta.model.objects.using(self.context['request'].database).get(pk=validated_data[self.pk])
