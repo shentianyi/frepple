@@ -1,0 +1,144 @@
+body {
+    background: white;
+    overflow: hidden;
+}
+
+#content-main img {
+    width: auto;
+}
+
+.errornote {
+    color: red;
+    margin-top: 20px;
+    text-align: center;
+}
+
+.errorlist {
+    color: red;
+}
+
+.input-group-addon {
+    width: 95px;
+    text-align: left;
+}
+
+.form-control {
+    padding: 20px;
+}
+
+.leftBg {
+    padding: 75px 96px;;
+    margin-left: -15px;
+    background: linear-gradient(150deg, rgba(89, 126, 247, 1) 0%, rgba(127, 212, 235, 1) 100%);
+    /*box-shadow: 2px 10px 14px 3px rgba(44, 132, 255, 1);*/
+    height: 100vh;
+}
+
+.laurusImg {
+    width: auto !important;
+    margin-top: -10px;
+}
+
+.laurus {
+    font-size: 24px;
+    color: rgba(255, 255, 255, 1);
+    margin-left: 10px;
+    font-weight: bold;
+}
+
+.leftImg {
+    position: absolute;
+    top: 50%;
+    text-align: center;
+    margin-top: -75px;
+    height: 150px;
+    left: 50%;
+    margin-left: -200px;
+}
+
+.leftFooter {
+    position: absolute;
+    bottom: 40px;
+    font-size: 18px;
+    color: #FFFFFF;
+    width: 100%;
+    left: 50%;
+    margin-left: -130px;
+}
+
+.loginForm {
+    height: calc(100vh - 200px);
+    margin-top: 200px;
+}
+
+.formInputGroup {
+    margin-top: 20px;
+}
+
+.loginIcon {
+    background: transparent;
+    border: none;
+    width: auto;
+    text-align: right;
+}
+
+.input-group {
+    width: 90%;
+    margin-top: 40px;
+}
+
+.loginInput,
+.loginInput:hover,
+.loginInput:active,
+.loginInput:focus,
+.loginInput:link {
+    width: 100%;
+    -webkit-border-radius: 0;
+    -moz-border-radius: 0;
+    border-radius: 0;
+    border: none;
+    box-shadow: 0 0 0 transparent;
+    border-bottom: 1px solid rgba(89, 126, 247, 1)
+}
+
+.header {
+    text-align: center;
+}
+
+.title {
+    color: #597EF7;
+    font-size: 24px;
+}
+
+.subtitle {
+    color: #597EF7;
+    font-size: 12px;
+}
+
+.btn-lg-primary-aps,
+.btn-lg-primary-aps:hover,
+.btn-lg-primary-aps:link,
+.btn-lg-primary-aps:focus,
+.btn-lg-primary-aps:active {
+    width: 280px;
+    height: 60px;
+    background: #597EF7;
+    /*box-shadow: 0 8px 21px 0 rgba(133, 165, 255, 1);*/
+    border-radius: 6px;
+    font-size: 24px;
+    margin-top: 33px;
+    color: white;
+}
+
+.forgetPassword {
+    text-align: right;
+    margin-bottom: 10px;
+    margin-right: 40px;
+    margin-top: 20px;
+}
+
+.logoFooter {
+    position: absolute;
+    bottom: 40px;
+    right: 200px;
+}
