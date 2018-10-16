@@ -21,10 +21,9 @@ import freppledb.input.models
 from rest_framework_bulk.drf3.serializers import BulkListSerializer, BulkSerializerMixin
 from django_filters import rest_framework as filters
 from rest_framework import serializers
-from freppledb.common.api.serializers import ModelSerializer, CustomerNumberPagination
+from freppledb.common.api.serializers import ModelSerializer
+from freppledb.common.report import GridReport, GridFieldText, GridFieldCreateOrUpdateDate
 from django.utils.translation import ugettext_lazy as _
-from rest_framework import status, mixins, generics, viewsets
-import django_filters
 
 
 class CalendarFilter(filters.FilterSet):
@@ -96,28 +95,23 @@ class CalendarBucketdetailAPI(frePPleRetrieveUpdateDestroyAPIView):
     queryset = freppledb.input.models.CalendarBucket.objects.all()
     serializer_class = CalendarBucketSerializer
 
-# CMARK begin LOCATION API-------------------------------------------------------
-# CMARK 定义过滤
-class LocationFilter(filters.FilterSet):
-    # created_at 查询 创建在一段时间内
-    # [url例子] /api/input/location/?created_at_gte=2018-1-1&created_at_lte=2019-10-1
-    created_at_gte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='gte')
-    created_at_lte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='lte')
 
+class LocationFilter(filters.FilterSet):
     class Meta:
         model = freppledb.input.models.Location
-        # owner__nr 定义为外键查询
-        # [url例子] /api/input/location/?owner__nr=l001
-        fields = (
-           'id', 'nr', 'name', 'area', 'owner', 'owner__nr', 'description', 'category', 'subcategory',
-           'available', 'source', 'created_at', 'updated_at')
+        fields = {
+            'name': ['exact', 'in', 'contains'],
+            'owner': ['exact', 'in'],
+            'description': ['exact', 'contains'],
+            'category': ['exact', 'contains'],
+            'subcategory': ['exact', 'contains'],
+            'available': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
+            'source': ['exact', 'in'],
+            'lastmodified': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
+        }
+        filter_fields = (
+            'name', 'owner', 'description', 'category', 'subcategory', 'available', 'source', 'lastmodified')
 
-# 定义外键对象的显示
-#  "owner": {
-#                "id": 6,
-#                "nr": "2-code",
-#                "name": "2-name"
-#            }
 
 class LocationOwnerSerializer(serializers.ModelSerializer):
     class Meta:
@@ -132,24 +126,56 @@ class LocationSerializer(BulkSerializerMixin, ModelSerializer):
 
     class Meta:
         model = freppledb.input.models.Location
-        fields = ('id', 'nr', 'name', 'area', 'owner', 'description', 'category', 'subcategory', 'available', 'source', 'created_at', 'updated_at')
+        # fields = ('name', 'owner', 'owner_nr', 'description', 'category', 'subcategory', 'available', 'source', 'lastmodified')
+        fields = ('id', 'nr', 'name', 'owner', 'description', 'category', 'subcategory', 'available', 'source', 'lastmodified')
         list_serializer_class = BulkListSerializer
         update_lookup_field = 'nr'
         partial = True
 
-# CMARK LIST API
-class LocationAPI(generics.ListAPIView):
+
+# class LocationAPI(GridReport):
+#   '''
+#   A list report to show locations.
+#   '''
+#   basequeryset = freppledb.input.models.Location.objects.all()
+#   model = freppledb.input.models.Location
+#
+#   rows = (
+#     GridFieldText('id'),
+#     GridFieldText('nr'),
+#     GridFieldText('name'),
+#     GridFieldText('area'),
+#     GridFieldText('source'),
+#     GridFieldText('available', field_name='available__name'),
+#     GridFieldText('owner_nr', field_name='owner__nr'),
+#     GridFieldText('owner_id', field_name='owner_id'),
+#     GridFieldText('category'),
+#     GridFieldText('subcategory'),
+#     GridFieldText('description'),
+#     GridFieldCreateOrUpdateDate('created_at'),
+#     GridFieldCreateOrUpdateDate('updated_at'),
+#   )
+
+
+class LocationAPI(frePPleListCreateAPIView):
     # 基础查询
     queryset = freppledb.input.models.Location.objects.all()
     # 序列化类-定义字段相关内容
     serializer_class = LocationSerializer
     # 过滤类-查询相关内容
     filter_class = LocationFilter
-    # 排序
-    ordering_fields =('id' )
-    # 自定义分页, 默认每页100
-    # [url例子]/api/input/location/?page=2&pagesize=10
-    pagination_class = CustomerNumberPagination
+
+# class LocationAPI(APIView):
+#     def get(self, request, *args, **kwargs):
+#         queryset = freppledb.input.models.Location.objects.all()
+#         serializer_class = LocationSerializer
+#         filter_class = LocationFilter
+#         # 创建分页对象，这里是自定义的MyPageNumberPagination
+#         pg = MyPageNumberPagination()
+#         # 对数据进行序列化
+#         ser = PagerSerialiser(instance=queryset, many=True)
+#         return Response(ser.data)
+
 
 
 class LocationdetailAPI(frePPleRetrieveUpdateDestroyAPIView):
@@ -157,13 +183,10 @@ class LocationdetailAPI(frePPleRetrieveUpdateDestroyAPIView):
     serializer_class = LocationSerializer
 
 
-# CMARK end LOCATION API-------------------------------------------------------
-
 class CustomerFilter(filters.FilterSet):
     class Meta:
         model = freppledb.input.models.Customer
         fields = {
-            'id': ['exact', 'in'],
             'name': ['exact', 'in', 'contains'],
             'owner': ['exact', 'in'],
             'description': ['exact', 'contains'],
@@ -173,7 +196,7 @@ class CustomerFilter(filters.FilterSet):
             'lastmodified': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
         }
         filter_fields = (
-           'id', 'name', 'owner', 'description', 'category', 'subcategory', 'available', 'source', 'lastmodified')
+            'name', 'owner', 'description', 'category', 'subcategory', 'available', 'source', 'lastmodified')
 
 
 class CustomerSerializer(BulkSerializerMixin, ModelSerializer):
@@ -272,10 +295,10 @@ class ItemSupplierFilter(filters.FilterSet):
     class Meta:
         model = freppledb.input.models.ItemSupplier
         fields = {'id': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ], 'item': ['exact', 'in', ],
-                  # 'location': ['exact', 'in', ], 'supplier': ['exact', 'in', ],
-                  # 'leadtime': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
-                  # 'sizeminimum': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
-                  # 'sizemultiple': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
+                  'location': ['exact', 'in', ], 'supplier': ['exact', 'in', ],
+                  'leadtime': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
+                  'sizeminimum': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
+                  'sizemultiple': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
                   'cost': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
                   'priority': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
                   'effective_start': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],

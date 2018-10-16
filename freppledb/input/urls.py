@@ -74,6 +74,8 @@ urlpatterns = [
   url(r'^data/input/buffer/$', freppledb.input.views.BufferList.as_view(), name="input_buffer_changelist"),
   url(r'^api/input/resource/$', freppledb.input.serializers.ResourceAPI.as_view()),
   url(r'^api/input/location/$', freppledb.input.serializers.LocationAPI.as_view()),
+  # url(r'^api/input/location/$', freppledb.input.api.views.LocationAPI.as_view()),
+
   url(r'^api/input/customer/$', freppledb.input.serializers.CustomerAPI.as_view()),
   url(r'^api/input/demand/$', freppledb.input.serializers.DemandAPI.as_view()),
   url(r'^api/input/item/$', freppledb.input.serializers.ItemAPI.as_view()),
