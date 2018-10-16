@@ -14,13 +14,44 @@
 # You should have received a copy of the GNU Affero General Public
 # License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-
+from rest_framework.response import Response
 from rest_framework.serializers import ModelSerializer as DefaultModelSerializer
 from rest_framework.validators import UniqueValidator, UniqueTogetherValidator
 from rest_framework.fields import JSONField
 from freppledb.common.fields import JSONBField
 
+from rest_framework.pagination import PageNumberPagination
+
 DefaultModelSerializer.serializer_field_mapping[JSONBField] = JSONField
+
+# CMARK自定义分页类
+class CustomerNumberPagination(PageNumberPagination):
+    #每页显示多少个
+    page_size = 100
+    #默认每页显示3个，可以通过传入pager1/?page=2&size=4,改变默认每页显示的个数
+    page_size_query_param = "pagesize"
+    #获取页码数的
+    page_query_param = "page"
+
+    #自定义分页返回
+    def get_paginated_response(self, data):
+      return Response({
+        # 不显示上一个/下一个链接
+        # 'links': {
+        #   'next': self.get_next_link(),
+        #   'previous': self.get_previous_link()
+        # },
+        # 当前页
+        'page': self.page.number,
+        # 每页个数
+        'pagesize': self.page.paginator.per_page,
+        # 总个数
+        'count': self.page.paginator.count,
+        # 总页数
+        'total_pages': self.page.paginator.num_pages,
+        # 数据
+        'results': data
+      })
 
 class ModelSerializer(DefaultModelSerializer):
   '''

@@ -323,7 +323,13 @@ REST_FRAMEWORK = {
   'DEFAULT_RENDERER_CLASSES': (
     'rest_framework.renderers.JSONRenderer',
     'freppledb.common.api.renderers.freppleBrowsableAPI',
-  )
+  ),
+  # 过滤
+  'DEFAULT_FILTER_BACKENDS': ('django_filters.rest_framework.DjangoFilterBackend',),
+  # 分页
+  'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+  #分页
+  "PAGE_SIZE": 100  #每页显示多少个
 }
 
 # Bootstrap

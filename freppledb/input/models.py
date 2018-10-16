@@ -181,7 +181,7 @@ class Location(AuditModel, HierarchyModel):
         db_table = 'location'
         verbose_name = _('location')
         verbose_name_plural = _('locations')
-        ordering = ['name']
+        ordering = ['id']
 
 
 class Customer(AuditModel, HierarchyModel):
