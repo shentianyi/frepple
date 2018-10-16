@@ -746,11 +746,11 @@ msgid "Only %(limit)s out of %(count)s records are shown."
 msgstr ""
 
 msgid "Login"
-msgstr "登陆"
+msgstr "登录"
 
 #: common/templates/admin/login.html:116
 msgid "Forgot your password?"
-msgstr "忘记密码吗？"
+msgstr "忘记密码"
 
 #: common/templates/admin/login.html:116
 msgid "Please correct the error below."
