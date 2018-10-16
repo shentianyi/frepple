@@ -232,7 +232,7 @@ class Customer(AuditModel, HierarchyModel):
         db_table = 'customer'
         verbose_name = _('customer')
         verbose_name_plural = _('customers')
-        ordering = ['name']
+        ordering = ['id']
 
 
 class Item(AuditModel, HierarchyModel):
@@ -255,59 +255,75 @@ class Item(AuditModel, HierarchyModel):
     )
 
     test = {('FG', _('FG')): [('S0', _('S0')),
-                    ('S1', _('S1')),
-                    ('S2', _('S1')),
-                    ('S3', _('S2')),
-                    ('S4', _('S3')),
-                    ('S5', _('S4'))],
+                              ('S1', _('S1')),
+                              ('S2', _('S1')),
+                              ('S3', _('S2')),
+                              ('S4', _('S3')),
+                              ('S5', _('S4'))],
             ('WIP', _('WIP')): [],
             ('RM', _('RM')): [
-            ('FG', _('FG')),
+                ('FG', _('FG')),
                 ('WIP', _('WIP')),
                 ('RM', _('RM'))]
-             }
-
+            }
 
     # Database fields
-    # TODO 字段类型\长度\可空等再对一遍!
+    # 设置外键显示的值
+    display_key = 'nr'
+    # 设置外键导入的值
+    foreign_input_key = 'nr'
     id = models.AutoField(_('id'), help_text=_('Unique identifier'), primary_key=True)
     nr = models.CharField(_('nr'), max_length=300, db_index=True, unique=True)
     name = models.CharField(_('name'), max_length=300, primary_key=False, db_index=True)
     barcode = models.CharField(_('barcode'), max_length=300, db_index=True, null=True, blank=True)
-    type = models.CharField(_('type'), max_length=20, null=True, blank=True, choices=test)
-    status = models.CharField(_('status'), max_length=20, null=True, blank=True, choices=())
-    gross_weight = models.DecimalField(_('gross weight'), max_digits=20,decimal_places=8, null=True, blank=True)
-    net_weight = models.DecimalField(_('net weight'), max_digits=20,decimal_places=8, null=True, blank=True)
-    physical_unit = models.CharField(_('physical unit'), max_length=20,null=True, blank=True)
-    project_nr = models.CharField(_('project nr'), max_length=300, primary_key=False, db_index=True)
-    # TODO 类型改为numeric
-    mpq = models.IntegerField(_('mpq'), null=True, blank=True)
-    outer_package_num = models.IntegerField(_('outer package num'), null=True, blank=True)
-    pallet_num = models.IntegerField(_('pallet num'), null=True, blank=True)
-    outer_package_gross_weight = models.DecimalField(_('outer package gross weight'), max_digits=20,decimal_places=8, null=True, blank=True)
-    pallet_gross_weight = models.DecimalField(_('pallet gross weight'), max_digits=20,decimal_places=8, null=True, blank=True)
-    outer_package_volume = models.DecimalField(_('outer package volume'), max_digits=20,decimal_places=8, null=True, blank=True)
-    pallet_volume = models.DecimalField(_('pallet volume'), max_digits=20,decimal_places=8, null=True, blank=True)
-    # TODO 这个两个值是空的
-    plan_list_date = models.DateTimeField(_('plan list date'), editable=False, db_index=True)
-    plan_delist_date = models.DateTimeField(_('plan delist date'), editable=False, db_index=True)
-    category = models.CharField(_('category'), max_length=300, null=True, blank=True, db_index=True)
-    subcategory = models.CharField(_('subcategory'), max_length=300, null=True, blank=True, db_index=True)
-    description = models.CharField(_('description'), max_length=500, null=True, blank=True)
+    status = models.CharField(_('status'), max_length=20, null=True, blank=True)
+    type = models.CharField(_('type'), max_length=20, null=True, blank=True, choices=types)
     cost = models.DecimalField(
         _('cost'), null=True, blank=True,
         max_digits=20, decimal_places=8,
         help_text=_("Cost of the item")
     )
+    gross_weight = models.DecimalField(_('gross weight'), max_digits=20, decimal_places=8, null=True, blank=True)
+    net_weight = models.DecimalField(_('net weight'), max_digits=20, decimal_places=8, null=True, blank=True)
+    physical_unit = models.CharField(_('physical unit'), max_length=20, null=True, blank=True)
+    project_nr = models.CharField(_('project nr'), max_length=300, primary_key=False, db_index=True, null=True,
+                                  blank=True, )
+    mpq = models.DecimalField(_('mpq'), max_digits=20, decimal_places=8, null=True, blank=True)
+    outer_package_num = models.IntegerField(_('outer package num'), null=True, blank=True)
+    pallet_num = models.IntegerField(_('pallet num'), null=True, blank=True)
+    outer_package_gross_weight = models.DecimalField(_('outer package gross weight'), max_digits=20, decimal_places=8,
+                                                     null=True, blank=True)
+    pallet_gross_weight = models.DecimalField(_('pallet gross weight'), max_digits=20, decimal_places=8, null=True,
+                                              blank=True)
+    outer_package_volume = models.DecimalField(_('outer package volume'), max_digits=20, decimal_places=8, null=True,
+                                               blank=True)
+    pallet_volume = models.DecimalField(_('pallet volume'), max_digits=20, decimal_places=8, null=True, blank=True)
+    plan_list_date = models.DateField(_('plan list date'), db_index=True, null=True, blank=True, )
+    plan_delist_date = models.DateField(_('plan delist date'), db_index=True, null=True, blank=True, )
+    category = models.CharField(_('category'), max_length=300, null=True, blank=True, db_index=True)
+    subcategory = models.CharField(_('subcategory'), max_length=300, null=True, blank=True, db_index=True)
+    description = models.CharField(_('description'), max_length=500, null=True, blank=True)
 
     def __str__(self):
-        return self.name
+        return self.nr
+
+    # CMARK 上传时,使用以下判断是否可以使用
+    class Manager(MultiDBManager):
+        def get_by_natural_key(self, nr):
+            return self.get(nr=nr)
+
+    # CMARK 定义自然key, 在创建/编辑的过程中, 可以使用这个键来做查询
+    # 　比如上传时，id(主键)是非必须的，所有通过natural_key 查询, 如果填写了id就使用id做查询
+    natural_key = ('nr',)
+
+    # 设置manager 这个要和get_by_natural_key一起使用!
+    objects = Manager()
 
     class Meta(AuditModel.Meta):
         db_table = 'item'
         verbose_name = _('item')
         verbose_name_plural = _('items')
-        ordering = ['name']
+        ordering = ['id']
 
 
 class Operation(AuditModel):
@@ -949,49 +965,52 @@ class Supplier(AuditModel, HierarchyModel):
         db_table = 'supplier'
         verbose_name = _('supplier')
         verbose_name_plural = _('suppliers')
-        ordering = ['name']
+        ordering = ['id']
 
 
 class ItemSupplier(AuditModel):
     # Database fields
+    # 设置外键显示的值
+    display_key = 'nr'
+    # 设置外键导入的值
+    foreign_input_key = 'nr'
     id = models.AutoField(_('identifier'), primary_key=True)
     item = models.ForeignKey(
         Item, verbose_name=_('item'),
         db_index=True, related_name='itemsuppliers',
         null=False, blank=False, on_delete=models.CASCADE
     )
-    location = models.ForeignKey(
-        Location, verbose_name=_('location'), null=True, blank=True,
-        db_index=True, related_name='itemsuppliers', on_delete=models.CASCADE
-    )
     supplier = models.ForeignKey(
         Supplier, verbose_name=_('supplier'),
         db_index=True, related_name='suppliers',
         null=False, blank=False, on_delete=models.CASCADE
     )
-    leadtime = models.DurationField(
-        _('lead time'), null=True, blank=True,
-        help_text=_('Purchasing lead time')
-    )
-    sizeminimum = models.DecimalField(
-        _('size minimum'), max_digits=20, decimal_places=8,
-        null=True, blank=True, default='1.0',
-        help_text=_("A minimum purchasing quantity")
-    )
-    sizemultiple = models.DecimalField(
-        _('size multiple'), null=True, blank=True,
-        max_digits=20, decimal_places=8,
-        help_text=_("A multiple purchasing quantity")
-    )
-    cost = models.DecimalField(
-        _('cost'), null=True, blank=True,
-        max_digits=20, decimal_places=8,
-        help_text=_("Purchasing cost per unit")
-    )
-    priority = models.IntegerField(
-        _('priority'), default=1, null=True, blank=True,
-        help_text=_('Priority among all alternates')
-    )
+    supplier_item_nr = models.CharField(_('supplier item nr'), max_length=300, db_index=True, null=True, blank=True)
+    status = models.CharField(_('status'), max_length=20, choices=())
+    cost = models.DecimalField(_('cost'), max_digits=20, decimal_places=8)
+    monetary_unit = models.CharField(_('monetary unit'), max_length=20)
+    cost_unit = models.DecimalField(_('cost unit'), max_digits=20, decimal_places=8)
+    priority = models.IntegerField(_('priority'), default=0, help_text=_('Priority among all alternates'))
+    ratio = models.DecimalField(_('ratio'), max_digits=20, decimal_places=8, null=True, blank=True)
+    moq = models.DecimalField(_('MOQ'), max_digits=20, decimal_places=8)
+    product_time = models.DurationField(_('product time'), null=True, blank=True)
+    load_time = models.DurationField(_('load time'), null=True, blank=True)
+    transit_time = models.DurationField(_('transit time'), null=True, blank=True)
+    receive_time = models.DurationField(_('receive time'), null=True, blank=True)
+    mpq = models.DecimalField(_('mpq'), max_digits=20, decimal_places=8, null=True, blank=True)
+    earliest_order_date = models.DateField(_('earliest order date'), null=True, blank=True)
+    outer_package_num = models.IntegerField(_('outer package num'), null=True, blank=True)
+    pallet_num = models.IntegerField(_('pallet num'), null=True, blank=True)
+    outer_package_gross_weight = models.DecimalField(_('outer package gross weight'), max_digits=20, decimal_places=8,
+                                                     null=True, blank=True)
+    pallet_gross_weight = models.DecimalField(_('pallet gross weight'), max_digits=20, decimal_places=8,
+                                                     null=True, blank=True)
+    outer_package_volume = models.DecimalField(_('outer package volume'), max_digits=20, decimal_places=8,
+                                                     null=True, blank=True)
+    pallet_volume = models.DateField(_('pallet volume'), null=True, blank=True)
+    plan_list_date = models.DateField(_('plan list date'), null=True, blank=True)
+    plan_delist_date = models.DateField(_('plan delist date'), null=True, blank=True)
+    origin = models.CharField(_('origin'), max_length=20, null=True, blank=True)
     effective_start = models.DateTimeField(
         _('effective start'), null=True, blank=True,
         help_text=_('Validity start date')
@@ -1000,40 +1019,71 @@ class ItemSupplier(AuditModel):
         _('effective end'), null=True, blank=True,
         help_text=_('Validity end date')
     )
-    resource = models.ForeignKey(
-        Resource, verbose_name=_('resource'), null=True, blank=True,
-        db_index=True, related_name='itemsuppliers', on_delete=models.CASCADE,
-        help_text=_("Resource to model the supplier capacity")
-    )
-    resource_qty = models.DecimalField(
-        _('resource quantity'), null=True, blank=True,
-        max_digits=20, decimal_places=8, default='1.0',
-        help_text=_("Resource capacity consumed per purchased unit")
-    )
-    fence = models.DurationField(
-        _('fence'), null=True, blank=True,
-        help_text=_('Frozen fence for creating new procurements')
-    )
+
+    # location = models.ForeignKey(
+    #     Location, verbose_name=_('location'), null=True, blank=True,
+    #     db_index=True, related_name='itemsuppliers', on_delete=models.CASCADE
+    # )
+    # leadtime = models.DurationField(
+    #     _('lead time'), null=True, blank=True,
+    #     help_text=_('Purchasing lead time')
+    # )
+    # sizeminimum = models.DecimalField(
+    #     _('size minimum'), max_digits=20, decimal_places=8,
+    #     null=True, blank=True, default='1.0',
+    #     help_text=_("A minimum purchasing quantity")
+    # )
+    # sizemultiple = models.DecimalField(
+    #     _('size multiple'), null=True, blank=True,
+    #     max_digits=20, decimal_places=8,
+    #     help_text=_("A multiple purchasing quantity")
+    # )
+    # cost = models.DecimalField(
+    #     _('cost'), null=True, blank=True,
+    #     max_digits=20, decimal_places=8,
+    #     help_text=_("Purchasing cost per unit")
+    # )
+    # priority = models.IntegerField(
+    #     _('priority'), default=1, null=True, blank=True,
+    #     help_text=_('Priority among all alternates')
+    # )
+    # resource = models.ForeignKey(
+    #     Resource, verbose_name=_('resource'), null=True, blank=True,
+    #     db_index=True, related_name='itemsuppliers', on_delete=models.CASCADE,
+    #     help_text=_("Resource to model the supplier capacity")
+    # )
+    # resource_qty = models.DecimalField(
+    #     _('resource quantity'), null=True, blank=True,
+    #     max_digits=20, decimal_places=8, default='1.0',
+    #     help_text=_("Resource capacity consumed per purchased unit")
+    # )
+    # fence = models.DurationField(
+    #     _('fence'), null=True, blank=True,
+    #     help_text=_('Frozen fence for creating new procurements')
+    # )
 
     class Manager(MultiDBManager):
-        def get_by_natural_key(self, item, location, supplier, effective_start):
-            return self.get(item=item, location=location, supplier=supplier, effective_start=effective_start)
+        def get_by_natural_key(self, item, supplier, effective_start):
+            # return self.get(item=item, location=location, supplier=supplier, effective_start=effective_start)
+            return self.get(item=item, supplier=supplier, effective_start=effective_start)
 
     def natural_key(self):
-        return (self.item, self.location, self.supplier, self.effective_start)
+        return (self.item, self.supplier, self.effective_start)
 
     objects = Manager()
 
     def __str__(self):
-        return '%s - %s - %s' % (
+        # return '%s - %s - %s' % (
+        return '%s - %s' % (
             self.supplier.name if self.supplier else 'No supplier',
             self.item.name if self.item else 'No item',
-            self.location.nr if self.location else 'Any location'
+            # self.location.nr if self.location else 'Any location'
         )
 
     class Meta(AuditModel.Meta):
         db_table = 'itemsupplier'
-        unique_together = (('item', 'location', 'supplier', 'effective_start'),)
+        # unique_together = (('item', 'location', 'supplier', 'effective_start'),)
+        unique_together = (('item', 'supplier', 'effective_start'),)
         verbose_name = _('item supplier')
         verbose_name_plural = _('item suppliers')
 

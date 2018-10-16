@@ -274,10 +274,10 @@ class ItemSupplierFilter(filters.FilterSet):
     class Meta:
         model = freppledb.input.models.ItemSupplier
         fields = {'id': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ], 'item': ['exact', 'in', ],
-                  'location': ['exact', 'in', ], 'supplier': ['exact', 'in', ],
-                  'leadtime': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
-                  'sizeminimum': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
-                  'sizemultiple': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
+                  # 'location': ['exact', 'in', ], 'supplier': ['exact', 'in', ],
+                  # 'leadtime': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
+                  # 'sizeminimum': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
+                  # 'sizemultiple': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
                   'cost': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
                   'priority': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
                   'effective_start': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
