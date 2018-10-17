@@ -97,19 +97,39 @@ class CalendarBucketdetailAPI(frePPleRetrieveUpdateDestroyAPIView):
 
 # CMARK begin LOCATION API-------------------------------------------------------
 # CMARK 定义过滤
+# class LocationFilter(filters.FilterSet):
+#     # created_at 查询 创建在一段时间内
+#     # [url例子] /api/input/location/?created_at_gte=2018-1-1&created_at_lte=2019-10-1
+#     created_at_gte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='gte')
+#     created_at_lte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='lte')
+#
+#     class Meta:
+#         model = freppledb.input.models.Location
+#         # owner__nr 定义为外键查询
+#         # [url例子] /api/input/location/?owner__nr=l001
+#         fields = (
+#            'id', 'nr', 'name', 'area', 'owner', 'owner__nr', 'description', 'category', 'subcategory',
+#            'available', 'source', 'created_at', 'updated_at')
+# /api/input/location/?nr__contains=nr1&created_at__gte=2018-1-1&area=china
 class LocationFilter(filters.FilterSet):
-    # created_at 查询 创建在一段时间内
-    # [url例子] /api/input/location/?created_at_gte=2018-1-1&created_at_lte=2019-10-1
-    created_at_gte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='gte')
-    created_at_lte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='lte')
+    created_at__gte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='gte')
+    created_at__lte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='lte')
 
     class Meta:
         model = freppledb.input.models.Location
-        # owner__nr 定义为外键查询
-        # [url例子] /api/input/location/?owner__nr=l001
-        fields = (
-           'id', 'nr', 'name', 'area', 'owner', 'owner__nr', 'description', 'category', 'subcategory',
-           'available', 'source', 'created_at', 'updated_at')
+        fields = {
+            'id': ['exact', 'in'],
+            'nr': ['exact', 'in', 'contains'],
+            'name': ['exact', 'in', 'contains'],
+            'area': ['exact', 'in', 'contains'],
+            'owner__nr': ['exact'],
+            'available': ['exact'],
+            'category': ['exact', 'contains'],
+            'subcategory': ['exact', 'contains'],
+        }
+        filter_fields = (
+           'id', 'nr', 'name', 'area', 'owner__nr', 'category', 'subcategory', 'available', 'created_at', 'updated_at')
+
 
 # 定义外键对象的显示
 #  "owner": {
@@ -165,6 +185,7 @@ class LocationAPI(frePPleListCreateAPIView):
     pagination_class = CustomerNumberPagination
 
 
+# CMARK 根据主键操作
 class LocationdetailAPI(frePPleRetrieveUpdateDestroyAPIView):
     queryset = freppledb.input.models.Location.objects.all()
     serializer_class = LocationSerializer
