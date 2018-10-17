@@ -196,7 +196,7 @@ class LocationdetailAPI(frePPleRetrieveUpdateDestroyAPIView):
     queryset = freppledb.input.models.Location.objects.all()
     serializer_class = LocationSerializer
 
-# CMARL 根据自然键查询/删除
+# CMARK 根据自然键查询/删除
 # TODO　多个自然键不支持
 class LocationdetailNkAPI(frePPleRetrieveUpdateDestroyAPIView):
     # natural key 自然键
