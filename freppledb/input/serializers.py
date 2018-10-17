@@ -27,20 +27,29 @@ from rest_framework import serializers
 
 
 class CalendarFilter(filters.FilterSet):
+    created_at__gte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='gte')
+    created_at__lte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='lte')
+
     class Meta:
         model = freppledb.input.models.Calendar
-        fields = {'name': ['exact', 'in', 'contains', ], 'description': ['exact', 'contains', ],
-                  'category': ['exact', 'contains', ], 'subcategory': ['exact', 'contains', ],
-                  'defaultvalue': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ], 'source': ['exact', 'in', ],
-                  'lastmodified': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ], }
-        filter_fields = ('name', 'description', 'category', 'subcategory', 'defaultvalue', 'source', 'lastmodified')
+        fields = {'name': ['exact', 'in', 'contains', ],
+                  'description': ['exact', 'contains', ],
+                  'category': ['exact', 'contains', ],
+                  'subcategory': ['exact', 'contains', ],
+                  'defaultvalue': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
+                  'source': ['exact', 'in', ],
+                  }
+        filter_fields = (
+        'name', 'description', 'category', 'subcategory', 'defaultvalue', 'source', 'created_at', 'updated_at')
 
 
 class CalendarSerializer(BulkSerializerMixin, ModelSerializer):
     name = serializers.CharField(read_only=False)
+
     class Meta:
         model = freppledb.input.models.Calendar
         # fields = ('name', 'description', 'category', 'subcategory', 'defaultvalue', 'source', 'lastmodified')
+        # fields该序列化器包含模型类中的哪些字段，'__all__'为包含所有字段
         fields = '__all__'
         list_serializer_class = BulkListSerializer
         update_lookup_field = 'name'
@@ -52,7 +61,6 @@ class CalendarAPI(frePPleListCreateAPIView):
     serializer_class = CalendarSerializer
     filter_class = CalendarFilter
     ordering_fields = ('id')
-    pagination_class = CustomerNumberPagination
 
 
 class CalendardetailAPI(frePPleRetrieveUpdateDestroyAPIView):
@@ -61,27 +69,29 @@ class CalendardetailAPI(frePPleRetrieveUpdateDestroyAPIView):
 
 
 class CalendarBucketFilter(filters.FilterSet):
+    created_at__gte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='gte')
+    created_at__lte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='lte')
+
     class Meta:
         model = freppledb.input.models.CalendarBucket
-        fields = {'id': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ], 'calendar': ['exact', 'in', ],
+        fields = {'id': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
+                  'calendar': ['exact', 'in', ],
                   'value': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
                   'priority': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
                   'startdate': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
                   'enddate': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
-                  'monday': ['exact', ], 'tuesday': ['exact', ], 'wednesday': ['exact', ], 'thursday': ['exact', ],
-                  'friday': ['exact', ], 'saturday': ['exact', ], 'sunday': ['exact', ],
-                  'starttime': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
-                  'endtime': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ], 'source': ['exact', 'in', ],
-                  'lastmodified': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ]}
+                  'endtime': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
+                  'source': ['exact', 'in', ],
+                  }
 
-        filter_fields = ('name', 'description', 'category', 'subcategory', 'defaultvalue', 'source', 'lastmodified')
+        filter_fields = (
+        'id', 'calendar', 'value', 'priority','source', 'enddate', 'endtime', 'created_at', 'updated_at')
 
 
 class CalendarBucketSerializer(BulkSerializerMixin, ModelSerializer):
     class Meta:
         model = freppledb.input.models.CalendarBucket
-        fields = ('id', 'calendar', 'startdate', 'enddate', 'value', 'priority', 'monday', 'tuesday', 'wednesday',
-                  'thursday', 'friday', 'saturday', 'sunday', 'starttime', 'endtime', 'source', 'lastmodified')
+        fields = '__all__'
         list_serializer_class = BulkListSerializer
         update_lookup_field = 'id'
         partial = True
@@ -89,10 +99,12 @@ class CalendarBucketSerializer(BulkSerializerMixin, ModelSerializer):
 
 class CalendarBucketAPI(frePPleListCreateAPIView):
     queryset = freppledb.input.models.CalendarBucket.objects.all()
-    fields = ('id', 'calendar', 'startdate', 'enddate', 'value', 'priority', 'monday', 'tuesday', 'wednesday',
-              'thursday', 'friday', 'saturday', 'sunday', 'starttime', 'endtime', 'source', 'lastmodified')
+    # fields = ('id', 'calendar', 'startdate', 'enddate', 'value', 'priority', 'monday', 'tuesday', 'wednesday',
+    #           'thursday', 'friday', 'saturday', 'sunday', 'starttime', 'endtime', 'source', 'lastmodified')
+
     serializer_class = CalendarBucketSerializer
     filter_class = CalendarBucketFilter
+    ordering_fields = ('id')
 
 
 class CalendarBucketdetailAPI(frePPleRetrieveUpdateDestroyAPIView):
@@ -134,7 +146,7 @@ class LocationFilter(filters.FilterSet):
             'subcategory': ['exact', 'contains'],
         }
         filter_fields = (
-           'id', 'nr', 'name', 'area', 'owner__nr', 'category', 'subcategory', 'available', 'created_at', 'updated_at')
+            'id', 'nr', 'name', 'area', 'owner__nr', 'category', 'subcategory', 'available', 'created_at', 'updated_at')
 
 
 # 定义外键对象的显示
@@ -190,7 +202,6 @@ class LocationAPI(frePPleListCreateAPIView):
     # [url例子]/api/input/location/?page=2&pagesize=10
 
 
-
 # CMARK 根据主键操作
 class LocationdetailAPI(frePPleRetrieveUpdateDestroyAPIView):
     queryset = freppledb.input.models.Location.objects.all()
@@ -200,28 +211,56 @@ class LocationdetailAPI(frePPleRetrieveUpdateDestroyAPIView):
 # CMARK end LOCATION API-------------------------------------------------------
 
 class CustomerFilter(filters.FilterSet):
+    created_at__gte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='gte')
+    created_at__lte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='lte')
+
     class Meta:
         model = freppledb.input.models.Customer
         fields = {
             'id': ['exact', 'in'],
+            'nr': ['exact', 'in', 'contains'],
             'name': ['exact', 'in', 'contains'],
-            'owner': ['exact', 'in'],
+            'area': ['exact', 'in', 'contains'],
+            'owner__nr': ['exact'],
+            'available': ['exact'],
             'description': ['exact', 'contains'],
             'category': ['exact', 'contains'],
             'subcategory': ['exact', 'contains'],
             'source': ['exact', 'in'],
-            'lastmodified': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
         }
         filter_fields = (
-            'id', 'name', 'owner', 'description', 'category', 'subcategory', 'available', 'source', 'lastmodified')
+            'id', 'nr', 'name', 'area', 'owner__nr', 'available', 'description', 'category', 'subcategory', 'source',
+            'created_at', 'updated_at')
+
+
+class CustomerOwnerSerializer(ModelSerializer):
+    class Meta:
+        model = freppledb.input.models.Customer
+        fields = ('id', 'nr', 'name')
+        # CMARK 写入参数, 用来更新外键, 如果没有这个配置, 那么
+        extra_kwargs = {
+            'id': {
+                'read_only': False,
+                'required': False,
+            },
+            'name': {
+                'read_only': False,
+                'required': False,
+            }
+        }
 
 
 class CustomerSerializer(BulkSerializerMixin, ModelSerializer):
+    owner = CustomerOwnerSerializer(many=False)
+    # id readonly=False 不可以缺少
+    id = serializers.IntegerField(read_only=False)
+
     class Meta:
         model = freppledb.input.models.Customer
-        fields = ('name', 'owner', 'description', 'category', 'subcategory', 'source', 'lastmodified')
+        # fields = ('name', 'owner', 'description', 'category', 'subcategory', 'source', 'lastmodified')
+        fields = '__all__'
         list_serializer_class = BulkListSerializer
-        update_lookup_field = 'name'
+        update_lookup_field = 'id'
         partial = True
 
 
@@ -229,6 +268,7 @@ class CustomerAPI(frePPleListCreateAPIView):
     queryset = freppledb.input.models.Customer.objects.all()
     serializer_class = CustomerSerializer
     filter_class = CustomerFilter
+    ordering_fields = ('id')
 
 
 class CustomerdetailAPI(frePPleRetrieveUpdateDestroyAPIView):
@@ -237,25 +277,47 @@ class CustomerdetailAPI(frePPleRetrieveUpdateDestroyAPIView):
 
 
 class ItemFilter(filters.FilterSet):
+    created_at__gte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='gte')
+    created_at__lte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='lte')
+
     class Meta:
         model = freppledb.input.models.Item
         fields = {
+            'id': ['exact', 'in'],
+            'nr': ['exact', 'in', 'contains'],
             'name': ['exact', 'in', 'contains'],
-            'owner': ['exact', 'in'],
+            'owner__nr': ['exact'],
+            'project_nr': ['exact'],
             'description': ['exact', 'contains'],
             'category': ['exact', 'contains'],
             'subcategory': ['exact', 'contains'],
             'cost': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
             'source': ['exact', 'in'],
-            'lastmodified': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
         }
         filter_fields = (
-            'id', 'nr', 'name', 'cost', 'source', 'owner', 'owner__nr',
-            'project_nr', 'description', 'category', 'subcategory', 'lastmodified', 'created_at', 'updated_at')
+            'id', 'nr', 'name', 'cost', 'owner__nr', 'source',
+            'project_nr', 'description', 'category', 'subcategory', 'created_at', 'updated_at')
+
+
+class ItemOwnerSerializer(ModelSerializer):
+    class Meta:
+        model = freppledb.input.models.Item
+        fields = ('id', 'nr', 'name')
+        # CMARK 写入参数, 用来更新外键, 如果没有这个配置, 那么
+        extra_kwargs = {
+            'id': {
+                'read_only': False,
+                'required': False,
+            },
+            'name': {
+                'read_only': False,
+                'required': False,
+            }
+        }
 
 
 class ItemSerializer(BulkSerializerMixin, ModelSerializer):
-    owner = LocationOwnerSerializer(many=False)
+    owner = ItemOwnerSerializer(many=False)
     # id readonly=False 不可以缺少
     id = serializers.IntegerField(read_only=False)
 
@@ -285,33 +347,58 @@ class ItemdetailAPI(frePPleRetrieveUpdateDestroyAPIView):
 
 # CMARK begin supplier API-----------------------------------------
 class SupplierFilter(filters.FilterSet):
+    created_at__gte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='gte')
+    created_at__lte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='lte')
+
     class Meta:
         model = freppledb.input.models.Supplier
         fields = {
+            'id': ['exact', 'in'],
+            'nr': ['exact', 'in', 'contains'],
             'name': ['exact', 'in', 'contains'],
-            'owner': ['exact', 'in'],
+            'area': ['exact', 'contains'],
+            'address': ['exact', 'contains'],
+            'ship_address': ['exact', 'contains'],
+            'owner__nr': ['exact'],
+            'available': ['exact'],
             'description': ['exact', 'contains'],
             'category': ['exact', 'contains'],
             'subcategory': ['exact', 'contains'],
             'source': ['exact', 'in'],
-            'lastmodified': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
         }
         filter_fields = (
-            'id', 'nr', 'name', 'area', 'address', 'ship_address', 'source', 'available', 'owner', 'owner__nr',
-            'category',
-            'subcategory', 'description', 'created_at', 'updated_at', 'lastmodified')
+            'id', 'nr', 'name', 'area', 'address', 'ship_address', 'source', 'available', 'owner__nr',
+            'category', 'subcategory', 'description', 'created_at', 'updated_at')
+
+
+class SupplierOwnerSerializer(ModelSerializer):
+    class Meta:
+        model = freppledb.input.models.Supplier
+        fields = ('id', 'nr', 'name')
+        # CMARK 写入参数, 用来更新外键, 如果没有这个配置, 那么
+        extra_kwargs = {
+            'id': {
+                'read_only': False,
+                'required': False,
+            },
+            'name': {
+                'read_only': False,
+                'required': False,
+            }
+        }
 
 
 class SupplierSerializer(BulkSerializerMixin, ModelSerializer):
-    owner = LocationOwnerSerializer(many=False)
+    owner = SupplierOwnerSerializer(many=False)
     id = serializers.IntegerField(read_only=False)
 
     class Meta:
         model = freppledb.input.models.Supplier
         # fields = ('name', 'owner', 'description', 'category', 'subcategory', 'source', 'lastmodified')
-        filter_fields = (
-            'id', 'nr', 'name', 'area', 'address', 'ship_address', 'source', 'available', 'owner', 'category',
-            'subcategory', 'description', 'created_at', 'updated_at', 'lastmodified')
+        # filter_fields = (
+        #     'id', 'nr', 'name', 'area', 'address', 'ship_address', 'source', 'available', 'owner', 'category',
+        #     'subcategory', 'description', 'created_at', 'updated_at', 'lastmodified')
+        fields = '__all__'
         list_serializer_class = BulkListSerializer
         update_lookup_field = 'id'
         partial = True
@@ -320,15 +407,12 @@ class SupplierSerializer(BulkSerializerMixin, ModelSerializer):
 class SupplierAPI(frePPleListCreateAPIView):
     queryset = freppledb.input.models.Supplier.objects.all()
     serializer_class = SupplierSerializer
-    filter_fields = (
-        'id', 'nr', 'name', 'area', 'address', 'ship_address', 'source', 'available', 'owner', 'category',
-        'subcategory', 'description', 'created_at', 'updated_at', 'lastmodified')
+    # filter_fields = (
+    #     'id', 'nr', 'name', 'area', 'address', 'ship_address', 'source', 'available', 'owner', 'category',
+    #     'subcategory', 'description', 'created_at', 'updated_at', 'lastmodified')
     filter_class = SupplierFilter
     ordering_fields = ('id')
     pagination_class = CustomerNumberPagination
-
-
-# CMARK end Supplier API-------------------------------------------------------
 
 
 class SupplierdetailAPI(frePPleRetrieveUpdateDestroyAPIView):
@@ -336,29 +420,42 @@ class SupplierdetailAPI(frePPleRetrieveUpdateDestroyAPIView):
     serializer_class = SupplierSerializer
 
 
+# CMARK end Supplier API-------------------------------------------------------
+
 class ItemSupplierFilter(filters.FilterSet):
+    created_at__gte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='gte')
+    created_at__lte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='lte')
+
     class Meta:
         model = freppledb.input.models.ItemSupplier
-        fields = {'id': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ], 'item': ['exact', 'in', ],
-                  # 'location': ['exact', 'in', ], 'supplier': ['exact', 'in', ],
-                  # 'leadtime': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
-                  # 'sizeminimum': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
-                  # 'sizemultiple': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
+        fields = {'id': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
+                  'item__nr': ['exact', 'in', ],
+                  'supplier__nr': ['exact', 'in'],
+                  'status': ['exact', 'in'],
                   'cost': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
+                  'monetary_unit': ['exact', 'in'],
+                  'cost_unit': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
                   'priority': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
+                  'moq': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
                   'effective_start': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
                   'effective_end': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
-                  'source': ['exact', 'in', ], 'lastmodified': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ], }
-
-        filter_fields = ('id', 'item', 'location', 'supplier', 'leadtime', 'sizeminimum', 'sizemultiple',
-                         'cost', 'priority', 'effective_start', 'effective_end', 'source', 'lastmodified')
+                  'source': ['exact', 'in', ], }
+        filter_fields = (
+        'id', 'item__nr', 'supplier__nr', 'status', 'cost', 'monetary_unit', 'cost_unit', 'priority', 'moq',
+        'effective_start', 'effective_end', 'source', 'created_at', 'updated_at')
 
 
 class ItemSupplierSerializer(BulkSerializerMixin, ModelSerializer):
+    item = ItemOwnerSerializer(many=False)
+    supplier = SupplierOwnerSerializer(many=False)
+    # id readonly=False 不可以缺少
+    id = serializers.IntegerField(read_only=False)
+
     class Meta:
         model = freppledb.input.models.ItemSupplier
-        fields = ('id', 'item', 'location', 'supplier', 'leadtime', 'sizeminimum', 'sizemultiple',
-                  'cost', 'priority', 'effective_start', 'effective_end', 'source', 'lastmodified')
+        # fields = ('id', 'item', 'location', 'supplier', 'leadtime', 'sizeminimum', 'sizemultiple',
+        #           'cost', 'priority', 'effective_start', 'effective_end', 'source', 'lastmodified')
+        fields = '__all__'
         list_serializer_class = BulkListSerializer
         update_lookup_field = 'id'
         partial = True
@@ -368,6 +465,7 @@ class ItemSupplierAPI(frePPleListCreateAPIView):
     queryset = freppledb.input.models.ItemSupplier.objects.all()
     serializer_class = ItemSupplierSerializer
     filter_class = ItemSupplierFilter
+    ordering_fields = ('id')
 
 
 class ItemSupplierdetailAPI(frePPleRetrieveUpdateDestroyAPIView):

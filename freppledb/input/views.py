@@ -906,7 +906,7 @@ class CustomerList(GridReport):
         GridFieldText('category', title=_('category'), initially_hidden=True, editable=False),
         GridFieldText('subcategory', title=_('subcategory'), initially_hidden=True, editable=False),
         GridFieldText('description', title=_('description'), editable=False),
-        GridFieldLastModified('lastmodified', title=_('lastmodified'), editable=False),
+        # GridFieldLastModified('lastmodified', title=_('lastmodified'), editable=False),
         GridFieldCreateOrUpdateDate('created_at', title=_('created_at')),
         GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at')),
     )
@@ -940,7 +940,7 @@ class SupplierList(GridReport):
         # GridFieldLastModified('lastmodified', title=_('lastmodified'), editable=False),
         GridFieldCreateOrUpdateDate('created_at', title=_('created_at')),
         GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at')),
-        GridFieldLastModified('lastmodified', title=_('lastmodified')),
+        # GridFieldLastModified('lastmodified', title=_('lastmodified')),
     )
 
 
@@ -992,7 +992,7 @@ class ItemSupplierList(GridReport):
         GridFieldText('origin', title=_('origin'), editable=False),
         GridFieldDateTime('effective_start', title=_('effective start'), editable=False),
         GridFieldDateTime('effective_end', title=_('effective end'), editable=False),
-        GridFieldLastModified('lastmodified', title=_('last modified'), editable=False),
+        # GridFieldLastModified('lastmodified', title=_('last modified'), editable=False),
         GridFieldCreateOrUpdateDate('created_at', title=_('created_at'), editable=False),
         GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at'), editable=False),
 
@@ -1229,7 +1229,7 @@ class ItemList(GridReport):
         GridFieldText('category', title=_('category'), editable=False, initially_hidden=True),
         GridFieldText('subcategory', title=_('subcategory'), editable=False, initially_hidden=True),
         GridFieldText('description', title=_('description'), editable=False),
-        GridFieldLastModified('lastmodified', title=_('last modified')),
+        # GridFieldLastModified('lastmodified', title=_('last modified')),
         GridFieldCreateOrUpdateDate('created_at', title=_('created_at')),
         GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at')),
     )
@@ -1598,7 +1598,7 @@ class CalendarList(GridReport):
         GridFieldText('subcategory', title=_('subcategory'), initially_hidden=True),
         GridFieldNumber('defaultvalue', title=_('default value')),
         GridFieldText('source', title=_('source')),
-        GridFieldLastModified('lastmodified', title=_('lastmodified')),
+        # GridFieldLastModified('lastmodified', title=_('lastmodified')),
         GridFieldCreateOrUpdateDate('created_at', title=_('created_at')),
         GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at')),
     )
@@ -1640,7 +1640,7 @@ class CalendarBucketList(GridReport):
         GridFieldTime('starttime', title=_('start time')),
         GridFieldTime('endtime', title=_('end time')),
         GridFieldText('source', title=_('source')),  # Not really right, since the engine doesn't read or store it
-        GridFieldLastModified('lastmodified', title=_('lastmodified')),
+        # GridFieldLastModified('lastmodified', title=_('lastmodified')),
         GridFieldCreateOrUpdateDate('created_at', title=_('created_at')),
         GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at')),
     )
