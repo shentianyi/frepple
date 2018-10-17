@@ -138,12 +138,12 @@ class Location(AuditModel, HierarchyModel):
     name = models.CharField(_('name'), max_length=300, primary_key=False, db_index=True)
 
     # 地区
-    area = models.CharField(_('area'), max_length=300, db_index=True)
+    area = models.CharField(_('area'), max_length=300, db_index=True, )
 
     available = models.ForeignKey(
         Calendar, verbose_name=_('available'),
         null=True, blank=True, on_delete=models.CASCADE,
-        help_text=_('Calendar defining the working hours and holidays')
+        help_text=_('Calendar defining the working hours and holidays'),
     )
 
     category = models.CharField(

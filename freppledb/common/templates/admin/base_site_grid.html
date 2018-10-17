@@ -28,9 +28,10 @@ $(function() {
 	  datatype: "json",
 	  jsonReader : {repeatitems:false},
     colModel:[{{colmodel|safe}}],
+    rownumbers: true,
    	rowNum: {{request.pagesize}},
    	autoencode: false,{% if is_popup %}
-    onSelectRow: grid.setSelectedRow,{% elif reportclass.editable and haschangeperm %}
+    onSelectRow: grid.setSelectedRow, {% elif reportclass.editable and haschangeperm %}
     cellEdit: true,
     cellsubmit: 'clientArray',
     editurl: location.pathname,
@@ -85,7 +86,8 @@ $(function() {
       }
       else
         $('#curfilter').html("{{_('Error retrieving report data')|escapejs}}" + ":&nbsp;" + xhr.status + "&nbsp;" + xhr.statusText);
-    },{% if reportclass.editable and reportclass.multiselect and not is_popup and hasaddperm %}
+    },
+    {% if reportclass.editable and reportclass.multiselect and not is_popup and hasaddperm %}
     multiselect: true,
     multiboxonly: true,
     noCellSelection: true,
@@ -107,24 +109,24 @@ $(function() {
         if (!e.shiftKey) {
             return true;
         } else if (startId) {
-			
+
         	startRow = rows.namedItem(startId);
             endRow = rows.namedItem(rowid);
             rowidIndex = endRow.rowIndex;
         	var selRowIds = $this.jqGrid("getGridParam", "selarrrow");
         	iStart = startRow.rowIndex;
             iEnd = endRow.rowIndex;
-                
+
             if (iStart == iEnd) {
             	if ($.inArray(rows[iStart].id, selRowIds) >= 0) {
         			$this.jqGrid('setSelection', rows[iStart].id, false);
         		}
             }
-                
-            for (i = Math.min(iStart, iEnd); i <= Math.max(iStart, iEnd); i++) {                   
+
+            for (i = Math.min(iStart, iEnd); i <= Math.max(iStart, iEnd); i++) {
                 if (i != rowidIndex) {
              	if ($.inArray(rows[i].id, selRowIds) < 0) {
-                 	$this.jqGrid('setSelection', rows[i].id, false);                    
+                 	$this.jqGrid('setSelection', rows[i].id, false);
                  }
                 }
             	else {
@@ -228,17 +230,69 @@ $(function() {
 {% endblock save_undo_buttons %}
 </div>
 
-<div id="toolicons" class="col-xs-4 hor-align-right ver-align-middle pull-right">{% block actions %}
-{% if reportclass.filterable %}
-<button class="btn btn-xs btn-primary" id="filter" onclick="grid.showFilter()" data-toggle="tooltip" data-placement="top" data-original-title="{% trans 'filter data'|capfirst|force_escape %}" ><span class="fa fa-search"></span></button>{% endif %}
-{% if hasaddperm %}<button class="btn btn-xs btn-primary" onclick="location.href='{{request.prefix}}/data/{{model|app_label}}/{{model|object_name|lower}}/add/{% if is_popup %}?_popup=1{% endif %}'" data-toggle="tooltip" data-placement="top" data-original-title="{% trans "Create new object"|escape %}" ><span class="fa fa-plus"></span></button>
-{% if not is_popup %}<button class="btn btn-xs btn-primary"  disabled id="copy_selected" onclick="grid.showCopy()" data-toggle="tooltip" data-placement="top" data-original-title="{% trans 'Copy selected objects'|escape %}" ><span class="fa fa-copy"></span></button>
-{% endif %}{% endif %}{% if hasdeleteperm and not is_popup %}<button class="btn btn-xs btn-primary" id="delete_selected" disabled data-toggle="tooltip" data-placement="top" data-original-title="{% trans 'Delete selected objects'|escape %}" onclick="grid.showDelete()" ><span class="fa fa-minus"></span></button>
-{% endif %}{% if reportclass.hasTimeBuckets %}<button class="btn btn-xs btn-primary" onclick="grid.showBucket()" data-toggle="tooltip" data-placement="top" data-original-title="{% trans 'Configure time buckets'|escape %}" id="bucketconfig"><span class="fa fa-clock-o"></span></button>
-{% endif %}{% if hasaddperm %}<button class="btn btn-xs btn-primary" id="csvimport" data-toggle="tooltip" data-placement="top" data-original-title="{% trans 'import CSV or Excel file'|capfirst|force_escape %}" onclick="import_show()"><span class="fa fa-arrow-up"></span></button>
-{% endif %}<button class="btn btn-xs btn-primary" onclick="grid.showExport(true)" data-toggle="tooltip" data-placement="top" data-original-title="{% trans 'export as CSV or Excel file'|capfirst|force_escape %}"><span class="fa fa-arrow-down"></span></button>
-<button class="btn btn-xs btn-primary" onclick="grid.showCustomize(false);" data-toggle="tooltip" data-placement="top" data-original-title="{% trans 'customize'|capfirst|force_escape %}"><span class="fa fa-wrench"></span></button>{% endblock %}
-{% if reportclass.help_url %}<button class="btn btn-xs btn-primary" onclick="window.open('https://frepple.com/docs/{% version_short %}/{{reportclass.help_url}}');" data-toggle="tooltip" data-placement="top" data-original-title="{% trans 'help'|capfirst|force_escape %}"><span class="fa fa-question"></span></button>{% endif %}
+<div id="toolicons" class="col-xs-4 hor-align-right ver-align-middle pull-right">
+    {% block actions %}
+    {% if reportclass.filterable %}
+    <button class="btn btn-xs btn-primary" id="filter" onclick="grid.showFilter()" data-toggle="tooltip"
+            data-placement="top" data-original-title="{% trans 'filter data'|capfirst|force_escape %}"><span
+            class="fa fa-search"></span></button>
+    {% endif %}
+
+    <!--新建按钮-->
+    {% if hasaddperm %}
+        <button class="btn btn-xs btn-primary"
+                onclick="location.href='{{request.prefix}}/data/{{model|app_label}}/{{model|object_name|lower}}/add/{% if is_popup %}?_popup=1{% endif %}'"
+                data-toggle="tooltip" data-placement="top"
+                data-original-title="{% trans 'Create new object'|escape %}" ><span class="fa fa-plus"></span></button>
+
+    <!--{% if not is_popup %}
+        <button class="btn btn-xs btn-primary"  disabled id="copy_selected" onclick="grid.showCopy()" data-toggle="tooltip" data-placement="top" data-original-title="{% trans 'Copy selected objects'|escape %}" ><span class="fa fa-copy"></span></button>-->
+    <!--{% endif %}-->
+    {% endif %}
+
+    <!--编辑按钮-->
+    {% if not is_popup %}
+        <button class="btn btn-xs btn-primary" id="edit_selected" disabled data-toggle="tooltip" data-placement="top"
+            data-original-title="{% trans 'Edit selected objects'|escape %}" onclick="grid.showEdit()"><span
+            class="fa fa-pencil"></span></button>
+    {% endif %}
+
+    <!--删除按钮-->
+    {% if hasdeleteperm and not is_popup %}
+    <button class="btn btn-xs btn-primary" id="delete_selected" disabled data-toggle="tooltip" data-placement="top"
+            data-original-title="{% trans 'Delete selected objects'|escape %}" onclick="grid.showDelete()"><span
+            class="fa fa-minus"></span></button>
+    {% endif %}
+
+    <!--堆叠-->
+    {% if reportclass.hasTimeBuckets %}
+    <button class="btn btn-xs btn-primary" onclick="grid.showBucket()" data-toggle="tooltip" data-placement="top"
+            data-original-title="{% trans 'Configure time buckets'|escape %}" id="bucketconfig"><span
+            class="fa fa-clock-o"></span></button>
+    {% endif %}
+
+    <!--导入按钮-->
+    {% if hasaddperm %}
+    <button class="btn btn-xs btn-primary" id="csvimport" data-toggle="tooltip" data-placement="top"
+            data-original-title="{% trans 'import CSV or Excel file'|capfirst|force_escape %}"
+            onclick="import_show()"><span class="fa fa-arrow-up"></span></button>
+    {% endif %}
+
+    <!--导出按钮-->
+    <button class="btn btn-xs btn-primary" onclick="grid.showExport(true)" data-toggle="tooltip"
+            data-placement="top"
+            data-original-title="{% trans 'export as CSV or Excel file'|capfirst|force_escape %}"><span
+            class="fa fa-arrow-down"></span></button>
+
+    <!--自定义表头-->
+    <button class="btn btn-xs btn-primary" onclick="grid.showCustomize(false);" data-toggle="tooltip"
+            data-placement="top" data-original-title="{% trans 'customize'|capfirst|force_escape %}"><span
+            class="fa fa-wrench"></span></button>
+    {% endblock %}
+
+    <!--{% if reportclass.help_url %}-->
+    <!--<button class="btn btn-xs btn-primary" onclick="window.open('https://frepple.com/docs/{% version_short %}/{{reportclass.help_url}}');" data-toggle="tooltip" data-placement="top" data-original-title="{% trans 'help'|capfirst|force_escape %}"><span class="fa fa-question"></span></button>-->
+    <!--{% endif %}-->
 </div>
 
 </div>

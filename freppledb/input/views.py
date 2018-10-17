@@ -877,6 +877,9 @@ class LocationList(GridReport):
         # GridFieldLastModified('lastmodified'),
         GridFieldCreateOrUpdateDate('created_at', title=_('created_at')),
         GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at')),
+
+        GridFieldText('_pk', field_name='id', editable=False, hidden=True),
+        GridFieldText('_nk', field_name='nr', editable=False, hidden=True),
     )
 
 
