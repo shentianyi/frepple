@@ -112,6 +112,7 @@ class CalendarBucketdetailAPI(frePPleRetrieveUpdateDestroyAPIView):
 #            'available', 'source', 'created_at', 'updated_at')
 # /api/input/location/?nr__contains=nr1&created_at__gte=2018-1-1&area=china
 class LocationFilter(filters.FilterSet):
+    # 时间使用这个方式,不然会发生类型错误
     created_at__gte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='gte')
     created_at__lte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='lte')
 
