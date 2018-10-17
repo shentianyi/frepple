@@ -25,6 +25,7 @@ from rest_framework_bulk import ListBulkCreateUpdateDestroyAPIView
 from rest_framework import filters
 from rest_framework import permissions
 
+from freppledb.common.api.serializers import CustomerNumberPagination
 from freppledb.common.models import User
 from freppledb.common.auth import getWebserviceAuthorization
 
@@ -100,7 +101,7 @@ class frePPleListCreateAPIView(ListBulkCreateUpdateDestroyAPIView):
 
   filter_backends = (filters.DjangoFilterBackend,)
   permission_classes = (frepplePermissionClass,)
-
+  pagination_class = CustomerNumberPagination
 
   def get_queryset(self):
     queryset = super().get_queryset().using(self.request.database)
@@ -133,3 +134,29 @@ class frePPleRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView)
       return super().get_queryset()
     else:
       return super().get_queryset().using(self.request.database)
+
+  def get(self, request, *args, **kwargs):
+    self.change_pk_nk(request, *args, **kwargs)
+    return super().retrieve(request, *args, **kwargs)
+
+  def put(self, request, *args, **kwargs):
+    self.change_pk_nk(request, *args, **kwargs)
+    return super().update(request, *args, **kwargs)
+
+  def patch(self, request, *args, **kwargs):
+    self.change_pk_nk(request, *args, **kwargs)
+    return super().partial_update(request, *args, **kwargs)
+
+  def delete(self, request, *args, **kwargs):
+    self.change_pk_nk(request, *args, **kwargs)
+    return super().destroy(request, *args, **kwargs)
+
+  # 修改主外键
+  def change_pk_nk(self, request, *args, **kwargs):
+    if hasattr(self, 'lookup_field'):
+       nk= getattr(self, 'lookup_field', None)
+       if 'nk' in kwargs:
+         v = kwargs['nk']
+         kwargs[nk]=v
+         kwargs.pop('nk')
+         self.kwargs = kwargs

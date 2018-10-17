@@ -259,7 +259,7 @@ msgid "address"
 msgstr "地址"
 
 msgid "lastmodified"
-msgstr "最后的修改"
+msgstr "最后的修改时间"
 
 
 #: common/models.py:41 input/models.py:1111 input/views.py:721
@@ -328,7 +328,7 @@ msgstr "源"
 #: output/views/resource.py:368 output/views/resource.py:451
 #: planningboard/models.py:27
 msgid "last modified"
-msgstr "最后的修改"
+msgstr "最后的修改时间"
 
 #: common/models.py:243 common/report.py:1431 common/report.py:1529
 #: common/report.py:2432 common/views.py:333
@@ -3698,7 +3698,7 @@ msgstr ""
 
 #: inventoryplanning/templates/inventoryplanning/drp.html:1799
 msgid "Last Modified"
-msgstr "最后的修改"
+msgstr "最后的修改时间"
 
 #: inventoryplanning/templates/inventoryplanning/drp.html:1996
 #: inventoryplanning/templates/inventoryplanning/drp.html:2003
