@@ -25,6 +25,7 @@ from rest_framework_bulk import ListBulkCreateUpdateDestroyAPIView
 from rest_framework import filters
 from rest_framework import permissions
 
+from freppledb.common.api.serializers import CustomerNumberPagination
 from freppledb.common.models import User
 from freppledb.common.auth import getWebserviceAuthorization
 
@@ -100,7 +101,7 @@ class frePPleListCreateAPIView(ListBulkCreateUpdateDestroyAPIView):
 
   filter_backends = (filters.DjangoFilterBackend,)
   permission_classes = (frepplePermissionClass,)
-
+  pagination_class = CustomerNumberPagination
 
   def get_queryset(self):
     queryset = super().get_queryset().using(self.request.database)

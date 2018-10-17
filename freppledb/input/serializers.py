@@ -37,9 +37,11 @@ class CalendarFilter(filters.FilterSet):
 
 
 class CalendarSerializer(BulkSerializerMixin, ModelSerializer):
+    name = serializers.CharField(read_only=False)
     class Meta:
         model = freppledb.input.models.Calendar
-        fields = ('name', 'description', 'category', 'subcategory', 'defaultvalue', 'source', 'lastmodified')
+        # fields = ('name', 'description', 'category', 'subcategory', 'defaultvalue', 'source', 'lastmodified')
+        fields = '__all__'
         list_serializer_class = BulkListSerializer
         update_lookup_field = 'name'
         partial = True
@@ -49,6 +51,8 @@ class CalendarAPI(frePPleListCreateAPIView):
     queryset = freppledb.input.models.Calendar.objects.all()
     serializer_class = CalendarSerializer
     filter_class = CalendarFilter
+    ordering_fields = ('id')
+    pagination_class = CustomerNumberPagination
 
 
 class CalendardetailAPI(frePPleRetrieveUpdateDestroyAPIView):
@@ -95,6 +99,7 @@ class CalendarBucketdetailAPI(frePPleRetrieveUpdateDestroyAPIView):
     queryset = freppledb.input.models.CalendarBucket.objects.all()
     serializer_class = CalendarBucketSerializer
 
+
 # CMARK begin LOCATION API-------------------------------------------------------
 # CMARK 定义过滤
 # class LocationFilter(filters.FilterSet):
@@ -139,7 +144,6 @@ class LocationFilter(filters.FilterSet):
 #                "name": "2-name"
 #            }
 class LocationOwnerSerializer(ModelSerializer):
-
     class Meta:
         model = freppledb.input.models.Location
         fields = ('id', 'nr', 'name')
@@ -171,6 +175,7 @@ class LocationSerializer(BulkSerializerMixin, ModelSerializer):
         update_lookup_field = 'id'
         partial = True
 
+
 # CMARK LIST API
 class LocationAPI(frePPleListCreateAPIView):
     # 基础查询
@@ -180,10 +185,10 @@ class LocationAPI(frePPleListCreateAPIView):
     # 过滤类-查询相关内容
     filter_class = LocationFilter
     # 排序
-    ordering_fields =('id' )
+    ordering_fields = ('id')
     # 自定义分页, 默认每页100
     # [url例子]/api/input/location/?page=2&pagesize=10
-    pagination_class = CustomerNumberPagination
+
 
 
 # CMARK 根据主键操作
@@ -216,7 +221,7 @@ class CustomerFilter(filters.FilterSet):
             'lastmodified': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
         }
         filter_fields = (
-           'id', 'name', 'owner', 'description', 'category', 'subcategory', 'available', 'source', 'lastmodified')
+            'id', 'name', 'owner', 'description', 'category', 'subcategory', 'available', 'source', 'lastmodified')
 
 
 class CustomerSerializer(BulkSerializerMixin, ModelSerializer):
@@ -252,15 +257,23 @@ class ItemFilter(filters.FilterSet):
             'source': ['exact', 'in'],
             'lastmodified': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
         }
-        filter_fields = ('name', 'owner', 'description', 'category', 'subcategory', 'cost', 'source', 'lastmodified')
+        filter_fields = (
+            'id', 'nr', 'name', 'cost', 'source', 'owner', 'owner__nr',
+            'project_nr', 'description', 'category', 'subcategory', 'lastmodified', 'created_at', 'updated_at')
 
 
 class ItemSerializer(BulkSerializerMixin, ModelSerializer):
+    owner = LocationOwnerSerializer(many=False)
+    # id readonly=False 不可以缺少
+    id = serializers.IntegerField(read_only=False)
+
     class Meta:
         model = freppledb.input.models.Item
-        fields = ('name', 'owner', 'description', 'category', 'subcategory', 'cost', 'source', 'lastmodified')
+        # fields来明确字段，__all__表名包含所有字段
+        fields = '__all__'
+        # fields = ('name', 'owner', 'description', 'category', 'subcategory', 'cost', 'source', 'lastmodified')
         list_serializer_class = BulkListSerializer
-        update_lookup_field = 'name'
+        update_lookup_field = 'id'
         partial = True
 
 
@@ -268,6 +281,9 @@ class ItemAPI(frePPleListCreateAPIView):
     queryset = freppledb.input.models.Item.objects.all()
     serializer_class = ItemSerializer
     filter_class = ItemFilter
+    # 排序
+    ordering_fields = ('id')
+    pagination_class = CustomerNumberPagination
 
 
 class ItemdetailAPI(frePPleRetrieveUpdateDestroyAPIView):
@@ -275,6 +291,7 @@ class ItemdetailAPI(frePPleRetrieveUpdateDestroyAPIView):
     serializer_class = ItemSerializer
 
 
+# CMARK begin supplier API-----------------------------------------
 class SupplierFilter(filters.FilterSet):
     class Meta:
         model = freppledb.input.models.Supplier
@@ -287,23 +304,39 @@ class SupplierFilter(filters.FilterSet):
             'source': ['exact', 'in'],
             'lastmodified': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
         }
-        filter_fields = ('name', 'description', 'category', 'subcategory', 'available', 'source', 'lastmodified')
+        filter_fields = (
+            'id', 'nr', 'name', 'area', 'address', 'ship_address', 'source', 'available', 'owner', 'owner__nr',
+            'category',
+            'subcategory', 'description', 'created_at', 'updated_at', 'lastmodified')
 
 
 class SupplierSerializer(BulkSerializerMixin, ModelSerializer):
+    owner = LocationOwnerSerializer(many=False)
+    id = serializers.IntegerField(read_only=False)
+
     class Meta:
         model = freppledb.input.models.Supplier
-        fields = ('name', 'owner', 'description', 'category', 'subcategory', 'source', 'lastmodified')
+        # fields = ('name', 'owner', 'description', 'category', 'subcategory', 'source', 'lastmodified')
+        filter_fields = (
+            'id', 'nr', 'name', 'area', 'address', 'ship_address', 'source', 'available', 'owner', 'category',
+            'subcategory', 'description', 'created_at', 'updated_at', 'lastmodified')
         list_serializer_class = BulkListSerializer
-        update_lookup_field = 'name'
+        update_lookup_field = 'id'
         partial = True
 
 
 class SupplierAPI(frePPleListCreateAPIView):
     queryset = freppledb.input.models.Supplier.objects.all()
     serializer_class = SupplierSerializer
-    filter_fields = ('name', 'owner', 'description', 'category', 'subcategory', 'source', 'lastmodified')
+    filter_fields = (
+        'id', 'nr', 'name', 'area', 'address', 'ship_address', 'source', 'available', 'owner', 'category',
+        'subcategory', 'description', 'created_at', 'updated_at', 'lastmodified')
     filter_class = SupplierFilter
+    ordering_fields = ('id')
+    pagination_class = CustomerNumberPagination
+
+
+# CMARK end Supplier API-------------------------------------------------------
 
 
 class SupplierdetailAPI(frePPleRetrieveUpdateDestroyAPIView):
