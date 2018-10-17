@@ -877,7 +877,15 @@ class LocationList(GridReport):
         # GridFieldLastModified('lastmodified'),
         GridFieldCreateOrUpdateDate('created_at', title=_('created_at')),
         GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at')),
+
+        GridFieldText('_pk', field_name='id', editable=False, hidden=True),
+        GridFieldText('_nk', field_name='nr', editable=False, hidden=True),
+
         # GridFieldLastModified('lastmodified', title=_('lastmodified'), editable=False),
+
+        # CMARK 必须有为了弹框查询
+        GridFieldText('_pk', field_name='id', editable=False, hidden=True),
+        GridFieldText('_nk', field_name='nr', editable=False, hidden=True),
     )
 
 
@@ -909,6 +917,10 @@ class CustomerList(GridReport):
         # GridFieldLastModified('lastmodified', title=_('lastmodified'), editable=False),
         GridFieldCreateOrUpdateDate('created_at', title=_('created_at')),
         GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at')),
+
+        # CMARK 必须有为了弹框查询
+        GridFieldText('_pk', field_name='id', editable=False, hidden=True),
+        GridFieldText('_nk', field_name='nr', editable=False, hidden=True),
     )
 
 
@@ -940,7 +952,11 @@ class SupplierList(GridReport):
         # GridFieldLastModified('lastmodified', title=_('lastmodified'), editable=False),
         GridFieldCreateOrUpdateDate('created_at', title=_('created_at')),
         GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at')),
-        # GridFieldLastModified('lastmodified', title=_('lastmodified')),
+        GridFieldLastModified('lastmodified', title=_('lastmodified')),
+
+        # CMARK 必须有为了弹框查询
+        GridFieldText('_pk', field_name='id', editable=False, hidden=True),
+        GridFieldText('_nk', field_name='nr', editable=False, hidden=True),
     )
 
 
@@ -1601,6 +1617,10 @@ class CalendarList(GridReport):
         # GridFieldLastModified('lastmodified', title=_('lastmodified')),
         GridFieldCreateOrUpdateDate('created_at', title=_('created_at')),
         GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at')),
+
+        # CMARK 必须有为了弹框查询
+        GridFieldText('_pk', field_name='name', editable=False, hidden=True),
+        GridFieldText('_nk', field_name='name', editable=False, hidden=True),
     )
 
 

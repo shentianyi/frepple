@@ -134,3 +134,29 @@ class frePPleRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView)
       return super().get_queryset()
     else:
       return super().get_queryset().using(self.request.database)
+
+  def get(self, request, *args, **kwargs):
+    self.change_pk_nk(request, *args, **kwargs)
+    return super().retrieve(request, *args, **kwargs)
+
+  def put(self, request, *args, **kwargs):
+    self.change_pk_nk(request, *args, **kwargs)
+    return super().update(request, *args, **kwargs)
+
+  def patch(self, request, *args, **kwargs):
+    self.change_pk_nk(request, *args, **kwargs)
+    return super().partial_update(request, *args, **kwargs)
+
+  def delete(self, request, *args, **kwargs):
+    self.change_pk_nk(request, *args, **kwargs)
+    return super().destroy(request, *args, **kwargs)
+
+  # 修改主外键
+  def change_pk_nk(self, request, *args, **kwargs):
+    if hasattr(self, 'lookup_field'):
+       nk= getattr(self, 'lookup_field', None)
+       if 'nk' in kwargs:
+         v = kwargs['nk']
+         kwargs[nk]=v
+         kwargs.pop('nk')
+         self.kwargs = kwargs

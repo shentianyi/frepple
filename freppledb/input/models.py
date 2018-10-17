@@ -143,7 +143,7 @@ class Location(AuditModel, HierarchyModel):
     available = models.ForeignKey(
         Calendar, verbose_name=_('available'),
         null=True, blank=True, on_delete=models.CASCADE,
-        help_text=_('Calendar defining the working hours and holidays')
+        help_text=_('Calendar defining the working hours and holidays'),
     )
 
     category = models.CharField(
