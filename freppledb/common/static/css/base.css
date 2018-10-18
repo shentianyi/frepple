@@ -63,3 +63,72 @@
     color: white;
     border-color: #85A5FF;
 }
+
+/* 保存， 保存并添加，保存继续编辑*/
+.submit-area {
+    margin: 20px;
+    padding: 20px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 1);
+    box-shadow: 0 1px 6px 0 #D8D8D8;
+}
+
+.submit-alert-error {
+    margin: 20px 5px 5px 5px;
+    padding: 15px;
+    border: 1px solid transparent;
+    border-radius: 0;
+}
+
+.submit-alert-error > button.close {
+    right: 0;
+}
+
+.input-field {
+    min-height: 55px;
+}
+
+.input-field-label {
+    margin-top: 5px;
+}
+
+.input-field-label > label {
+    font-size: 14px;
+    color: #666666;
+    margin-left: -15px;
+}
+
+.input-field-input {
+    padding-left: 0;
+}
+
+.input-field-input > input {
+    border-color: #999999;
+}
+
+#content-main input[type=number] {
+    max-width: 100%;
+}
+
+.input-required {
+    margin-right: 15px;
+    width: 6px;
+    height: 6px;
+    margin-top: 5px;
+    background: red;
+    border-radius: 50%;
+    cursor: help;
+}
+
+.related-widget-wrapper {
+    width: 100%;
+}
+
+/*修改日历样式*/
+p.datetime {
+    display: flex;
+}
+
+p.datetime span {
+    margin-top: 5px;
+}

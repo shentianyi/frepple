@@ -1,0 +1,28 @@
+/*保存按钮*/
+
+.btn-aps,
+.btn-aps:active:hover,
+.btn-aps:active:focus,
+.btn-aps:active:link,
+.btn-aps:active:visited {
+    border-radius: 4px;
+    min-width: 60px;
+    height: 26px;
+    line-height: 13px;
+    box-shadow: none;
+    outline: none;
+}
+
+.btn-aps-save,
+.btn-aps-save:hover,
+.btn-aps-save:focus,
+.btn-aps-save:link,
+.btn-aps-save:visited,
+.btn-aps-save:active:hover,
+.btn-aps-save:active:focus,
+.btn-aps-save:active:link,
+.btn-aps-save:active:visited {
+    background-color: #597EF7;
+    border-color: #597EF7;
+    outline: none;
+}
