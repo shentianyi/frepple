@@ -164,18 +164,21 @@ class LocationOwnerSerializer(ModelSerializer):
             'id': {
                 'read_only': False,
                 'required': False,
+                'allow_null': True
             },
             'name': {
                 'read_only': False,
                 'required': False,
-            }
+                'allow_null': True
+            },
+            'nr': {'allow_null': True}
         }
 
 
 class LocationSerializer(BulkSerializerMixin, ModelSerializer):
     # 这个方法不好, 不适用left join, 是查询出来结果再遍历查询
     # owner_nr = serializers.CharField(source='owner.nr')
-    owner = LocationOwnerSerializer(many=False)
+    owner = LocationOwnerSerializer(many=False, allow_null=True)
     # id readonly=False 不可以缺少
     id = serializers.IntegerField(read_only=False)
 
@@ -250,16 +253,19 @@ class CustomerOwnerSerializer(ModelSerializer):
             'id': {
                 'read_only': False,
                 'required': False,
+                'allow_null': True
             },
             'name': {
                 'read_only': False,
                 'required': False,
-            }
+                'allow_null': True
+             },
+            'nr':{'allow_null': True}
         }
 
 
 class CustomerSerializer(BulkSerializerMixin, ModelSerializer):
-    owner = CustomerOwnerSerializer(many=False)
+    owner = CustomerOwnerSerializer(many=False, required=False, allow_null=True)
     # id readonly=False 不可以缺少
     id = serializers.IntegerField(read_only=False)
 
@@ -316,16 +322,19 @@ class ItemOwnerSerializer(ModelSerializer):
             'id': {
                 'read_only': False,
                 'required': False,
+                'allow_null': True
             },
             'name': {
                 'read_only': False,
                 'required': False,
-            }
+                'allow_null': True
+            },
+            'nr':{'allow_null':True}
         }
 
 
 class ItemSerializer(BulkSerializerMixin, ModelSerializer):
-    owner = ItemOwnerSerializer(many=False)
+    owner = ItemOwnerSerializer(many=False, allow_null=True)
     # id readonly=False 不可以缺少
     id = serializers.IntegerField(read_only=False)
 
@@ -388,16 +397,19 @@ class SupplierOwnerSerializer(ModelSerializer):
             'id': {
                 'read_only': False,
                 'required': False,
+                'allow_null': True
             },
             'name': {
                 'read_only': False,
                 'required': False,
-            }
+                'allow_null':True
+            },
+            'nr':{'allow_null': True}
         }
 
 
 class SupplierSerializer(BulkSerializerMixin, ModelSerializer):
-    owner = SupplierOwnerSerializer(many=False)
+    owner = SupplierOwnerSerializer(many=False, allow_null=True)
     id = serializers.IntegerField(read_only=False)
 
     class Meta:
@@ -454,8 +466,8 @@ class ItemSupplierFilter(filters.FilterSet):
 
 
 class ItemSupplierSerializer(BulkSerializerMixin, ModelSerializer):
-    item = ItemOwnerSerializer(many=False)
-    supplier = SupplierOwnerSerializer(many=False)
+    item = ItemOwnerSerializer(many=False, allow_null=True)
+    supplier = SupplierOwnerSerializer(many=False, allow_null=True)
     # id readonly=False 不可以缺少
     id = serializers.IntegerField(read_only=False)
 
