@@ -36,6 +36,11 @@ class Calendar(AuditModel):
     # Database fields
     # . Translators: Translation included with Django
     name = models.CharField(_('name'), max_length=300, primary_key=True)
+    defaultvalue = models.DecimalField(
+        _('default value'), max_digits=20,
+        decimal_places=8, default='0.00', null=True, blank=True,
+        help_text=_('Value to be used when no entry is effective')
+    )
     description = models.CharField(
         _('description'), max_length=500, null=True,
         blank=True
@@ -47,11 +52,6 @@ class Calendar(AuditModel):
     subcategory = models.CharField(
         _('subcategory'), max_length=300,
         null=True, blank=True, db_index=True
-    )
-    defaultvalue = models.DecimalField(
-        _('default value'), max_digits=20,
-        decimal_places=8, default='0.00', null=True, blank=True,
-        help_text=_('Value to be used when no entry is effective')
     )
 
     def __str__(self):
@@ -74,8 +74,8 @@ class CalendarBucket(AuditModel):
         Calendar, verbose_name=_('calendar'), related_name='buckets',
         on_delete=models.CASCADE
     )
-    startdate = models.DateTimeField(_('start date'), null=True, blank=True)
-    enddate = models.DateTimeField(_('end date'), null=True, blank=True, default=datetime(2030, 12, 31))
+    startdate = models.DateField(_('start date'), null=True, blank=True)
+    enddate = models.DateField(_('end date'), null=True, blank=True, default=datetime(2030, 12, 31))
     value = models.DecimalField(
         _('value'), default='0.00', blank=True,
         max_digits=20, decimal_places=8
@@ -969,6 +969,11 @@ class Supplier(AuditModel, HierarchyModel):
 
 
 class ItemSupplier(AuditModel):
+    status1 = (
+        ('A0', _('A0')),
+        ('A1', _('A1')),
+        ('A2', _('A1')),
+        ('A3', _('A2')),)
     # Database fields
     # 设置外键显示的值
     display_key = 'nr'
@@ -986,17 +991,17 @@ class ItemSupplier(AuditModel):
         null=False, blank=False, on_delete=models.CASCADE
     )
     supplier_item_nr = models.CharField(_('supplier item nr'), max_length=300, db_index=True, null=True, blank=True)
-    status = models.CharField(_('status'), max_length=20, choices=())
+    status = models.CharField(_('status'), max_length=20, choices=status1)
     cost = models.DecimalField(_('cost'), max_digits=20, decimal_places=8)
     monetary_unit = models.CharField(_('monetary unit'), max_length=20)
     cost_unit = models.DecimalField(_('cost unit'), max_digits=20, decimal_places=8)
     priority = models.IntegerField(_('priority'), default=0, help_text=_('Priority among all alternates'))
     ratio = models.DecimalField(_('ratio'), max_digits=20, decimal_places=8, null=True, blank=True)
     moq = models.DecimalField(_('MOQ'), max_digits=20, decimal_places=8)
-    product_time = models.DurationField(_('product time'), null=True, blank=True)
-    load_time = models.DurationField(_('load time'), null=True, blank=True)
-    transit_time = models.DurationField(_('transit time'), null=True, blank=True)
-    receive_time = models.DurationField(_('receive time'), null=True, blank=True)
+    product_time = models.DecimalField(_('product time'), max_digits=20, decimal_places=8,null=True, blank=True)
+    load_time = models.DecimalField(_('load time'), null=True, max_digits=20, decimal_places=8,blank=True)
+    transit_time = models.DecimalField(_('transit time'), max_digits=20, decimal_places=8,null=True, blank=True)
+    receive_time = models.DecimalField(_('receive time'), max_digits=20, decimal_places=8,null=True, blank=True)
     mpq = models.DecimalField(_('mpq'), max_digits=20, decimal_places=8, null=True, blank=True)
     earliest_order_date = models.DateField(_('earliest order date'), null=True, blank=True)
     outer_package_num = models.IntegerField(_('outer package num'), null=True, blank=True)

@@ -12,6 +12,7 @@ openpyxl == 2.4.11
 lxml == 3.7.3
 PyJWT == 1.5.2
 requests == 2.18.4
+psycopg2 == 2.7.5
 
 #frepple 这个源其实就是django的,版本是1.11.5 比较旧
 #https://github.com/frePPLe/django/tarball/frepple_4.3
