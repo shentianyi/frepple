@@ -36,7 +36,7 @@ class CalendarBucket_inline(MultiDBTabularInline):
 
 class CalendarBucket_admin(MultiDBModelAdmin):
   model = CalendarBucket
-  # raw_id_fields = ('calendar',)
+  raw_id_fields = ('calendar',)
   save_on_top = True
   fieldsets = (
     (None, {'fields': ('calendar', ('startdate', 'enddate'), 'value', 'priority')}),

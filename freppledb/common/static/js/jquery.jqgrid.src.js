@@ -5948,6 +5948,10 @@
 				});
 			grid.bDiv = document.createElement("div");
 			if (isMSIE) { if (String(p.height).toLowerCase() === "auto") { p.height = "100%"; } }
+
+			console.log(".sdfsdsdfdsf")
+			console.log(p.height)
+
 			$(grid.bDiv)
 				.append($("<div style='position:relative;'></div>").append("<div></div>").append(ts))
 				.addClass("ui-jqgrid-bdiv")

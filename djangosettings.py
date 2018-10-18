@@ -57,14 +57,14 @@ DATABASES = {
 
   'default': {
     'ENGINE': 'django.db.backends.postgresql',
-    'NAME': 'frepple',
+    'NAME': 'frepple_dev',
     'USER': 'postgres',     # Role name when using md5 authentication.
                            # Leave as an empty string when using peer or
                            # ident authencation.
-    'PASSWORD': 'postgres', # Role password when using md5 authentication.
+    'PASSWORD': '123456@', # Role password when using md5 authentication.
                            # Leave as an empty string when using peer or
                            # ident authencation.
-    'HOST': '127.0.0.1',            # When using TCP sockets specify the hostname,
+    'HOST': '121.199.48.53',            # When using TCP sockets specify the hostname,
                            # the ip4 address or the ip6 address here.
                            # Leave as an empty string to use Unix domain
                            # socket ("local" lines in pg_hba.conf).
@@ -386,14 +386,14 @@ MAXTOTALLOGFILESIZE = 200
 # If the list contains only a single value, the preferences screen will not
 # display users an option to choose the theme.
 THEMES = [
-  'earth', 'grass', 'lemon', 'odoo', 'openbravo', 'orange', 'snow', 'strawberry', 'water'
+  'earth', 'grass', 'lemon', 'odoo', 'openbravo', 'orange', 'snow', 'strawberry', 'water', 'laura'
   ]
 
 # A default user-group to which new users are automatically added
 DEFAULT_USER_GROUP = None
 
 # The default user interface theme
-DEFAULT_THEME = 'earth'
+DEFAULT_THEME = 'laura'
 
 # The default number of records to pull from the server as a page
 DEFAULT_PAGESIZE = 100

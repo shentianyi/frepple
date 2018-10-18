@@ -36,6 +36,11 @@ class Calendar(AuditModel):
     # Database fields
     # . Translators: Translation included with Django
     name = models.CharField(_('name'), max_length=300, primary_key=True)
+    defaultvalue = models.DecimalField(
+        _('default value'), max_digits=20,
+        decimal_places=8, default='0.00', null=True, blank=True,
+        help_text=_('Value to be used when no entry is effective')
+    )
     description = models.CharField(
         _('description'), max_length=500, null=True,
         blank=True
@@ -47,11 +52,6 @@ class Calendar(AuditModel):
     subcategory = models.CharField(
         _('subcategory'), max_length=300,
         null=True, blank=True, db_index=True
-    )
-    defaultvalue = models.DecimalField(
-        _('default value'), max_digits=20,
-        decimal_places=8, default='0.00', null=True, blank=True,
-        help_text=_('Value to be used when no entry is effective')
     )
 
     def __str__(self):
@@ -143,7 +143,7 @@ class Location(AuditModel, HierarchyModel):
     available = models.ForeignKey(
         Calendar, verbose_name=_('available'),
         null=True, blank=True, on_delete=models.CASCADE,
-        help_text=_('Calendar defining the working hours and holidays')
+        help_text=_('Calendar defining the working hours and holidays'),
     )
 
     category = models.CharField(
@@ -969,6 +969,11 @@ class Supplier(AuditModel, HierarchyModel):
 
 
 class ItemSupplier(AuditModel):
+    status1 = (
+        ('A0', _('A0')),
+        ('A1', _('A1')),
+        ('A2', _('A1')),
+        ('A3', _('A2')),)
     # Database fields
     # 设置外键显示的值
     display_key = 'nr'
@@ -986,7 +991,7 @@ class ItemSupplier(AuditModel):
         null=False, blank=False, on_delete=models.CASCADE
     )
     supplier_item_nr = models.CharField(_('supplier item nr'), max_length=300, db_index=True, null=True, blank=True)
-    status = models.CharField(_('status'), max_length=20, choices=())
+    status = models.CharField(_('status'), max_length=20, choices=status1)
     cost = models.DecimalField(_('cost'), max_digits=20, decimal_places=8)
     monetary_unit = models.CharField(_('monetary unit'), max_length=20)
     cost_unit = models.DecimalField(_('cost unit'), max_digits=20, decimal_places=8)
