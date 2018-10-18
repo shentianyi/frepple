@@ -74,8 +74,8 @@ class CalendarBucket(AuditModel):
         Calendar, verbose_name=_('calendar'), related_name='buckets',
         on_delete=models.CASCADE
     )
-    startdate = models.DateTimeField(_('start date'), null=True, blank=True)
-    enddate = models.DateTimeField(_('end date'), null=True, blank=True, default=datetime(2030, 12, 31))
+    startdate = models.DateField(_('start date'), null=True, blank=True)
+    enddate = models.DateField(_('end date'), null=True, blank=True, default=datetime(2030, 12, 31))
     value = models.DecimalField(
         _('value'), default='0.00', blank=True,
         max_digits=20, decimal_places=8
@@ -998,10 +998,10 @@ class ItemSupplier(AuditModel):
     priority = models.IntegerField(_('priority'), default=0, help_text=_('Priority among all alternates'))
     ratio = models.DecimalField(_('ratio'), max_digits=20, decimal_places=8, null=True, blank=True)
     moq = models.DecimalField(_('MOQ'), max_digits=20, decimal_places=8)
-    product_time = models.DurationField(_('product time'), null=True, blank=True)
-    load_time = models.DurationField(_('load time'), null=True, blank=True)
-    transit_time = models.DurationField(_('transit time'), null=True, blank=True)
-    receive_time = models.DurationField(_('receive time'), null=True, blank=True)
+    product_time = models.DecimalField(_('product time'), max_digits=20, decimal_places=8,null=True, blank=True)
+    load_time = models.DecimalField(_('load time'), null=True, max_digits=20, decimal_places=8,blank=True)
+    transit_time = models.DecimalField(_('transit time'), max_digits=20, decimal_places=8,null=True, blank=True)
+    receive_time = models.DecimalField(_('receive time'), max_digits=20, decimal_places=8,null=True, blank=True)
     mpq = models.DecimalField(_('mpq'), max_digits=20, decimal_places=8, null=True, blank=True)
     earliest_order_date = models.DateField(_('earliest order date'), null=True, blank=True)
     outer_package_num = models.IntegerField(_('outer package num'), null=True, blank=True)

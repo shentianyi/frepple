@@ -854,7 +854,7 @@ class LocationList(GridReport):
         # formatter 表示链接的动作
         # extra 表示其它的内容
 
-        GridFieldText('id', title=_('id'), key=True, formatter='detail', extra='"role":"input/location"'),
+        GridFieldText('id', title=_('id'), key=True, formatter='detail', extra='"role":"input/location"', editable=False),
         GridFieldText('nr', title=_('nr'), editable=False),
         GridFieldText('name', title=_('name'), editable=False),
         # GridFieldText('name', title=_('name'), key=True, formatter='detail', extra='"role":"input/location"'),
@@ -901,7 +901,7 @@ class CustomerList(GridReport):
 
     rows = (
         # . Translators: Translation included with Django
-        GridFieldText('id', title=_('id'), key=True, formatter='detail', extra='"role":"input/customer"'),
+        GridFieldText('id', title=_('id'), key=True, formatter='detail', extra='"role":"input/customer"', editable=False),
         GridFieldText('nr', title=_('nr'), editable=False),
         GridFieldText('name', title=_('name'), editable=False),
         GridFieldText('area', title=_('area'), editable=False),
@@ -915,8 +915,8 @@ class CustomerList(GridReport):
         GridFieldText('subcategory', title=_('subcategory'), initially_hidden=True, editable=False),
         GridFieldText('description', title=_('description'), editable=False),
         # GridFieldLastModified('lastmodified', title=_('lastmodified'), editable=False),
-        GridFieldCreateOrUpdateDate('created_at', title=_('created_at')),
-        GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at')),
+        GridFieldCreateOrUpdateDate('created_at', title=_('created_at') ,editable=False),
+        GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at'), editable=False),
 
         # CMARK 必须有为了弹框查询
         GridFieldText('_pk', field_name='id', editable=False, hidden=True),
@@ -936,7 +936,7 @@ class SupplierList(GridReport):
 
     rows = (
         # . Translators: Translation included with Django
-        GridFieldText('id', title=_('id'), key=True, formatter='detail', extra='"role":"input/supplier"'),
+        GridFieldText('id', title=_('id'), key=True, formatter='detail', extra='"role":"input/supplier"', editable=False),
         GridFieldText('nr', title=_('nr'), editable=False),
         GridFieldText('name', title=_('name'), editable=False),
         GridFieldText('area', title=_('area'), editable=False),
@@ -950,9 +950,9 @@ class SupplierList(GridReport):
         GridFieldText('subcategory', title=_('subcategory'), initially_hidden=True, editable=False),
         GridFieldText('description', title=_('description'), editable=False),
         # GridFieldLastModified('lastmodified', title=_('lastmodified'), editable=False),
-        GridFieldCreateOrUpdateDate('created_at', title=_('created_at')),
-        GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at')),
-        GridFieldLastModified('lastmodified', title=_('lastmodified')),
+        GridFieldCreateOrUpdateDate('created_at', title=_('created_at'), editable=False),
+        GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at'), editable=False),
+        GridFieldLastModified('lastmodified', title=_('lastmodified'), editable=False),
 
         # CMARK 必须有为了弹框查询
         GridFieldText('_pk', field_name='id', editable=False, hidden=True),
@@ -972,7 +972,7 @@ class ItemSupplierList(GridReport):
 
     rows = (
         # GridFieldInteger('id', title=_('identifier'), key=True, formatter='detail', extra='"role":"input/itemsupplier"'),
-        GridFieldInteger('id', title=_('id'), key=True, formatter='detail', extra='"role":"input/itemsupplier"'),
+        GridFieldInteger('id', title=_('id'), key=True, formatter='detail', extra='"role":"input/itemsupplier"', editable=False),
         # 新建一个显示列
         GridFieldText('item_display', title=_('item_display'), field_name='item__nr', editable=False),
         GridFieldText('supplier_display', title=_('supplier_display'), field_name='supplier__nr', editable=False),
@@ -990,11 +990,11 @@ class ItemSupplierList(GridReport):
         GridFieldInteger('priority', title=_('priority'), editable=False),
         GridFieldNumber('ratio', title=_('ratio'), editable=False),
         GridFieldNumber('moq', title=_('MOQ'), editable=False),
-        GridFieldDuration('product_time', title=_('product time'), editable=False),
-        GridFieldDuration('load_time', title=_('load time'), editable=False),
-        GridFieldDuration('transit_time', title=_('transit time'), editable=False),
-        GridFieldDuration('receive_time', title=_('receive time'), editable=False),
-        GridFieldInteger('mpq', title=_('mpq')),
+        GridFieldNumber('product_time', title=_('product time'), editable=False),
+        GridFieldNumber('load_time', title=_('load time'), editable=False),
+        GridFieldNumber('transit_time', title=_('transit time'), editable=False),
+        GridFieldNumber('receive_time', title=_('receive time'), editable=False),
+        GridFieldInteger('mpq', title=_('mpq'), editable=False),
         GridFieldDate('earliest_order_date', title=_('earliest order date'), editable=False, initially_hidden=True),
         GridFieldInteger('outer_package_num', title=_('outer package num'), editable=False, initially_hidden=True),
         GridFieldInteger('pallet_num', title=_('pallet num'), editable=False, initially_hidden=True),
@@ -1248,6 +1248,10 @@ class ItemList(GridReport):
         # GridFieldLastModified('lastmodified', title=_('last modified')),
         GridFieldCreateOrUpdateDate('created_at', title=_('created_at')),
         GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at')),
+
+        # CMARK 必须有为了弹框查询
+        GridFieldText('_pk', field_name='id', editable=False, hidden=True),
+        GridFieldText('_nk', field_name='nr', editable=False, hidden=True),
     )
 
 
@@ -1608,15 +1612,15 @@ class CalendarList(GridReport):
 
     rows = (
         # . Translators: Translation included with Django
-        GridFieldText('name', title=_('name'), key=True, formatter='detail', extra='"role":"input/calendar"'),
-        GridFieldText('source', title=_('source')),
-        GridFieldNumber('defaultvalue', title=_('default value')),
-        GridFieldText('description', title=_('description')),
-        GridFieldText('category', title=_('category'), initially_hidden=True),
-        GridFieldText('subcategory', title=_('subcategory'), initially_hidden=True),
+        GridFieldText('name', title=_('name'), key=True, formatter='detail', extra='"role":"input/calendar"', editable=False),
+        GridFieldText('source', title=_('source'), editable=False),
+        GridFieldNumber('defaultvalue', title=_('default value'), editable=False),
+        GridFieldText('description', title=_('description'), editable=False),
+        GridFieldText('category', title=_('category'), initially_hidden=True, editable=False),
+        GridFieldText('subcategory', title=_('subcategory'), initially_hidden=True, editable=False),
         # GridFieldLastModified('lastmodified', title=_('lastmodified')),
-        GridFieldCreateOrUpdateDate('created_at', title=_('created_at')),
-        GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at')),
+        GridFieldCreateOrUpdateDate('created_at', title=_('created_at'), editable=False),
+        GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at'), editable=False),
 
         # CMARK 必须有为了弹框查询
         GridFieldText('_pk', field_name='name', editable=False, hidden=True),
@@ -1636,33 +1640,33 @@ class CalendarBucketList(GridReport):
 
     rows = (
         GridFieldInteger('id', title=_('identifier'), formatter='detail', extra='"role":"input/calendarbucket"',
-                         initially_hidden=True),
+                         initially_hidden=True, editable=False),
         GridFieldText('calendar', title=_('calendar'), field_name='calendar__name', formatter='detail',
-                      extra='"role":"input/calendar"'),
-        GridFieldDateTime('startdate', title=_('start date')),
-        GridFieldDateTime('enddate', title=_('end date')),
-        GridFieldNumber('value', title=_('value')),
-        GridFieldInteger('priority', title=_('priority')),
+                      extra='"role":"input/calendar"', editable=False),
+        GridFieldDateTime('startdate', title=_('start date'), editable=False),
+        GridFieldDateTime('enddate', title=_('end date'), editable=False),
+        GridFieldNumber('value', title=_('value'),editable=False),
+        GridFieldInteger('priority', title=_('priority'), editable=False),
         # . Translators: Translation included with Django
-        GridFieldBool('monday', title=_('Monday')),
+        GridFieldBool('monday', title=_('Monday'), editable=False),
         # . Translators: Translation included with Django
-        GridFieldBool('tuesday', title=_('Tuesday')),
+        GridFieldBool('tuesday', title=_('Tuesday'), editable=False),
         # . Translators: Translation included with Django
-        GridFieldBool('wednesday', title=_('Wednesday')),
+        GridFieldBool('wednesday', title=_('Wednesday'), editable=False),
         # . Translators: Translation included with Django
-        GridFieldBool('thursday', title=_('Thursday')),
+        GridFieldBool('thursday', title=_('Thursday'), editable=False),
         # . Translators: Translation included with Django
-        GridFieldBool('friday', title=_('Friday')),
+        GridFieldBool('friday', title=_('Friday'), editable=False),
         # . Translators: Translation included with Django
-        GridFieldBool('saturday', title=_('Saturday')),
+        GridFieldBool('saturday', title=_('Saturday'), editable=False),
         # . Translators: Translation included with Django
-        GridFieldBool('sunday', title=_('Sunday')),
-        GridFieldTime('starttime', title=_('start time')),
-        GridFieldTime('endtime', title=_('end time')),
-        GridFieldText('source', title=_('source')),  # Not really right, since the engine doesn't read or store it
+        GridFieldBool('sunday', title=_('Sunday'), editable=False),
+        GridFieldDateTime('starttime', title=_('start time'), editable=False),
+        GridFieldDateTime('endtime', title=_('end time'), editable=False),
+        GridFieldText('source', title=_('source'), editable=False),  # Not really right, since the engine doesn't read or store it
         # GridFieldLastModified('lastmodified', title=_('lastmodified')),
-        GridFieldCreateOrUpdateDate('created_at', title=_('created_at')),
-        GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at')),
+        GridFieldCreateOrUpdateDate('created_at', title=_('created_at'), editable=False),
+        GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at'), editable=False),
     )
 
 
