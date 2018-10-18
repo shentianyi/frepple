@@ -57,14 +57,14 @@ DATABASES = {
 
   'default': {
     'ENGINE': 'django.db.backends.postgresql',
-    'NAME': 'frepple_dev',
+    'NAME': 'frepple',
     'USER': 'postgres',     # Role name when using md5 authentication.
                            # Leave as an empty string when using peer or
                            # ident authencation.
     'PASSWORD': '123456@', # Role password when using md5 authentication.
                            # Leave as an empty string when using peer or
                            # ident authencation.
-    'HOST': '121.199.48.53',            # When using TCP sockets specify the hostname,
+    'HOST': '127.0.0.1',            # When using TCP sockets specify the hostname,
                            # the ip4 address or the ip6 address here.
                            # Leave as an empty string to use Unix domain
                            # socket ("local" lines in pg_hba.conf).
