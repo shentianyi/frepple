@@ -159,19 +159,19 @@ class LocationOwnerSerializer(ModelSerializer):
     class Meta:
         model = freppledb.input.models.Location
         fields = ('id', 'nr', 'name')
-        # CMARK 写入参数, 用来更新外键, 如果没有这个配置, 那么
+        # CMARK 写入参数, 用来更新外键, 如果没有这个配置, 那么产生不可写错误
         extra_kwargs = {
             'id': {
                 'read_only': False,
                 'required': False,
                 'allow_null': True
             },
-            'name': {
+            'nr': {
                 'read_only': False,
                 'required': False,
                 'allow_null': True
             },
-            'nr': {'allow_null': True}
+            'name': {'allow_null': True}
         }
 
 
@@ -248,19 +248,19 @@ class CustomerOwnerSerializer(ModelSerializer):
     class Meta:
         model = freppledb.input.models.Customer
         fields = ('id', 'nr', 'name')
-        # CMARK 写入参数, 用来更新外键, 如果没有这个配置, 那么
+        # CMARK 写入参数, 用来更新外键, 如果没有这个配置, 那么产生不可写错误
         extra_kwargs = {
             'id': {
                 'read_only': False,
                 'required': False,
                 'allow_null': True
             },
-            'name': {
+            'nr': {
                 'read_only': False,
                 'required': False,
                 'allow_null': True
              },
-            'nr':{'allow_null': True}
+            'name':{'allow_null': True}
         }
 
 
@@ -317,19 +317,19 @@ class ItemOwnerSerializer(ModelSerializer):
     class Meta:
         model = freppledb.input.models.Item
         fields = ('id', 'nr', 'name')
-        # CMARK 写入参数, 用来更新外键, 如果没有这个配置, 那么
+        # CMARK 写入参数, 用来更新外键, 如果没有这个配置, 那么产生不可写错误
         extra_kwargs = {
             'id': {
                 'read_only': False,
                 'required': False,
                 'allow_null': True
             },
-            'name': {
+            'nr': {
                 'read_only': False,
                 'required': False,
                 'allow_null': True
             },
-            'nr':{'allow_null':True}
+            'name':{'allow_null':True}
         }
 
 
