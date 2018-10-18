@@ -143,8 +143,8 @@ $(function() {
 {% block save_undo_buttons %}
 {% if not is_popup and reportclass.editable and haschangeperm %}
 {% comment %}Translators: Translation included with Django {% endcomment %}
-<input type="submit" value="{% filter force_escape|upper %}{% trans "Save" %}{% endfilter %}" class="btn btn-primary"  disabled role="button" id="save" onclick="upload.save()" title="{% trans 'save changes'|capfirst|force_escape %}">
-<input type="submit" value="{% filter force_escape|upper %}{% trans "Undo" %}{% endfilter %}" class="btn btn-primary"  disabled role="button" id="undo" onclick="upload.undo()" title="{% trans 'undo changes'|capfirst|force_escape %}">
+<input type="submit" value="{% filter force_escape|upper %}{% trans "Save" %}{% endfilter %}" class="btn btn-default"  disabled role="button" id="save" onclick="upload.save()" title="{% trans 'save changes'|capfirst|force_escape %}">
+<input type="submit" value="{% filter force_escape|upper %}{% trans "Undo" %}{% endfilter %}" class="btn btn-default"  disabled role="button" id="undo" onclick="upload.undo()" title="{% trans 'undo changes'|capfirst|force_escape %}">
 {% endif %}
 {% endblock save_undo_buttons %}
 </div>

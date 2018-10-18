@@ -67,7 +67,7 @@ $(function() {
                     <a href="#" class="dropdown-toggle" style="padding-right: 20px;" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
                         <!--{% trans 'user'|capfirst %} {% firstof user.first_name user.username %}-->
 
-                        <img src="{{STATIC_URL}}img/man.png" style="height: 37px;" alt="{% trans 'user'|capfirst %} {% firstof user.first_name user.username %}">
+                        <img src="{{STATIC_URL}}img/woman.png" style="height: 37px;" alt="{% trans 'user'|capfirst %} {% firstof user.first_name user.username %}">
                     </a>
 
                     <ul class="dropdown-menu">
@@ -85,7 +85,7 @@ $(function() {
 
             <ul class="nav navbar-nav navbar-right">
                 <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" style="padding-right: 20px;" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                    <a href="#" onclick="window.open('https://frepple.com/docs/{% version_short %}/{{reportclass.help_url}}');" class="dropdown-toggle" style="padding-right: 20px;" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
                         <span class="fa fa-question-circle" style="font-size: 20px;"></span>
                     </a>
                 </li>
@@ -125,7 +125,7 @@ $(function() {
 				<!--</div>-->
 			<!--</div>-->
 	  <!--</div>-->
-  </div> <!--  end of container -->
+  </div>
 </nav>
 
 {% endif %}{% endblock %}
