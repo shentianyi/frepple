@@ -331,33 +331,51 @@ LOGGING = {
             'filters': ['require_debug_false'],
             'class': 'django.utils.log.AdminEmailHandler',
         },
-        'file_handler': {
-             'level': 'DEBUG',
-             'class': 'logging.handlers.RotatingFileHandler',
-             # 'class': 'freppledb.common.logging.MakeFileHandler',
-            'filename': os.path.normpath(os.path.join(FREPPLE_LOGDIR, 'frepple.log')),
-             'formatter': 'file',
-             'maxBytes': 1024 * 1024 * 150,  # 150MB
-             'backupCount': 10,
-        },
+        # 'file_handler': {
+        #      'level': 'DEBUG',
+        #      'class': 'logging.handlers.RotatingFileHandler',
+        #      # 'class': 'freppledb.common.logging.MakeFileHandler',
+        #     'filename': os.path.normpath(os.path.join(FREPPLE_LOGDIR, 'frepple.log')),
+        #      'formatter': 'file',
+        #      'maxBytes': 1024 * 1024 * 150,  # 150MB
+        #      'backupCount': 10,
+        # },
     },
     'loggers': {
         # A handler to log all SQL queries.
         # The setting "DEBUG" also needs to be set to True higher up in this file.
         'django.db.backends': {
-           'handlers': ['console', 'file_handler'],
+           'handlers': ['console'],
            'level': 'DEBUG',
            'propagate': False,
         },
         'django': {
-            'handlers': ['console', 'file_handler'],
+            'handlers': ['console'],
             'level': 'INFO',
         },
         'freppledb': {
-            'handlers': ['console', 'file_handler'],
+            'handlers': ['console'],
             'level': 'INFO',
         }
     }
+
+    # 'loggers': {
+    #     # A handler to log all SQL queries.
+    #     # The setting "DEBUG" also needs to be set to True higher up in this file.
+    #     'django.db.backends': {
+    #        'handlers': ['console', 'file_handler'],
+    #        'level': 'DEBUG',
+    #        'propagate': False,
+    #     },
+    #     'django': {
+    #         'handlers': ['console', 'file_handler'],
+    #         'level': 'INFO',
+    #     },
+    #     'freppledb': {
+    #         'handlers': ['console', 'file_handler'],
+    #         'level': 'INFO',
+    #     }
+    # }
 }
 # Max total log files size in MB, if the limit is reached deletes the oldest.
 MAXTOTALLOGFILESIZE = 200

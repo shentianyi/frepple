@@ -8,10 +8,14 @@ follows its packaging guidelines:
   See https://wiki.ubuntu.com/PackagingGuide/Complete
 
 Build instructions:
- - You need to install the packages "cdbs", "debhelper", "python-support", "pbuilder".
+ - You need to install the packages "cdbs", "debhelper", "python-support", "pbuilder", "python3-sphinx".
  - Build the packages:
      make contrib
  - Verify the build dependencies of the package:
+      - from Ubuntu16.04 remove python-support
+       https://askubuntu.com/questions/766169/why-no-more-python-support-in-16-04
+       install dh-python:
+       sudo apt-get install dh-python
      - Only for Ubuntu, to enable the universe packages
 	   Create a file ~/.pbuilderrc with the following line:
          COMPONENTS="main restricted universe multiverse"
