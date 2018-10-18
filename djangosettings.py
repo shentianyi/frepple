@@ -368,14 +368,14 @@ MAXTOTALLOGFILESIZE = 200
 # If the list contains only a single value, the preferences screen will not
 # display users an option to choose the theme.
 THEMES = [
-  'earth', 'grass', 'lemon', 'odoo', 'openbravo', 'orange', 'snow', 'strawberry', 'water'
+  'earth', 'grass', 'lemon', 'odoo', 'openbravo', 'orange', 'snow', 'strawberry', 'water', 'laura'
   ]
 
 # A default user-group to which new users are automatically added
 DEFAULT_USER_GROUP = None
 
 # The default user interface theme
-DEFAULT_THEME = 'earth'
+DEFAULT_THEME = 'laura'
 
 # The default number of records to pull from the server as a page
 DEFAULT_PAGESIZE = 100

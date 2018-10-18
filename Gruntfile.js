@@ -57,6 +57,7 @@ module.exports = function (grunt) {
       water: themeconfig('freppledb/common', 'water'),
       orange: themeconfig('freppledb/common', 'orange'),
       openbravo: themeconfig('freppledb/common', 'openbravo'),
+      laura: themeconfig('freppledb/common', 'laura'),
     },
     // When any .less file changes we automatically run the "less"-task.
     watch: {
