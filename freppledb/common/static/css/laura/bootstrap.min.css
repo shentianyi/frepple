@@ -2774,11 +2774,11 @@ th {
 }
 
 .table-striped > tbody > tr:nth-of-type(odd) {
-    background-color: #e4ebe9
+    background-color: #F9FAFB;
 }
 
 .table-hover > tbody > tr:hover {
-    background-color: #f5f5f5
+    background-color: #F4F6FF;
 }
 
 table col[class*="col-"] {
@@ -2794,43 +2794,43 @@ table td[class*="col-"], table th[class*="col-"] {
 }
 
 .table > thead > tr > td.active, .table > tbody > tr > td.active, .table > tfoot > tr > td.active, .table > thead > tr > th.active, .table > tbody > tr > th.active, .table > tfoot > tr > th.active, .table > thead > tr.active > td, .table > tbody > tr.active > td, .table > tfoot > tr.active > td, .table > thead > tr.active > th, .table > tbody > tr.active > th, .table > tfoot > tr.active > th {
-    background-color: #f5f5f5
+    background-color: #F4F6FF;
 }
 
 .table-hover > tbody > tr > td.active:hover, .table-hover > tbody > tr > th.active:hover, .table-hover > tbody > tr.active:hover > td, .table-hover > tbody > tr:hover > .active, .table-hover > tbody > tr.active:hover > th {
-    background-color: #e8e8e8
+    background-color: #F4F6FF;
 }
 
 .table > thead > tr > td.success, .table > tbody > tr > td.success, .table > tfoot > tr > td.success, .table > thead > tr > th.success, .table > tbody > tr > th.success, .table > tfoot > tr > th.success, .table > thead > tr.success > td, .table > tbody > tr.success > td, .table > tfoot > tr.success > td, .table > thead > tr.success > th, .table > tbody > tr.success > th, .table > tfoot > tr.success > th {
-    background-color: #dff0d8
+    background-color: #F4F6FF;
 }
 
 .table-hover > tbody > tr > td.success:hover, .table-hover > tbody > tr > th.success:hover, .table-hover > tbody > tr.success:hover > td, .table-hover > tbody > tr:hover > .success, .table-hover > tbody > tr.success:hover > th {
-    background-color: #d0e9c6
+    background-color: #F4F6FF;
 }
 
 .table > thead > tr > td.info, .table > tbody > tr > td.info, .table > tfoot > tr > td.info, .table > thead > tr > th.info, .table > tbody > tr > th.info, .table > tfoot > tr > th.info, .table > thead > tr.info > td, .table > tbody > tr.info > td, .table > tfoot > tr.info > td, .table > thead > tr.info > th, .table > tbody > tr.info > th, .table > tfoot > tr.info > th {
-    background-color: #d9edf7
+    background-color: #F4F6FF;
 }
 
 .table-hover > tbody > tr > td.info:hover, .table-hover > tbody > tr > th.info:hover, .table-hover > tbody > tr.info:hover > td, .table-hover > tbody > tr:hover > .info, .table-hover > tbody > tr.info:hover > th {
-    background-color: #c4e3f3
+    background-color: #F4F6FF;
 }
 
 .table > thead > tr > td.warning, .table > tbody > tr > td.warning, .table > tfoot > tr > td.warning, .table > thead > tr > th.warning, .table > tbody > tr > th.warning, .table > tfoot > tr > th.warning, .table > thead > tr.warning > td, .table > tbody > tr.warning > td, .table > tfoot > tr.warning > td, .table > thead > tr.warning > th, .table > tbody > tr.warning > th, .table > tfoot > tr.warning > th {
-    background-color: #fcf8e3
+    background-color: #F4F6FF;
 }
 
 .table-hover > tbody > tr > td.warning:hover, .table-hover > tbody > tr > th.warning:hover, .table-hover > tbody > tr.warning:hover > td, .table-hover > tbody > tr:hover > .warning, .table-hover > tbody > tr.warning:hover > th {
-    background-color: #faf2cc
+    background-color: #F4F6FF;
 }
 
 .table > thead > tr > td.danger, .table > tbody > tr > td.danger, .table > tfoot > tr > td.danger, .table > thead > tr > th.danger, .table > tbody > tr > th.danger, .table > tfoot > tr > th.danger, .table > thead > tr.danger > td, .table > tbody > tr.danger > td, .table > tfoot > tr.danger > td, .table > thead > tr.danger > th, .table > tbody > tr.danger > th, .table > tfoot > tr.danger > th {
-    background-color: #f2dede
+    background-color: #F4F6FF;
 }
 
 .table-hover > tbody > tr > td.danger:hover, .table-hover > tbody > tr > th.danger:hover, .table-hover > tbody > tr.danger:hover > td, .table-hover > tbody > tr:hover > .danger, .table-hover > tbody > tr.danger:hover > th {
-    background-color: #ebcccc
+    background-color: #F4F6FF;
 }
 
 .table-responsive {
@@ -3463,8 +3463,8 @@ a.btn.disabled, fieldset[disabled] a.btn {
 
 .btn-default:active:hover, .btn-default.active:hover, .open > .dropdown-toggle.btn-default:hover, .btn-default:active:focus, .btn-default.active:focus, .open > .dropdown-toggle.btn-default:focus, .btn-default:active.focus, .btn-default.active.focus, .open > .dropdown-toggle.btn-default.focus {
     color: #333;
-    background-color: #d4d4d4;
-    border-color: #8c8c8c
+    /*background-color: #d4d4d4;*/
+    /*border-color: #8c8c8c*/
 }
 
 .btn-default:active, .btn-default.active, .open > .dropdown-toggle.btn-default {
@@ -4878,7 +4878,8 @@ textarea.input-group-sm > .form-control, textarea.input-group-sm > .input-group-
 
 .navbar-default {
     background-color: #85a5ff;
-    border-color: #648dff
+    border-color: #648dff;
+    margin-bottom: 0;
 }
 
 .navbar-default .navbar-brand {

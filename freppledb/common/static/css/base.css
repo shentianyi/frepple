@@ -2,3 +2,64 @@
     width: 150px;
     border-radius: 0;
 }
+
+/*.ui-th-column {*/
+/*height: 60px !important;*/
+/*font-size: 18px;*/
+/*}*/
+
+/*.jqgfirstrow {*/
+/*height: auto !important;*/
+/*}*/
+
+.btn-table-icon,
+.btn-table-icon:hover,
+.btn-table-icon:active,
+.btn-table-icon:link,
+.btn-table-icon:visited,
+.btn-table-icon:focus {
+    background: transparent;
+    border: none;
+}
+
+.btn-save, .btn-unsave {
+    width: 50px;
+    height: 20px;
+    line-height: 20px;
+    padding: 0;
+    font-size: 10px;
+}
+
+.btn-save,
+.btn-save:hover,
+.btn-save:active,
+.btn-save:focus,
+.btn-save:link {
+    background-color: #85A5FF;
+    color: white;
+    border-color: #85A5FF;
+}
+
+.btn-unsave,
+.btn-unsave:hover,
+.btn-unsave:active,
+.btn-unsave:focus,
+.btn-unsave:link {
+    background-color: #fff;
+    color: black;
+    border-color: #ccc;
+}
+
+#save_undo > .btn-default.disabled:hover,
+#save_undo > .btn-default[disabled]:hover,
+#save_undo > fieldset[disabled].btn-default:hover,
+#save_undo > .btn-default.disabled:focus,
+#save_undo > .btn-default[disabled]:focus,
+#save_undo > fieldset[disabled] .btn-default:focus,
+#save_undo > .btn-default.disabled.focus,
+#save_undo > .btn-default[disabled].focus,
+#save_undo > fieldset[disabled] .btn-default.focus {
+    background-color: #85A5FF;
+    color: white;
+    border-color: #85A5FF;
+}

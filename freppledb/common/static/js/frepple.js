@@ -187,7 +187,7 @@ var upload = {
         if ($('#undo').hasClass("btn-primary")) return;
         $("#grid").trigger("reloadGrid");
         $("#grid").closest(".ui-jqgrid-bdiv").scrollTop(0);
-        $('#save, #undo').addClass("btn-primary").removeClass("btn-danger").prop('disabled', true);
+        $('#save, #undo').addClass("btn-default").removeClass("btn-danger").prop('disabled', true);
         $('#actions1').prop('disabled', true);
         $('#filter').prop('disabled', false);
         $(window).off('beforeunload', upload.warnUnsavedChanges);
@@ -196,7 +196,7 @@ var upload = {
     select: function () {
         $('#filter').prop('disabled', true);
         $.jgrid.hideModal("#searchmodfbox_grid");
-        $('#save, #undo').removeClass("btn-primary").addClass("btn-danger").prop('disabled', false);
+        $('#save, #undo').removeClass("btn-default").addClass("btn-danger").prop('disabled', false);
         $(window).off('beforeunload', upload.warnUnsavedChanges);
         $(window).on('beforeunload', upload.warnUnsavedChanges);
     },
@@ -258,7 +258,8 @@ var upload = {
     validateSort: function (event) {
         if ($(this).attr('id') == 'grid_cb') return;
         if ($("body").hasClass("popup")) return;
-        if ($('#save').hasClass("btn-primary"))
+
+        if ($('#save').hasClass("btn-default"))
             jQuery("#grid").jqGrid('resetSelection');
         else {
             $('#timebuckets').modal('hide');
@@ -269,7 +270,7 @@ var upload = {
                 '<h4 class="modal-title alert-warning">' + gettext("Save or cancel your changes first") + '</h4>' +
                 '</div>' +
                 '<div class="modal-body">' +
-                '<p>' + "" + '</p>' +
+                '<p>' + "ssssssssssssssssssssssssssssssss" + '</p>' +
                 '</div>' +
                 '<div class="modal-footer">' +
                 '<input type="submit" id="savebutton" role="button" class="btn btn-primary pull-right" value="' + gettext('Save') + '">' +
