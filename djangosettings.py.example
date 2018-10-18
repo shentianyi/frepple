@@ -39,6 +39,22 @@ SECRET_KEY = '%@mzit!i8b*$zc&6oev96=RANDOMSTRING'
 # Create additional entries in this dictionary to define scenario schemas.
 
 DATABASES = {
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.postgresql',
+    #     'NAME': 'frepple_dev',
+    #     'USER': 'postgres',
+    #     'PASSWORD': '123456@',
+    #     'HOST': '121.199.48.53',
+    #     'PORT': '5432',
+    #     # Specify the port number when using a TCP socket.
+    #     'OPTIONS': {},  # Backend specific configuration parameters.
+    #     'TEST': {
+    #         'NAME': 'test_frepple'  # Database name used when running the test suite.
+    #     },
+    #     'FILEUPLOADFOLDER': os.path.normpath(os.path.join(FREPPLE_LOGDIR, 'data', 'default')),
+    #     'SECRET_WEBTOKEN_KEY': SECRET_KEY,
+    # },
+
   'default': {
     'ENGINE': 'django.db.backends.postgresql',
     'NAME': 'frepple',
@@ -315,33 +331,51 @@ LOGGING = {
             'filters': ['require_debug_false'],
             'class': 'django.utils.log.AdminEmailHandler',
         },
-        'file_handler': {
-             'level': 'DEBUG',
-             'class': 'logging.handlers.RotatingFileHandler',
-             # 'class': 'freppledb.common.logging.MakeFileHandler',
-            'filename': os.path.normpath(os.path.join(FREPPLE_LOGDIR, 'frepple.log')),
-             'formatter': 'file',
-             'maxBytes': 1024 * 1024 * 150,  # 150MB
-             'backupCount': 10,
-        },
+        # 'file_handler': {
+        #      'level': 'DEBUG',
+        #      'class': 'logging.handlers.RotatingFileHandler',
+        #      # 'class': 'freppledb.common.logging.MakeFileHandler',
+        #     'filename': os.path.normpath(os.path.join(FREPPLE_LOGDIR, 'frepple.log')),
+        #      'formatter': 'file',
+        #      'maxBytes': 1024 * 1024 * 150,  # 150MB
+        #      'backupCount': 10,
+        # },
     },
     'loggers': {
         # A handler to log all SQL queries.
         # The setting "DEBUG" also needs to be set to True higher up in this file.
         'django.db.backends': {
-           'handlers': ['console', 'file_handler'],
+           'handlers': ['console'],
            'level': 'DEBUG',
            'propagate': False,
         },
         'django': {
-            'handlers': ['console', 'file_handler'],
+            'handlers': ['console'],
             'level': 'INFO',
         },
         'freppledb': {
-            'handlers': ['console', 'file_handler'],
+            'handlers': ['console'],
             'level': 'INFO',
         }
     }
+
+    # 'loggers': {
+    #     # A handler to log all SQL queries.
+    #     # The setting "DEBUG" also needs to be set to True higher up in this file.
+    #     'django.db.backends': {
+    #        'handlers': ['console', 'file_handler'],
+    #        'level': 'DEBUG',
+    #        'propagate': False,
+    #     },
+    #     'django': {
+    #         'handlers': ['console', 'file_handler'],
+    #         'level': 'INFO',
+    #     },
+    #     'freppledb': {
+    #         'handlers': ['console', 'file_handler'],
+    #         'level': 'INFO',
+    #     }
+    # }
 }
 # Max total log files size in MB, if the limit is reached deletes the oldest.
 MAXTOTALLOGFILESIZE = 200
@@ -373,7 +407,7 @@ DEFAULT_DASHBOARD = [
     ]},
     {'width':6, 'widgets':[
       #("execute",{}),
-      ("wizard",{}),      
+      ("wizard",{}),
     ]},
   ]},
   { 'rowname': 'sales', 'cols': [
@@ -419,7 +453,7 @@ DEFAULT_DASHBOARD = [
     ]},
     {'width':6, 'widgets':[
       ("recent_actions",{"limit":10}),
-    ]},      
+    ]},
   ]},
 ]
 
@@ -451,4 +485,3 @@ EMAIL_HOST_PASSWORD = 'Brilliantech123@'
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 # Port number for the CherryPy web server
 PORT = 8000
-

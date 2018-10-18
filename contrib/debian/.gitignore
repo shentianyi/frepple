@@ -3,3 +3,6 @@ DEBIAN
 *.dsc
 *.changes
 */*
+*.ddeb
+*.tar.xz
+*.buildinfo
