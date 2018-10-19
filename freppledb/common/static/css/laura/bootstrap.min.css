@@ -3031,9 +3031,9 @@ input[type="search"] {
 }
 
 .radio input[type="radio"], .radio-inline input[type="radio"], .checkbox input[type="checkbox"], .checkbox-inline input[type="checkbox"] {
-    position: absolute;
-    margin-left: -20px;
-    margin-top: 4px \9
+    /*position: absolute;*/
+    /*margin-left: -20px;*/
+    /*margin-top: 4px \9*/
 }
 
 .radio + .radio, .checkbox + .checkbox {

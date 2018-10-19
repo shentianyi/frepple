@@ -1,3 +1,26 @@
+body {
+    min-width: 1100px;
+}
+
+/* 滚动槽 */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    border-radius: 3px;
+    background: rgba(0, 0, 0, 0.06);
+    -webkit-box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.08);
+}
+
+/* 滚动条滑块 */
+::-webkit-scrollbar-thumb {
+    border-radius: 3px;
+    background: rgba(0, 0, 0, 0.12);
+    -webkit-box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
 .btn-lg-primary-aps {
     width: 150px;
     border-radius: 0;
@@ -84,6 +107,10 @@
     right: 0;
 }
 
+.input-field-xs {
+    padding: 0;
+}
+
 .input-field {
     min-height: 55px;
 }
@@ -95,7 +122,6 @@
 .input-field-label > label {
     font-size: 14px;
     color: #666666;
-    margin-left: -15px;
 }
 
 .input-field-input {
@@ -111,7 +137,6 @@
 }
 
 .input-required {
-    margin-right: 15px;
     width: 6px;
     height: 6px;
     margin-top: 5px;
@@ -131,4 +156,190 @@ p.datetime {
 
 p.datetime span {
     margin-top: 5px;
+}
+
+/* 搜索框 样式修改 */
+#searchmodfbox_grid > .modal-dialog > .modal-content {
+    border-radius: 4px;
+    border-color: rgba(0, 0, 0, 0);
+    -webkit-box-shadow: 0 1px 4px 0 #B2ADAD;
+    -moz-box-shadow: 0 1px 4px 0 #B2ADAD;
+    box-shadow: 0 1px 4px 0 #B2ADAD;
+}
+
+#searchmodfbox_grid > .modal-dialog > .modal-content > .modal-header {
+    padding: 15px 20px;
+    background-color: white;
+    text-align: left;
+    border-bottom: 1px solid #f3f3f3;
+}
+
+#searchmodfbox_grid > .modal-dialog > .modal-content > .modal-header > a.close {
+    font-size: 2em;
+    right: 20px;
+    top: 10px;
+    box-shadow: none;
+    outline: none;
+    margin-top: 0;
+}
+
+#searchmodfbox_grid > .modal-dialog > .modal-content > .modal-content {
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none;
+}
+
+#searchmodfbox_grid > .modal-dialog > .modal-content > .modal-content .modal-footer {
+    border: none;
+}
+
+#fbox_grid > table.group > tbody > tr > th input[type='button'], #fbox_grid > table.group > tbody > tr > td input[type='button'] {
+    margin-left: 10px;
+    background-color: #597EF7;
+    border-color: #597EF7;
+
+}
+
+.EditTable > tbody > tr > td.EditButton > a {
+    background-color: #597EF7;
+    border-color: #597EF7;
+    border-radius: 4px;
+    outline: none;
+    box-shadow: none;
+    width: 100px;
+}
+
+.EditTable > tbody > tr > td.EditButton > a:hover,
+.EditTable > tbody > tr > td.EditButton > a:focus,
+.EditTable > tbody > tr > td.EditButton > a:link,
+.EditTable > tbody > tr > td.EditButton > a:visited,
+.EditTable > tbody > tr > td.EditButton > a:active:hover,
+.EditTable > tbody > tr > td.EditButton > a:active:focus,
+.EditTable > tbody > tr > td.EditButton > a:active:link,
+.EditTable > tbody > tr > td.EditButton > a:active:visited {
+    background-color: #648dff;
+    border-color: #648dff;
+    border-radius: 4px;
+    outline: none;
+    box-shadow: none;
+}
+
+.EditTable > tbody > tr > td.EditButton-ltr {
+    width: calc(200% - 110px);
+}
+
+/* 导入导出， 调整列头 */
+
+.btn-dialog-confirm {
+    width: 100px;
+    background-color: #597EF7;
+    border-color: #597EF7;
+    border-radius: 4px;
+    outline: none;
+    box-shadow: none;
+}
+
+.btn-dialog-confirm:hover,
+.btn-dialog-confirm:focus,
+.btn-dialog-confirm:link,
+.btn-dialog-confirm:visited,
+.btn-dialog-confirm:active:hover,
+.btn-dialog-confirm:active:focus,
+.btn-dialog-confirm:active:link,
+.btn-dialog-confirm:active:visited {
+    background-color: #648dff;
+    border-color: #648dff;
+    border-radius: 4px;
+    outline: none;
+    box-shadow: none;
+}
+
+.btn-dialog-cancel {
+    width: 100px;
+}
+
+.btn-dialog-cancel:hover,
+.btn-dialog-cancel:focus,
+.btn-dialog-cancel:link,
+.btn-dialog-cancel:visited,
+.btn-dialog-cancel:active:hover,
+.btn-dialog-cancel:active:focus,
+.btn-dialog-cancel:active:link,
+.btn-dialog-cancel:active:visited {
+    background-color: #f2f2f2;
+    outline: none;
+    box-shadow: none;
+}
+
+.modal-content {
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+    -webkit-box-shadow: 0 0 0 0 transparent;
+    -moz-box-shadow: 0 0 0 0 transparent;
+    box-shadow: 0 0 0 0 transparent;
+}
+
+.modal-footer {
+    border-top: none;
+}
+
+/*自定义表头*/
+.custom-header-panel {
+    border-color: #f2f2f2;
+    box-shadow: none;
+}
+
+.custom-header-panel > .panel-heading {
+    background-color: #85A5FF;
+    border-color: #85A5FF;
+    text-align: center;
+    color: white;
+}
+
+.custom-header-panel > .panel-body {
+    padding: 0;
+}
+
+.custom-header-panel > .panel-body > ul {
+    height: 300px;
+    overflow-y: scroll;
+    margin-bottom: -1px;
+}
+
+.custom-header-panel > .panel-body > ul > li {
+    border: none;
+    border-bottom: 1px solid #f2f2f2;
+    -webkit-border-radius: 0;
+    -moz-border-radius: 0;
+    border-radius: 0;
+    margin-bottom: 0;
+}
+
+.custom-header-panel > .panel-body > ul > li:hover {
+    background: #F4F6FF;
+}
+
+fieldset .field-box {
+    margin-right: 0;
+}
+
+/*表单， 复选框*/
+.field-checkbox {
+    display: flex;
+    margin-left: 50px;
+    white-space: nowrap;
+    margin-right: 20px !important;
+}
+
+.field-checkbox > .input-field-input {
+    margin-top: -5px;
+}
+
+.datetimeshortcuts, .datetimeshortcuts {
+    display: none;
+}
+
+.help-block {
+    white-space: nowrap;
 }

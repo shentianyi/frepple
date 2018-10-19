@@ -489,7 +489,6 @@ jQuery.extend($.fn.fmatter.percentage, {
 
 //
 // Functions related to jqgrid
-//
 
 function windowname_to_id(text) {
     text = text.replace(/__dot__/g, '.');
@@ -522,7 +521,7 @@ function popClick(win, id) {
         showInput.type = "text";
         showInput.value = r._nk;
         showInput.className = 'form-control';
-        showInput.id = window.name + '_new_display';
+        showInput.id = window.name + '_new_display_by_sfz';
         showInput.readOnly = true;
         elem.parentNode.prepend(showInput);
     }
@@ -596,16 +595,16 @@ var grid = {
         var row0 = "" +
             '<div class="row">' +
             '<div class="col-xs-6">' +
-            '<div class="panel panel-default"><div class="panel-heading">' + gettext("Selected options") + '</div>' +
+            '<div class="panel panel-default custom-header-panel"><div class="panel-heading">' + gettext("Selected options") + '</div>' +
             '<div class="panel-body">' +
-            '<ul class="list-group" id="Rows" style="height: 160px; overflow-y: scroll;">placeholder0</ul>' +
+            '<ul class="list-group" id="Rows">placeholder0</ul>' +
             '</div>' +
             '</div>' +
             '</div>' +
             '<div class="col-xs-6">' +
-            '<div class="panel panel-default"><div class="panel-heading">' + gettext("Available options") + '</div>' +
+            '<div class="panel panel-default custom-header-panel" ><div class="panel-heading">' + gettext("Available options") + '</div>' +
             '<div class="panel-body">' +
-            '<ul class="list-group" id="DroppointRows" style="height: 160px; overflow-y: scroll;">placeholder1</ul>' +
+            '<ul class="list-group" id="DroppointRows">placeholder1</ul>' +
             '</div>' +
             '</div>' +
             '</div>' +
@@ -697,9 +696,9 @@ var grid = {
             row2 +
             '</div>' +
             '<div class="modal-footer">' +
-            '<input type="submit" id="okCustbutton" role="button" class="btn btn-danger pull-left" value="' + gettext("OK") + '">' +
-            '<input type="submit" id="cancelCustbutton" role="button" class="btn btn-primary pull-right" data-dismiss="modal" value="' + gettext('Cancel') + '">' +
-            '<input type="submit" id="resetCustbutton" role="button" class="btn btn-primary pull-right" value="' + gettext('Reset') + '">' +
+            '<input type="submit" id="okCustbutton" role="button" class="btn btn-primary btn-dialog-confirm" value="' + gettext("OK") + '">' +
+            '<input type="submit" id="cancelCustbutton" role="button" class="btn btn-default btn-dialog-cancel pull-right" data-dismiss="modal" value="' + gettext('Cancel') + '">' +
+            '<input type="submit" id="resetCustbutton" role="button" class="btn btn-default btn-dialog-cancel pull-right" value="' + gettext('Reset') + '">' +
             '</div>' +
             '</div>' +
             '</div>')
@@ -775,10 +774,21 @@ var grid = {
         });
 
         $('#okCustbutton').on('click', function () {
+            debugger
             var colModel = $("#grid")[0].p.colModel;
             var perm = [];
             var hiddenrows = [];
-            if (colModel[0].name == "cb") perm.push(0);
+
+            if(colModel[0].name == "rn") {
+                perm.push(0);
+                if(colModel[1].name == "cb"){
+                    perm.push(1);
+                }
+            }else if(colModel[0].name == "cb"){
+                perm.push(0);
+            }else{
+            }
+            // if (colModel[0].name == "cb") perm.push(0);
             cross_idx = [];
             if (!graph)
                 $("#grid").jqGrid('destroyFrozenColumns');
@@ -843,6 +853,9 @@ var grid = {
         //   - paging button string, when called from jqgrid paging event
         //   - number argument, when called from jqgrid resizeStop event
         //   - function argument, when you want to run a callback function after the save
+
+        debugger
+
         var colArray = new Array();
         var colModel = $("#grid")[0].p.colModel;
         var maxfrozen = 0;
@@ -988,7 +1001,7 @@ var grid = {
         // The argument is true when we show a "list" report.
         // It is false for "table" reports.
         if (only_list)
-            $('#popup').html('<div class="modal-dialog" style="width: 350px;">' +
+            $('#popup').html('<div class="modal-dialog" style="width: 400px;">' +
                 '<div class="modal-content">' +
                 '<div class="modal-header">' +
                 '<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>' +
@@ -1003,8 +1016,8 @@ var grid = {
                 '</label>' +
                 '</div>' +
                 '<div class="modal-footer">' +
-                '<input type="submit" id="exportbutton" role="button" class="btn btn-danger pull-left" value="' + gettext('Export') + '">' +
-                '<input type="submit" id="cancelbutton" role="button" class="btn btn-primary pull-right" data-dismiss="modal" value="' + gettext('Cancel') + '">' +
+                '<input type="submit" id="exportbutton" role="button" class="btn btn-primary btn-dialog-confirm " value="' + gettext('Export') + '">' +
+                '<input type="submit" id="cancelbutton" role="button" class="btn btn-default btn-dialog-cancel pull-right" data-dismiss="modal" value="' + gettext('Cancel') + '">' +
                 '</div>' +
                 '</div>' +
                 '</div>')
@@ -2710,7 +2723,7 @@ function import_show(title, paragraph, multiple, fxhr) {
         modalcontent += '' +
             '<div class="box" style="outline: 2px dashed black; outline-offset: -10px">' +
             '<div class="box__input" style="text-align: center; padding: 20px;">' +
-            '<i class="fa fa-sign-in fa-5x fa-rotate-90"></i>' +
+            '<i class="fa fa-sign-in fa-5x fa-rotate-270"></i>' +
             '<input class="box__file invisible" type="file" id="csv_file" name="csv_file" data-multiple-caption="{count} ' + gettext("files selected") + '" multiple/>' +
             '<label id="uploadlabel" for="csv_file">' +
             '<kbd>' +
@@ -2735,9 +2748,9 @@ function import_show(title, paragraph, multiple, fxhr) {
         '</div>' +
         '</div>' +
         '<div class="modal-footer">' +
-        '<input type="submit" id="importbutton" role="button" class="btn btn-danger pull-left" value="' + gettext('Import') + '">' +
+        '<input type="submit" id="importbutton" role="button" class="btn btn-primary btn-dialog-confirm" value="' + gettext('Import') + '">' +
         '<input type="submit" id="cancelimportbutton" role="button" class="btn btn-danger pull-left" value="' + gettext('Cancel Import') + '" style="display: none;">' +
-        '<input type="submit" id="cancelbutton" role="button" class="btn btn-primary pull-right" data-dismiss="modal" value="' + gettext('Close') + '">' +
+        '<input type="submit" id="cancelbutton" role="button" class="btn btn-default btn-dialog-cancel pull-right" data-dismiss="modal" value="' + gettext('Close') + '">' +
         '<input type="submit" id="copytoclipboard" role="button" class="btn btn-primary pull-left" value="' + gettext('Copy to Clipboard') + '" style="display: none;">' +
         '</div>' +
         '</div>' +
