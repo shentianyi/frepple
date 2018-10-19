@@ -2362,7 +2362,7 @@
 							"fm-button-icon-right" :
 							(iconOnLeftOrRight === "left" ? "fm-button-icon-left" : "")
 				) + "' role='button' tabindex='0'>" +
-				(icon ? "<span class='fm-button-icon " + ($self.jqGrid("getIconRes", icon) || icon) + "'></span>" : "") +
+				(icon ? "<span class='fm-button-icon" + ($self.jqGrid("getIconRes", icon) || icon) + "'></span>" : "") +
 				(text ? "<span class='fm-button-text'>" + text + "</span>" : "") +
 				"</a>";
 		},
@@ -11694,6 +11694,7 @@
 							break;
 						}
 					}
+
 					if (!columns) { return; }
 					var editoptions = $.extend({}, columns.editoptions || {});
 					delete editoptions.readonly;
@@ -12683,7 +12684,7 @@
 					}
 
 					bt = "<div class='" + getGuiStyles.call($t, "dialog.footer") + "'><table class='EditTable' style='border:0px none;margin-top:5px' id='" + fid + "_2'><tbody><tr><td colspan='2'><hr class='" +
-						getGuiStyles.call($t, "dialog.hr") + "' style='margin:1px'/></td></tr><tr><td class='EditButton EditButton-" + p.direction + "'  style='float:" + (p.direction === "rtl" ? "right" : "left") + ";'>" + bC + tmpl + "</td><td class='EditButton EditButton-" + p.direction + "'>" + bQ + bS + "</td></tr></tbody></table></div>";
+						getGuiStyles.call($t, "dialog.hr") + "' style='margin:1px'/></td></tr><tr><td><div class='EditButton EditButton-" + p.direction + "'  style='float:" + (p.direction === "rtl" ? "right" : "left") + ";'>" + bC + tmpl + "</div><div class='EditButton EditButton-" + p.direction + "'>" + bQ + bS + "</div></td></tr></tbody></table></div>";
 					fid = jqID(fid);
 					o.gbox = gboxSelector; //"#gbox_" + fid;
 					o.height = "auto";
