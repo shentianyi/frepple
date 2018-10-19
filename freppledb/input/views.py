@@ -880,12 +880,6 @@ class LocationList(GridReport):
 
         GridFieldText('_pk', field_name='id', editable=False, hidden=True),
         GridFieldText('_nk', field_name='nr', editable=False, hidden=True),
-
-        # GridFieldLastModified('lastmodified', title=_('lastmodified'), editable=False),
-
-        # CMARK 必须有为了弹框查询
-        GridFieldText('_pk', field_name='id', editable=False, hidden=True),
-        GridFieldText('_nk', field_name='nr', editable=False, hidden=True),
     )
 
 

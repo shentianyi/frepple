@@ -23,10 +23,10 @@
         {% endif %}
         <div class="row" style="margin-top: 30px;">
             {% for line in fieldset %}
-            <div class="col-md-6 control-group {% if line.fields|length_is:'1' and line.errors %} error{% endif %}{% for field in line %}{% if field.field.name %} field-{{ field.field.name }}{% endif %}{% if not line.has_visible_field %} hidden{% endif %}{% endfor %}">
+            <div class="col-md-{% if not line.fields|length_is:'1' %}12{% else %}6 col-xs-12 {% endif %} control-group {% if line.fields|length_is:'1' and line.errors %} error{% endif %}{% for field in line %}{% if field.field.name %} field-{{ field.field.name }}{% endif %}{% if not line.has_visible_field %} hidden{% endif %}{% endfor %}">
                 {% for field in line %}
-                <div class="input-field form-group {% if not line.fields|length_is:'1' %} field-box{% if field.field.name %} field-{{ field.field.name }}{% endif %}{% if not field.is_readonly and field.errors %} errors{% endif %}{% if field.field.is_hidden %} hidden{% endif %}{% endif %}">
-                    <div class="control-label col-md-3 input-field-label">
+                <div class="input-field form-group {% if not line.fields|length_is:'1' %}{%if field.is_checkbox %} field-checkbox {%else%}col-xs-12 input-field-xs col-md-6{% endif %}{% endif %} {% if not line.fields|length_is:'1' %} field-box {% if field.field.name %} field-{{ field.field.name }}{% endif %}{% if not field.is_readonly and field.errors %} errors{% endif %}{% if field.field.is_hidden %} hidden{% endif %}{% endif %}">
+                    <div class="control-label {%if not field.is_checkbox %}col-md-4{%endif%} input-field-label">
                         {% if field.field.field.required %}
                             <label class="input-required" title="该项必填" data-toggle="tooltip" ></label>
                         {% endif %}
@@ -35,7 +35,7 @@
                     </div>
 
                     {% if field.is_checkbox %}
-                        <div class="controls col-md-9 input-field-input">
+                        <div class="controls {%if not field.is_checkbox %}col-md-8{%endif%} input-field-input">
                             <div class="checkbox">
                                 {% dab_field_rendering field.field %}
                                 {% if field.field.help_text %}
@@ -44,7 +44,7 @@
                             </div>
                         </div>
                     {% else %}
-                    <div class="controls col-md-9 input-field-input">
+                    <div class="controls {%if not field.is_checkbox %}col-md-8{%endif%} input-field-input">
                         {% if field.is_readonly %}
                             <p>{{ field.contents }}</p>
                         {% else %}

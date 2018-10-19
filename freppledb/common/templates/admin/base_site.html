@@ -11,6 +11,7 @@
 <link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/ui.jqgrid.min.css" />
 <link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/{{request.theme}}/bootstrap.min.css" />
 <link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/bootstrap-datetimepicker.css" />
+<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/jquery.datetimepicker.css" />
 <link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/frepple-laura.css" />
 <link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/base.css" />
 <link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/button.css" />
@@ -28,6 +29,7 @@
 <script type="text/javascript" src="{{STATIC_URL}}js/jquery.jqgrid.min.js"></script>
 <script type="text/javascript" src="{{STATIC_URL}}js/frepple{% if not debug_js %}.min{% endif %}.js"></script>
 <script type="text/javascript" src="{{STATIC_URL}}js/Sortable.min.js"></script>
+<script type="text/javascript" src="{{STATIC_URL}}js/jquery.datetimepicker.full.min.js"></script>
 <script type="text/javascript" src="{{STATIC_URL}}js/i18n/intro.en.js"></script>
 <script type="text/javascript" src="{{STATIC_URL}}js/base.js"></script>
 <script type="text/javascript">
@@ -49,6 +51,26 @@ $(function() {
       $("#showHints").addClass("toggle-off");
     {% endif %}
     $('[data-toggle="tooltip"],#database').tooltip({delay: { "show": 500, "hide": 100 }});
+
+    if($('.datetime').html() !== undefined){
+        $('.datetime').html($('.datetime').html().replace("Date:", "").replace("Time:", ""));
+    }
+
+    // 时间选择器
+    $(".vDateField").datetimepicker({
+        timepicker: false,
+        format: 'Y-m-d',
+        formatDate: 'Y-m-d',
+        defaultDate: new Date().format("YYYY-MM-DD"),
+    });
+
+    //单纯显示时间
+    $(".vTimeField").datetimepicker({
+        datepicker: false,
+        format: 'H:i:s',
+        formatDate: 'H:i:s',
+        step: 3600,
+    });
   });
 </script>
 {% endblock %}

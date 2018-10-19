@@ -15,24 +15,29 @@
     }
 
     #content-main .form-control {
-        /*width: calc(100% - 45px);*/
-        width: 90%;
+        width: calc(100% - 115px);
+        /*width: 90%;*/
         display: inline-block;
     }
 
     #content-main .form-control-inline {
-        width: 100%;
+        /*width: 100%;*/
     }
 
     #content-main select.form-control {
-        width: 89%;
         display: inline-block;
     }
 
     #content-main .vDateField, .row .vTimeField {
         width: calc(100% - 115px);
         /*max-width: 150px;*/
+        /*width: 150px;*/
+        /*text-align: center;*/
     }
+
+    /*#content-main .vTimeField {*/
+        /*width: 100px;*/
+    /*}*/
 
     #content-main input[type=number] {
         max-width: 150px;
@@ -88,6 +93,7 @@
         </div>
     </div>
     {% endif %}
+
     <div class="row">
         <div class="col-md-12">
             <form {% if has_file_field %}enctype="multipart/form-data" {% endif %}action="{{ form_url }}" method="post"
@@ -115,19 +121,51 @@
 
                 {% block admin_change_form_document_ready %}
                 <script type="text/javascript">
+
                     (function ($) {
                         $(document).ready(function () {
+
                             $('.add-another').click(function (e) {
                                 e.preventDefault();
                                 showAddAnotherPopup(this);
                             });
+
                             $('.related-lookup').click(function (e) {
                                 e.preventDefault();
                                 showRelatedObjectLookupPopup(this);
                             });
-                            {%if adminform and add %}
+
+                            {% if adminform and add %}
                                 $('form#{{ opts.model_name }}_form :input:visible:enabled:first').focus()
-                            {%  endif %}
+                            {% endif %}
+
+                            {% if opts.model_name == 'item' %}
+                                $("#id_type").change(function () {
+                                    $.ajax({
+                                        url: '/',
+                                        method: 'get',
+                                        data: {
+                                            type: $(this).val()
+                                        },
+                                        success: function (data) {
+                                            var data = [{ key: 'A0', value: 'A0'}, { key: 'A1', value: 'A1'}, { key: 'A1', value: 'A1'}]
+
+                                            $("#id_status").empty();
+
+                                            var html = '<option selected>---------</option>';
+
+                                            data.map(d => {
+                                                html += '<option value="'+ d.key +'" selected>' + d.value + '</option>';
+                                            });
+
+                                            $("#id_status").append(html);
+                                        },
+                                        error: function (error) {
+                                           console.log(error)
+                                        }
+                                    })
+                                });
+                            {% endif %}
                         });
                     })(django.jQuery);
                 </script>

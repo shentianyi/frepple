@@ -1,7 +1,25 @@
 {% load i18n admin_urls %}
 <div class="row submit-area">
     <div class="col-md-6">
-        <div class="pull-left">
+        <div class="pull-left" style="color: #333333;font-size: 20px;">
+            {% block content_title %}
+                <div class="row">
+                    <div class="col-md-12">
+                        {% if post_title %}
+                            编辑{{title}}
+                        {% else %}
+                            创建{{title}}
+                        {% endif %}
+                            <small>&nbsp;&nbsp;<span id="curfilter"></span></small>
+                        {% block tools %}
+                        {% endblock %}
+                    </div>
+                </div>
+            {% endblock %}
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="pull-right">
             {% comment %}Translators: Translation included with Django {% endcomment %}
             {% if show_save %}
                 <input type="submit" value="{% trans 'Save' %}" class="btn btn-primary default btn-aps btn-aps-save" name="_save" {{ onclick_attrib }}/>
@@ -20,15 +38,15 @@
             {%endif %}
         </div>
     </div>
-    <div class="col-md-6">
-        <div class="pull-right">
-            {% if show_delete_link %}
-            {% url opts|admin_urlname:'delete' original.pk|admin_urlquote as delete_url %}
-            {% comment %}Translators: Translation included with Django {% endcomment %}
-            <a class="btn btn-danger btn-aps deletelink" href="{{request.prefix}}{% add_preserved_filters delete_url %}">
-                {%trans "Delete" %}
-            </a>
-            {% endif %}
-        </div>
-    </div>
+    <!--<div class="col-md-6">-->
+        <!--<div class="pull-right">-->
+            <!--{% if show_delete_link %}-->
+            <!--{% url opts|admin_urlname:'delete' original.pk|admin_urlquote as delete_url %}-->
+            <!--{% comment %}Translators: Translation included with Django {% endcomment %}-->
+            <!--<a class="btn btn-danger btn-aps deletelink" href="{{request.prefix}}{% add_preserved_filters delete_url %}">-->
+                <!--{%trans "Delete" %}-->
+            <!--</a>-->
+            <!--{% endif %}-->
+        <!--</div>-->
+    <!--</div>-->
 </div>

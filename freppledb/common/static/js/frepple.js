@@ -489,7 +489,6 @@ jQuery.extend($.fn.fmatter.percentage, {
 
 //
 // Functions related to jqgrid
-//
 
 function windowname_to_id(text) {
     text = text.replace(/__dot__/g, '.');
@@ -522,7 +521,7 @@ function popClick(win, id) {
         showInput.type = "text";
         showInput.value = r._nk;
         showInput.className = 'form-control';
-        showInput.id = window.name + '_new_display';
+        showInput.id = window.name + '_new_display_by_sfz';
         showInput.readOnly = true;
         elem.parentNode.prepend(showInput);
     }
@@ -775,10 +774,21 @@ var grid = {
         });
 
         $('#okCustbutton').on('click', function () {
+            debugger
             var colModel = $("#grid")[0].p.colModel;
             var perm = [];
             var hiddenrows = [];
-            if (colModel[0].name == "cb") perm.push(0);
+
+            if(colModel[0].name == "rn") {
+                perm.push(0);
+                if(colModel[1].name == "cb"){
+                    perm.push(1);
+                }
+            }else if(colModel[0].name == "cb"){
+                perm.push(0);
+            }else{
+            }
+            // if (colModel[0].name == "cb") perm.push(0);
             cross_idx = [];
             if (!graph)
                 $("#grid").jqGrid('destroyFrozenColumns');
@@ -843,6 +853,9 @@ var grid = {
         //   - paging button string, when called from jqgrid paging event
         //   - number argument, when called from jqgrid resizeStop event
         //   - function argument, when you want to run a callback function after the save
+
+        debugger
+
         var colArray = new Array();
         var colModel = $("#grid")[0].p.colModel;
         var maxfrozen = 0;
