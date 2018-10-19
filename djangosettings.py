@@ -61,7 +61,7 @@ DATABASES = {
     'USER': 'postgres',     # Role name when using md5 authentication.
                            # Leave as an empty string when using peer or
                            # ident authencation.
-    'PASSWORD': '123456@', # Role password when using md5 authentication.
+    'PASSWORD': 'postgres', # Role password when using md5 authentication.
                            # Leave as an empty string when using peer or
                            # ident authencation.
     'HOST': '127.0.0.1',            # When using TCP sockets specify the hostname,

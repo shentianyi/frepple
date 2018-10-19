@@ -226,6 +226,46 @@ msgstr "收货周期"
 msgid "earliest order date"
 msgstr "最早下单时间"
 
+#: input/models.py:976 input/views.py:916
+msgid "sale item"
+msgstr "销售物料"
+
+#: input/views.py:916
+msgid "sale_item_display"
+msgstr "销售物料"
+
+#: input/models.py:976 input/views.py:916
+msgid "product item"
+msgstr "生产物料"
+
+#: input/views.py:916
+msgid "product_item_display"
+msgstr "生产物料"
+
+#: input/views.py:1275
+msgid "client_display"
+msgstr "客户"
+
+#: input/views.py:1275
+msgid "client"
+msgstr "客户"
+
+#: input/views.py:1277
+msgid "location_display"
+msgstr "地点"
+
+#: input/models.py:339 input/views.py:1279
+msgid "client item nr"
+msgstr "客户物料编号"
+
+#: input/models.py:339 input/views.py:1279
+msgid "item successor"
+msgstr "替代物料"
+
+#: input/models.py:339 input/views.py:1279
+msgid "item_successor_display"
+msgstr "替代物料"
+
 
 # CMARK 翻译
 msgid "id"
@@ -2367,6 +2407,12 @@ msgstr "用来定义工作时间和假期的日历"
 #: input/models.py:143 input/views.py:739
 msgid "locations"
 msgstr "地点"
+
+msgid "item clients"
+msgstr "物料销售"
+
+msgid "item successors"
+msgstr "物料替代"
 
 #: input/models.py:165 input/views.py:762
 msgid "customers"

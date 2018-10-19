@@ -236,14 +236,14 @@ class Customer(AuditModel, HierarchyModel):
 
 
 class Item(AuditModel, HierarchyModel):
-    status1 = (
+    fg_status = (
         ('S0', _('S0')),
         ('S1', _('S1')),
         ('S2', _('S1')),
         ('S3', _('S2')),
         ('S4', _('S3')),
         ('S5', _('S4')),)
-    status2 = (
+    rm_status = (
         ('A0', _('A0')),
         ('A1', _('A1')),
         ('A2', _('A1')),
@@ -254,18 +254,6 @@ class Item(AuditModel, HierarchyModel):
         ('RM', _('RM')),
     )
 
-    test = {('FG', _('FG')): [('S0', _('S0')),
-                              ('S1', _('S1')),
-                              ('S2', _('S1')),
-                              ('S3', _('S2')),
-                              ('S4', _('S3')),
-                              ('S5', _('S4'))],
-            ('WIP', _('WIP')): [],
-            ('RM', _('RM')): [
-                ('FG', _('FG')),
-                ('WIP', _('WIP')),
-                ('RM', _('RM'))]
-            }
 
     # Database fields
     # 设置外键显示的值
@@ -299,7 +287,7 @@ class Item(AuditModel, HierarchyModel):
                                                blank=True)
     pallet_volume = models.DecimalField(_('pallet volume'), max_digits=20, decimal_places=8, null=True, blank=True)
     plan_list_date = models.DateField(_('plan list date'), db_index=True, null=True, blank=True, )
-    plan_delist_date = models.DateField(_('plan delist date'), db_index=True, null=True, blank=True, )
+    plan_delist_date = models.DateField(_('plan delist date'), db_index=True, null=True, blank=True)
     category = models.CharField(_('category'), max_length=300, null=True, blank=True, db_index=True)
     subcategory = models.CharField(_('subcategory'), max_length=300, null=True, blank=True, db_index=True)
     description = models.CharField(_('description'), max_length=500, null=True, blank=True)
@@ -324,6 +312,116 @@ class Item(AuditModel, HierarchyModel):
         verbose_name = _('item')
         verbose_name_plural = _('items')
         ordering = ['id']
+
+
+class ItemClient(AuditModel):
+
+    id = models.AutoField(_('id'), help_text=_('Unique identifier'), primary_key=True)
+    sale_item = models.ForeignKey(
+        Item, verbose_name=_('sale item'),
+        db_index=True, related_name='itemclients_item',
+        null=False, blank=False, on_delete=models.CASCADE)
+
+    product_item = models.ForeignKey(
+        Item, verbose_name=_('product item'),
+        db_index=True, related_name='itemclients_product_item',
+        null=False, blank=False, on_delete=models.CASCADE)
+
+    client = models.ForeignKey(
+        Customer, verbose_name=_('client'),
+        db_index=True, related_name='itemsclients_client',
+        null=False, blank=False, on_delete=models.CASCADE)
+
+    location = models.ForeignKey(
+        Location, verbose_name=_('location'),
+        db_index=True, related_name='itemclients_location',
+        null=False, blank=False, on_delete=models.CASCADE)
+    client_item_nr = models.CharField(_('client item nr'), max_length=300, null=True, blank=True, db_index=True)
+    status = models.CharField(_('status'), max_length=20, null=True, blank=True, choices=Item.fg_status)
+    plan_list_date = models.DateField(_('plan list date'), db_index=True, null=True, blank=True )
+    plan_delist_date = models.DateField(_('plan delist date'), db_index=True, null=True, blank=True)
+    effective_start = models.DateTimeField(
+        _('effective start'), null=True, blank=True,
+        help_text=_('Validity start date'))
+    effective_end = models.DateTimeField(
+        _('effective end'), null=True, blank=True,
+        help_text=_('Validity end date'))
+
+    # CMARK 的显示值是这个返回的
+    def __str__(self):
+        # return '%s - %s - %s' % (
+        return '%s - %s -%s -%s' % (
+            self.sale_item.nr if self.sale_item else 'No item',
+            self.product_item.nr if self.product_item else 'No product item',
+            self.client.nr if self.client else 'No client',
+            self.location.nr if self.location else 'Any location'
+        )
+
+    class Manager(MultiDBManager):
+        def get_by_natural_key(self, item, product_item, client, location):
+            return self.get(item=item, product_item=product_item, client=client, location=location)
+
+    def natural_key(self):
+        return (self.item, self.product_item, self.client, self.location)
+
+    objects = Manager()
+
+    class Meta(AuditModel.Meta):
+        db_table = 'itemclient'
+        verbose_name = _('item client')
+        verbose_name_plural = _('item clients')
+        ordering = ['id']
+
+
+class ItemSuccessor(AuditModel):
+    # Database fields
+    # # 设置外键显示的值
+    # display_key = 'nr'
+    # # 设置外键导入的值
+    # foreign_input_key = 'nr'
+
+    id = models.AutoField(_('id'), help_text=_('Unique identifier'), primary_key=True)
+    item = models.ForeignKey(
+        Item, verbose_name=_('item'),
+        db_index=True, related_name='itemsuccessors_item',
+        null=False, blank=False, on_delete=models.CASCADE)
+
+    item_successor = models.ForeignKey(
+        Item, verbose_name=_('item successor'),
+        db_index=True, related_name='itemsuccessor_successor',
+        null=False, blank=False, on_delete=models.CASCADE)
+
+    priority = models.IntegerField(_('priority'), default=0)
+    ratio = models.DecimalField(_('ratio'), max_digits=20, decimal_places=8,default=100)
+    effective_start = models.DateTimeField(
+        _('effective start'), null=True, blank=True,
+        help_text=_('Validity start date'))
+    effective_end = models.DateTimeField(
+        _('effective end'), null=True, blank=True,
+        help_text=_('Validity end date'))
+
+    def __str__(self):
+        # return '%s - %s - %s' % (
+        return '%s - %s' % (
+            self.item.nr if self.item else 'No item',
+            self.item_successor.nr if self.item_successor else 'No item successor',
+        )
+
+    class Manager(MultiDBManager):
+        def get_by_natural_key(self, item, item_successor):
+            return self.get(item=item, item_successor=item_successor)
+
+    def natural_key(self):
+        return (self.item, self.item_successor)
+
+    objects = Manager()
+
+    class Meta(AuditModel.Meta):
+        db_table = 'itemsuccessor'
+        verbose_name = _('item successor')
+        verbose_name_plural = _('item successors')
+        ordering = ['id']
+
 
 
 class Operation(AuditModel):
@@ -969,11 +1067,7 @@ class Supplier(AuditModel, HierarchyModel):
 
 
 class ItemSupplier(AuditModel):
-    status1 = (
-        ('A0', _('A0')),
-        ('A1', _('A1')),
-        ('A2', _('A1')),
-        ('A3', _('A2')),)
+
     # Database fields
     # 设置外键显示的值
     display_key = 'nr'
@@ -991,17 +1085,17 @@ class ItemSupplier(AuditModel):
         null=False, blank=False, on_delete=models.CASCADE
     )
     supplier_item_nr = models.CharField(_('supplier item nr'), max_length=300, db_index=True, null=True, blank=True)
-    status = models.CharField(_('status'), max_length=20, choices=status1)
+    status = models.CharField(_('status'), max_length=20, choices=Item.rm_status)
     cost = models.DecimalField(_('cost'), max_digits=20, decimal_places=8)
     monetary_unit = models.CharField(_('monetary unit'), max_length=20)
     cost_unit = models.DecimalField(_('cost unit'), max_digits=20, decimal_places=8)
     priority = models.IntegerField(_('priority'), default=0, help_text=_('Priority among all alternates'))
-    ratio = models.DecimalField(_('ratio'), max_digits=20, decimal_places=8, null=True, blank=True)
+    ratio = models.DecimalField(_('ratio'), max_digits=20, decimal_places=8, default=100,null=True, blank=True)
     moq = models.DecimalField(_('MOQ'), max_digits=20, decimal_places=8)
-    product_time = models.DecimalField(_('product time'), max_digits=20, decimal_places=8,null=True, blank=True)
-    load_time = models.DecimalField(_('load time'), null=True, max_digits=20, decimal_places=8,blank=True)
-    transit_time = models.DecimalField(_('transit time'), max_digits=20, decimal_places=8,null=True, blank=True)
-    receive_time = models.DecimalField(_('receive time'), max_digits=20, decimal_places=8,null=True, blank=True)
+    product_time = models.DecimalField(_('product time'), max_digits=20, decimal_places=8,default=0, null=True, blank=True)
+    load_time = models.DecimalField(_('load time'), null=True, max_digits=20, decimal_places=8,default=0 ,blank=True)
+    transit_time = models.DecimalField(_('transit time'), max_digits=20, decimal_places=8,default=0, null=True, blank=True)
+    receive_time = models.DecimalField(_('receive time'), max_digits=20, decimal_places=8,default=0, null=True, blank=True)
     mpq = models.DecimalField(_('mpq'), max_digits=20, decimal_places=8, null=True, blank=True)
     earliest_order_date = models.DateField(_('earliest order date'), null=True, blank=True)
     outer_package_num = models.IntegerField(_('outer package num'), null=True, blank=True)
@@ -1009,13 +1103,13 @@ class ItemSupplier(AuditModel):
     outer_package_gross_weight = models.DecimalField(_('outer package gross weight'), max_digits=20, decimal_places=8,
                                                      null=True, blank=True)
     pallet_gross_weight = models.DecimalField(_('pallet gross weight'), max_digits=20, decimal_places=8,
-                                                     null=True, blank=True)
+                                              null=True, blank=True)
     outer_package_volume = models.DecimalField(_('outer package volume'), max_digits=20, decimal_places=8,
-                                                     null=True, blank=True)
+                                               null=True, blank=True)
     pallet_volume = models.DateField(_('pallet volume'), null=True, blank=True)
     plan_list_date = models.DateField(_('plan list date'), null=True, blank=True)
     plan_delist_date = models.DateField(_('plan delist date'), null=True, blank=True)
-    origin = models.CharField(_('origin'), max_length=20, null=True, blank=True)
+    origin_country = models.CharField(_('origin country'), max_length=20, null=True, blank=True)
     effective_start = models.DateTimeField(
         _('effective start'), null=True, blank=True,
         help_text=_('Validity start date')
@@ -1068,27 +1162,27 @@ class ItemSupplier(AuditModel):
     # )
 
     class Manager(MultiDBManager):
-        def get_by_natural_key(self, item, supplier, effective_start):
+        def get_by_natural_key(self, item, supplier):
             # return self.get(item=item, location=location, supplier=supplier, effective_start=effective_start)
-            return self.get(item=item, supplier=supplier, effective_start=effective_start)
+            return self.get(item=item, supplier=supplier)
 
     def natural_key(self):
-        return (self.item, self.supplier, self.effective_start)
+        return (self.item, self.supplier)
 
     objects = Manager()
 
     def __str__(self):
         # return '%s - %s - %s' % (
         return '%s - %s' % (
-            self.supplier.name if self.supplier else 'No supplier',
-            self.item.name if self.item else 'No item',
+            self.supplier.nr if self.supplier else 'No supplier',
+            self.item.nr if self.item else 'No item',
             # self.location.nr if self.location else 'Any location'
         )
 
     class Meta(AuditModel.Meta):
         db_table = 'itemsupplier'
         # unique_together = (('item', 'location', 'supplier', 'effective_start'),)
-        unique_together = (('item', 'supplier', 'effective_start'),)
+        # unique_together = (('item', 'supplier', 'effective_start'),)
         verbose_name = _('item supplier')
         verbose_name_plural = _('item suppliers')
 

@@ -32,6 +32,9 @@ urlpatterns = [
   url(r'^data/input/customer/$', freppledb.input.views.CustomerList.as_view(), name="input_customer_changelist"),
   url(r'^data/input/demand/$', freppledb.input.views.DemandList.as_view(), name="input_demand_changelist"),
   url(r'^data/input/item/$', freppledb.input.views.ItemList.as_view(), name="input_item_changelist"),
+  url(r'^data/input/itemclient/$', freppledb.input.views.ItemClientList.as_view(), name="input_itemclient_changelist"),
+  url(r'^data/input/itemsuccessor/$', freppledb.input.views.ItemSuccessorList.as_view(), name="input_itemsuccessor_changelist"),
+
   url(r'^data/input/operationresource/$', freppledb.input.views.OperationResourceList.as_view(), name="input_operationresource_changelist"),
   url(r'^data/input/operationmaterial/$', freppledb.input.views.OperationMaterialList.as_view(), name="input_operationmaterial_changelist"),
   url(r'^data/input/calendar/$', freppledb.input.views.CalendarList.as_view(), name="input_calendar_changelist"),
@@ -96,6 +99,8 @@ urlpatterns = [
   url(r'^api/input/supplier/$', freppledb.input.serializers.SupplierAPI.as_view()),
   url(r'^api/input/itemsupplier/$', freppledb.input.serializers.ItemSupplierAPI.as_view()),
   url(r'^api/input/itemdistribution/$', freppledb.input.serializers.ItemDistributionAPI.as_view()),
+  url(r'^api/input/itemclient/$', freppledb.input.serializers.ItemClientAPI.as_view()),
+  url(r'^api/input/itemsuccessor/$', freppledb.input.serializers.ItemSuccessorAPI.as_view()),
 
   url(r'^api/input/buffer/(?P<pk>(.+))/$', freppledb.input.serializers.BufferdetailAPI.as_view()),
   url(r'^api/input/resource/(?P<pk>(.+))/$', freppledb.input.serializers.ResourcedetailAPI.as_view()),
@@ -104,10 +109,11 @@ urlpatterns = [
   url(r'^api/input/location/(?P<pk>(.+))/$', freppledb.input.serializers.LocationdetailAPI.as_view()),
   #　CMARK 自然键路由
   url(r'^api/input/nk/location/(?P<nk>(.+))/$', freppledb.input.serializers.LocationdetailNkAPI.as_view()),
-
   url(r'^api/input/customer/(?P<pk>(.+))/$', freppledb.input.serializers.CustomerdetailAPI.as_view()),
+  url(r'^api/input/nk/customer/(?P<nk>(.+))/$', freppledb.input.serializers.LocationdetailNkAPI.as_view()),
   url(r'^api/input/demand/(?P<pk>(.+))/$', freppledb.input.serializers.DemanddetailAPI.as_view()),
   url(r'^api/input/item/(?P<pk>(.+))/$', freppledb.input.serializers.ItemdetailAPI.as_view()),
+  url(r'^api/input/nk/item/(?P<nk>(.+))/$', freppledb.input.serializers.ItemdetailNkAPI.as_view()),
   url(r'^api/input/operationresource/(?P<pk>(.+))/$', freppledb.input.serializers.OperationResourcedetailAPI.as_view()),
   url(r'^api/input/operationmaterial/(?P<pk>(.+))/$', freppledb.input.serializers.OperationMaterialdetailAPI.as_view()),
   url(r'^api/input/calendar/(?P<pk>(.+))/$', freppledb.input.serializers.CalendardetailAPI.as_view()),
@@ -123,7 +129,10 @@ urlpatterns = [
   url(r'^api/input/skill/(?P<pk>(.+))/$', freppledb.input.serializers.SkilldetailAPI.as_view()),
   url(r'^api/input/resourceskill/(?P<pk>(.+))/$', freppledb.input.serializers.ResourceSkilldetailAPI.as_view()),
   url(r'^api/input/supplier/(?P<pk>(.+))/$', freppledb.input.serializers.SupplierdetailAPI.as_view()),
+  url(r'^api/input/nk/supplier/(?P<nk>(.+))/$', freppledb.input.serializers.SupplierdetailNkAPI.as_view()),
   url(r'^api/input/itemsupplier/(?P<pk>(.+))/$', freppledb.input.serializers.ItemSupplierdetailAPI.as_view()),
   url(r'^api/input/itemdistribution/(?P<pk>(.+))/$', freppledb.input.serializers.ItemDistributiondetailAPI.as_view()),
+  url(r'^api/input/itemclient/(?P<pk>(.+))/$', freppledb.input.serializers.ItemClientdetailAPI.as_view()),
+  url(r'^api/input/itemsuccessor/(?P<pk>(.+))/$', freppledb.input.serializers.ItemSuccessordetailAPI.as_view()),
 
   ]
