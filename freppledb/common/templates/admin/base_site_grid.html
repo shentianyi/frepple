@@ -28,7 +28,7 @@ $(function() {
 	  datatype: "json",
 	  jsonReader : {repeatitems:false},
     colModel:[{{colmodel|safe}}],
-    rownumbers: true,
+//    rownumbers: true,
    	rowNum: {{request.pagesize}},
    	autoencode: false, {% if is_popup %}
     onSelectRow: grid.setSelectedRow, {% elif reportclass.editable and haschangeperm %}
