@@ -1098,40 +1098,57 @@ class ItemDistribution(AuditModel):
     id = models.AutoField(_('identifier'), primary_key=True)
     item = models.ForeignKey(
         Item, verbose_name=_('item'),
-        db_index=True, related_name='distributions',
+        db_index=True, related_name='itemdistributions_item',
         null=False, blank=False, on_delete=models.CASCADE
     )
-    location = models.ForeignKey(
-        Location, verbose_name=_('location'), null=True, blank=True,
+    origin = models.ForeignKey(
+        Location, verbose_name=_('distribute origin location'), on_delete=models.CASCADE,
+        db_index=True, null=False, blank=False, related_name='itemdistributions_origin'
+    )
+    destination = models.ForeignKey(
+        Location, verbose_name=_('distribute destination location'), null=False, blank=False,
         db_index=True, related_name='itemdistributions_destination',
         on_delete=models.CASCADE
-    )
-    origin = models.ForeignKey(
-        Location, verbose_name=_('origin'), on_delete=models.CASCADE,
-        db_index=True, related_name='itemdistributions_origin'
-    )
-    leadtime = models.DurationField(
-        _('lead time'), null=True, blank=True,
-        help_text=_('lead time')
-    )
-    sizeminimum = models.DecimalField(
-        _('size minimum'), max_digits=20, decimal_places=8,
-        null=True, blank=True, default='1.0',
-        help_text=_("A minimum shipping quantity")
-    )
-    sizemultiple = models.DecimalField(
-        _('size multiple'), null=True, blank=True,
-        max_digits=20, decimal_places=8,
-        help_text=_("A multiple shipping quantity")
     )
     cost = models.DecimalField(
         _('cost'), null=True, blank=True,
         max_digits=20, decimal_places=8,
         help_text=_("Shipping cost per unit")
     )
+    # leadtime = models.DurationField(
+    #     _('lead time'), null=True, blank=True,
+    #     help_text=_('lead time')
+    # )
+
+    load_time = models.DecimalField(_('load time'), default=0, null=True, max_digits=20, decimal_places=8, blank=True)
+    transit_time = models.DecimalField(_('transit time'), default=0, max_digits=20, decimal_places=8, null=True, blank=True)
+    receive_time = models.DecimalField(_('receive time'), default=0, max_digits=20, decimal_places=8, null=True, blank=True)
+
+    size_minimum = models.DecimalField(
+        _('distribute size minimum'), max_digits=20, decimal_places=8,
+        null=True, blank=True, default='1.0',
+        help_text=_("A minimum shipping quantity")
+    )
+    size_multiple = models.DecimalField(
+        _('distribute size multiple'), null=True, blank=True,
+        max_digits=20, decimal_places=8,
+        help_text=_("A multiple shipping quantity")
+    )
+
     priority = models.IntegerField(
         _('priority'), default=1, null=True, blank=True,
         help_text=_('Priority among all alternates')
+    )
+
+    resource = models.ForeignKey(
+        Resource, verbose_name=_('resource'), null=True, blank=True,
+        db_index=True, related_name='itemdistributions_resource', on_delete=models.CASCADE,
+        help_text=_("Resource to model the distribution capacity")
+    )
+    resource_qty = models.DecimalField(
+        _('resource quantity'), null=True, blank=True,
+        max_digits=20, decimal_places=8, default='1.0',
+        help_text=_("Resource capacity consumed per distributed unit")
     )
     effective_start = models.DateTimeField(
         _('effective start'), null=True, blank=True,
@@ -1141,40 +1158,31 @@ class ItemDistribution(AuditModel):
         _('effective end'), null=True, blank=True,
         help_text=_('Validity end date')
     )
-    resource = models.ForeignKey(
-        Resource, verbose_name=_('resource'), null=True, blank=True,
-        db_index=True, related_name='itemdistributions', on_delete=models.CASCADE,
-        help_text=_("Resource to model the distribution capacity")
-    )
-    resource_qty = models.DecimalField(
-        _('resource quantity'), null=True, blank=True,
-        max_digits=20, decimal_places=8, default='1.0',
-        help_text=_("Resource capacity consumed per distributed unit")
-    )
-    fence = models.DurationField(
-        _('fence'), null=True, blank=True,
-        help_text=_('Frozen fence for creating new shipments')
-    )
+
+    # fence = models.DurationField(
+    #     _('fence'), null=True, blank=True,
+    #     help_text=_('Frozen fence for creating new shipments')
+    # )
 
     class Manager(MultiDBManager):
-        def get_by_natural_key(self, item, location, origin, effective_start):
-            return self.get(item=item, location=location, origin=origin, effective_start=effective_start)
+        def get_by_natural_key(self, item, destination, origin, effective_start):
+            return self.get(item=item, destination=destination, origin=origin, effective_start=effective_start)
 
     def natural_key(self):
-        return (self.item, self.location, self.origin, self.effective_start)
+        return (self.item, self.destination, self.origin, self.effective_start)
 
     objects = Manager()
 
     def __str__(self):
         return '%s - %s - %s' % (
-            self.location.nr if self.location else 'Any destination',
+            self.destination.nr if self.destination else 'Any destination',
             self.item.name if self.item else 'No item',
             self.origin.name if self.origin else 'No origin'
         )
 
     class Meta(AuditModel.Meta):
         db_table = 'itemdistribution'
-        unique_together = (('item', 'location', 'origin', 'effective_start'),)
+        unique_together = (('item', 'destination', 'origin', 'effective_start'),)
         verbose_name = _('item distribution')
         verbose_name_plural = _('item distributions')
 
