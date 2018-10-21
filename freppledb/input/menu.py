@@ -23,6 +23,7 @@ from freppledb.input.models import PurchaseOrder, Supplier, ItemSupplier, Operat
 from freppledb.input.models import ItemDistribution, Skill, Resource, OperationResource
 from freppledb.input.models import ResourceSkill, SetupMatrix, SetupRule, SubOperation
 from freppledb.input.models import Calendar, Operation, DeliveryOrder
+from freppledb.input.models import ItemClient, ItemSuccessor
 
 
 menu.addItem(
@@ -54,6 +55,17 @@ menu.addItem(
   "sales", "item", url="/data/input/item/",
   report=freppledb.input.views.ItemList, index=1100, model=Item
   )
+
+menu.addItem(
+  "sales", "item clients", url="/data/input/itemclient/",
+  report=freppledb.input.views.ItemClientList, index=1110, model=ItemClient
+  )
+
+menu.addItem(
+  "sales", "item successors", url="/data/input/itemsuccessor/",
+  report=freppledb.input.views.ItemSuccessorList, index=1120, model=ItemSuccessor
+  )
+
 menu.addItem(
   "sales", "locations", url="/data/input/location/",
   report=freppledb.input.views.LocationList, index=1150, model=Location

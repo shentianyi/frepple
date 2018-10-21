@@ -37,6 +37,8 @@ from freppledb.common.fields import JSONBField
 logger = logging.getLogger(__name__)
 
 
+from django.forms import forms
+
 class HierarchyModel(models.Model):
     display_key = None
 
@@ -636,3 +638,12 @@ class BucketDetail(AuditModel):
         db_table = 'common_bucketdetail'
         unique_together = (('bucket', 'startdate'),)
         ordering = ['bucket', 'startdate']
+
+
+class ItemAdminForm(forms.Form):
+    def locations(self):
+        import json
+        return json.dumps({"浙江": ["杭州", "宁波"], "湖北": ["武汉"]})
+
+    class Meta:
+        db_table = 'item'

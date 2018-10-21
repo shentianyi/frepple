@@ -631,3 +631,5 @@ class MultiDBTabularInline(admin.TabularInline):
 
   def formfield_for_manytomany(self, db_field, request=None, **kwargs):
     return super(MultiDBTabularInline, self).formfield_for_manytomany(db_field, request=request, using=request.database, **kwargs)
+
+
