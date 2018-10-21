@@ -16,7 +16,6 @@
 #
 
 from datetime import datetime
-import json
 
 from django.conf import settings
 from django.contrib.admin.views.decorators import staff_member_required
@@ -24,7 +23,7 @@ from django.db import connections
 from django.db.models import Q
 from django.db.models.fields import CharField
 from django.http import HttpResponse, Http404
-from django.http.response import StreamingHttpResponse, HttpResponseServerError
+from django.http.response import StreamingHttpResponse, HttpResponseServerError, HttpResponseBadRequest
 from django.utils.decorators import method_decorator
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import ungettext
@@ -33,7 +32,6 @@ from django.utils.encoding import force_text
 from django.utils.text import format_lazy
 from django.views.generic import View
 from django.views.decorators.csrf import csrf_exempt
-from rest_framework.generics import ListAPIView
 
 from freppledb.boot import getAttributeFields
 from freppledb.common.models import Parameter
@@ -50,6 +48,11 @@ from freppledb.common.report import GridFieldDateTime, GridFieldTime, GridFieldT
 from freppledb.common.report import GridFieldNumber, GridFieldInteger, GridFieldCurrency
 from freppledb.common.report import GridFieldChoice, GridFieldDuration
 from freppledb.admin import data_site
+
+
+
+import json
+from django.core.serializers.json import DjangoJSONEncoder
 
 import logging
 
@@ -1227,10 +1230,19 @@ class ItemDistributionList(GridReport):
         # ),
     )
 
-class ItemView(View):
-    form_class = ItemAdmin_
+
+class EnumView(View):
     def get(self, request, *args, **kwargs):
-        return 1
+        if 'type' in kwargs and 'value' in kwargs:
+            type = kwargs['type']
+            value = kwargs['value']
+            if type =='item_status_by_type':
+                t = Item.type_status[value]
+                dic = dict(t) if t!=None else None
+                return HttpResponse(json.dumps(dic, cls=DjangoJSONEncoder),
+                                    content_type='application/json')
+        else:
+            raise HttpResponseBadRequest()
 
 class ItemList(GridReport):
     '''
