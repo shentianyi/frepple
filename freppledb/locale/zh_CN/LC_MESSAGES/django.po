@@ -3017,6 +3017,29 @@ msgstr "产品供应商"
 msgid "origin"
 msgstr "原产地"
 
+# class_ItemDistribution class_ItemDistributionList
+msgid "distribute origin location"
+msgstr "出发地点"
+
+# class_ItemDistribution class_ItemDistributionList
+msgid "distribute destination location"
+msgstr "目的地点"
+
+# class_ItemDistribution class_ItemDistributionList
+msgid "distribute size minimum"
+msgstr "最小配送量"
+
+# class_ItemDistribution class_ItemDistributionList
+msgid "distribute size multiple"
+msgstr "配送单位量"
+
+msgid "distribute item"
+msgstr "物料"
+
+msgid "origin country"
+msgstr "原产地"
+
+
 #: input/models.py:901
 msgid "A minimum shipping quantity"
 msgstr "最低装运数量"

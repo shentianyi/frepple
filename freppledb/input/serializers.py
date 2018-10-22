@@ -648,23 +648,23 @@ class ItemDistributionFilter(filters.FilterSet):
 
     class Meta:
         model = freppledb.input.models.ItemDistribution
-        fields = {'id': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ], 'item': ['exact', 'in', ],
-                  # 'location': ['exact', 'in', ], 'origin': ['exact', 'in', ],
-                  # 'leadtime': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
-                  # 'sizeminimum': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
-                  # 'sizemultiple': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
-                  'cost': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
-                  'priority': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
-                  'effective_start': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
-                  'effective_end': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
-                  # 'source': ['exact', 'in', ], 'lastmodified': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
+        fields = {
+                  'id': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
+                   'item__nr': ['exact', ],
+                   'origin__nr': ['exact', ],
+                   'destination__nr': ['exact'],
+                   'priority': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
                   }
-
-        filter_fields = ('id', 'item', 'location', 'origin', 'cost', 'priority', 'effective_start', 'effective_end',
-                         'created_at','updated_at')
+        filter_fields = ('id', 'item__nr', 'origin__nr', 'destination__nr', 'created_at', 'updated_at')
 
 
 class ItemDistributionSerializer(BulkSerializerMixin, ModelSerializer):
+    item = ItemOwnerSerializer(many=False, allow_null=True)
+    id = serializers.IntegerField(read_only=False)
+    origin = LocationOwnerSerializer(many=False, allow_null=True)
+    destination = LocationOwnerSerializer(many=False, allow_null=True)
+
+
     class Meta:
         model = freppledb.input.models.ItemDistribution
         fields = '__all__'
@@ -677,7 +677,8 @@ class ItemDistributionAPI(frePPleListCreateAPIView):
     queryset = freppledb.input.models.ItemDistribution.objects.all()
     serializer_class = ItemDistributionSerializer
     filter_class = ItemDistributionFilter
-    ordering_fields = ('id')
+    ordering_fields =('id' )
+    pagination_class = CustomerNumberPagination
 
 
 class ItemDistributiondetailAPI(frePPleRetrieveUpdateDestroyAPIView):

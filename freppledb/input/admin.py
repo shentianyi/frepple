@@ -246,18 +246,16 @@ data_site.register(ItemSupplier, ItemSupplier_admin)
 
 
 class ItemDistribution_admin(MultiDBModelAdmin):
-    model = ItemDistribution
-    save_on_top = True
-    raw_id_fields = ('item', 'resource')
-    exclude = ('source', 'id')
-    tabs = [
-        {"name": 'edit', "label": _("edit"), "view": "admin:input_itemdistribution_change",
-         "permissions": "input.change_itemdistribution"},
-        {"name": 'comments', "label": _("comments"), "view": "admin:input_itemdistribution_comment"},
-        # . Translators: Translation included with Django
-        {"name": 'history', "label": _("History"), "view": "admin:input_itemdistribution_history"},
-    ]
-
+  model = ItemDistribution
+  save_on_top = True
+  raw_id_fields = ('item', 'origin', 'destination', 'resource')
+  # exclude = ('id')
+  tabs = [
+    {"name": 'edit', "label": _("edit"), "view": "admin:input_itemdistribution_change", "permissions": "input.change_itemdistribution"},
+    {"name": 'comments', "label": _("comments"), "view": "admin:input_itemdistribution_comment"},
+    #. Translators: Translation included with Django
+    {"name": 'history', "label": _("History"), "view": "admin:input_itemdistribution_history"},
+  ]
 
 data_site.register(ItemDistribution, ItemDistribution_admin)
 

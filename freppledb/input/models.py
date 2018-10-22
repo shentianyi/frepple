@@ -254,6 +254,7 @@ class Item(AuditModel, HierarchyModel):
         ('RM', _('RM')),
     )
 
+    type_status = {'FG': fg_status, 'RM': rm_status, 'WIP': None}
 
     # Database fields
     # 设置外键显示的值
@@ -264,7 +265,7 @@ class Item(AuditModel, HierarchyModel):
     nr = models.CharField(_('nr'), max_length=300, db_index=True, unique=True)
     name = models.CharField(_('name'), max_length=300, primary_key=False, db_index=True)
     barcode = models.CharField(_('barcode'), max_length=300, db_index=True, null=True, blank=True)
-    status = models.CharField(_('status'), max_length=20, null=True, blank=True)
+    status = models.CharField(_('status'), max_length=20, null=True, blank=True, choices=fg_status)
     type = models.CharField(_('type'), max_length=20, null=True, blank=True, choices=types)
     cost = models.DecimalField(
         _('cost'), null=True, blank=True,
@@ -1192,7 +1193,7 @@ class ItemDistribution(AuditModel):
     id = models.AutoField(_('identifier'), primary_key=True)
     item = models.ForeignKey(
         Item, verbose_name=_('item'),
-        db_index=True, related_name='distributions',
+        db_index=True, related_name='itemdistributions_item',
         null=False, blank=False, on_delete=models.CASCADE
     )
     origin = models.ForeignKey(
@@ -1216,15 +1217,15 @@ class ItemDistribution(AuditModel):
     )
     receive_time = models.DecimalField(
         _('receive time'), null=True, blank=True,
-        max_digits=20, decimal_places=8,default='0.00'
+        max_digits=20, decimal_places=8,default='0.0'
     )
     size_minimum = models.DecimalField(
         _('size minimum'), null=True, blank=True,
-        max_digits=20, decimal_places=8,default='1.00'
+        max_digits=20, decimal_places=8,default='1.0'
     )
     size_multiple = models.DecimalField(
         _('size multiple'), null=True, blank=True,
-        max_digits=20, decimal_places=8,default='0.00'
+        max_digits=20, decimal_places=8,default='0.0'
     )
     priority = models.IntegerField(
         _('priority'), default=1, null=True, blank=True,
@@ -1232,7 +1233,7 @@ class ItemDistribution(AuditModel):
     )
     resource = models.ForeignKey(
         Resource, verbose_name=_('resource'), null=True, blank=True,
-        db_index=True, related_name='itemdistributions', on_delete=models.CASCADE,
+        db_index=True, related_name='itemdistributions_resource', on_delete=models.CASCADE,
         help_text=_("Resource to model the distribution capacity")
     )
     resource_qty = models.DecimalField(
@@ -1246,10 +1247,7 @@ class ItemDistribution(AuditModel):
     )
     effective_end = models.DateTimeField(
         _('effective end'), null=True, blank=True,
-        help_text=_('Validity end date')
-    )
-
-
+        help_text=_('Validity end date'))
 
     # leadtime = models.DurationField(
     #     _('lead time'), null=True, blank=True,
@@ -1268,7 +1266,6 @@ class ItemDistribution(AuditModel):
     # fence = models.DurationField(
     #     _('fence'), null=True, blank=True,
     #     help_text=_('Frozen fence for creating new shipments')
-    # )
 
     class Manager(MultiDBManager):
         def get_by_natural_key(self, item, origin, destination,resource):
@@ -1289,12 +1286,11 @@ class ItemDistribution(AuditModel):
             self.item.nr if self.item else 'No item',
             self.origin.nr if self.origin else 'No origin',
             self.destination.nr if self.destination else 'Any destination',
-            self.resource.nr if self.resource else 'No resource'
-        )
+            self.resource.nr if self.resource else 'No resource')
 
     class Meta(AuditModel.Meta):
         db_table = 'itemdistribution'
-        # unique_together = (('item', 'location', 'origin', 'effective_start'),)
+        unique_together = (('item', 'destination', 'origin', 'effective_start'),)
         verbose_name = _('item distribution')
         verbose_name_plural = _('item distributions')
 

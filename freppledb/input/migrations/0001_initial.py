@@ -232,16 +232,16 @@ class Migration(migrations.Migration):
                 ('created_at', models.DateTimeField(db_index=True, default=django.utils.timezone.now, editable=False, verbose_name='created_at')),
                 ('updated_at', models.DateTimeField(db_index=True, default=django.utils.timezone.now, editable=False, verbose_name='updated_at')),
                 ('id', models.AutoField(primary_key=True, serialize=False, verbose_name='identifier')),
-                ('leadtime', models.DurationField(blank=True, help_text='lead time', null=True, verbose_name='lead time')),
-                ('sizeminimum', models.DecimalField(blank=True, decimal_places=8, default='1.0', help_text='A minimum shipping quantity', max_digits=20, null=True, verbose_name='size minimum')),
-                ('sizemultiple', models.DecimalField(blank=True, decimal_places=8, help_text='A multiple shipping quantity', max_digits=20, null=True, verbose_name='size multiple')),
                 ('cost', models.DecimalField(blank=True, decimal_places=8, help_text='Shipping cost per unit', max_digits=20, null=True, verbose_name='cost')),
+                ('load_time', models.DecimalField(blank=True, decimal_places=8, default=0, max_digits=20, null=True, verbose_name='load time')),
+                ('transit_time', models.DecimalField(blank=True, decimal_places=8, default=0, max_digits=20, null=True, verbose_name='transit time')),
+                ('receive_time', models.DecimalField(blank=True, decimal_places=8, default=0, max_digits=20, null=True, verbose_name='receive time')),
+                ('size_minimum', models.DecimalField(blank=True, decimal_places=8, default='1.0', help_text='A minimum shipping quantity', max_digits=20, null=True, verbose_name='distribute size minimum')),
+                ('size_multiple', models.DecimalField(blank=True, decimal_places=8, help_text='A multiple shipping quantity', max_digits=20, null=True, verbose_name='distribute size multiple')),
                 ('priority', models.IntegerField(blank=True, default=1, help_text='Priority among all alternates', null=True, verbose_name='priority')),
+                ('resource_qty', models.DecimalField(blank=True, decimal_places=8, default='1.0', help_text='Resource capacity consumed per distributed unit', max_digits=20, null=True, verbose_name='resource quantity')),
                 ('effective_start', models.DateTimeField(blank=True, help_text='Validity start date', null=True, verbose_name='effective start')),
                 ('effective_end', models.DateTimeField(blank=True, help_text='Validity end date', null=True, verbose_name='effective end')),
-                ('resource_qty', models.DecimalField(blank=True, decimal_places=8, default='1.0', help_text='Resource capacity consumed per distributed unit', max_digits=20, null=True, verbose_name='resource quantity')),
-                ('fence', models.DurationField(blank=True, help_text='Frozen fence for creating new shipments', null=True, verbose_name='fence')),
-                ('item', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='distributions', to='input.Item', verbose_name='item')),
             ],
             options={
                 'verbose_name': 'item distribution',
@@ -289,6 +289,7 @@ class Migration(migrations.Migration):
                 ('priority', models.IntegerField(default=0, help_text='Priority among all alternates', verbose_name='priority')),
                 ('ratio', models.DecimalField(blank=True, decimal_places=8, default=100, max_digits=20, null=True, verbose_name='ratio')),
                 ('moq', models.DecimalField(decimal_places=8, max_digits=20, verbose_name='MOQ')),
+
                 ('product_time', models.DecimalField(blank=True, decimal_places=8, default=0, max_digits=20, null=True, verbose_name='product time')),
                 ('load_time', models.DecimalField(blank=True, decimal_places=8, default=0, max_digits=20, null=True, verbose_name='load time')),
                 ('transit_time', models.DecimalField(blank=True, decimal_places=8, default=0, max_digits=20, null=True, verbose_name='transit time')),
@@ -714,18 +715,23 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='itemdistribution',
-            name='location',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='itemdistributions_destination', to='input.Location', verbose_name='location'),
+            name='destination',
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='itemdistributions_destination', to='input.Location', verbose_name='distribute destination location'),
+        ),
+        migrations.AddField(
+            model_name='itemdistribution',
+            name='item',
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='itemdistributions_item', to='input.Item', verbose_name='item'),
         ),
         migrations.AddField(
             model_name='itemdistribution',
             name='origin',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='itemdistributions_origin', to='input.Location', verbose_name='origin'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='itemdistributions_origin', to='input.Location', verbose_name='distribute origin location'),
         ),
         migrations.AddField(
             model_name='itemdistribution',
             name='resource',
-            field=models.ForeignKey(blank=True, help_text='Resource to model the distribution capacity', null=True, on_delete=django.db.models.deletion.CASCADE, related_name='itemdistributions', to='input.Resource', verbose_name='resource'),
+            field=models.ForeignKey(blank=True, help_text='Resource to model the distribution capacity', null=True, on_delete=django.db.models.deletion.CASCADE, related_name='itemdistributions_resource', to='input.Resource', verbose_name='resource'),
         ),
         migrations.AddField(
             model_name='itemclient',
@@ -847,7 +853,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterUniqueTogether(
             name='itemdistribution',
-            unique_together=set([('item', 'location', 'origin', 'effective_start')]),
+            unique_together=set([('item', 'destination', 'origin', 'effective_start')]),
         ),
         migrations.AlterUniqueTogether(
             name='calendarbucket',

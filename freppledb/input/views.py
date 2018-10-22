@@ -16,7 +16,6 @@
 #
 
 from datetime import datetime
-import json
 
 from django.conf import settings
 from django.contrib.admin.views.decorators import staff_member_required
@@ -24,7 +23,7 @@ from django.db import connections
 from django.db.models import Q
 from django.db.models.fields import CharField
 from django.http import HttpResponse, Http404
-from django.http.response import StreamingHttpResponse, HttpResponseServerError
+from django.http.response import StreamingHttpResponse, HttpResponseServerError, HttpResponseBadRequest
 from django.utils.decorators import method_decorator
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import ungettext
@@ -33,7 +32,6 @@ from django.utils.encoding import force_text
 from django.utils.text import format_lazy
 from django.views.generic import View
 from django.views.decorators.csrf import csrf_exempt
-from rest_framework.generics import ListAPIView
 
 from freppledb.boot import getAttributeFields
 from freppledb.common.models import Parameter
@@ -50,6 +48,11 @@ from freppledb.common.report import GridFieldDateTime, GridFieldTime, GridFieldT
 from freppledb.common.report import GridFieldNumber, GridFieldInteger, GridFieldCurrency
 from freppledb.common.report import GridFieldChoice, GridFieldDuration
 from freppledb.admin import data_site
+
+
+
+import json
+from django.core.serializers.json import DjangoJSONEncoder
 
 import logging
 
@@ -1087,123 +1090,155 @@ class ItemDistributionList(GridReport):
     help_url = 'user-guide/modeling-wizard/distribution/item-distributions.html'
 
     rows = (
-        GridFieldInteger('id', title=_('identifier'), key=True, formatter='detail',editable=False,
+        GridFieldInteger('id', title=_('identifier'), key=True, formatter='detail',
                          extra='"role":"input/itemdistribution"'),
-        GridFieldText('item', title=_('item'), field_name='item__name', formatter='detail',editable=False,
-                      extra='"role":"input/item"'),
-        GridFieldText('origin', title=_('origin'), field_name='origin__name', formatter='detail',editable=False,
-                      extra='"role":"input/location"'),
-        GridFieldText('destination', title=_('destination'), field_name='destination__name', formatter='detail',
-                      editable=False,extra='"role":"input/location"'),
-        GridFieldCurrency('cost', title=_('cost'),editable=False),
-        GridFieldNumber('load_time', title=_('load time'),editable=False),
-        GridFieldNumber('receive_time', title=_('receive time'),editable=False),
-        GridFieldNumber('size_minimum', title=_('size minimum'),editable=False),
-        GridFieldNumber('size_multiple', title=_('size multiple'),editable=False),
+
+        # GridFieldText('item', title=_('item'), field_name='item__name', formatter='detail',
+        #               extra='"role":"input/item"', editable=False),
+
+        # 新建一个显示列
+        GridFieldText('item_display', title=_('distribute item'), field_name='item__name', editable=False),
+
+        # 因为是id 让外键永远不显示
+        GridFieldText('item_id', title=_('item_id'), field_name='item_id', editable=False, hidden=True),
+
+        #
+        # GridFieldText('item', title=_('item'), field_name='item__name', formatter='detail',
+        #               extra='"role":"input/item"', editable=False),
+
+        GridFieldText('origin_display', title=_('distribute origin location'), field_name='origin__name', editable=False),
+        GridFieldText('origin_id', title=_('origin_id'), field_name='origin_id', editable=False, hidden=True),
+
+        GridFieldText('destination_display', title=_('distribute destination location'), field_name='destination__name', editable=False),
+        GridFieldText('destination_id', title=_('destination_id'), field_name='destination_id', editable=False, hidden=True),
+
+
+        GridFieldCurrency('cost', title=_('cost'), editable=False),
+
+        GridFieldNumber('load_time', title=_('load time'), editable=False),
+        GridFieldNumber('transit_time', title=_('transit time'), editable=False),
+        GridFieldNumber('receive_time', title=_('receive time'), editable=False),
+
+
+        GridFieldNumber('size_minimum', title=_('distribute size minimum'), editable=False),
+        GridFieldNumber('size_multiple', title=_('distribute size multiple')),
         GridFieldInteger('priority', title=_('priority'), editable=False),
-        GridFieldText('resource', title=_('resource'), field_name='resource__name', formatter='detail',
-                      editable=False, extra='"role":"input/resource"'),
+        # GridFieldDuration('fence', title=_('fence'), initially_hidden=True),
+
+        GridFieldText('resource', title=_('resource'), field_name='resource__name', editable=False),
         GridFieldNumber('resource_qty', title=_('resource quantity'), editable=False),
-        GridFieldDateTime('effective_start', title=_('effective start'), editable=False),
-        GridFieldDateTime('effective_end', title=_('effective end'), editable=False),
+
+        GridFieldDateTime('effective_start', title=_('effective start'), initially_hidden=True, editable=False),
+        GridFieldDateTime('effective_end', title=_('effective end'), initially_hidden=True, editable=False),
+
         GridFieldCreateOrUpdateDate('created_at', title=_('created_at'), editable=False),
         GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at'), editable=False),
-    )
-        # GridFieldDuration('leadtime', title=_('lead time')),
-        # GridFieldDuration('fence', title=_('fence'), initially_hidden=True),
-        # GridFieldDateTime('effective_start', title=_('effective start'), initially_hidden=True),
-        # GridFieldDateTime('effective_end', title=_('effective end'), initially_hidden=True),
-        # GridFieldText('source', title=_('source')),
-        # GridFielcLastModified('lastmodified'),
-        # Optional fields referencing the item
-    #     GridFieldText(
-    #         'item__description', title=string_concat(_('item'), ' - ', _('description')),
-    #         initially_hidden=True, editable=False
-    #     ),
-    #     GridFieldText(
-    #         'item__category', title=string_concat(_('item'), ' - ', _('category')),
-    #         initially_hidden=True, editable=False
-    #     ),
-    #     GridFieldText(
-    #         'item__subcategory', title=string_concat(_('item'), ' - ', _('subcategory')),
-    #         initially_hidden=True, editable=False
-    #     ),
-    #     GridFieldText(
-    #         'item__owner', title=string_concat(_('item'), ' - ', _('owner')),
-    #         field_name='item__owner__name', initially_hidden=True, editable=False
-    #     ),
-    #     GridFieldText(
-    #         'item__source', title=string_concat(_('item'), ' - ', _('source')),
-    #         initially_hidden=True, editable=False
-    #     ),
-    #     GridFieldLastModified(
-    #         'item__lastmodified', title=string_concat(_('item'), ' - ', _('last modified')),
-    #         initially_hidden=True, editable=False
-    #     ),
-    #     # Optional fields referencing the location
-    #     GridFieldText(
-    #         'location__description', title=string_concat(_('location'), ' - ', _('description')),
-    #         initially_hidden=True, editable=False
-    #     ),
-    #     GridFieldText(
-    #         'location__category', title=string_concat(_('location'), ' - ', _('category')),
-    #         initially_hidden=True, editable=False
-    #     ),
-    #     GridFieldText(
-    #         'location__subcategory', title=string_concat(_('location'), ' - ', _('subcategory')),
-    #         initially_hidden=True, editable=False
-    #     ),
-    #     GridFieldText(
-    #         'location__available', title=string_concat(_('location'), ' - ', _('available')),
-    #         initially_hidden=True, field_name='location__available__name', formatter='detail',
-    #         extra='"role":"input/calendar"', editable=False
-    #     ),
-    #     GridFieldText(
-    #         'location__owner', title=string_concat(_('location'), ' - ', _('owner')),
-    #         initially_hidden=True, field_name='location__owner__name', formatter='detail',
-    #         extra='"role":"input/location"', editable=False
-    #     ),
-    #     GridFieldText(
-    #         'location__source', title=string_concat(_('location'), ' - ', _('source')),
-    #         initially_hidden=True, editable=False
-    #     ),
-    #     GridFieldLastModified(
-    #         'location__lastmodified', title=string_concat(_('location'), ' - ', _('last modified')),
-    #         initially_hidden=True, editable=False
-    #     ),
-    #     # Optional fields referencing the origin location
-    #     GridFieldText(
-    #         'origin__description', title=string_concat(_('origin'), ' - ', _('description')),
-    #         initially_hidden=True, editable=False
-    #     ),
-    #     GridFieldText(
-    #         'origin__category', title=string_concat(_('origin'), ' - ', _('category')),
-    #         initially_hidden=True, editable=False
-    #     ),
-    #     GridFieldText(
-    #         'origin__subcategory', title=string_concat(_('origin'), ' - ', _('subcategory')),
-    #         initially_hidden=True, editable=False
-    #     ),
-    #     GridFieldText(
-    #         'origin__available', title=string_concat(_('origin'), ' - ', _('available')),
-    #         initially_hidden=True, field_name='origin__available__name', formatter='detail',
-    #         extra='"role":"input/calendar"', editable=False
-    #     ),
-    #     GridFieldText(
-    #         'origin__owner', title=string_concat(_('origin'), ' - ', _('owner')),
-    #         initially_hidden=True, field_name='origin__owner__name', formatter='detail',
-    #         extra='"role":"input/location"', editable=False
-    #     ),
-    #     GridFieldText(
-    #         'origin__source', title=string_concat(_('origin'), ' - ', _('source')),
-    #         initially_hidden=True, editable=False
-    #     ),
-    #     GridFieldLastModified(
-    #         'origin__lastmodified', title=string_concat(_('origin'), ' - ', _('last modified')),
-    #         initially_hidden=True, editable=False
-    #     ),
-    # )
 
+        # GridFieldText('source', title=_('source'), initially_hidden=True),
+
+        # GridFieldLastModified('lastmodified'),
+        # Optional fields referencing the item
+        # GridFieldText(
+        #     'item__description', title=string_concat(_('item'), ' - ', _('description')),
+        #     initially_hidden=True, editable=False
+        # ),
+        # GridFieldText(
+        #     'item__category', title=string_concat(_('item'), ' - ', _('category')),
+        #     initially_hidden=True, editable=False
+        # ),
+        # GridFieldText(
+        #     'item__subcategory', title=string_concat(_('item'), ' - ', _('subcategory')),
+        #     initially_hidden=True, editable=False
+        # ),
+        # GridFieldText(
+        #     'item__owner', title=string_concat(_('item'), ' - ', _('owner')),
+        #     field_name='item__owner__name', initially_hidden=True, editable=False
+        # ),
+        # GridFieldText(
+        #     'item__source', title=string_concat(_('item'), ' - ', _('source')),
+        #     initially_hidden=True, editable=False
+        # ),
+        # GridFieldLastModified(
+        #     'item__lastmodified', title=string_concat(_('item'), ' - ', _('last modified')),
+        #     initially_hidden=True, editable=False
+        # ),
+        # # Optional fields referencing the location
+        # GridFieldText(
+        #     'location__description', title=string_concat(_('location'), ' - ', _('description')),
+        #     initially_hidden=True, editable=False
+        # ),
+        # GridFieldText(
+        #     'location__category', title=string_concat(_('location'), ' - ', _('category')),
+        #     initially_hidden=True, editable=False
+        # ),
+        # GridFieldText(
+        #     'location__subcategory', title=string_concat(_('location'), ' - ', _('subcategory')),
+        #     initially_hidden=True, editable=False
+        # ),
+        # GridFieldText(
+        #     'location__available', title=string_concat(_('location'), ' - ', _('available')),
+        #     initially_hidden=True, field_name='location__available__name', formatter='detail',
+        #     extra='"role":"input/calendar"', editable=False
+        # ),
+        # GridFieldText(
+        #     'location__owner', title=string_concat(_('location'), ' - ', _('owner')),
+        #     initially_hidden=True, field_name='location__owner__name', formatter='detail',
+        #     extra='"role":"input/location"', editable=False
+        # ),
+        # GridFieldText(
+        #     'location__source', title=string_concat(_('location'), ' - ', _('source')),
+        #     initially_hidden=True, editable=False
+        # ),
+        # GridFieldLastModified(
+        #     'location__lastmodified', title=string_concat(_('location'), ' - ', _('last modified')),
+        #     initially_hidden=True, editable=False
+        # ),
+        # # Optional fields referencing the origin location
+        # GridFieldText(
+        #     'origin__description', title=string_concat(_('origin'), ' - ', _('description')),
+        #     initially_hidden=True, editable=False
+        # ),
+        # GridFieldText(
+        #     'origin__category', title=string_concat(_('origin'), ' - ', _('category')),
+        #     initially_hidden=True, editable=False
+        # ),
+        # GridFieldText(
+        #     'origin__subcategory', title=string_concat(_('origin'), ' - ', _('subcategory')),
+        #     initially_hidden=True, editable=False
+        # ),
+        # GridFieldText(
+        #     'origin__available', title=string_concat(_('origin'), ' - ', _('available')),
+        #     initially_hidden=True, field_name='origin__available__name', formatter='detail',
+        #     extra='"role":"input/calendar"', editable=False
+        # ),
+        # GridFieldText(
+        #     'origin__owner', title=string_concat(_('origin'), ' - ', _('owner')),
+        #     initially_hidden=True, field_name='origin__owner__name', formatter='detail',
+        #     extra='"role":"input/location"', editable=False
+        # ),
+        # GridFieldText(
+        #     'origin__source', title=string_concat(_('origin'), ' - ', _('source')),
+        #     initially_hidden=True, editable=False
+        # ),
+        # GridFieldLastModified(
+        #     'origin__lastmodified', title=string_concat(_('origin'), ' - ', _('last modified')),
+        #     initially_hidden=True, editable=False
+        # ),
+    )
+
+
+class EnumView(View):
+    def get(self, request, *args, **kwargs):
+        if 'type' in kwargs and 'value' in kwargs:
+            type = kwargs['type']
+            value = kwargs['value']
+            if type =='item_status_by_type':
+                t = Item.type_status[value]
+                dic = dict(t) if t!=None else None
+                return HttpResponse(json.dumps(dic, cls=DjangoJSONEncoder),
+                                    content_type='application/json')
+        else:
+            raise HttpResponseBadRequest()
 
 class ItemList(GridReport):
     '''

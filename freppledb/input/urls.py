@@ -60,6 +60,9 @@ urlpatterns = [
   url(r'^data/input/deliveryorder/item/(.+)/$', freppledb.input.views.DeliveryOrderList.as_view(), name="input_deliveryorder_by_item"),
   url(r'^data/input/deliveryorder/$', freppledb.input.views.DeliveryOrderList.as_view(), name="input_deliveryorder_changelist"),
 
+  url(r'^data/input/enum/(?P<type>(.+))/(?P<value>(.+))/$', freppledb.input.views.EnumView.as_view(), name="enum_get"),
+
+
   # Special reports
   url(r'^supplypath/item/(.+)/$', freppledb.input.views.UpstreamItemPath.as_view(), name="supplypath_item"),
   url(r'^whereused/item/(.+)/$', freppledb.input.views.DownstreamItemPath.as_view(), name="whereused_item"),
