@@ -142,21 +142,20 @@
                             {% if opts.model_name == 'item' %}
                                 $("#id_type").change(function () {
                                     $.ajax({
-                                        url: '/',
+                                        url: '/data/input/enum/item_status_by_type/'+ $(this).val()+"/",
                                         method: 'get',
                                         data: {
-                                            type: $(this).val()
                                         },
                                         success: function (data) {
-                                            var data = [{ key: 'A0', value: 'A0'}, { key: 'A1', value: 'A1'}, { key: 'A1', value: 'A1'}]
-
                                             $("#id_status").empty();
 
-                                            var html = '<option selected>---------</option>';
+                                            var html = '<option selected>------</option>';
 
-                                            data.map(d => {
-                                                html += '<option value="'+ d.key +'" selected>' + d.value + '</option>';
-                                            });
+                                            if(data != undefined && data != null){
+                                               Object.keys(data).map(d => {
+                                                    html += '<option value="'+ d +'">' + data[d] + '</option>';
+                                                });
+                                            }
 
                                             $("#id_status").append(html);
                                         },

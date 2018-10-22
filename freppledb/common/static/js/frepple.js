@@ -618,15 +618,23 @@ var grid = {
         var val1s = ""; //selected columns
         var val1a = ""; //available columns
 
+        var allArray = new Array();
         for (var i in colModel) {
             if (colModel[i].name == 'graph')
                 graph = true;
             else if (colModel[i].name != "rn" && colModel[i].name != "cb" && colModel[i].counter != null && colModel[i].label != '' && !('alwayshidden' in colModel[i])) {
                 if (colModel[i].frozen) maxfrozen = parseInt(i, 10) + 1 - skipped;
-                if (!colModel[i].hidden) {
-                    val0s += '<li id="' + (i) + '"  class="list-group-item" style="cursor: move;">' + colModel[i].label + '</li>';
-                } else {
-                    val0a += '<li id="' + (i) + '"  class="list-group-item" style="cursor: move;">' + colModel[i].label + '</li>';
+                // 处理重复
+                if(allArray.indexOf(colModel[i].index) === -1){
+                    if (!colModel[i].hidden) {
+                        val0s += '<li id="' + (i) + '"  class="list-group-item" style="cursor: move;">' + colModel[i].label + '</li>';
+                    } else {
+                        val0a += '<li id="' + (i) + '"  class="list-group-item" style="cursor: move;">' + colModel[i].label + '</li>';
+                    }
+
+                    allArray.push(colModel[i].index);
+                }else {
+                    // do something
                 }
             }
             else
@@ -774,10 +782,21 @@ var grid = {
         });
 
         $('#okCustbutton').on('click', function () {
-            debugger
             var colModel = $("#grid")[0].p.colModel;
+            var newModel = new Array();
+
+            for(var i = 0; i< colModel.length; i++) {
+                if(newModel.indexOf(colModel[i].index) === -1){
+                   newModel.push(colModel)
+                }else {
+                    colModel.splice(i, 1)
+                }
+            }
+
             var perm = [];
             var hiddenrows = [];
+
+            debugger
 
             if(colModel[0].name == "rn") {
                 perm.push(0);
@@ -807,6 +826,7 @@ var grid = {
                     hiddenrows.push(val);
                     if (pivot)
                         $("#grid").jqGrid('setColProp', colModel[val].name, {frozen: false});
+
                     $("#grid").jqGrid("hideCol", colModel[val].name);
                 }
             });
@@ -828,19 +848,27 @@ var grid = {
                         perm.push(parseInt(i, 10));
             }
             else
-                numfrozen = parseInt($("#frozen").val())
+                numfrozen = parseInt($("#frozen").val());
+
             for (var i in hiddenrows)
                 perm.push(hiddenrows[i]);
+
             $("#grid").jqGrid("remapColumns", perm, true);
+
+            var ddas = $("#grid")[0].p.colModel;
+
             var skipped = 0;
             for (var i in colModel)
                 if (colModel[i].name != "rn" && colModel[i].name != "cb" && colModel[i].counter != null)
                     $("#grid").jqGrid('setColProp', colModel[i].name, {frozen: i - skipped < numfrozen});
                 else
                     skipped++;
+
             if (!graph)
                 $("#grid").jqGrid('setFrozenColumns');
+
             $("#grid").trigger('reloadGrid');
+
             grid.saveColumnConfiguration();
             $('#popup').modal("hide");
         });
@@ -853,8 +881,6 @@ var grid = {
         //   - paging button string, when called from jqgrid paging event
         //   - number argument, when called from jqgrid resizeStop event
         //   - function argument, when you want to run a callback function after the save
-
-        debugger
 
         var colArray = new Array();
         var colModel = $("#grid")[0].p.colModel;
@@ -878,16 +904,27 @@ var grid = {
         else if (typeof indx != 'undefined' && colModel[indx].name == "operationplans")
         // We're resizing a Gantt chart column. Not too clean to trigger the redraw here, but so be it...
             gantt.redraw();
+
+        var allArray = new Array()
         for (var i in colModel) {
-            if (colModel[i].name != "rn" && colModel[i].name != "cb" && "counter" in colModel[i] && !('alwayshidden' in colModel[i])) {
-                colArray.push([colModel[i].counter, colModel[i].hidden, colModel[i].width]);
-                if (colModel[i].frozen) maxfrozen = parseInt(i) + 1 - skipped;
+            if (colModel[i].name != "rn" && colModel[i].name != "cb" && "counter" in colModel[i] && !('alwayshidden' in colModel[i])){
+                // 保证 colArray 是唯一的
+                if(allArray.indexOf(colModel[i].index) === -1){
+                    colArray.push([colModel[i].counter, colModel[i].hidden, colModel[i].width]);
+                    if (colModel[i].frozen) maxfrozen = parseInt(i) + 1 - skipped;
+                    allArray.push(colModel[i].index);
+                }else {
+                    // do something
+                }
             }
             else if (colModel[i].name == 'columns' || colModel[i].name == 'graph')
                 pivot = true;
             else
                 skipped++;
         }
+
+        debugger
+
         var result = {};
         var filter = $('#grid').getGridParam("postData").filters;
         if (typeof filter !== 'undefined' && filter.rules != [])
