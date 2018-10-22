@@ -1306,18 +1306,18 @@ class ItemClientList(GridReport):
         # . Translators: Translation included with Django
         GridFieldInteger('id', title=_('id'), key=True, formatter='detail', extra='"role":"input/itemclient"'),
         # 新建一个显示列
-        GridFieldText('item_display', title=_('sale_item_display'), field_name='sale_item__nr', editable=False),
+        GridFieldInteger('sale_item_display', title=_('sale_item_display'), field_name='sale_item__nr', editable=False),
         # 因为是id 让外键永远不显示
-        GridFieldText('sale_item', title=_('sale_item_id'), field_name='sale_item_id', editable=False, hidden=True),
+        GridFieldInteger('sale_item', title=_('sale_item_id'), field_name='sale_item_id', editable=False, hidden=True),
 
-        GridFieldText('product_item_display', title=_('product_item_display'), field_name='product_item__nr',
+        GridFieldInteger('product_item_display', title=_('product_item_display'), field_name='product_item__nr',
                       editable=False),
-        GridFieldText('product_item', title=_('product_item_id'), field_name='product_item_id', editable=False,
+        GridFieldInteger('product_item', title=_('product_item_id'), field_name='product_item_id', editable=False,
                       hidden=True),
-        GridFieldText('client_display', title=_('client'), field_name='client__nr', editable=False),
-        GridFieldText('client', title=_('client_id'), field_name='client_id', editable=False, hidden=True),
-        GridFieldText('location_display', title=_('location'), field_name='location__nr', editable=False),
-        GridFieldText('location', title=_('location_id'), field_name='location_id', editable=False, hidden=True),
+        GridFieldInteger('client_display', title=_('client'), field_name='client__nr', editable=False),
+        GridFieldInteger('client', title=_('client_id'), field_name='client_id', editable=False, hidden=True),
+        GridFieldInteger('location_display', title=_('location'), field_name='location__nr', editable=False),
+        GridFieldInteger('location', title=_('location_id'), field_name='location_id', editable=False, hidden=True),
         GridFieldText('client_item_nr', title=_('client item nr'), editable=False),
         GridFieldText('status', title=_('status'), editable=False),
         GridFieldDate('plan_list_date', title=_('plan list date'), editable=False, initially_hidden=True),
@@ -1326,8 +1326,8 @@ class ItemClientList(GridReport):
         GridFieldDateTime('effective_end', title=_('effective end'), editable=False),
         GridFieldCreateOrUpdateDate('created_at', title=_('created_at'), editable=False),
         GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at'), editable=False),
-        GridFieldText('_pk', field_name='id', editable=False, hidden=True),
-        GridFieldText('_nk', field_name='nr', editable=False, hidden=True),
+        # GridFieldText('_pk', field_name='id', editable=False, hidden=True),
+        # GridFieldText('_nk', field_name='nr', editable=False, hidden=True),
     )
 
 

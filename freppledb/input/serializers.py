@@ -29,6 +29,8 @@ from rest_framework import serializers
 class CalendarFilter(filters.FilterSet):
     created_at__gte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='gte')
     created_at__lte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='lte')
+    updated_at__gte = django_filters.DateTimeFilter(field_name="updated_at", lookup_expr='gte')
+    updated_at__lte = django_filters.DateTimeFilter(field_name="updated_at", lookup_expr='lte')
 
     class Meta:
         model = freppledb.input.models.Calendar
@@ -71,6 +73,8 @@ class CalendardetailAPI(frePPleRetrieveUpdateDestroyAPIView):
 class CalendarBucketFilter(filters.FilterSet):
     created_at__gte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='gte')
     created_at__lte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='lte')
+    updated_at__gte = django_filters.DateTimeFilter(field_name="updated_at", lookup_expr='gte')
+    updated_at__lte = django_filters.DateTimeFilter(field_name="updated_at", lookup_expr='lte')
 
     class Meta:
         model = freppledb.input.models.CalendarBucket
@@ -132,6 +136,8 @@ class LocationFilter(filters.FilterSet):
     # 时间使用这个方式,不然会发生类型错误
     created_at__gte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='gte')
     created_at__lte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='lte')
+    updated_at__gte = django_filters.DateTimeFilter(field_name="updated_at", lookup_expr='gte')
+    updated_at__lte = django_filters.DateTimeFilter(field_name="updated_at", lookup_expr='lte')
 
     class Meta:
         model = freppledb.input.models.Location
@@ -225,6 +231,8 @@ class LocationdetailNkAPI(frePPleRetrieveUpdateDestroyAPIView):
 class CustomerFilter(filters.FilterSet):
     created_at__gte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='gte')
     created_at__lte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='lte')
+    updated_at__gte = django_filters.DateTimeFilter(field_name="updated_at", lookup_expr='gte')
+    updated_at__lte = django_filters.DateTimeFilter(field_name="updated_at", lookup_expr='lte')
 
     class Meta:
         model = freppledb.input.models.Customer
@@ -381,6 +389,8 @@ class ItemdetailAPI(frePPleRetrieveUpdateDestroyAPIView):
 class ItemClientFilter(filters.FilterSet):
     created_at__gte = django_filters.DateTimeFilter(field_name=("created_at", "update_at"), lookup_expr='gte')
     created_at__lte = django_filters.DateTimeFilter(field_name=("created_at", "update_at"), lookup_expr='lte')
+    updated_at__gte = django_filters.DateTimeFilter(field_name="updated_at", lookup_expr='gte')
+    updated_at__lte = django_filters.DateTimeFilter(field_name="updated_at", lookup_expr='lte')
 
     class Meta:
         model = freppledb.input.models.ItemClient
@@ -437,6 +447,8 @@ class ItemSuccessorFilter(filters.FilterSet):
     # 时间使用这个方式,不然会发生类型错误
     created_at__gte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='gte')
     created_at__lte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='lte')
+    updated_at__gte = django_filters.DateTimeFilter(field_name="updated_at", lookup_expr='gte')
+    updated_at__lte = django_filters.DateTimeFilter(field_name="updated_at", lookup_expr='lte')
 
     class Meta:
         model = freppledb.input.models.ItemSuccessor
@@ -488,6 +500,8 @@ class ItemSuccessordetailAPI(frePPleRetrieveUpdateDestroyAPIView):
 class SupplierFilter(filters.FilterSet):
     created_at__gte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='gte')
     created_at__lte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='lte')
+    updated_at__gte = django_filters.DateTimeFilter(field_name="updated_at", lookup_expr='gte')
+    updated_at__lte = django_filters.DateTimeFilter(field_name="updated_at", lookup_expr='lte')
 
     class Meta:
         model = freppledb.input.models.Supplier
@@ -574,6 +588,8 @@ class SupplierdetailAPI(frePPleRetrieveUpdateDestroyAPIView):
 class ItemSupplierFilter(filters.FilterSet):
     created_at__gte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='gte')
     created_at__lte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='lte')
+    updated_at__gte = django_filters.DateTimeFilter(field_name="updated_at", lookup_expr='gte')
+    updated_at__lte = django_filters.DateTimeFilter(field_name="updated_at", lookup_expr='lte')
 
     # /api/input/location/?nr__contains=nr1&created_at__gte=2018-1-1&area=china
     class Meta:
@@ -627,6 +643,8 @@ class ItemSupplierdetailAPI(frePPleRetrieveUpdateDestroyAPIView):
 class ItemDistributionFilter(filters.FilterSet):
     created_at__gte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='gte')
     created_at__lte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='lte')
+    updated_at__gte = django_filters.DateTimeFilter(field_name="updated_at", lookup_expr='gte')
+    updated_at__lte = django_filters.DateTimeFilter(field_name="updated_at", lookup_expr='lte')
 
     class Meta:
         model = freppledb.input.models.ItemDistribution
@@ -649,12 +667,7 @@ class ItemDistributionSerializer(BulkSerializerMixin, ModelSerializer):
 
     class Meta:
         model = freppledb.input.models.ItemDistribution
-        # fields = (
-        #     'id', 'item', 'location', 'origin', 'leadtime', 'sizeminimum', 'sizemultiple',
-        #     'cost', 'priority', 'effective_start', 'effective_end', 'source', 'lastmodified'
-        # )
         fields = '__all__'
-
         list_serializer_class = BulkListSerializer
         update_lookup_field = 'id'
         partial = True

@@ -151,6 +151,10 @@ msgstr "外包装数量"
 msgid "pallet num"
 msgstr "托盘数量"
 
+#: input/models.py:263 input/views.py:1161
+msgid "origin country"
+msgstr "原产地"
+
 #: input/models.py:992 input/models.py:263
 #: input/views.py:932 input/views.py:1162
 msgid "outer package gross weight"
@@ -260,12 +264,11 @@ msgstr "客户物料编号"
 
 #: input/models.py:339 input/views.py:1279
 msgid "item successor"
-msgstr "替代物料"
+msgstr "物料替代"
 
 #: input/models.py:339 input/views.py:1279
 msgid "item_successor_display"
 msgstr "替代物料"
-
 
 # CMARK 翻译
 msgid "id"
@@ -2409,6 +2412,9 @@ msgid "locations"
 msgstr "地点"
 
 msgid "item clients"
+msgstr "物料销售"
+
+msgid "item client"
 msgstr "物料销售"
 
 msgid "item successors"

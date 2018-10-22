@@ -80,7 +80,7 @@ class CalendarBucket(AuditModel):
         _('value'), default='0.00', blank=True,
         max_digits=20, decimal_places=8
     )
-    priority = models.IntegerField(_('priority'), default=0, blank=True, null=True)
+    priority = models.IntegerField(_('priority'), default='0', blank=True, null=True)
 
     # . Translators: Translation included with Django
     monday = models.BooleanField(_('Monday'), blank=True, default=True)
@@ -392,8 +392,8 @@ class ItemSuccessor(AuditModel):
         db_index=True, related_name='itemsuccessor_successor',
         null=False, blank=False, on_delete=models.CASCADE)
 
-    priority = models.IntegerField(_('priority'), default=0)
-    ratio = models.DecimalField(_('ratio'), max_digits=20, decimal_places=8,default=100)
+    priority = models.IntegerField(_('priority'), default='0')
+    ratio = models.DecimalField(_('ratio'), max_digits=20, decimal_places=8,default='100%')
     effective_start = models.DateTimeField(
         _('effective start'), null=True, blank=True,
         help_text=_('Validity start date'))
@@ -831,7 +831,7 @@ class ResourceSkill(AuditModel):
         help_text=_('Validity end date')
     )
     priority = models.IntegerField(
-        _('priority'), default=1, null=True, blank=True,
+        _('priority'), default=0, null=True, blank=True,
         help_text=_('Priority of this skill in a group of alternates')
     )
 
@@ -1090,13 +1090,13 @@ class ItemSupplier(AuditModel):
     cost = models.DecimalField(_('cost'), max_digits=20, decimal_places=8)
     monetary_unit = models.CharField(_('monetary unit'), max_length=20)
     cost_unit = models.DecimalField(_('cost unit'), max_digits=20, decimal_places=8)
-    priority = models.IntegerField(_('priority'), default=0, help_text=_('Priority among all alternates'))
-    ratio = models.DecimalField(_('ratio'), max_digits=20, decimal_places=8, default=100,null=True, blank=True)
+    priority = models.IntegerField(_('priority'), default='0', help_text=_('Priority among all alternates'))
+    ratio = models.DecimalField(_('ratio'), max_digits=20, decimal_places=8, default='100%',null=True, blank=True)
     moq = models.DecimalField(_('MOQ'), max_digits=20, decimal_places=8)
-    product_time = models.DecimalField(_('product time'), max_digits=20, decimal_places=8,default=0, null=True, blank=True)
-    load_time = models.DecimalField(_('load time'), null=True, max_digits=20, decimal_places=8,default=0 ,blank=True)
-    transit_time = models.DecimalField(_('transit time'), max_digits=20, decimal_places=8,default=0, null=True, blank=True)
-    receive_time = models.DecimalField(_('receive time'), max_digits=20, decimal_places=8,default=0, null=True, blank=True)
+    product_time = models.DecimalField(_('product time'), max_digits=20, decimal_places=8,default='0.00', null=True, blank=True)
+    load_time = models.DecimalField(_('load time'), null=True, max_digits=20, decimal_places=8,default='0.00' ,blank=True)
+    transit_time = models.DecimalField(_('transit time'), max_digits=20, decimal_places=8,default='0.00', null=True, blank=True)
+    receive_time = models.DecimalField(_('receive time'), max_digits=20, decimal_places=8,default='0.00', null=True, blank=True)
     mpq = models.DecimalField(_('mpq'), max_digits=20, decimal_places=8, null=True, blank=True)
     earliest_order_date = models.DateField(_('earliest order date'), null=True, blank=True)
     outer_package_num = models.IntegerField(_('outer package num'), null=True, blank=True)
@@ -1197,44 +1197,40 @@ class ItemDistribution(AuditModel):
         null=False, blank=False, on_delete=models.CASCADE
     )
     origin = models.ForeignKey(
-        Location, verbose_name=_('distribute origin location'), on_delete=models.CASCADE,
-        db_index=True, null=False, blank=False, related_name='itemdistributions_origin'
+        Location, verbose_name=_('origin'), on_delete=models.CASCADE,
+        db_index=True, related_name='itemdistributions_origin'
     )
     destination = models.ForeignKey(
-        Location, verbose_name=_('distribute destination location'), null=False, blank=False,
+        Location, verbose_name=_('destination'),
         db_index=True, related_name='itemdistributions_destination',
         on_delete=models.CASCADE
     )
     cost = models.DecimalField(
-        _('cost'), null=True, blank=True,
-        max_digits=20, decimal_places=8,
-        help_text=_("Shipping cost per unit")
+        _('cost'), max_digits=20, decimal_places=8, help_text=_("Shipping cost per unit") )
+    load_time = models.DecimalField(
+        _('load time'), null=True, blank=True,
+        max_digits=20, decimal_places=8,default='0.0'
     )
-    # leadtime = models.DurationField(
-    #     _('lead time'), null=True, blank=True,
-    #     help_text=_('lead time')
-    # )
-
-    load_time = models.DecimalField(_('load time'), default=0, null=True, max_digits=20, decimal_places=8, blank=True)
-    transit_time = models.DecimalField(_('transit time'), default=0, max_digits=20, decimal_places=8, null=True, blank=True)
-    receive_time = models.DecimalField(_('receive time'), default=0, max_digits=20, decimal_places=8, null=True, blank=True)
-
+    transit_time = models.DecimalField(
+        _('transit time'), null=True, blank=True,
+        max_digits=20, decimal_places=8,default='0.0'
+    )
+    receive_time = models.DecimalField(
+        _('receive time'), null=True, blank=True,
+        max_digits=20, decimal_places=8,default='0.0'
+    )
     size_minimum = models.DecimalField(
-        _('distribute size minimum'), max_digits=20, decimal_places=8,
-        null=True, blank=True, default='1.0',
-        help_text=_("A minimum shipping quantity")
+        _('size minimum'), null=True, blank=True,
+        max_digits=20, decimal_places=8,default='1.0'
     )
     size_multiple = models.DecimalField(
-        _('distribute size multiple'), null=True, blank=True,
-        max_digits=20, decimal_places=8,
-        help_text=_("A multiple shipping quantity")
+        _('size multiple'), null=True, blank=True,
+        max_digits=20, decimal_places=8,default='0.0'
     )
-
     priority = models.IntegerField(
         _('priority'), default=1, null=True, blank=True,
         help_text=_('Priority among all alternates')
     )
-
     resource = models.ForeignKey(
         Resource, verbose_name=_('resource'), null=True, blank=True,
         db_index=True, related_name='itemdistributions_resource', on_delete=models.CASCADE,
@@ -1251,29 +1247,46 @@ class ItemDistribution(AuditModel):
     )
     effective_end = models.DateTimeField(
         _('effective end'), null=True, blank=True,
-        help_text=_('Validity end date')
-    )
+        help_text=_('Validity end date'))
 
+    # leadtime = models.DurationField(
+    #     _('lead time'), null=True, blank=True,
+    #     help_text=_('lead time')
+    # )
+    # sizeminimum = models.DecimalField(
+    #     _('size minimum'), max_digits=20, decimal_places=8,
+    #     null=True, blank=True, default='1.0',
+    #     help_text=_("A minimum shipping quantity")
+    # )
+    # sizemultiple = models.DecimalField(
+    #     _('size multiple'), null=True, blank=True,
+    #     max_digits=20, decimal_places=8,
+    #     help_text=_("A multiple shipping quantity")
+    # )
     # fence = models.DurationField(
     #     _('fence'), null=True, blank=True,
     #     help_text=_('Frozen fence for creating new shipments')
-    # )
 
     class Manager(MultiDBManager):
-        def get_by_natural_key(self, item, destination, origin, effective_start):
-            return self.get(item=item, destination=destination, origin=origin, effective_start=effective_start)
+        def get_by_natural_key(self, item, origin, destination,resource):
+            return self.get(item=item, origin=origin, destination=destination, resource=resource)
 
     def natural_key(self):
-        return (self.item, self.destination, self.origin, self.effective_start)
+        return (self.item, self.origin, self.destination, self.resource)
 
     objects = Manager()
 
     def __str__(self):
-        return '%s - %s - %s' % (
+        # return '%s - %s - %s' % (
+        #     self.location.nr if self.location else 'Any destination',
+        #     self.item.name if self.item else 'No item',
+        #     self.origin.name if self.origin else 'No origin'
+        # )
+        return '%s - %s - %s - %s' % (
+            self.item.nr if self.item else 'No item',
+            self.origin.nr if self.origin else 'No origin',
             self.destination.nr if self.destination else 'Any destination',
-            self.item.name if self.item else 'No item',
-            self.origin.name if self.origin else 'No origin'
-        )
+            self.resource.nr if self.resource else 'No resource')
 
     class Meta(AuditModel.Meta):
         db_table = 'itemdistribution'
