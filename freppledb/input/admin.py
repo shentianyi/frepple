@@ -17,7 +17,7 @@
 
 from django.utils.translation import ugettext_lazy as _
 
-from freppledb.input.models import Resource, Operation, Location, SetupMatrix, SetupRule, ItemClient, ItemSuccessor
+from freppledb.input.models import Resource, Operation, Location, SetupMatrix, SetupRule,  ItemSuccessor,ItemCustomer
 from freppledb.input.models import Buffer, Customer, Demand, Item, OperationResource
 from freppledb.input.models import OperationMaterial, Skill, ResourceSkill, Supplier
 from freppledb.input.models import Calendar, CalendarBucket, ManufacturingOrder, SubOperation
@@ -183,14 +183,14 @@ class Item_admin(MultiDBModelAdmin):
 data_site.register(Item, Item_admin)
 
 
-class ItemClient_admin(MultiDBModelAdmin):
-    model = ItemClient
+class ItemCustomer_admin(MultiDBModelAdmin):
+    model = ItemCustomer
     save_on_top = True
     exclude = ('source',)
-    raw_id_fields = ('sale_item', 'product_item', 'client', 'location')
+    raw_id_fields = ('sale_item', 'product_item', 'customer', 'location')
     tabs = [
-        {"name": 'edit', "label": _("edit"), "view": "admin:input_itemclient_changelist",
-         "permissions": "input.change_itemclient"}
+        {"name": 'edit', "label": _("edit"), "view": "admin:input_itemcustomer_change",
+         "permissions": "input.change_itemcustomer"}
         # {"name": 'supplypath', "label": _("supply path"), "view": "supplypath_item"},
         # {"name": 'whereused', "label": _("where used"), "view": "whereused_item"},
         # {"name": 'plan', "label": _("plan"), "view": "output_demand_plandetail"},
@@ -202,7 +202,7 @@ class ItemClient_admin(MultiDBModelAdmin):
     ]
 
 
-data_site.register(ItemClient, ItemClient_admin)
+data_site.register(ItemCustomer, ItemCustomer_admin)
 
 
 class ItemSuccessor_admin(MultiDBModelAdmin):
@@ -211,7 +211,7 @@ class ItemSuccessor_admin(MultiDBModelAdmin):
     exclude = ('source',)
     raw_id_fields = ('item', 'item_successor')
     tabs = [
-        {"name": 'edit', "label": _("edit"), "view": "admin:input_itemsuccessor_changelist",
+        {"name": 'edit', "label": _("edit"), "view": "admin:input_itemsuccessor_change",
          "permissions": "input.change_itemsuccessor"}
         # {"name": 'supplypath', "label": _("supply path"), "view": "supplypath_item"},
         # {"name": 'whereused', "label": _("where used"), "view": "whereused_item"},
@@ -254,7 +254,7 @@ class ItemDistribution_admin(MultiDBModelAdmin):
     {"name": 'edit', "label": _("edit"), "view": "admin:input_itemdistribution_change", "permissions": "input.change_itemdistribution"},
     {"name": 'comments', "label": _("comments"), "view": "admin:input_itemdistribution_comment"},
     #. Translators: Translation included with Django
-    {"name": 'history', "label": _("History"), "view": "admin:input_itemdistribution_history"},
+    {"name": 'history',"label": _("History"), "view": "admin:input_itemdistribution_history"},
   ]
 
 data_site.register(ItemDistribution, ItemDistribution_admin)

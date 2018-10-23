@@ -32,7 +32,7 @@ urlpatterns = [
   url(r'^data/input/customer/$', freppledb.input.views.CustomerList.as_view(), name="input_customer_changelist"),
   url(r'^data/input/demand/$', freppledb.input.views.DemandList.as_view(), name="input_demand_changelist"),
   url(r'^data/input/item/$', freppledb.input.views.ItemList.as_view(), name="input_item_changelist"),
-  url(r'^data/input/itemclient/$', freppledb.input.views.ItemClientList.as_view(), name="input_itemclient_changelist"),
+  url(r'^data/input/itemcustomer/$', freppledb.input.views.ItemCustomerList.as_view(), name="input_itemcustomer_changelist"),
   url(r'^data/input/itemsuccessor/$', freppledb.input.views.ItemSuccessorList.as_view(), name="input_itemsuccessor_changelist"),
 
   url(r'^data/input/operationresource/$', freppledb.input.views.OperationResourceList.as_view(), name="input_operationresource_changelist"),
@@ -102,7 +102,7 @@ urlpatterns = [
   url(r'^api/input/supplier/$', freppledb.input.serializers.SupplierAPI.as_view()),
   url(r'^api/input/itemsupplier/$', freppledb.input.serializers.ItemSupplierAPI.as_view()),
   url(r'^api/input/itemdistribution/$', freppledb.input.serializers.ItemDistributionAPI.as_view()),
-  url(r'^api/input/itemclient/$', freppledb.input.serializers.ItemClientAPI.as_view()),
+  url(r'^api/input/itemcustomer/$', freppledb.input.serializers.ItemCustomerAPI.as_view()),
   url(r'^api/input/itemsuccessor/$', freppledb.input.serializers.ItemSuccessorAPI.as_view()),
 
   url(r'^api/input/buffer/(?P<pk>(.+))/$', freppledb.input.serializers.BufferdetailAPI.as_view()),
@@ -135,7 +135,7 @@ urlpatterns = [
   url(r'^api/input/nk/supplier/(?P<nk>(.+))/$', freppledb.input.serializers.SupplierdetailNkAPI.as_view()),
   url(r'^api/input/itemsupplier/(?P<pk>(.+))/$', freppledb.input.serializers.ItemSupplierdetailAPI.as_view()),
   url(r'^api/input/itemdistribution/(?P<pk>(.+))/$', freppledb.input.serializers.ItemDistributiondetailAPI.as_view()),
-  url(r'^api/input/itemclient/(?P<pk>(.+))/$', freppledb.input.serializers.ItemClientdetailAPI.as_view()),
+  url(r'^api/input/itemcustomer/(?P<pk>(.+))/$', freppledb.input.serializers.ItemCustomerdetailAPI.as_view()),
   url(r'^api/input/itemsuccessor/(?P<pk>(.+))/$', freppledb.input.serializers.ItemSuccessordetailAPI.as_view()),
 
   ]

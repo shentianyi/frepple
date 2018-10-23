@@ -246,7 +246,6 @@ class MultiDBModelAdmin(admin.ModelAdmin):
         "admin/object_history.html"
     ], context)
 
-
   def response_add(self, request, obj, post_url_continue=None):
     """
     Determines the HttpResponse for the add_view stage.

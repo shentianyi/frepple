@@ -214,7 +214,7 @@ class Customer(AuditModel, HierarchyModel):
     )
 
     def __str__(self):
-        return self.name
+        return self.nr
 
     # CMARK 上传时,使用以下判断是否可以使用
     class Manager(MultiDBManager):
@@ -315,29 +315,29 @@ class Item(AuditModel, HierarchyModel):
         ordering = ['id']
 
 
-class ItemClient(AuditModel):
+class ItemCustomer(AuditModel):
 
     id = models.AutoField(_('id'), help_text=_('Unique identifier'), primary_key=True)
     sale_item = models.ForeignKey(
         Item, verbose_name=_('sale item'),
-        db_index=True, related_name='itemclients_item',
+        db_index=True, related_name='itemcustomer_sale_item',
         null=False, blank=False, on_delete=models.CASCADE)
 
     product_item = models.ForeignKey(
         Item, verbose_name=_('product item'),
-        db_index=True, related_name='itemclients_product_item',
+        db_index=True, related_name='itemcustomer_product_item',
         null=False, blank=False, on_delete=models.CASCADE)
 
-    client = models.ForeignKey(
-        Customer, verbose_name=_('client'),
-        db_index=True, related_name='itemsclients_client',
+    customer = models.ForeignKey(
+        Customer, verbose_name=_('customer'),
+        db_index=True, related_name='itemcustomer_customer',
         null=False, blank=False, on_delete=models.CASCADE)
 
     location = models.ForeignKey(
         Location, verbose_name=_('location'),
-        db_index=True, related_name='itemclients_location',
+        db_index=True, related_name='itemcustomer_location',
         null=False, blank=False, on_delete=models.CASCADE)
-    client_item_nr = models.CharField(_('client item nr'), max_length=300, null=True, blank=True, db_index=True)
+    customer_item_nr = models.CharField(_('customer item nr'), max_length=300, null=True, blank=True, db_index=True)
     status = models.CharField(_('status'), max_length=20, null=True, blank=True, choices=Item.fg_status)
     plan_list_date = models.DateField(_('plan list date'), db_index=True, null=True, blank=True )
     plan_delist_date = models.DateField(_('plan delist date'), db_index=True, null=True, blank=True)
@@ -354,23 +354,24 @@ class ItemClient(AuditModel):
         return '%s - %s -%s -%s' % (
             self.sale_item.nr if self.sale_item else 'No item',
             self.product_item.nr if self.product_item else 'No product item',
-            self.client.nr if self.client else 'No client',
+            self.customer.nr if self.customer else 'No client',
             self.location.nr if self.location else 'Any location'
         )
 
     class Manager(MultiDBManager):
-        def get_by_natural_key(self, item, product_item, client, location):
-            return self.get(item=item, product_item=product_item, client=client, location=location)
+        def get_by_natural_key(self, sale_item, product_item, customer, location):
+            return self.get(item=sale_item, product_item=product_item, client=customer, location=location)
 
     def natural_key(self):
-        return (self.item, self.product_item, self.client, self.location)
+        return (self.sale_item, self.product_item, self.customer, self.location)
 
     objects = Manager()
 
     class Meta(AuditModel.Meta):
-        db_table = 'itemclient'
-        verbose_name = _('item client')
-        verbose_name_plural = _('item clients')
+        db_table = 'itemcustomer'
+        verbose_name = _('item customer')
+        verbose_name_plural = _('item customer')
+        unique_together = (('sale_item', 'product_item','customer','location'),)
         ordering = ['id']
 
 
@@ -393,7 +394,7 @@ class ItemSuccessor(AuditModel):
         null=False, blank=False, on_delete=models.CASCADE)
 
     priority = models.IntegerField(_('priority'), default='0')
-    ratio = models.DecimalField(_('ratio'), max_digits=20, decimal_places=8,default='100%')
+    ratio = models.DecimalField(_('ratio'), max_digits=20, decimal_places=8, default='100.0')
     effective_start = models.DateTimeField(
         _('effective start'), null=True, blank=True,
         help_text=_('Validity start date'))
@@ -650,7 +651,19 @@ class Buffer(AuditModel):
 
 class SetupMatrix(AuditModel):
     # Database fields
-    name = models.CharField(_('name'), max_length=300, primary_key=True)
+    id = models.AutoField(_('id'), help_text=_('Unique identifier'), primary_key=True)
+
+    nr = models.CharField(_('nr'), max_length=300, db_index=True, unique=True)
+
+    name = models.CharField(_('name'), max_length=300)
+
+    category = models.CharField(
+        _('category'), max_length=300, null=True, blank=True, db_index=True
+    )
+    subcategory = models.CharField(
+        _('subcategory'), max_length=300, null=True, blank=True, db_index=True
+    )
+
 
     # Methods
     def __str__(self):
@@ -668,12 +681,12 @@ class SetupRule(AuditModel):
     A rule that is part of a setup matrix.
     '''
     # Database fields
-    id = models.AutoField(_('identifier'), primary_key=True)
+    id = models.AutoField(_('id'), primary_key=True)
     setupmatrix = models.ForeignKey(
         SetupMatrix, verbose_name=_('setup matrix'), related_name='rules',
         on_delete=models.CASCADE
     )
-    priority = models.IntegerField(_('priority'))
+    priority = models.IntegerField(_('priority'), default='0')
     fromsetup = models.CharField(
         _('from setup'), max_length=300, blank=True, null=True,
         help_text=_("Name of the old setup (wildcard characters are supported)")
@@ -682,13 +695,13 @@ class SetupRule(AuditModel):
         _('to setup'), max_length=300, blank=True, null=True,
         help_text=_("Name of the new setup (wildcard characters are supported)")
     )
-    duration = models.DurationField(
-        _('duration'), null=True, blank=True,
-        help_text=_("Duration of the changeover")
-    )
     cost = models.DecimalField(
         _('cost'), max_digits=20, decimal_places=8, null=True, blank=True,
         help_text=_("Cost of the conversion")
+    )
+    duration = models.DurationField(
+        _('duration'), null=True, blank=True,
+        help_text=_("Duration of the changeover")
     )
 
     class Manager(MultiDBManager):
@@ -723,6 +736,11 @@ class Resource(AuditModel, HierarchyModel):
     )
 
     # Database fields
+    id = models.AutoField(_('id'), help_text=_('Unique identifier'), primary_key=True)
+
+    nr = models.CharField(_('nr'), max_length=300, db_index=True, unique=True)
+    name = models.CharField(_('name'), max_length=300, db_index=True)
+
     description = models.CharField(
         _('description'), max_length=500, null=True, blank=True
     )
@@ -741,64 +759,75 @@ class Resource(AuditModel, HierarchyModel):
         help_text=_('Size of the resource')
     )
     maximum_calendar = models.ForeignKey(
-        Calendar, verbose_name=_('maximum calendar'), related_name='+',
-        null=True, blank=True, on_delete=models.CASCADE,
-        help_text=_('Calendar defining the resource size varying over time')
+        Calendar, verbose_name=_('maximum calendar'), null=True, blank=True,related_name='resource_maximum_calendar',
+        on_delete=models.CASCADE,help_text=_('Calendar defining the resource size varying over time')
     )
     available = models.ForeignKey(
-        Calendar, verbose_name=_('available'), related_name='+',
-        null=True, blank=True, on_delete=models.CASCADE,
+        Calendar, verbose_name=_('available'), null=True, blank=True,related_name='resource_available',on_delete=models.CASCADE,
         help_text=_('Calendar defining the working hours and holidays')
     )
     location = models.ForeignKey(
-        Location, verbose_name=_('location'), on_delete=models.CASCADE,
-        null=True, blank=True, db_index=True
+        Location, verbose_name=_('location'), on_delete=models.CASCADE,related_name='resource_location',db_index=True
     )
     cost = models.DecimalField(
         _('cost'), null=True, blank=True,
         max_digits=20, decimal_places=8,
         help_text=_("Cost for using 1 unit of the resource for 1 hour"))
-    maxearly = models.DurationField(
-        _('max early'), null=True, blank=True,
-        help_text=_('Time window before the ask date where we look for available capacity')
+
+    efficiency = models.DecimalField(
+        _('efficiency %'), null=True, blank=True, max_digits=20, decimal_places=8,default='100.00',
+        help_text=_("Efficiency percentage of the resource")
+    )
+
+    efficiency_calendar = models.ForeignKey(
+        Calendar, verbose_name=_('efficiency % calendar'), related_name='resource_efficiency_calendar',
+        null=True, blank=True,on_delete=models.CASCADE,
+        help_text=_('Calendar defining the efficiency percentage of the resource varying over time')
     )
     setupmatrix = models.ForeignKey(
-        SetupMatrix, verbose_name=_('setup matrix'),
-        null=True, blank=True, db_index=True, on_delete=models.CASCADE,
+        SetupMatrix, verbose_name=_('setup matrix'),null=True, blank=True,
+        db_index=True, on_delete=models.CASCADE,related_name='resource_setupmatrix',
         help_text=_('Setup matrix defining the conversion time and cost')
     )
     setup = models.CharField(
         _('setup'), max_length=300, null=True, blank=True,
         help_text=_('Setup of the resource at the start of the plan')
     )
-    efficiency = models.DecimalField(
-        _('efficiency %'), null=True, blank=True, max_digits=20, decimal_places=8,
-        help_text=_("Efficiency percentage of the resource")
-    )
-    efficiency_calendar = models.ForeignKey(
-        Calendar, verbose_name=_('efficiency % calendar'), related_name='+',
-        null=True, blank=True, on_delete=models.CASCADE,
-        help_text=_('Calendar defining the efficiency percentage of the resource varying over time')
-    )
 
+    # maxearly = models.DurationField(
+    #     _('max early'), null=True, blank=True,
+    #     help_text=_('Time window before the ask date where we look for available capacity')
+    # )
     # Methods
     def __str__(self):
-        return self.name
+        return self.nr
 
     class Meta(AuditModel.Meta):
         db_table = 'resource'
         verbose_name = _('resource')
         verbose_name_plural = _('resources')
-        ordering = ['name']
+        ordering = ['id']
 
 
 class Skill(AuditModel):
     # Database fields
+    id = models.AutoField(_('id'), help_text=_('Unique identifier'), primary_key=True)
+
+    nr = models.CharField(_('nr'), max_length=300, db_index=True, unique=True)
+
     name = models.CharField(
         # . Translators: Translation included with Django
-        _('name'), max_length=300, primary_key=True,
-        help_text=_('Unique identifier')
+        _('name'), max_length=300,help_text=_('Unique identifier'))
+    category = models.CharField(
+        _('category'), max_length=300, null=True, blank=True, db_index=True
     )
+    subcategory = models.CharField(
+        _('subcategory'), max_length=300, null=True, blank=True, db_index=True
+    )
+    description = models.CharField(
+        _('description'), max_length=500, null=True, blank=True
+    )
+
 
     # Methods
     def __str__(self):
@@ -808,12 +837,13 @@ class Skill(AuditModel):
         db_table = 'skill'
         verbose_name = _('skill')
         verbose_name_plural = _('skills')
-        ordering = ['name']
+        ordering = ['id']
 
 
 class ResourceSkill(AuditModel):
     # Database fields
-    id = models.AutoField(_('identifier'), primary_key=True)
+    id = models.AutoField(_('id'), primary_key=True)
+
     resource = models.ForeignKey(
         Resource, verbose_name=_('resource'), db_index=True, related_name='skills',
         blank=False, null=False, on_delete=models.CASCADE
@@ -1091,7 +1121,7 @@ class ItemSupplier(AuditModel):
     monetary_unit = models.CharField(_('monetary unit'), max_length=20)
     cost_unit = models.DecimalField(_('cost unit'), max_digits=20, decimal_places=8)
     priority = models.IntegerField(_('priority'), default='0', help_text=_('Priority among all alternates'))
-    ratio = models.DecimalField(_('ratio'), max_digits=20, decimal_places=8, default='100%',null=True, blank=True)
+    ratio = models.DecimalField(_('ratio'), max_digits=20, decimal_places=8, default='100',null=True, blank=True)
     moq = models.DecimalField(_('MOQ'), max_digits=20, decimal_places=8)
     product_time = models.DecimalField(_('product time'), max_digits=20, decimal_places=8,default='0.00', null=True, blank=True)
     load_time = models.DecimalField(_('load time'), null=True, max_digits=20, decimal_places=8,default='0.00' ,blank=True)
@@ -1164,7 +1194,6 @@ class ItemSupplier(AuditModel):
 
     class Manager(MultiDBManager):
         def get_by_natural_key(self, item, supplier):
-            # return self.get(item=item, location=location, supplier=supplier, effective_start=effective_start)
             return self.get(item=item, supplier=supplier)
 
     def natural_key(self):
@@ -1177,20 +1206,18 @@ class ItemSupplier(AuditModel):
         return '%s - %s' % (
             self.supplier.nr if self.supplier else 'No supplier',
             self.item.nr if self.item else 'No item',
-            # self.location.nr if self.location else 'Any location'
         )
 
     class Meta(AuditModel.Meta):
         db_table = 'itemsupplier'
-        # unique_together = (('item', 'location', 'supplier', 'effective_start'),)
-        # unique_together = (('item', 'supplier', 'effective_start'),)
+        unique_together = (('item','supplier'),)
         verbose_name = _('item supplier')
         verbose_name_plural = _('item suppliers')
 
 
 class ItemDistribution(AuditModel):
     # Database fields
-    id = models.AutoField(_('identifier'), primary_key=True)
+    id = models.AutoField(_('id'), primary_key=True)
     item = models.ForeignKey(
         Item, verbose_name=_('item'),
         db_index=True, related_name='itemdistributions_item',
@@ -1206,7 +1233,7 @@ class ItemDistribution(AuditModel):
         on_delete=models.CASCADE
     )
     cost = models.DecimalField(
-        _('cost'), max_digits=20, decimal_places=8, help_text=_("Shipping cost per unit") )
+        _('cost'), max_digits=20, decimal_places=8,help_text=_("Shipping cost per unit") )
     load_time = models.DecimalField(
         _('load time'), null=True, blank=True,
         max_digits=20, decimal_places=8,default='0.0'
@@ -1290,7 +1317,7 @@ class ItemDistribution(AuditModel):
 
     class Meta(AuditModel.Meta):
         db_table = 'itemdistribution'
-        unique_together = (('item', 'destination', 'origin', 'effective_start'),)
+        unique_together = (('item', 'origin', 'destination', 'resource'),)
         verbose_name = _('item distribution')
         verbose_name_plural = _('item distributions')
 

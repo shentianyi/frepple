@@ -56,7 +56,7 @@ DATABASES = {
     },
 
 
-
+    #
     # 'default': {
     #     'ENGINE': 'django.db.backends.postgresql',
     #     'NAME': 'frepple_dev',
