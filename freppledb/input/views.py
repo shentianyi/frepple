@@ -35,7 +35,8 @@ from django.views.decorators.csrf import csrf_exempt
 
 from freppledb.boot import getAttributeFields
 from freppledb.common.models import Parameter
-from freppledb.input.models import Resource, Operation, Location, SetupMatrix, SetupRule, ItemSuccessor, ItemCustomer
+from freppledb.input.models import Resource, Operation, Location, SetupMatrix, SetupRule, ItemSuccessor, ItemCustomer, \
+    Process
 from freppledb.input.models import Skill, Buffer, Customer, Demand, DeliveryOrder
 from freppledb.input.models import Item, OperationResource, OperationMaterial
 from freppledb.input.models import Calendar, CalendarBucket, ManufacturingOrder, SubOperation
@@ -741,8 +742,8 @@ class SetupMatrixList(GridReport):
                       editable=False),
         GridFieldText('nr', title=_('nr'), editable=False),
         GridFieldText('name', title=_('name'), key=True, formatter='detail', editable=False),
+        GridFieldText('category', title=_('category'), editable=False),
         GridFieldText('subcategory', title=_('subcategory'), editable=False),
-        GridFieldText('description', title=_('description'), editable=False),
         GridFieldCreateOrUpdateDate('created_at', title=_('created_at'), editable=False),
         GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at'), editable=False),
 
@@ -813,9 +814,9 @@ class ResourceList(GridReport):
             'efficiency_calendar', title=_('efficiency % calendar'),field_name='efficiency_calendar__name', formatter='detail', extra='"role":"input/calendar"', editable=False
         ),
 
-        GridFieldText('setup_matrix_display', title=_('setup_matrix_display'), field_name='setup_matrix__nr', editable=False),
-        GridFieldText('setup_matrix', title=_('setup_matrix_id'), field_name='setup_matrix_id', editable=False, hidden=True),
-        GridFieldText('setup', title=_('setup'), editable=False),
+        GridFieldText('setupmatrix_display', title=_('setupmatrix_display'), field_name='setupmatrix__nr', editable=False),
+        GridFieldText('setupmatrix', title=_('setupmatrix_id'), field_name='setupmatrix_id', editable=False, hidden=True),
+        GridFieldText('now_setup', title=_('now setup'), editable=False),
         GridFieldCreateOrUpdateDate('created_at', title=_('created_at'), editable=False),
         GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at'), editable=False),
 
@@ -890,8 +891,6 @@ class LocationList(GridReport):
 
         GridFieldText('category', title=_('category'), initially_hidden=True, editable=False),
         GridFieldText('subcategory', title=_('subcategory'), initially_hidden=True, editable=False),
-        # GridFieldText('owner', title=_('owner'), field_name='owner__name', formatter='detail',
-        #               extra='"role":"input/location"'),
         GridFieldText('description', title=_('description'), editable=False),
         # GridFieldLastModified('lastmodified'),
         GridFieldCreateOrUpdateDate('created_at', title=_('created_at'), editable=False),
@@ -1002,7 +1001,9 @@ class ItemSupplierList(GridReport):
         GridFieldText('monetary_unit', title=_('monetary unit'), editable=False),
         GridFieldNumber('cost_unit', title=_('cost unit'), editable=False),
         GridFieldInteger('priority', title=_('priority'), editable=False),
-        GridFieldNumber('ratio', title=_('ratio'), editable=False),
+        GridFieldNumber('ratio', title=_('ratio %'),
+                        extra='"formatoptions":{"suffix":" %","defaultValue":"100.00"}', editable=False),
+
         GridFieldNumber('moq', title=_('MOQ'), editable=False),
         GridFieldNumber('product_time', title=_('product time'), editable=False),
         GridFieldNumber('load_time', title=_('load time'), editable=False),
@@ -1367,7 +1368,9 @@ class ItemSuccessorList(GridReport):
         GridFieldText('item_successor', title=_('item_successor'), field_name='item_successor_id', editable=False,
                       hidden=True),
         GridFieldInteger('priority', title=_('priority'), editable=False),
-        GridFieldNumber('ratio', title=_('ratio'), editable=False),
+        GridFieldNumber('ratio', title=_('ratio %'),
+                        extra='"formatoptions":{"suffix":" %","defaultValue":"100.00"}', editable=False),
+
         GridFieldDateTime('effective_start', title=_('effective start'), editable=False),
         GridFieldDateTime('effective_end', title=_('effective end'), editable=False),
         GridFieldCreateOrUpdateDate('created_at', title=_('created_at'), editable=False),
@@ -1425,6 +1428,35 @@ class ResourceSkillList(GridReport):
         GridFieldCreateOrUpdateDate('created_at', title=_('created_at'), editable=False),
         GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at'), editable=False),
 
+    )
+
+class ProcessList(GridReport):
+    title = _("process")
+    basequeryset = Process.objects.all()
+    model = Process
+    frozenColumns = 1
+    rows = (
+        GridFieldText('id', title=_('id'), key=True, formatter='detail', extra='"role":"input/location"',
+                      editable=False),
+        GridFieldText('nr', title=_('nr'), editable=False),
+        GridFieldText('name', title=_('name'), editable=False),
+        GridFieldText('type', title=_('type'), editable=False),
+        GridFieldText('location_display', title=_('location_display'), field_name='location__nr', editable=False),
+        GridFieldText('location', title=_('location_id'), field_name='location_id', editable=False, hidden=True),
+        GridFieldText('category', title=_('category'), initially_hidden=True, editable=False),
+        GridFieldText('subcategory', title=_('subcategory'), initially_hidden=True, editable=False),
+        GridFieldNumber('unit_min_num', title=_('unit min num'), editable=False),
+        GridFieldNumber('unit_max_num', title=_('unit max num'), editable=False),
+        GridFieldNumber('unit_num_multiple', title=_('unit num multiple'), editable=False),
+        GridFieldNumber('unit_cost', title=_('unit cost'), editable=False),
+        GridFieldDuration('unit_duration', title=_('unit duration'), editable=False),
+        GridFieldText('available', title=_('available'), field_name='available__name', formatter='detail',
+                      extra='"role":"input/calendar"', editable=False),
+        GridFieldDateTime('effective_start', title=_('effective start'), editable=False),
+        GridFieldDateTime('effective_end', title=_('effective end'), editable=False),
+        GridFieldText('alternative_process_mode', title=_('alternative process mode'), editable=False),
+        GridFieldCreateOrUpdateDate('created_at', title=_('created_at'), editable=False),
+        GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at'), editable=False),
     )
 
 
@@ -1812,31 +1844,27 @@ class OperationList(GridReport):
 
     rows = (
         # . Translators: Translation included with Django
-        GridFieldText('name', title=_('name'), key=True, formatter='detail', extra='"role":"input/operation"'),
-        GridFieldText('description', title=_('description')),
-        GridFieldText('category', title=_('category'), initially_hidden=True),
-        GridFieldText('subcategory', title=_('subcategory'), initially_hidden=True),
-        GridFieldChoice('type', title=_('type'), choices=Operation.types),
-        GridFieldText('item', title=_('item'), field_name='item__name', formatter='detail',
-                      extra='"role":"input/item"'),
-        GridFieldText('location', title=_('location'), field_name='location__name', formatter='detail',
-                      extra='"role":"input/location"'),
-        GridFieldDuration('duration', title=_('duration')),
-        GridFieldDuration('duration_per', title=_('duration per unit')),
-        GridFieldDuration('fence', title=_('release fence'), initially_hidden=True),
-        GridFieldDuration('posttime', title=_('post-op time'), initially_hidden=True),
-        GridFieldNumber('sizeminimum', title=_('size minimum'), initially_hidden=True),
-        GridFieldNumber('sizemultiple', title=_('size multiple'), initially_hidden=True),
-        GridFieldNumber('sizemaximum', title=_('size maximum'), initially_hidden=True),
+        GridFieldText('id', title=_('id'), key=True, formatter='detail', extra='"role":"input/location"',
+                      editable=False),
+        GridFieldText('nr', title=_('nr'), editable=False),
+        GridFieldText('name', title=_('name'), editable=False),
+        GridFieldText('type', title=_('type'), editable=False),
+        GridFieldText('location_display', title=_('location_display'), field_name='location__nr', editable=False),
+        GridFieldText('location', title=_('location_id'), field_name='location_id', editable=False, hidden=True),
+        GridFieldText('category', title=_('category'), initially_hidden=True, editable=False),
+        GridFieldText('subcategory', title=_('subcategory'), initially_hidden=True, editable=False),
+        GridFieldNumber('min_num_per', title=_('min num per'), editable=False),
+        GridFieldNumber('max_num_per', title=_('max num per'), editable=False),
+        GridFieldNumber('multiple_per', title=_('multiple per'), editable=False),
+        GridFieldNumber('cost_per', title=_('cost per'), editable=False),
+        GridFieldDuration('duration_per', title=_('duration per'), editable=False),
         GridFieldText('available', title=_('available'), field_name='available__name', formatter='detail',
-                      extra='"role":"input/calendar"'),
-        GridFieldInteger('priority', title=_('priority'), initially_hidden=True),
-        GridFieldDateTime('effective_start', title=_('effective start'), initially_hidden=True),
-        GridFieldDateTime('effective_end', title=_('effective end'), initially_hidden=True),
-        GridFieldCurrency('cost', title=_('cost'), initially_hidden=True),
-        GridFieldChoice('search', title=_('search mode'), choices=searchmode, initially_hidden=True),
-        GridFieldText('source', title=_('source')),
-        GridFieldLastModified('lastmodified'),
+                      extra='"role":"input/calendar"', editable=False),
+        GridFieldDateTime('effective_start', title=_('effective start'), editable=False),
+        GridFieldDateTime('effective_end', title=_('effective end'), editable=False),
+        GridFieldText('alternative_process_mode', title=_('alternative process mode'), editable=False),
+        GridFieldCreateOrUpdateDate('created_at', title=_('created_at'), editable=False),
+        GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at'), editable=False),
     )
 
 

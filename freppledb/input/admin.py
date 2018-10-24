@@ -17,7 +17,8 @@
 
 from django.utils.translation import ugettext_lazy as _
 
-from freppledb.input.models import Resource, Operation, Location, SetupMatrix, SetupRule,  ItemSuccessor,ItemCustomer
+from freppledb.input.models import Resource, Operation, Location, SetupMatrix, SetupRule, ItemSuccessor, ItemCustomer, \
+    Process
 from freppledb.input.models import Buffer, Customer, Demand, Item, OperationResource
 from freppledb.input.models import OperationMaterial, Skill, ResourceSkill, Supplier
 from freppledb.input.models import Calendar, CalendarBucket, ManufacturingOrder, SubOperation
@@ -278,18 +279,19 @@ class ResourceSkill_inline(MultiDBTabularInline):
 
 class Operation_admin(MultiDBModelAdmin):
     model = Operation
-    raw_id_fields = ('location', 'item', 'available')
+    raw_id_fields = ('location', 'available')
     save_on_top = True
-    inlines = [SubOperation_inline, OperationMaterial_inline, OperationResource_inline, ]
-    fieldsets = (
-        (None, {'fields': ('name', 'type', 'item', 'location', 'description', 'category', 'subcategory')}),
-        (_('planning parameters'), {
-            'fields': (
-                'fence', 'posttime', 'sizeminimum', 'sizemultiple', 'sizemaximum', 'cost',
-                'duration', 'duration_per', 'available', 'effective_start', 'effective_end', 'search'
-            ),
-        }),
-    )
+    exclude = ('source',)
+    # inlines = [SubOperation_inline, OperationMaterial_inline, OperationResource_inline, ]
+    # fieldsets = (
+    #     (None, {'fields': ('name', 'type', 'location', 'description', 'category', 'subcategory')}),
+    #     (_('planning parameters'), {
+    #         'fields': (
+    #             'fence', 'posttime', 'sizeminimum', 'sizemultiple', 'sizemaximum', 'cost',
+    #             'duration', 'duration_per', 'available', 'effective_start', 'effective_end', 'search'
+    #         ),
+    #     }),
+    # )
     tabs = [
         {"name": 'edit', "label": _("edit"), "view": "admin:input_operation_change",
          "permissions": "input.change_operation"},
@@ -439,6 +441,27 @@ class Resource_admin(MultiDBModelAdmin):
 
 
 data_site.register(Resource, Resource_admin)
+
+class Process_admin(MultiDBModelAdmin):
+    model = Process
+    raw_id_fields = ('location', 'available')
+    save_on_top = True
+    exclude = ('source',)
+    tabs = [
+        {"name": 'edit', "label": _("edit"), "view": "admin:input_process_change",
+         "permissions": "input.change_process"},
+        # {"name": 'supplypath', "label": _("supply path"), "view": "supplypath_resource"},
+        # {"name": 'whereused', "label": _("where used"), "view": "whereused_resource"},
+        # {"name": 'plan', "label": _("plan"), "view": "output_resource_plandetail"},
+        # {"name": 'plandetail', "label": _("plan detail"), "view": "output_loadplan_plandetail"},
+        # {"name": 'constraint', "label": _("constrained demand"), "view": "output_constraint_resource"},
+        # {"name": 'comments', "label": _("comments"), "view": "admin:input_resource_comment"},
+        # # . Translators: Translation included with Django
+        # {"name": 'history', "label": _("History"), "view": "admin:input_resource_history"},
+    ]
+
+
+data_site.register(Process, Process_admin)
 
 
 class OperationMaterial_admin(MultiDBModelAdmin):

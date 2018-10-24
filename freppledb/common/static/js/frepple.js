@@ -512,7 +512,7 @@ function popClick(win, id) {
         opener.document.getElementById(name).value = r._pk;
     }
 
-    var displayInput = opener.document.getElementById(window.name + '_new_display');
+    var displayInput = opener.document.getElementById(window.name + '_new_display_by_laurel');
 
     if (displayInput !== null) {
         displayInput.value = r._nk;
@@ -521,7 +521,7 @@ function popClick(win, id) {
         showInput.type = "text";
         showInput.value = r._nk;
         showInput.className = 'form-control';
-        showInput.id = window.name + '_new_display_by_sfz';
+        showInput.id = window.name + '_new_display_by_laurel';
         showInput.readOnly = true;
         elem.parentNode.prepend(showInput);
     }

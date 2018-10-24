@@ -206,6 +206,9 @@ msgstr "计价单位"
 msgid "ratio"
 msgstr "比重"
 
+msgid "ratio %"
+msgstr "比重"
+
 #: input/models.py:976 input/views.py:916
 msgid "MOQ"
 msgstr "最小起订量"
@@ -2637,11 +2640,11 @@ msgstr ""
 #: output/views/resource.py:292 output/views/resource.py:293
 #: output/views/resource.py:294 output/widget.py:1151
 msgid "operation"
-msgstr "操作"
+msgstr "工序"
 
 #: input/models.py:285 input/views.py:1198
 msgid "operations"
-msgstr "操作"
+msgstr "工序"
 
 #: input/models.py:294
 msgid "Parent operation"
@@ -2738,6 +2741,21 @@ msgstr "换线准备规则矩阵"
 #: input/models.py:442 input/views.py:696
 msgid "from setup"
 msgstr "前一个换线准备"
+
+msgid "efficiency %"
+msgstr "效率"
+
+msgid "efficiency % calendar"
+msgstr "效率日历"
+
+msgid "setupmatrix_display"
+msgstr "换线准备规则矩阵"
+
+msgid "setupmatrix_id"
+msgstr "换线准备规则矩阵id"
+
+msgid "now setup"
+msgstr "当前换线准备"
 
 #: input/models.py:443
 msgid "Name of the old setup (wildcard characters are supported)"
