@@ -309,6 +309,8 @@ class CustomerdetailAPI(frePPleRetrieveUpdateDestroyAPIView):
 class ItemFilter(filters.FilterSet):
     created_at__gte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='gte')
     created_at__lte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='lte')
+    updated_at__gte = django_filters.DateTimeFilter(field_name="updated_at", lookup_expr='gte')
+    updated_at__lte = django_filters.DateTimeFilter(field_name="updated_at", lookup_expr='lte')
 
     class Meta:
         model = freppledb.input.models.Item
@@ -745,28 +747,31 @@ class OperationdetailAPI(frePPleRetrieveUpdateDestroyAPIView):
 
 
 class SubOperationFilter(filters.FilterSet):
+    created_at__gte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='gte')
+    created_at__lte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='lte')
+    updated_at__gte = django_filters.DateTimeFilter(field_name="updated_at", lookup_expr='gte')
+    updated_at__lte = django_filters.DateTimeFilter(field_name="updated_at", lookup_expr='lte')
+
     class Meta:
         model = freppledb.input.models.SubOperation
         fields = {
             'id': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
-            'operation': ['exact', 'in', ],
+            'parent_operation__nr': ['exact', 'in', ],
             'priority': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
-            'suboperation': ['exact', 'in', ],
+            'suboperation__nr': ['exact', 'in', ],
             'effective_start': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
             'effective_end': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
-            'source': ['exact', 'in', ],
-            'lastmodified': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
         }
 
         filter_fields = (
-            'id', 'operation', 'priority', 'suboperation', 'effective_start', 'effective_end', 'source', 'lastmodified')
+            'id','parent_operation__nr','suboperation__nr', 'priority','effective_start', 'effective_end',
+            'created_at', 'updated_at')
 
 
 class SubOperationSerializer(BulkSerializerMixin, ModelSerializer):
     class Meta:
         model = freppledb.input.models.SubOperation
-        fields = (
-            'id', 'operation', 'priority', 'suboperation', 'effective_start', 'effective_end', 'source', 'lastmodified')
+        fields = '__all__'
         list_serializer_class = BulkListSerializer
         update_lookup_field = 'id'
         partial = True
@@ -970,9 +975,9 @@ class SkillFilter(filters.FilterSet):
 class SkillSerializer(BulkSerializerMixin, ModelSerializer):
     class Meta:
         model = freppledb.input.models.Skill
-        fields = ('name', 'source', 'lastmodified')
+        fields = '__all__'
         list_serializer_class = BulkListSerializer
-        update_lookup_field = 'name'
+        update_lookup_field = 'id'
         partial = True
 
 
@@ -987,26 +992,36 @@ class SkilldetailAPI(frePPleRetrieveUpdateDestroyAPIView):
     serializer_class = SkillSerializer
 
 
+class SkilldetailNkAPI(frePPleRetrieveUpdateDestroyAPIView):
+    lookup_field = 'nr'
+    queryset = freppledb.input.models.Skill.objects.all()
+    serializer_class = SkillSerializer
+
 class ResourceSkillFilter(filters.FilterSet):
+    created_at__gte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='gte')
+    created_at__lte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='lte')
+    updated_at__gte = django_filters.DateTimeFilter(field_name="updated_at", lookup_expr='gte')
+    updated_at__lte = django_filters.DateTimeFilter(field_name="updated_at", lookup_expr='lte')
+
     class Meta:
         model = freppledb.input.models.ResourceSkill
         fields = {
             'id': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
-            'resource': ['exact', 'in', ],
-            'skill': ['exact', 'in', ],
+            'resource__nr': ['exact', 'in', ],
+            'skill__nr': ['exact', 'in', ],
             'effective_start': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
             'effective_end': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
             'priority': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
         }
 
         filter_fields = (
-            'id', 'resource', 'skill', 'effective_start', 'effective_end', 'priority')
+            'id', 'resource__nr', 'skill__nr', 'effective_start', 'effective_end', 'priority','created_at','updated_at')
 
 
 class ResourceSkillSerializer(BulkSerializerMixin, ModelSerializer):
     class Meta:
         model = freppledb.input.models.ResourceSkill
-        fields = ('id', 'resource', 'skill', 'effective_start', 'effective_end', 'priority', 'source', 'lastmodified')
+        fields = '__all__'
         list_serializer_class = BulkListSerializer
         update_lookup_field = 'id'
         partial = True
@@ -1074,40 +1089,35 @@ class ProcessdetailAPI(frePPleRetrieveUpdateDestroyAPIView):
 # CMARK end Process API-------------------------------------------------------
 
 class OperationMaterialFilter(filters.FilterSet):
+    created_at__gte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='gte')
+    created_at__lte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='lte')
+    updated_at__gte = django_filters.DateTimeFilter(field_name="updated_at", lookup_expr='gte')
+    updated_at__lte = django_filters.DateTimeFilter(field_name="updated_at", lookup_expr='lte')
+
     class Meta:
         model = freppledb.input.models.OperationMaterial
         fields = {
             'id': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
             'quantity': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
             'quantity_fixed': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
-            'transferbatch': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
-            'operation': ['exact', 'in', ],
-            'item': ['exact', 'in', ],
+            'materialbatch_per': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
+            'operation__nr': ['exact', 'in', ],
+            'item__nr': ['exact', 'in', ],
             'type': ['exact', 'in', ],
             'effective_start': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
             'effective_end': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
-            'name': ['exact', 'in', 'contains', ],
             'priority': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
-            'search': ['exact', 'contains', ],
-            'source': ['exact', 'in', ],
-            'lastmodified': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
         }
 
         filter_fields = (
-            'id', 'operation', 'item', 'quantity', 'quantity_fixed', 'transferbatch', 'type',
-            'effective_start', 'effective_end', 'name', 'priority', 'search',
-            'source', 'lastmodified'
-        )
+            'id', 'operation__nr', 'item__nr', 'quantity', 'quantity_fixed', 'materialbatch_per', 'type',
+            'effective_start', 'effective_end', 'priority', 'search','created_at','updated_at')
 
 
 class OperationMaterialSerializer(BulkSerializerMixin, ModelSerializer):
     class Meta:
         model = freppledb.input.models.OperationMaterial
-        fields = (
-            'id', 'operation', 'item', 'quantity', 'quantity_fixed', 'transferbatch', 'type',
-            'effective_start', 'effective_end', 'name', 'priority', 'search',
-            'source', 'lastmodified'
-        )
+        fields = '__all__'
         list_serializer_class = BulkListSerializer
         update_lookup_field = 'id'
         partial = True
@@ -1125,30 +1135,35 @@ class OperationMaterialdetailAPI(frePPleRetrieveUpdateDestroyAPIView):
 
 
 class OperationResourceFilter(filters.FilterSet):
+    created_at__gte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='gte')
+    created_at__lte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='lte')
+    updated_at__gte = django_filters.DateTimeFilter(field_name="updated_at", lookup_expr='gte')
+    updated_at__lte = django_filters.DateTimeFilter(field_name="updated_at", lookup_expr='lte')
+
     class Meta:
         model = freppledb.input.models.OperationResource
         fields = {
-            'id': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ], 'operation': ['exact', 'in', ],
-            'resource': ['exact', 'in', ], 'skill': ['exact', 'in', ],
+            'id': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
+            'operation__nr': ['exact', 'in', ],
+            'resource__nr': ['exact', 'in', ], 'skill__nr': ['exact', 'in', ],
             'quantity': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
             'effective_start': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
             'effective_end': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
-            'name': ['exact', 'in', 'contains', ], 'priority': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
-            'search': ['exact', 'contains', ],
-            'source': ['exact', 'in', ], 'lastmodified': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
+            'priority': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
+            'setup': ['exact', 'in', 'contains', ],
+            # 'search': ['exact', 'contains', ],
+            # 'source': ['exact', 'in', ],
         }
 
         filter_fields = (
-            'id', 'operation', 'resource', 'skill', 'quantity', 'effective_start', 'effective_end',
-            'name', 'priority', 'setup', 'search', 'source', 'lastmodified'
-        )
+            'id', 'operation__nr', 'resource__nr', 'skill__nr', 'quantity', 'effective_start', 'effective_end',
+            'priority', 'setup', 'created_at','updated_at')
 
 
 class OperationResourceSerializer(BulkSerializerMixin, ModelSerializer):
     class Meta:
         model = freppledb.input.models.OperationResource
-        fields = ('id', 'operation', 'resource', 'skill', 'quantity', 'effective_start', 'effective_end',
-                  'name', 'priority', 'setup', 'search', 'source', 'lastmodified')
+        fields = '__all__'
         list_serializer_class = BulkListSerializer
         update_lookup_field = 'id'
         partial = True

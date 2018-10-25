@@ -444,7 +444,7 @@ class Operation(AuditModel):
         ('mincost', _('mincost')),
     )
 
-    id = models.AutoField(_('identifier'), primary_key=True)
+    id = models.AutoField(_('id'), primary_key=True)
     nr = models.CharField(_('nr'), max_length=300, db_index=True, unique=True)
     name = models.CharField(_('name'), max_length=300, primary_key=False, db_index=True)
     type = models.CharField(
@@ -516,8 +516,8 @@ class Operation(AuditModel):
     #     help_text=_('Method to select preferred alternate')
     # )
 
-    # def __str__(self):
-    #     return self.name
+    def __str__(self):
+        return self.nr
 
     class Manager(MultiDBManager):
         def get_by_natural_key(self, location, available):
@@ -528,34 +528,35 @@ class Operation(AuditModel):
 
     objects = Manager()
 
-    def __str__(self):
-        return '%s - %s' % (
-            self.location.nr,self.available.name)
-
+    # def __str__(self):
+    #     return '%s - %s' % (
+    #         self.location.nr if self.location else 'No location',
+    #         self.available.name if self.available else 'No calendar',
+    #     )
 
     class Meta(AuditModel.Meta):
         db_table = 'operation'
         verbose_name = _('operation')
         verbose_name_plural = _('operations')
-        ordering = ['name']
+        ordering = ['id']
 
 
 class SubOperation(AuditModel):
     # Database fields
     id = models.AutoField(_('identifier'), primary_key=True)
-    operation = models.ForeignKey(
-        Operation, verbose_name=_('operation'),
+    parent_operation = models.ForeignKey(
+        Operation, verbose_name=_('parent operation'),
         related_name='suboperations', help_text=_("Parent operation"),
         on_delete=models.CASCADE
-    )
-    priority = models.IntegerField(
-        _('priority'), default=1,
-        help_text=_("Sequence of this operation among the suboperations. Negative values are ignored.")
     )
     suboperation = models.ForeignKey(
         Operation, verbose_name=_('suboperation'),
         related_name='superoperations', help_text=_("Child operation"),
         on_delete=models.CASCADE
+    )
+    priority = models.IntegerField(
+        _('priority'), default=1,
+        help_text=_("Sequence of this operation among the suboperations. Negative values are ignored.")
     )
     effective_start = models.DateTimeField(
         _('effective start'), null=True, blank=True,
@@ -567,27 +568,28 @@ class SubOperation(AuditModel):
     )
 
     class Manager(MultiDBManager):
-        def get_by_natural_key(self, operation, suboperation, effective_start):
-            return self.get(operation=operation, suboperation=suboperation, effective_start=effective_start)
+        def get_by_natural_key(self, parent_operation, suboperation, effective_start):
+            return self.get(parent_operation=parent_operation, suboperation=suboperation, effective_start=effective_start)
 
     def natural_key(self):
-        return (self.operation, self.suboperation, self.effective_start)
+        return (self.parent_operation, self.suboperation)
 
     objects = Manager()
 
     def __str__(self):
         return ("%s   %s   %s" % (
-            self.operation.name if self.operation else None,
+            self.parent_operation.nr if self.parent_operation else None,
             self.priority,
-            self.suboperation.name if self.suboperation else None
+            self.suboperation.nr if self.suboperation else None
         ))
 
     class Meta(AuditModel.Meta):
         db_table = 'suboperation'
-        ordering = ['operation', 'priority', 'suboperation']
+        # ordering = ['parent_operation', 'priority', 'suboperation']
+        ordering = ['id']
         verbose_name = _('suboperation')
         verbose_name_plural = _('suboperations')
-        unique_together = (('operation', 'suboperation', 'effective_start'),)
+        unique_together = (('parent_operation', 'suboperation', 'effective_start'),)
 
 
 class Buffer(AuditModel):
@@ -682,9 +684,18 @@ class SetupMatrix(AuditModel):
         _('subcategory'), max_length=300, null=True, blank=True, db_index=True
     )
 
-    # Methods
+    class Manager(MultiDBManager):
+        def get_by_natural_key(self, nr):
+            return self.get(nr=nr)
+
+    def natural_key(self):
+        return (self.nr)
+
+    objects = Manager()
+
     def __str__(self):
-        return self.name
+        return self.nr
+
 
     class Meta(AuditModel.Meta):
         db_table = 'setupmatrix'
@@ -820,6 +831,13 @@ class Resource(AuditModel, HierarchyModel):
     def __str__(self):
         return self.nr
 
+    class Manager(MultiDBManager):
+        def get_by_natural_key(self, nr):
+            return self.get(nr=nr)
+
+    natural_key = ('nr',)
+    objects = Manager()
+
     class Meta(AuditModel.Meta):
         db_table = 'resource'
         verbose_name = _('resource')
@@ -835,7 +853,7 @@ class Skill(AuditModel):
 
     name = models.CharField(
         # . Translators: Translation included with Django
-        _('name'), max_length=300, help_text=_('Unique identifier'))
+        _('name'), max_length=300)
     category = models.CharField(
         _('category'), max_length=300, null=True, blank=True, db_index=True
     )
@@ -848,7 +866,14 @@ class Skill(AuditModel):
 
     # Methods
     def __str__(self):
-        return self.name
+        return self.nr
+
+    class Manager(MultiDBManager):
+        def get_by_natural_key(self, nr):
+            return self.get(nr=nr)
+
+    natural_key = ('nr',)
+    objects = Manager()
 
     class Meta(AuditModel.Meta):
         db_table = 'skill'
@@ -862,11 +887,11 @@ class ResourceSkill(AuditModel):
     id = models.AutoField(_('id'), primary_key=True)
 
     resource = models.ForeignKey(
-        Resource, verbose_name=_('resource'), db_index=True, related_name='skills',
+        Resource, verbose_name=_('resource'), db_index=True, related_name='resourceskill_resource',
         blank=False, null=False, on_delete=models.CASCADE
     )
     skill = models.ForeignKey(
-        Skill, verbose_name=_('skill'), db_index=True, related_name='resources',
+        Skill, verbose_name=_('skill'), db_index=True, related_name='resourcesskill_skill',
         blank=False, null=False, on_delete=models.CASCADE
     )
     effective_start = models.DateTimeField(
@@ -890,6 +915,13 @@ class ResourceSkill(AuditModel):
         return (self.resource, self.skill)
 
     objects = Manager()
+
+    def __str__(self):
+        return '%s - %s' % (
+            self.resource.nr if self.resource else 'No resource',
+            self.skill.nr if self.skill else 'No skill',
+        )
+
 
     class Meta(AuditModel.Meta):
         db_table = 'resourceskill'
@@ -972,20 +1004,28 @@ class OperationMaterial(AuditModel):
     types = (
         ('start', _('Start')),
         ('end', _('End')),
-        ('transfer_batch', _('Batch transfer'))
+        # ('transfer_batch', _('Batch transfer'))
     )
 
     # Database fields
-    id = models.AutoField(_('identifier'), primary_key=True)
+    id = models.AutoField(_('id'), primary_key=True)
     operation = models.ForeignKey(
         Operation, verbose_name=_('operation'),
-        db_index=True, related_name='operationmaterials',
+        db_index=True, related_name='operationmaterials_operation',
         blank=False, null=False, on_delete=models.CASCADE
     )
     item = models.ForeignKey(
         Item, verbose_name=_('item'),
-        db_index=True, related_name='operationmaterials',
+        db_index=True, related_name='operationmaterials_item',
         blank=False, null=False, on_delete=models.CASCADE
+    )
+    type = models.CharField(
+        _('type'), max_length=20, null=True, blank=True, choices=types, default='start',
+        help_text=_('Consume/produce material at the start or the end of the operationplan'),
+    )
+    priority = models.IntegerField(
+        _('priority'), default=1, null=True, blank=True,
+        help_text=_('Priority of this operation material in a group of alternates')
     )
     quantity = models.DecimalField(
         _('quantity'), default='1.00', blank=True, null=True,
@@ -997,9 +1037,9 @@ class OperationMaterial(AuditModel):
         max_digits=20, decimal_places=8,
         help_text=_('Fixed quantity to consume or produce')
     )
-    type = models.CharField(
-        _('type'), max_length=20, null=True, blank=True, choices=types, default='start',
-        help_text=_('Consume/produce material at the start or the end of the operationplan'),
+    materialbatch_per = models.DecimalField(
+        _('materialbatch per'), blank=True, null=True,
+        max_digits=20, decimal_places=8,
     )
     effective_start = models.DateTimeField(
         _('effective start'), null=True, blank=True,
@@ -1009,25 +1049,24 @@ class OperationMaterial(AuditModel):
         _('effective end'), null=True, blank=True,
         help_text=_('Validity end date')
     )
-    name = models.CharField(
-        # . Translators: Translation included with Django
-        _('name'), max_length=300, null=True, blank=True,
-        help_text=_('Optional name of this operation material')
-    )
-    priority = models.IntegerField(
-        _('priority'), default=1, null=True, blank=True,
-        help_text=_('Priority of this operation material in a group of alternates')
-    )
-    search = models.CharField(
-        _('search mode'), max_length=20,
-        null=True, blank=True, choices=searchmode,
-        help_text=_('Method to select preferred alternate')
-    )
-    transferbatch = models.DecimalField(
-        _('transfer batch quantity'),
-        max_digits=20, decimal_places=8, null=True, blank=True,
-        help_text=_('Batch size by in which material is produced or consumed')
-    )
+    alternative_process_mode = models.CharField(
+        _('alternative process mode'), max_length=20, null=True, blank=True, choices=Operation.modes)
+
+    # transferbatch = models.DecimalField(
+    #     _('transfer batch quantity'),
+    #     max_digits=20, decimal_places=8, null=True, blank=True,
+    #     help_text=_('Batch size by in which material is produced or consumed')
+    # )
+    # name = models.CharField(
+    #     # . Translators: Translation included with Django
+    #     _('name'), max_length=300, null=True, blank=True,
+    #     help_text=_('Optional name of this operation material')
+    # )
+    # search = models.CharField(
+    #     _('search mode'), max_length=20,
+    #     null=True, blank=True, choices=searchmode,
+    #     help_text=_('Method to select preferred alternate')
+    # )
 
     class Manager(MultiDBManager):
         def get_by_natural_key(self, operation, item, effective_start):
@@ -1041,14 +1080,14 @@ class OperationMaterial(AuditModel):
     def __str__(self):
         if self.effective_start:
             return '%s - %s - %s' % (
-                self.operation.name if self.operation else None,
-                self.item.name if self.item else None,
+                self.operation.nr if self.operation else None,
+                self.item.nr if self.item else None,
                 self.effective_start
             )
         else:
             return '%s - %s' % (
-                self.operation.name if self.operation else None,
-                self.item.name if self.item else None
+                self.operation.nr if self.operation else None,
+                self.item.nr if self.item else None
             )
 
     class Meta(AuditModel.Meta):
@@ -1061,23 +1100,31 @@ class OperationMaterial(AuditModel):
 class OperationResource(AuditModel):
     # Database fields
     id = models.AutoField(_('identifier'), primary_key=True)
-    operation = models.ForeignKey(
-        Operation, verbose_name=_('operation'),
-        db_index=True, related_name='operationresources',
-        blank=False, null=False, on_delete=models.CASCADE
-    )
     resource = models.ForeignKey(
         Resource, verbose_name=_('resource'), db_index=True,
         related_name='operationresources',
         blank=False, null=False, on_delete=models.CASCADE
     )
-    skill = models.ForeignKey(
-        Skill, verbose_name=_('skill'), related_name='operationresources',
-        null=True, blank=True, db_index=True, on_delete=models.CASCADE
+    operation = models.ForeignKey(
+        Operation, verbose_name=_('operation'),
+        db_index=True, related_name='operationresources',
+        blank=False, null=False, on_delete=models.CASCADE
     )
     quantity = models.DecimalField(
         _('quantity'), default='1.00',
         max_digits=20, decimal_places=8
+    )
+    priority = models.IntegerField(
+        _('priority'), default=1, null=True, blank=True,
+        help_text=_('Priority of this load in a group of alternates')
+    )
+    skill = models.ForeignKey(
+        Skill, verbose_name=_('skill'), related_name='operationresources',
+        null=True, blank=True, db_index=True, on_delete=models.CASCADE
+    )
+    setup = models.CharField(
+        _('setup'), max_length=300, null=True, blank=True,
+        help_text=_('Setup required on the resource for this operation')
     )
     effective_start = models.DateTimeField(
         _('effective start'), null=True, blank=True,
@@ -1087,50 +1134,46 @@ class OperationResource(AuditModel):
         _('effective end'), null=True, blank=True,
         help_text=_('Validity end date')
     )
-    name = models.CharField(
-        # . Translators: Translation included with Django
-        _('name'), max_length=300, null=True, blank=True,
-        help_text=_('Optional name of this load')
-    )
-    priority = models.IntegerField(
-        _('priority'), default=1, null=True, blank=True,
-        help_text=_('Priority of this load in a group of alternates')
-    )
-    setup = models.CharField(
-        _('setup'), max_length=300, null=True, blank=True,
-        help_text=_('Setup required on the resource for this operation')
-    )
-    search = models.CharField(
-        _('search mode'), max_length=20,
-        null=True, blank=True, choices=searchmode,
-        help_text=_('Method to select preferred alternate')
-    )
+    alternative_process_mode = models.CharField(
+        _('alternative process mode'), max_length=20, null=True, blank=True, choices=Operation.modes)
+    # name = models.CharField(
+    #     # . Translators: Translation included with Django
+    #     _('name'), max_length=300, null=True, blank=True,
+    #     help_text=_('Optional name of this load')
+    # )
+    # search = models.CharField(
+    #     _('search mode'), max_length=20,
+    #     null=True, blank=True, choices=searchmode,
+    #     help_text=_('Method to select preferred alternate')
+    # )
 
     class Manager(MultiDBManager):
-        def get_by_natural_key(self, operation, resource, effective_start):
-            return self.get(operation=operation, resource=resource, effective_start=effective_start)
+        def get_by_natural_key(self, operation, resource,skill ,effective_start):
+            return self.get(operation=operation, resource=resource, skill=skill,effective_start=effective_start)
 
     def natural_key(self):
-        return (self.operation, self.resource, self.effective_start)
+        return (self.operation, self.resource,self.skill ,self.effective_start)
 
     objects = Manager()
 
     def __str__(self):
         if self.effective_start:
-            return '%s - %s - %s' % (
-                self.operation.name if self.operation else None,
-                self.resource.name if self.resource else None,
+            return '%s - %s - %s - %s' % (
+                self.operation.nr if self.operation else None,
+                self.resource.nr if self.resource else None,
+                self.skill.nr if self.skill else None,
                 self.effective_start
             )
         else:
-            return '%s - %s' % (
-                self.operation.name if self.operation else None,
-                self.resource.name if self.resource else None
+            return '%s - %s - %s' % (
+                self.operation.nr if self.operation else None,
+                self.resource.nr if self.resource else None,
+                self.skill.nr if self.skill else None
             )
 
     class Meta(AuditModel.Meta):
         db_table = 'operationresource'
-        unique_together = (('operation', 'resource', 'effective_start'),)
+        unique_together = (('operation', 'resource', 'skill','effective_start'),)
         verbose_name = _('operation resource')
         verbose_name_plural = _('operation resources')
 
@@ -1554,7 +1597,7 @@ class OperationPlan(AuditModel):
     plan = JSONBField(default="{}", null=True, blank=True, editable=False)
     # Used only for manufacturing orders
     operation = models.ForeignKey(
-        Operation, verbose_name=_('operation'),
+        Operation, verbose_name=_('operation'),related_name='operationplan_operation',
         db_index=True, null=True, blank=True, on_delete=models.CASCADE
     )
     owner = models.ForeignKey(

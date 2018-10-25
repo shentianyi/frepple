@@ -157,7 +157,8 @@ class OperationMaterial_inline(MultiDBTabularInline):
 class OperationResource_inline(MultiDBTabularInline):
     model = OperationResource
     raw_id_fields = ('operation', 'resource', 'skill')
-    fields = ('resource', 'operation', 'quantity', 'effective_start', 'effective_end', 'skill', 'setup', 'search')
+    # fields = ('resource', 'operation', 'quantity', 'effective_start', 'effective_end', 'skill', 'setup', 'search')
+    fields = ('resource', 'operation', 'quantity', 'effective_start', 'effective_end', 'skill', 'setup')
     extra = 0
     exclude = ('source',)
 
@@ -263,7 +264,7 @@ data_site.register(ItemDistribution, ItemDistribution_admin)
 
 class SubOperation_inline(MultiDBTabularInline):
     model = SubOperation
-    fk_name = 'operation'
+    fk_name = 'parent_operation'
     extra = 1
     raw_id_fields = ('suboperation',)
     exclude = ('source',)
@@ -311,9 +312,9 @@ data_site.register(Operation, Operation_admin)
 
 class SubOperation_admin(MultiDBModelAdmin):
     model = SubOperation
-    raw_id_fields = ('operation', 'suboperation')
+    raw_id_fields = ('parent_operation', 'suboperation')
     save_on_top = True
-    exclude = ('source', 'id')
+    exclude = ('source',)
 
 
 data_site.register(SubOperation, SubOperation_admin)
@@ -374,7 +375,7 @@ data_site.register(SetupRule, SetupRule_admin)
 class SetupMatrix_admin(MultiDBModelAdmin):
     model = SetupMatrix
     save_on_top = True
-    inlines = [SetupRule_inline, ]
+    # inlines = [SetupRule_inline, ]
     exclude = ('source',)
     tabs = [
         {"name": 'edit', "label": _("edit"), "view": "admin:input_setupmatrix_change",
@@ -470,9 +471,9 @@ class OperationMaterial_admin(MultiDBModelAdmin):
     save_on_top = True
     exclude = ('id',)
     fieldsets = (
-        (None, {'fields': ('item', 'operation', 'type', 'quantity', 'quantity_fixed', 'transferbatch',
+        (None, {'fields': ('item', 'operation', 'type', 'quantity', 'quantity_fixed',
                            ('effective_start', 'effective_end'))}),
-        (_('alternates'), {'fields': ('name', 'priority', 'search'), }),
+        # (_('alternates'), {'fields': ('name', 'priority', 'search'), }),
     )
     tabs = [
         {"name": 'edit', "label": _("edit"), "view": "admin:input_operationmaterial_change",
@@ -491,11 +492,11 @@ class OperationResource_admin(MultiDBModelAdmin):
     raw_id_fields = ('operation', 'resource', 'skill')
     save_on_top = True
     exclude = ('id',)
-    fieldsets = (
-        (None,
-         {'fields': ('resource', 'operation', 'quantity', 'skill', 'setup', ('effective_start', 'effective_end'))}),
-        (_('alternates'), {'fields': ('name', 'priority', 'search'), }),
-    )
+    # fieldsets = (
+    #     (None,
+    #      {'fields': ('resource', 'operation', 'quantity', 'skill', 'setup', ('effective_start', 'effective_end'))}),
+    #     (_('alternates'), {'fields': ('name', 'priority', 'search'), }),
+    # )
     tabs = [
         {"name": 'edit', "label": _("edit"), "view": "admin:input_operationresource_change",
          "permissions": "input.change_operationresource"},
