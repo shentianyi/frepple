@@ -794,7 +794,8 @@ class ResourceList(GridReport):
                       editable=False),
         GridFieldText('nr', title=_('nr'), editable=False),
         GridFieldText('name', title=_('name'), formatter='detail', editable=False),
-        GridFieldText('owner_display', title=_('owner_display'), field_name='owner__nr', editable=False, formatter='detail', extra='"role":"input/resource"'),
+        GridFieldText('owner_display', title=_('owner_display'), field_name='owner__nr', editable=False,
+                      formatter='detail', extra='"role":"input/resource"'),
         GridFieldText('owner', title=_('owner_id'), field_name='owner_id', editable=False, hidden=True),
         GridFieldText('description', title=_('description'), editable=False),
         GridFieldText('category', title=_('category'), initially_hidden=True, editable=False),
@@ -816,11 +817,14 @@ class ResourceList(GridReport):
         GridFieldNumber('efficiency', title=_('efficiency %'), formatter='currency',
                         extra='"formatoptions":{"suffix":" %","defaultValue":"100.00"}', editable=False),
         GridFieldText(
-            'efficiency_calendar', title=_('efficiency % calendar'),field_name='efficiency_calendar__name', formatter='detail', extra='"role":"input/calendar"', editable=False
+            'efficiency_calendar', title=_('efficiency % calendar'), field_name='efficiency_calendar__name',
+            formatter='detail', extra='"role":"input/calendar"', editable=False
         ),
 
-        GridFieldText('setupmatrix_display', title=_('setupmatrix_display'), field_name='setupmatrix__nr', editable=False),
-        GridFieldText('setupmatrix', title=_('setupmatrix_id'), field_name='setupmatrix_id', editable=False, hidden=True),
+        GridFieldText('setupmatrix_display', title=_('setupmatrix_display'), field_name='setupmatrix__nr',
+                      editable=False),
+        GridFieldText('setupmatrix', title=_('setupmatrix_id'), field_name='setupmatrix_id', editable=False,
+                      hidden=True),
         GridFieldText('now_setup', title=_('now setup'), editable=False),
 
         GridFieldCreateOrUpdateDate('created_at', title=_('created_at'), editable=False),
@@ -1279,11 +1283,10 @@ class ItemList(GridReport):
         # . Translators: Translation included with Django
         GridFieldInteger('id', title=_('id'), key=True, formatter='detail', extra='"role":"input/item"'),
         GridFieldText('nr', title=_('nr'), editable=False),
-        GridFieldText('name', title=_('name'), editable=False, formatter='detail', extra='"role":"input/item"'),
+        GridFieldText('name', title=_('name'), editable=False),
         GridFieldText('barcode', title=_('barcode'), editable=False),
-        GridFieldText('status', field_name='status', title=_('status'), formatter='detail', editable=False,
-                      extra='"role":"input/item"'),
-        GridFieldText('type', title=_('type'), formatter='detail', editable=False, extra='"role":"input/item"'),
+        GridFieldText('status', field_name='status', title=_('status'), editable=False),
+        GridFieldChoice('type', title=_('type'),choices=Item.types,editable=False),
         GridFieldCurrency('cost', title=_('cost'), editable=False),
         GridFieldText('source', title=_('source'), editable=False, initially_hidden=True),
         # 新建一个显示列
@@ -1402,7 +1405,7 @@ class SkillList(GridReport):
                       editable=False),
         GridFieldText('nr', title=_('nr'), editable=False),
 
-        GridFieldText('name', title=_('name'),editable=False),
+        GridFieldText('name', title=_('name'), editable=False),
         GridFieldText('category', title=_('category'), editable=False),
         GridFieldText('subcategory', title=_('subcategory'), editable=False),
         GridFieldText('description', title=_('description'), editable=False),
@@ -1430,12 +1433,12 @@ class ResourceSkillList(GridReport):
         GridFieldText('resource_display', title=_('resource_display'), field_name='resource__nr', formatter='detail',
                       extra='"role":"input/resource"', editable=False),
         GridFieldText('resource', title=_('resource_id'), field_name='resource_id', formatter='detail',
-                      extra='"role":"input/resource"', hidden=True,editable=False),
+                      extra='"role":"input/resource"', hidden=True, editable=False),
 
         GridFieldText('skill_display', title=_('skill_display'), field_name='skill__nr', formatter='detail',
                       extra='"role":"input/skill"', editable=False),
         GridFieldText('skill', title=_('skill_id'), field_name='skill_id', formatter='detail',
-                      extra='"role":"input/skill"', editable=False,hidden=True),
+                      extra='"role":"input/skill"', editable=False, hidden=True),
         GridFieldDateTime('effective_start', title=_('effective start'), editable=False),
         GridFieldDateTime('effective_end', title=_('effective end'), editable=False),
         GridFieldInteger('priority', title=_('priority'), editable=False),
@@ -1443,6 +1446,7 @@ class ResourceSkillList(GridReport):
         GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at'), editable=False),
 
     )
+
 
 class ProcessList(GridReport):
     title = _("process")
@@ -1454,7 +1458,7 @@ class ProcessList(GridReport):
                       editable=False),
         GridFieldText('nr', title=_('nr'), editable=False),
         GridFieldText('name', title=_('name'), editable=False),
-        GridFieldText('type', title=_('type'), editable=False),
+        GridFieldChoice('type', title=_('type'),choices=Process.types, editable=False),
         GridFieldText('location_display', title=_('location_display'), field_name='location__nr', editable=False),
         GridFieldText('location', title=_('location_id'), field_name='location_id', editable=False, hidden=True),
         GridFieldText('category', title=_('category'), initially_hidden=True, editable=False),
@@ -1488,7 +1492,7 @@ class OperationResourceList(GridReport):
         GridFieldInteger('id', title=_('id'), key=True, formatter='detail',
                          extra='"role":"input/operationresource"', editable=False),
         GridFieldText('resource_display', title=_('resource_display'), field_name='resource__nr', editable=False),
-        GridFieldText('resource', title=_('resource_id'), field_name='resource_id', hidden=True,editable=False),
+        GridFieldText('resource', title=_('resource_id'), field_name='resource_id', hidden=True, editable=False),
 
         GridFieldText('operation_display', title=_('operation_display'), field_name='operation__nr', editable=False),
         GridFieldText('operation', title=_('operation_id'), field_name='operation_id', hidden=True, editable=False),
@@ -1497,17 +1501,17 @@ class OperationResourceList(GridReport):
         GridFieldInteger('priority', title=_('priority'), editable=False),
 
         GridFieldText('skill_display', title=_('skill_display'), field_name='skill__nr', editable=False),
-        GridFieldText('skill', title=_('skill_id'), field_name='skill_id',hidden=True, editable=False),
+        GridFieldText('skill', title=_('skill_id'), field_name='skill_id', hidden=True, editable=False),
 
         GridFieldText('setup', title=_('setup'), editable=False),
         GridFieldDateTime('effective_start', title=_('effective start'), editable=False),
         GridFieldDateTime('effective_end', title=_('effective end'), editable=False),
-        GridFieldText('alternative_process_mode', title=_('alternative process mode'), editable=False),
+        GridFieldChoice('alternative_process_mode', title=_('alternative process mode'),choices=Operation.modes ,editable=False),
         GridFieldCreateOrUpdateDate('created_at', title=_('created_at'), editable=False),
         GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at'), editable=False),
     )
 
-        # . Translators: Translation included with Django
+    # . Translators: Translation included with Django
     #     GridFieldText('name', title=_('name'), initially_hidden=True),
     #     GridFieldChoice('search', title=_('search mode'), choices=searchmode, initially_hidden=True),
     #     GridFieldText('source', title=_('source')),
@@ -1583,7 +1587,7 @@ class OperationMaterialList(GridReport):
 
         GridFieldDateTime('effective_start', title=_('effective start'), editable=False),
         GridFieldDateTime('effective_end', title=_('effective end'), editable=False),
-        GridFieldText('alternative_process_mode', title=_('alternative process mode'), editable=False),
+        GridFieldChoice('alternative_process_mode', title=_('alternative process mode'), choices=Operation.modes,editable=False),
         GridFieldCreateOrUpdateDate('created_at', title=_('created_at'), editable=False),
         GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at'), editable=False),
         GridFieldText('_pk', field_name='id', editable=False, hidden=True),
@@ -1884,7 +1888,7 @@ class OperationList(GridReport):
                       editable=False),
         GridFieldText('nr', title=_('nr'), editable=False),
         GridFieldText('name', title=_('name'), editable=False),
-        GridFieldText('type', title=_('type'), editable=False),
+        GridFieldChoice('type', title=_('type'), choices=Operation.types, editable=False),
         GridFieldText('location_display', title=_('location_display'), field_name='location__nr', editable=False),
         GridFieldText('location', title=_('location_id'), field_name='location_id', editable=False, hidden=True),
         GridFieldText('category', title=_('category'), initially_hidden=True, editable=False),
@@ -1898,7 +1902,7 @@ class OperationList(GridReport):
                       extra='"role":"input/calendar"', editable=False),
         GridFieldDateTime('effective_start', title=_('effective start'), editable=False),
         GridFieldDateTime('effective_end', title=_('effective end'), editable=False),
-        GridFieldText('alternative_process_mode', title=_('alternative process mode'), editable=False),
+        GridFieldChoice('alternative_process_mode', title=_('alternative process mode'),choices=Operation.modes, editable=False),
         GridFieldCreateOrUpdateDate('created_at', title=_('created_at'), editable=False),
         GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at'), editable=False),
         GridFieldText('_pk', field_name='id', editable=False, hidden=True),
@@ -1918,12 +1922,16 @@ class SubOperationList(GridReport):
     help_url = 'user-guide/model-reference/suboperations.html'
 
     rows = (
-        GridFieldInteger('id', title=_('id'), key=True,editable=False,formatter='detail', extra='"role":"input/suboperation"'),
-        GridFieldText('parent_operation_display', title=_('parent_operation_display'), field_name='parent_operation__nr',editable=False),
-        GridFieldText('parent_operation', title=_('parent_operation_id'), field_name='parent_operation_id',hidden=True, editable=False),
+        GridFieldInteger('id', title=_('id'), key=True, editable=False, formatter='detail',
+                         extra='"role":"input/suboperation"'),
+        GridFieldText('parent_operation_display', title=_('parent_operation_display'),
+                      field_name='parent_operation__nr', editable=False),
+        GridFieldText('parent_operation', title=_('parent_operation_id'), field_name='parent_operation_id', hidden=True,
+                      editable=False),
 
         GridFieldText('suboperation', title=_('suboperation'), field_name='suboperation__nr', editable=False),
-        GridFieldText('suboperation', title=_('suboperation_id'), field_name='suboperation_id', hidden=True, editable=False),
+        GridFieldText('suboperation', title=_('suboperation_id'), field_name='suboperation_id', hidden=True,
+                      editable=False),
 
         GridFieldInteger('priority', title=_('priority')),
         GridFieldDateTime('effective_start', title=_('effective start'), editable=False),
