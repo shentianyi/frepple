@@ -164,7 +164,7 @@ class PlanTaskRegistry:
       raise
 
 
-# 计划生产
+# 生产计划
 class PlanTask:
   '''
   Base class for steps in the plan generation process

@@ -449,6 +449,8 @@ class Operation(AuditModel):
     name = models.CharField(_('name'), max_length=300, primary_key=False, db_index=True)
     type = models.CharField(
         _('type'), max_length=20, null=True, blank=True, choices=types)
+
+
     location = models.ForeignKey(Location, verbose_name=_('location'), related_name='operation_location',
                                  on_delete=models.CASCADE)
     category = models.CharField(

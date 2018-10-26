@@ -2482,16 +2482,25 @@ msgid "time_per"
 msgstr "单位时间"
 
 #: input/models.py:195
+#msgid "routing"
+#msgstr "串连工序（顺序号）"
+
 msgid "routing"
-msgstr "串连工序（顺序号）"
+msgstr "串连工序"
 
 #: input/models.py:196
+#msgid "alternate"
+#msgstr "备选工序（优先级）"
+
 msgid "alternate"
-msgstr "备选工序（优先级）"
+msgstr "备选工序"
 
 #: input/models.py:197
+#msgid "split"
+#msgstr "并连工序（%）"
+
 msgid "split"
-msgstr "并连工序（%）"
+msgstr "并连工序"
 
 #: input/models.py:203 input/models.py:359 input/models.py:500
 #: input/models.py:638 input/models.py:1074 input/views.py:146
