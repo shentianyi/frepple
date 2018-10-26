@@ -71,6 +71,33 @@ msgstr "资源"
 msgid "skill_display"
 msgstr "技能"
 
+msgid "forecastyears"
+msgstr "年初预测"
+
+msgid "forecastyear"
+msgstr "年初预测"
+
+msgid "forecastversions"
+msgstr "预测版本"
+
+msgid "normal qty"
+msgstr "手工数量"
+
+msgid "new product plan qty"
+msgstr "新品上市计划"
+
+msgid "W"
+msgstr "周"
+
+msgid "M"
+msgstr "月"
+
+msgid "new"
+msgstr "新建"
+
+msgid "promotion qty"
+msgstr "促销量"
+
 #: common/admin.py:39
 msgid "Important dates"
 msgstr "重要日期"
@@ -1383,7 +1410,7 @@ msgstr "导入/导出数据文件到一个文件夹"
 #: execute/management/commands/exportworkbook.py:204
 #: execute/management/commands/importfromfolder.py:580
 msgid "export"
-msgstr "导出"
+msgstr "输出"
 
 #: execute/management/commands/exporttofolder.py:530
 #: execute/management/commands/importfromfolder.py:580
@@ -1491,7 +1518,7 @@ msgstr "导入Excel"
 
 #: execute/management/commands/importworkbook.py:318
 msgid "import"
-msgstr "导入"
+msgstr "输入"
 
 #: execute/management/commands/importworkbook.py:319
 msgid ""

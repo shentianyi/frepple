@@ -764,7 +764,7 @@ class SubOperationFilter(filters.FilterSet):
         }
 
         filter_fields = (
-            'id','parent_operation__nr','suboperation__nr', 'priority','effective_start', 'effective_end',
+            'id', 'parent_operation__nr', 'suboperation__nr', 'priority', 'effective_start', 'effective_end',
             'created_at', 'updated_at')
 
 
@@ -997,6 +997,7 @@ class SkilldetailNkAPI(frePPleRetrieveUpdateDestroyAPIView):
     queryset = freppledb.input.models.Skill.objects.all()
     serializer_class = SkillSerializer
 
+
 class ResourceSkillFilter(filters.FilterSet):
     created_at__gte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='gte')
     created_at__lte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='lte')
@@ -1015,7 +1016,8 @@ class ResourceSkillFilter(filters.FilterSet):
         }
 
         filter_fields = (
-            'id', 'resource__nr', 'skill__nr', 'effective_start', 'effective_end', 'priority','created_at','updated_at')
+            'id', 'resource__nr', 'skill__nr', 'effective_start', 'effective_end', 'priority', 'created_at',
+            'updated_at')
 
 
 class ResourceSkillSerializer(BulkSerializerMixin, ModelSerializer):
@@ -1039,51 +1041,45 @@ class ResourceSkilldetailAPI(frePPleRetrieveUpdateDestroyAPIView):
 
 
 # CMARK begin Process API-------------------------------------------------------
-class ProcessFilter(filters.FilterSet):
-    # 时间使用这个方式,不然会发生类型错误
-    created_at__gte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='gte')
-    created_at__lte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='lte')
-    updated_at__gte = django_filters.DateTimeFilter(field_name="updated_at", lookup_expr='gte')
-    updated_at__lte = django_filters.DateTimeFilter(field_name="updated_at", lookup_expr='lte')
+class ForecastYearFilter(filters.FilterSet):
 
     class Meta:
-        model = freppledb.input.models.Process
+        model = freppledb.input.models.ForecastYear
         fields = {
-            'id': ['exact', 'in'],
-            'nr': ['exact', 'in', 'contains'],
-            'name': ['exact', 'in', 'contains'],
+            'id': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
+            'item__nr': ['exact'],
             'location__nr': ['exact'],
-            'available__name': ['exact'],
-            'category': ['exact', 'contains'],
-            'subcategory': ['exact', 'contains'],
+            'customer__nr': ['exact'],
+            'year': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
+            'data_number': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
+            'ratio': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
         }
         filter_fields = (
-            'id', 'nr', 'name', 'location__nr', 'available__name', 'category', 'subcategory', 'created_at',
-            'updated_at')
+           'id', 'item__nr', 'location__nr', 'customer__nr', 'year', 'data_number', 'ratio')
 
 
-class ProcessSerializer(BulkSerializerMixin, ModelSerializer):
-    owner = LocationOwnerSerializer(many=False, allow_null=True)
-    id = serializers.IntegerField(read_only=False)
+class ForecastYearSerializer(BulkSerializerMixin, ModelSerializer):
+    item = ItemOwnerSerializer(many=False, allow_null=True)
+    location = LocationOwnerSerializer(many=False, allow_null=True)
+    customer = CustomerOwnerSerializer(many=False, allow_null=True)
 
     class Meta:
-        model = freppledb.input.models.Process
+        model = freppledb.input.models.ForecastYear
         fields = '__all__'
         list_serializer_class = BulkListSerializer
         update_lookup_field = 'id'
         partial = True
 
 
-class ProcessAPI(frePPleListCreateAPIView):
-    queryset = freppledb.input.models.Process.objects.all()
-    serializer_class = ProcessSerializer
-    filter_class = ProcessFilter
-    ordering_fields = ('id')
+class ForecastYearAPI(frePPleListCreateAPIView):
+    queryset = freppledb.input.models.ForecastYear.objects.all()
+    serializer_class = ForecastYearSerializer
+    filter_class = ForecastYearFilter
 
 
-class ProcessdetailAPI(frePPleRetrieveUpdateDestroyAPIView):
-    queryset = freppledb.input.models.Process.objects.all()
-    serializer_class = ProcessSerializer
+class ForecastYeardetailAPI(frePPleRetrieveUpdateDestroyAPIView):
+    queryset = freppledb.input.models.ForecastYear.objects.all()
+    serializer_class = ForecastYearSerializer
 
 
 # CMARK end Process API-------------------------------------------------------
@@ -1111,7 +1107,7 @@ class OperationMaterialFilter(filters.FilterSet):
 
         filter_fields = (
             'id', 'operation__nr', 'item__nr', 'quantity', 'quantity_fixed', 'materialbatch_per', 'type',
-            'effective_start', 'effective_end', 'priority', 'search','created_at','updated_at')
+            'effective_start', 'effective_end', 'priority', 'search', 'created_at', 'updated_at')
 
 
 class OperationMaterialSerializer(BulkSerializerMixin, ModelSerializer):
@@ -1157,7 +1153,7 @@ class OperationResourceFilter(filters.FilterSet):
 
         filter_fields = (
             'id', 'operation__nr', 'resource__nr', 'skill__nr', 'quantity', 'effective_start', 'effective_end',
-            'priority', 'setup', 'created_at','updated_at')
+            'priority', 'setup', 'created_at', 'updated_at')
 
 
 class OperationResourceSerializer(BulkSerializerMixin, ModelSerializer):

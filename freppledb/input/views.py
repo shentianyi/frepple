@@ -36,7 +36,7 @@ from django.views.decorators.csrf import csrf_exempt
 from freppledb.boot import getAttributeFields
 from freppledb.common.models import Parameter
 from freppledb.input.models import Resource, Operation, Location, SetupMatrix, SetupRule, ItemSuccessor, ItemCustomer, \
-    Process
+    ForecastYear, ForecastVersion, Forecast
 from freppledb.input.models import Skill, Buffer, Customer, Demand, DeliveryOrder
 from freppledb.input.models import Item, OperationResource, OperationMaterial
 from freppledb.input.models import Calendar, CalendarBucket, ManufacturingOrder, SubOperation
@@ -44,7 +44,7 @@ from freppledb.input.models import ResourceSkill, Supplier, ItemSupplier, search
 from freppledb.input.models import ItemDistribution, DistributionOrder, PurchaseOrder
 from freppledb.input.models import OperationPlan, OperationPlanMaterial, OperationPlanResource
 from freppledb.common.report import GridReport, GridFieldBool, GridFieldLastModified, GridFieldCreateOrUpdateDate, \
-    GridFieldDate
+    GridFieldDate, GridFieldVersion
 from freppledb.common.report import GridFieldDateTime, GridFieldTime, GridFieldText
 from freppledb.common.report import GridFieldNumber, GridFieldInteger, GridFieldCurrency
 from freppledb.common.report import GridFieldChoice, GridFieldDuration
@@ -1286,7 +1286,7 @@ class ItemList(GridReport):
         GridFieldText('name', title=_('name'), editable=False),
         GridFieldText('barcode', title=_('barcode'), editable=False),
         GridFieldText('status', field_name='status', title=_('status'), editable=False),
-        GridFieldChoice('type', title=_('type'),choices=Item.types,editable=False),
+        GridFieldChoice('type', title=_('type'), choices=Item.types, editable=False),
         GridFieldCurrency('cost', title=_('cost'), editable=False),
         GridFieldText('source', title=_('source'), editable=False, initially_hidden=True),
         # 新建一个显示列
@@ -1448,36 +1448,6 @@ class ResourceSkillList(GridReport):
     )
 
 
-class ProcessList(GridReport):
-    title = _("process")
-    basequeryset = Process.objects.all()
-    model = Process
-    frozenColumns = 1
-    rows = (
-        GridFieldText('id', title=_('id'), key=True, formatter='detail', extra='"role":"input/process"',
-                      editable=False),
-        GridFieldText('nr', title=_('nr'), editable=False),
-        GridFieldText('name', title=_('name'), editable=False),
-        GridFieldChoice('type', title=_('type'),choices=Process.types, editable=False),
-        GridFieldText('location_display', title=_('location_display'), field_name='location__nr', editable=False),
-        GridFieldText('location', title=_('location_id'), field_name='location_id', editable=False, hidden=True),
-        GridFieldText('category', title=_('category'), initially_hidden=True, editable=False),
-        GridFieldText('subcategory', title=_('subcategory'), initially_hidden=True, editable=False),
-        GridFieldNumber('unit_min_num', title=_('unit min num'), editable=False),
-        GridFieldNumber('unit_max_num', title=_('unit max num'), editable=False),
-        GridFieldNumber('unit_num_multiple', title=_('unit num multiple'), editable=False),
-        GridFieldNumber('unit_cost', title=_('unit cost'), editable=False),
-        GridFieldDuration('unit_duration', title=_('unit duration'), editable=False),
-        GridFieldText('available', title=_('available'), field_name='available__name', formatter='detail',
-                      extra='"role":"input/calendar"', editable=False),
-        GridFieldDateTime('effective_start', title=_('effective start'), editable=False),
-        GridFieldDateTime('effective_end', title=_('effective end'), editable=False),
-        GridFieldText('alternative_process_mode', title=_('alternative process mode'), editable=False),
-        GridFieldCreateOrUpdateDate('created_at', title=_('created_at'), editable=False),
-        GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at'), editable=False),
-    )
-
-
 class OperationResourceList(GridReport):
     '''
     A list report to show operationresources.
@@ -1506,7 +1476,8 @@ class OperationResourceList(GridReport):
         GridFieldText('setup', title=_('setup'), editable=False),
         GridFieldDateTime('effective_start', title=_('effective start'), editable=False),
         GridFieldDateTime('effective_end', title=_('effective end'), editable=False),
-        GridFieldChoice('alternative_process_mode', title=_('alternative process mode'),choices=Operation.modes ,editable=False),
+        GridFieldChoice('alternative_process_mode', title=_('alternative process mode'), choices=Operation.modes,
+                        editable=False),
         GridFieldCreateOrUpdateDate('created_at', title=_('created_at'), editable=False),
         GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at'), editable=False),
     )
@@ -1587,7 +1558,8 @@ class OperationMaterialList(GridReport):
 
         GridFieldDateTime('effective_start', title=_('effective start'), editable=False),
         GridFieldDateTime('effective_end', title=_('effective end'), editable=False),
-        GridFieldChoice('alternative_process_mode', title=_('alternative process mode'), choices=Operation.modes,editable=False),
+        GridFieldChoice('alternative_process_mode', title=_('alternative process mode'), choices=Operation.modes,
+                        editable=False),
         GridFieldCreateOrUpdateDate('created_at', title=_('created_at'), editable=False),
         GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at'), editable=False),
         GridFieldText('_pk', field_name='id', editable=False, hidden=True),
@@ -1639,6 +1611,83 @@ class OperationMaterialList(GridReport):
         #                       initially_hidden=True, editable=False),
     )
 
+class ForecastYearList(GridReport):
+    # template = ''
+    title = _("forecastyears")
+    basequeryset = ForecastYear.objects.all()
+    model = ForecastYear
+    frozenColumns = 1
+    rows = (
+        GridFieldInteger('id', title=_('id'), key=True, formatter='detail',
+                         extra='"role":"input/forecastyear"', editable=False),
+        GridFieldText('item_display', title=_('item_display'), field_name='item__nr', editable=False),
+        GridFieldText('item', title=_('location_id'), field_name='location_id', editable=False, hidden=True),
+        GridFieldText('location_display', title=_('location_display'), field_name='location__nr', editable=False),
+        GridFieldText('location', title=_('location_id'), field_name='location_id', editable=False, hidden=True),
+        GridFieldText('customer_display', title=_('customer_display'), field_name='customer__nr', editable=False),
+        GridFieldText('customer', title=_('customer_id'), field_name='customer_id', editable=False, hidden=True),
+        GridFieldInteger('year', title=_('year'), editable=False),
+        GridFieldInteger('data_number', title=_('data number'), editable=False),
+        GridFieldText('data_type', title=_('data_type'), editable=False),
+        GridFieldNumber('ratio', title=_('ratio %'),
+                        extra='"formatoptions":{"suffix":" %","defaultValue":"100.00"}', editable=False),
+        GridFieldNumber('normal_qty', title=_('normal qty'), editable=False),
+        GridFieldNumber('new_product_plan_qty', title=_('new product plan qty'), editable=False),
+        GridFieldNumber('promotion_qty', title=_('promotion qty'), editable=False),
+        GridFieldCreateOrUpdateDate('created_at', title=_('created_at'), editable=False),
+        GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at'), editable=False),
+    )
+
+
+class ForecastVersionList(GridReport):
+    # template = ''
+    title = _("forecastversions")
+    basequeryset = ForecastVersion.objects.all()
+    model = ForecastVersion
+    frozenColumns = 1
+    rows = (
+
+        GridFieldText('id', title=_('id'), key=True, formatter='detail', extra='"role":"input/forecastversion"',
+                      editable=False),
+        GridFieldVersion('nr', title=_('nr'), editable=False),
+        GridFieldText('create_user_display', title=_('create_user_display'), field_name='create_user__username', editable=False),
+        GridFieldText('create_user', title=_('create_user_id'), field_name='create_user_id', editable=False, hidden=True),
+        GridFieldChoice('status', title=_('status'), choices=ForecastVersion.status1, editable=False),
+        GridFieldCreateOrUpdateDate('created_at', title=_('created_at'), editable=False),
+        GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at'), editable=False),
+    )
+
+
+class ForecastList(GridReport):
+    # template = ''
+    Permission = ()
+    title = _("forecasts")
+    basequeryset = Forecast.objects.all()
+    model = Forecast
+    frozenColumns = 1
+    rows = (
+        GridFieldInteger('id', title=_('id'), key=True, formatter='detail',
+                         extra='"role":"input/forecast"', editable=False),
+        GridFieldText('item_display', title=_('item_display'), field_name='item__nr', editable=False),
+        GridFieldText('item', title=_('location_id'), field_name='location_id', editable=False, hidden=True),
+        GridFieldText('location_display', title=_('location_display'), field_name='location__nr', editable=False),
+        GridFieldText('location', title=_('location_id'), field_name='location_id', editable=False, hidden=True),
+        GridFieldText('customer_display', title=_('customer_display'), field_name='customer__nr', editable=False),
+        GridFieldText('customer', title=_('customer_id'), field_name='customer_id', editable=False, hidden=True),
+        GridFieldInteger('year', title=_('year'), editable=False),
+        GridFieldInteger('data_number', title=_('data number'), editable=False),
+        GridFieldText('data_type', title=_('data_type'), editable=False),
+        GridFieldNumber('ratio', title=_('ratio %'),
+                        extra='"formatoptions":{"suffix":" %","defaultValue":"100.00"}', editable=False),
+        GridFieldNumber('normal_qty', title=_('normal qty'), editable=False),
+        GridFieldNumber('new_product_plan_qty', title=_('new product plan qty'), editable=False),
+        GridFieldNumber('promotion_qty', title=_('promotion qty'), editable=False),
+        GridFieldChoice('status', title=_('status'), choices=ForecastVersion.status1, editable=False),
+        GridFieldVersion('version', title=_('version'), editable=False),
+        GridFieldCreateOrUpdateDate('created_at', title=_('created_at'), editable=False),
+        GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at'), editable=False),
+    )
+
 
 class DemandList(GridReport):
     '''
@@ -1653,6 +1702,7 @@ class DemandList(GridReport):
 
     rows = (
         # . Translators: Translation included with Django
+
         GridFieldText('name', title=_('name'), key=True, formatter='detail', extra='"role":"input/demand"'),
         GridFieldText('item', title=_('item'), field_name='item__name', formatter='detail',
                       extra='"role":"input/item"'),
@@ -1902,7 +1952,8 @@ class OperationList(GridReport):
                       extra='"role":"input/calendar"', editable=False),
         GridFieldDateTime('effective_start', title=_('effective start'), editable=False),
         GridFieldDateTime('effective_end', title=_('effective end'), editable=False),
-        GridFieldChoice('alternative_process_mode', title=_('alternative process mode'),choices=Operation.modes, editable=False),
+        GridFieldChoice('alternative_process_mode', title=_('alternative process mode'), choices=Operation.modes,
+                        editable=False),
         GridFieldCreateOrUpdateDate('created_at', title=_('created_at'), editable=False),
         GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at'), editable=False),
         GridFieldText('_pk', field_name='id', editable=False, hidden=True),
