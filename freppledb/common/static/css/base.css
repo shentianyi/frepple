@@ -143,6 +143,7 @@ body {
     background: red;
     border-radius: 50%;
     cursor: help;
+    max-width: 6px;
 }
 
 .related-widget-wrapper {
