@@ -16,9 +16,10 @@
 
 from freppledb.menu import menu
 from freppledb.input.models import OperationPlanMaterial, OperationPlanResource
-from freppledb.input.models import Demand, Operation, Resource, DistributionOrder, PurchaseOrder
+from freppledb.input.models import Forecast, Demand, Operation, Resource, DistributionOrder, PurchaseOrder
 from freppledb.input.models import ManufacturingOrder, ItemDistribution, ItemSupplier
 import freppledb.output.views.buffer
+import freppledb.output.views.forecast
 import freppledb.output.views.demand
 import freppledb.output.views.problem
 import freppledb.output.views.constraint
@@ -28,6 +29,14 @@ import freppledb.output.views.kpi
 
 
 # Adding reports. We use an index value to keep the same order of the entries in all languages.
+
+menu.addItem(
+  "sales", "forecast report", url="/data/output/forecast/compare/",
+  report=freppledb.output.views.forecast.ForecastCompare, index=180,
+  dependencies=[Forecast]
+)
+
+
 menu.addItem(
   "sales", "demand report", url="/demand/",
   report=freppledb.output.views.demand.OverviewReport, index=200,

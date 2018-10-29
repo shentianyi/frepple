@@ -1253,7 +1253,7 @@ class ItemDistributionList(GridReport):
         # ),
     )
 
-
+# CMARK 枚举API
 class EnumView(View):
     def get(self, request, *args, **kwargs):
         if 'type' in kwargs and 'value' in kwargs:

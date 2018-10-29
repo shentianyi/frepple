@@ -68,9 +68,11 @@ class MenuItem:
         return False
     if self.report:
       # The menu item is a report class
-      for perm in self.report.permissions:
-        if not user.has_perm("auth.%s" % perm[0]):
-          return False
+      if hasattr(self.report, 'permissions'):
+        for perm in self.report.permissions:
+          if not user.has_perm("auth.%s" % perm[0]):
+            return False
+      return True
     if self.model:
       # The menu item is a model
       return user.has_perm("%s.%s" % (self.model._meta.app_label, get_permission_codename('view', self.model._meta)))

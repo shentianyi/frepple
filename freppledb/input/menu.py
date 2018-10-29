@@ -41,6 +41,7 @@ menu.addItem(
   report=freppledb.input.views.ItemDistributionList, index=1300, model=ItemDistribution,
   dependencies=[Item, Location]
   )
+
 menu.addItem(
   "sales", "demand", url="/data/input/demand/",
   report=freppledb.input.views.DemandList, index=100, model=Demand,

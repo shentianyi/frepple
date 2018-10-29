@@ -31,7 +31,6 @@ searchmode = (
     ('MINCOSTPENALTY', _('minimum cost plus penalty'))
 )
 
-
 class Calendar(AuditModel):
     # Database fields
     # . Translators: Translation included with Django
@@ -1453,6 +1452,18 @@ class ItemDistribution(AuditModel):
         unique_together = (('item', 'origin', 'destination', 'resource'),)
         verbose_name = _('item distribution')
         verbose_name_plural = _('item distributions')
+
+# TODO forecast
+class Forecast(AuditModel):
+    id = models.AutoField(_('id'), primary_key=True)
+
+    class Meta(AuditModel.Meta):
+        db_table = 'forecast'
+        # . Translators: Translation included with Django
+        verbose_name = _('forecast')
+        # . Translators: Translation included with Django
+        verbose_name_plural = _('forecasts')
+        ordering = ['id']
 
 
 class Demand(AuditModel, HierarchyModel):

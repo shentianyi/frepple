@@ -18,6 +18,7 @@
 from django.conf.urls import url
 
 import freppledb.output.views.buffer
+import freppledb.output.views.forecast
 import freppledb.output.views.demand
 import freppledb.output.views.problem
 import freppledb.output.views.constraint
@@ -35,6 +36,9 @@ urlpatterns = [
   url(r'^buffer/$', freppledb.output.views.buffer.OverviewReport.as_view(), name="output_buffer_plan"),
   url(r'^demand/operationplans/$', freppledb.output.views.demand.OperationPlans, name="output_demand_operationplans"),
   url(r'^demand/(.+)/$', freppledb.output.views.demand.OverviewReport.as_view(), name="output_demand_plandetail"),
+
+  url(r'^data/output/forecast/compare/$', freppledb.output.views.forecast.ForecastCompare.as_view(), name="forecast_compare"),
+
   url(r'^demand/$', freppledb.output.views.demand.OverviewReport.as_view(), name="output_demand_plan"),
   url(r'^resource/(.+)/$', freppledb.output.views.resource.OverviewReport.as_view(), name="output_resource_plandetail"),
   url(r'^resource/$', freppledb.output.views.resource.OverviewReport.as_view(), name="output_resource_plan"),
