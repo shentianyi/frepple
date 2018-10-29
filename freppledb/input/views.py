@@ -1649,7 +1649,7 @@ class ForecastYearList(GridReport):
 
 
 class ForecastVersionView(View):
-    permissions =('forecast_version_view',)
+    permissions = ('forecast_version_view',)
     title = _('forecast vesions')
 
     def get(self, request, *args, **kwargs):
@@ -1661,15 +1661,16 @@ class ForecastVersionView(View):
 
     def post(self, request, *args, **kwargs):
         if request.FILES and len(request.FILES) == 1:
-           excel_count = 0
-           for filename, file in  request.FILES.items():
-              if file.content_type== 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
-                  excel_count+=1
-           if excel_count==0:
-               message = ResponseMessage(message = 'no excel file')
-               return HttpResponse(json.dumps(message.__dict__, ensure_ascii=False))
-           else:
-               return HttpResponse(json.dumps(ForecastUploader.upload_excel(request, Forecast).__dict__, ensure_ascii=False))
+            excel_count = 0
+            for filename, file in request.FILES.items():
+                if file.content_type == 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
+                    excel_count += 1
+            if excel_count == 0:
+                message = ResponseMessage(message='no excel file')
+                return HttpResponse(json.dumps(message.__dict__, ensure_ascii=False))
+            else:
+                return HttpResponse(
+                    json.dumps(ForecastUploader.upload_excel(request, Forecast).__dict__, ensure_ascii=False))
         # 上传文件
         else:
             Http404('bad request')
@@ -1692,7 +1693,6 @@ class ForecastVersionView(View):
 #         GridFieldCreateOrUpdateDate('created_at', title=_('created_at'), editable=False),
 #         GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at'), editable=False),
 #     )
-
 
 
 class ForecastList(GridReport):

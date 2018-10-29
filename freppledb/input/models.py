@@ -1429,9 +1429,9 @@ class ForecastYear(AuditModel):
 
     objects = Manager()
 
-    def __str__(self):
-        return '%s - %s - %s' % (
-            self.item.nr, self.location.nr, self.customer.nr)
+    # def __str__(self):
+    #     return '%s - %s - %s' % (
+    #         self.item.nr, self.location.nr, self.customer.nr)
 
     class Meta(AuditModel.Meta):
         db_table = 'forecast_year'
@@ -1518,7 +1518,7 @@ class Forecast(AuditModel):
     new_product_plan_qty = models.DecimalField(_('new product plan qty'), max_digits=20, decimal_places=8, null=True,
                                                blank=True)
     promotion_qty = models.DecimalField(_('promotion qty'), max_digits=20, decimal_places=8, null=True, blank=True)
-    status = models.CharField(_('status'), max_length=20, choices=forecast_status, default='new')
+    status = models.CharField(_('status'), max_length=20, choices=forecast_status, default='init')
 
     version = models.ForeignKey(ForecastVersion, verbose_name=_('forecast version'),
                                  db_index=True, related_name='forecast_version',
