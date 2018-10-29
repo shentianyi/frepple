@@ -1,4 +1,7 @@
+from datetime import datetime
+
 import xlrd, csv
+from django.views import View
 from rest_framework.views import APIView
 from django.utils.translation import ugettext_lazy as _
 from django.http import HttpResponse
@@ -26,6 +29,9 @@ class ExcelSerializer(serializers.ModelSerializer):
                         rowValues = table.row_values(i)  # 读取一行的数据
                         Forecast.objects.create(item=rowValues[0], location=rowValues[1], customer=rowValues[2],
                                                 year=rowValues[3])
+                        now_version = 'V'+datetime.now().strftime('%Y%m%d%H%M%S')
+                        Forecast.version = now_version
+                        Forecast.version.save()
                 except:
                     transaction.savepoint_rollback(save_point)
                     raise serializers.ValidationError(_('error'))
@@ -78,6 +84,9 @@ class CsvSerializer(serializers.ModelSerializer):
                         for rowValues in rows[1:]:
                             Forecast.objects.create(item=rowValues[0], location=rowValues[1], customer=rowValues[2],
                                                     year=rowValues[3])
+                            now_version = 'V' + datetime.now().strftime('%Y%m%d%H%M%S')
+                            Forecast.version = now_version
+                            Forecast.version.save()
                     except:
                         transaction.savepoint_rollback(save_point)
                         raise serializers.ValidationError(_('error'))
@@ -90,6 +99,7 @@ class CsvSerializer(serializers.ModelSerializer):
             old_version = data.version
             if not data:
                 return serializers.ValidationError(_('no data to update'))
+
             else:
                 file = self.context['file']
                 with open(file) as csvFile:
@@ -111,9 +121,9 @@ class CsvSerializer(serializers.ModelSerializer):
                             transaction.savepoint_commit(save_point)
 
 
-class ForecastVersionView(APIView):
+class ForecastVersionView(View):
 
-    def post(self, request, file, data_type, action):
+    def post(self, request, file, date_type, action):
         if request.FILES.name.split('.')[-1] in ['xls', 'xlsx']:
             ser = ExcelSerializer(data=request.data, context={'file': file, 'action': action})
             ser.is_valid(raise_exception=True)

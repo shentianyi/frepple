@@ -1628,8 +1628,8 @@ class ForecastYearList(GridReport):
         GridFieldText('customer_display', title=_('customer_display'), field_name='customer__nr', editable=False),
         GridFieldText('customer', title=_('customer_id'), field_name='customer_id', editable=False, hidden=True),
         GridFieldInteger('year', title=_('year'), editable=False),
-        GridFieldInteger('data_number', title=_('data number'), editable=False),
-        GridFieldText('data_type', title=_('data_type'), editable=False),
+        GridFieldInteger('date_number', title=_('date_number'), editable=False),
+        GridFieldText('date_type', title=_('date_type'), editable=False),
         GridFieldNumber('ratio', title=_('ratio %'),
                         extra='"formatoptions":{"suffix":" %","defaultValue":"100.00"}', editable=False),
         GridFieldNumber('normal_qty', title=_('normal qty'), editable=False),
@@ -1661,7 +1661,6 @@ class ForecastVersionList(GridReport):
 
 class ForecastList(GridReport):
     # template = ''
-    Permission = ()
     title = _("forecasts")
     basequeryset = Forecast.objects.all()
     model = Forecast
@@ -1676,15 +1675,15 @@ class ForecastList(GridReport):
         GridFieldText('customer_display', title=_('customer_display'), field_name='customer__nr', editable=False),
         GridFieldText('customer', title=_('customer_id'), field_name='customer_id', editable=False, hidden=True),
         GridFieldInteger('year', title=_('year'), editable=False),
-        GridFieldInteger('data_number', title=_('data number'), editable=False),
-        GridFieldText('data_type', title=_('data_type'), editable=False),
+        GridFieldInteger('date_number', title=_('date_number'), editable=False),
+        GridFieldText('date_type', title=_('date_type'), editable=False),
         GridFieldNumber('ratio', title=_('ratio %'),
                         extra='"formatoptions":{"suffix":" %","defaultValue":"100.00"}', editable=False),
         GridFieldNumber('normal_qty', title=_('normal qty'), editable=False),
         GridFieldNumber('new_product_plan_qty', title=_('new product plan qty'), editable=False),
         GridFieldNumber('promotion_qty', title=_('promotion qty'), editable=False),
         GridFieldChoice('status', title=_('status'), choices=ForecastVersion.status1, editable=False),
-        GridFieldVersion('version', title=_('version'), editable=False),
+        GridFieldText('version', title=_('version'), editable=False),
         GridFieldCreateOrUpdateDate('created_at', title=_('created_at'), editable=False),
         GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at'), editable=False),
     )

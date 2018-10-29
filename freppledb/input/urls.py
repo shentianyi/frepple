@@ -111,11 +111,13 @@ urlpatterns = [
 
   url(r'^api/input/forecastyear/$', freppledb.input.serializers.ForecastYearAPI.as_view()),
   url(r'^api/input/forecastversion/$', freppledb.input.serializers.ForecastVersionAPI.as_view()),
+  url(r'^api/input/forecast/$', freppledb.input.serializers.ForecastAPI.as_view()),
 
   url(r'^api/input/buffer/(?P<pk>(.+))/$', freppledb.input.serializers.BufferdetailAPI.as_view()),
   url(r'^api/input/resource/(?P<pk>(.+))/$', freppledb.input.serializers.ResourcedetailAPI.as_view()),
   url(r'^api/input/forecastyear/(?P<pk>(.+))/$', freppledb.input.serializers.ForecastYeardetailAPI.as_view()),
   url(r'^api/input/forecastversion/(?P<pk>(.+))/$', freppledb.input.serializers.ForecastVersiondetailAPI.as_view()),
+  url(r'^api/input/forecast/(?P<pk>(.+))/$', freppledb.input.serializers.ForecastdetailAPI.as_view()),
 
   #　CMARK 主键路由
   url(r'^api/input/location/(?P<pk>(.+))/$', freppledb.input.serializers.LocationdetailAPI.as_view()),

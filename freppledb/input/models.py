@@ -31,6 +31,7 @@ searchmode = (
     ('MINCOSTPENALTY', _('minimum cost plus penalty'))
 )
 
+
 class Calendar(AuditModel):
     # Database fields
     # . Translators: Translation included with Django
@@ -1408,10 +1409,10 @@ class ForecastYear(AuditModel):
         null=True, blank=True, on_delete=models.CASCADE
     )
     year = models.IntegerField(_('year'), db_index=True)
-    date_number = models.IntegerField(_('date number'), db_index=True)
+    date_number = models.IntegerField(_('date_number'), db_index=True)
 
     date_type = models.CharField(
-        _('date_type'), max_length=20, choices=date_types, default= 'W',null=True,blank=True)
+        _('date_type'), max_length=20, choices=date_types, default='W', null=True, blank=True)
 
     ratio = models.DecimalField(_('ratio %'), max_digits=20, decimal_places=8, default='100', null=True, blank=True)
     normal_qty = models.DecimalField(_('normal qty'), max_digits=20, decimal_places=8)
@@ -1420,8 +1421,8 @@ class ForecastYear(AuditModel):
     promotion_qty = models.DecimalField(_('promotion qty'), max_digits=20, decimal_places=8, null=True, blank=True)
 
     class Manager(MultiDBManager):
-        def get_by_natural_key(self, item,location, customer):
-            return self.get(item=item, location=location,customer=customer)
+        def get_by_natural_key(self, item, location, customer):
+            return self.get(item=item, location=location, customer=customer)
 
     def natural_key(self):
         return (self.item, self.location, self.customer)
@@ -1449,14 +1450,14 @@ class ForecastVersion(AuditModel):
         ('confirm', _('confirm')),
     )
 
-    id = models.AutoField(_('id'), help_text=_('Unique identifier'))
-    nr = models.CharField(_('nr'), max_length=300, db_index=True, unique=True, primary_key=True)
+    id = models.AutoField(_('id'), help_text=_('Unique identifier'), primary_key=True)
+    nr = models.CharField(_('nr'), max_length=300, db_index=True, unique=True)
     create_user = models.ForeignKey(
         User, verbose_name=_('create_user'),
         db_index=True, related_name='forecastversion_create_user',
         null=False, blank=False, on_delete=models.CASCADE
     )
-    status = models.CharField(_('status'), max_length=20, choices=status1,default='init')
+    status = models.CharField(_('status'), max_length=20, choices=status1, default='init')
 
     class Manager(MultiDBManager):
         def get_by_natural_key(self, nr):
@@ -1495,10 +1496,10 @@ class Forecast(AuditModel):
         null=True, blank=True, on_delete=models.CASCADE
     )
     year = models.IntegerField(_('year'), db_index=True)
-    date_number = models.IntegerField(_('date number'), db_index=True)
+    date_number = models.IntegerField(_('date_number'), db_index=True)
 
     date_type = models.CharField(
-        _('date_type'), max_length=20, choices=ForecastYear.date_types, default='W' ,null=True,blank=True)
+        _('date_type'), max_length=20, choices=ForecastYear.date_types, default='W', null=True, blank=True)
 
     ratio = models.DecimalField(_('ratio %'), max_digits=20, decimal_places=8, default='100', null=True, blank=True)
     normal_qty = models.DecimalField(_('normal qty'), max_digits=20, decimal_places=8)
@@ -1507,11 +1508,12 @@ class Forecast(AuditModel):
     promotion_qty = models.DecimalField(_('promotion qty'), max_digits=20, decimal_places=8, null=True, blank=True)
     status = models.CharField(_('status'), max_length=20, choices=ForecastVersion.status1, default='new')
 
-    version = models.ForeignKey(ForecastVersion, verbose_name=_('forecast version'),
-                                 db_index=True, related_name='forecast version',
-                                 null=False, blank=False, on_delete=models.CASCADE)
+    # version = models.ForeignKey(ForecastVersion, verbose_name=_('forecast version'),
+    #                              db_index=True, related_name='forecast_version',
+    #                              null=False, blank=False, on_delete=models.CASCADE)
 
-    #version = models.CharField(_('version'), max_length=300)
+    version = models.CharField(_('version'), max_length=300, editable=False, db_index=True,
+                               default='V' + datetime.now().strftime('%Y%m%d%H%M%S'))
 
     class Manager(MultiDBManager):
         def get_by_natural_key(self, item, location, customer):
@@ -1522,9 +1524,9 @@ class Forecast(AuditModel):
 
     objects = Manager()
 
-    def __str__(self):
-        return '%s - %s - %s' % (
-            self.item.nr, self.location.nr, self.customer.nr)
+    # def __str__(self):
+    #     return '%s - %s - %s' % (
+    #         self.item.nr, self.location.nr, self.customer.nr)
 
     class Meta(AuditModel.Meta):
         db_table = 'forecast'

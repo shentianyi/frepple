@@ -1283,7 +1283,6 @@ class DeliveryOrderAPI(frePPleListCreateAPIView):
 
 # CMARK begin ForecastYear API-------------------------------------------------------
 class ForecastYearFilter(filters.FilterSet):
-
     class Meta:
         model = freppledb.input.models.ForecastYear
         fields = {
@@ -1292,11 +1291,11 @@ class ForecastYearFilter(filters.FilterSet):
             'location__nr': ['exact'],
             'customer__nr': ['exact'],
             'year': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
-            'data_number': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
+            'date_number': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
             'ratio': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
         }
         filter_fields = (
-           'id', 'item__nr', 'location__nr', 'customer__nr', 'year', 'data_number', 'ratio')
+            'id', 'item__nr', 'location__nr', 'customer__nr', 'year', 'date_number', 'ratio')
 
 
 class ForecastYearSerializer(BulkSerializerMixin, ModelSerializer):
@@ -1327,17 +1326,16 @@ class ForecastYeardetailAPI(frePPleRetrieveUpdateDestroyAPIView):
 
 # CMARK begin ForecastVersion API-------------------------------------------------------
 class ForecastVersionFilter(filters.FilterSet):
-
     class Meta:
         model = freppledb.input.models.ForecastVersion
         fields = {
             'id': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
-            'nr': ['exact','in'],
-            'create_user__username': ['exact','in'],
-            'status': ['exact','in'],
+            'nr': ['exact', 'in'],
+            'create_user__username': ['exact', 'in'],
+            'status': ['exact', 'in'],
         }
         filter_fields = (
-           'id', 'nr', 'cre', 'create_user__username', 'status')
+            'id', 'nr', 'create_user__username', 'status')
 
 
 class ForecastVersionSerializer(BulkSerializerMixin, ModelSerializer):
@@ -1359,6 +1357,46 @@ class ForecastVersionAPI(frePPleListCreateAPIView):
 class ForecastVersiondetailAPI(frePPleRetrieveUpdateDestroyAPIView):
     queryset = freppledb.input.models.ForecastVersion.objects.all()
     serializer_class = ForecastVersionSerializer
+
+
+# CMARK end ForecastVersion API--------------------------------------------------
+# CMARK begin Forecast API-------------------------------------------------------
+class ForecastFilter(filters.FilterSet):
+    class Meta:
+        model = freppledb.input.models.Forecast
+        fields = {
+            'id': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
+            'item__nr': ['exact'],
+            'location__nr': ['exact'],
+            'customer__nr': ['exact'],
+            'year': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
+            'date_number': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
+            'ratio': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
+            'version': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
+        }
+        filter_fields = (
+            'id', 'item__nr', 'location__nr', 'customer__nr', 'year', 'date_number', 'ratio', 'version')
+
+
+class ForecastSerializer(BulkSerializerMixin, ModelSerializer):
+    class Meta:
+        model = freppledb.input.models.Forecast
+        fields = '__all__'
+        list_serializer_class = BulkListSerializer
+        update_lookup_field = 'id'
+        partial = True
+
+
+class ForecastAPI(frePPleListCreateAPIView):
+    queryset = freppledb.input.models.Forecast.objects.all()
+    serializer_class = ForecastSerializer
+    filter_class = ForecastFilter
+    ordering_fields = ('-id')
+
+
+class ForecastdetailAPI(frePPleRetrieveUpdateDestroyAPIView):
+    queryset = freppledb.input.models.Forecast.objects.all()
+    serializer_class = ForecastSerializer
 
 
 # CMARK end ForecastVersion API-------------------------------------------------------

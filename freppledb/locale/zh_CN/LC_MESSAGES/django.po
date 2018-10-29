@@ -92,8 +92,29 @@ msgstr "周"
 msgid "M"
 msgstr "月"
 
-msgid "new"
+msgid "init"
 msgstr "新建"
+
+msgid "ok"
+msgstr "过审"
+
+msgid "nok"
+msgstr "未过审"
+
+msgid "confirm"
+msgstr "确认"
+
+msgid "date_number"
+msgstr "月份/周数"
+
+msgid "date_type"
+msgstr "类型"
+
+msgid "create_user_display"
+msgstr "创建人"
+
+msgid "create_user_id"
+msgstr "创建人"
 
 msgid "promotion qty"
 msgstr "促销量"
@@ -1928,7 +1949,7 @@ msgstr "客户"
 #: output/widget.py:1030 output/widget.py:1070 output/widget.py:1110
 #: output/widget.py:1187 quoting/views.py:46
 msgid "item"
-msgstr "对象"
+msgstr "物料"
 
 #: forecast/models.py:47 forecast/models.py:929 forecast/views.py:65
 #: forecast/views.py:106 forecast/widget.py:384 input/models.py:142
@@ -2498,7 +2519,7 @@ msgstr "对象成本"
 
 #: input/models.py:186 input/views.py:866
 msgid "items"
-msgstr "产品"
+msgstr "物料"
 
 #: input/models.py:193
 msgid "fixed_time"
