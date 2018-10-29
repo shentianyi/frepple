@@ -27,8 +27,7 @@ class ForecastUploader:
                 headers_field_name = {}
                 # 所有excel中的forecast
                 forecasts = []
-                # forecast版本
-                forecast_version = None
+
                 for row in sheet.iter_rows():
                     row_count += 1
                     if row_number == 1:
@@ -51,22 +50,34 @@ class ForecastUploader:
                     # 取值
                     else:
                         values = [i.value for i in row]
+                        none_len = 0
+                        for v in values:
+                            if v == None:
+                                none_len += 1
+
+                        if none_len == len(values):
+                            continue
+
                         forecast = Forecast()
                         for k, v in headers_index.items():
                             value = values[v]
                             field_name = headers_field_name[k]
-                            forecast.version = forecast_version
 
                             if field_name == 'location':
                                 forecast.location = Location.objects.using(request.database).get(nr=value)
                             elif field_name == 'item':
                                 forecast.item = Item.objects.using(request.database).get(nr=value)
                             elif field_name == 'customer':
-                                forecast.customer = Customer.objects.using(request.database).get(nr=value)
+                                if not value:
+                                    forecast.customer = value
+                                else:
+                                    forecast.customer = Customer.objects.using(request.database).get(nr=value)
                             elif field_name == 'year':
                                 forecast.year = value
                             elif field_name == 'date_number':
                                 forecast.date_number = value
+                            elif field_name == 'normal_qty':
+                                forecast.normal_qty = value
 
                         forecasts.append(forecast)
                 if row_count < 2:
@@ -82,6 +93,8 @@ class ForecastUploader:
                             forecast_version.status = ForecastVersion.version_status[0]
                             forecast_version.nr = timezone.now().strftime('%y%m%d%H%M%S')
                             forecast_version.save()
+                            for f in forecasts:
+                                f.version =forecast_version
                             # 创建forecast
                             Forecast.objects.bulk_create(forecasts)
                         elif request.POST['action'] == 'update':

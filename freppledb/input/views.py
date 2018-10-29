@@ -1655,6 +1655,7 @@ class ForecastVersionView(GridReport):
     frozenColumns = 1
     template = 'input/forecastversion.html'
 
+
     rows = (
             # GridFieldText('id', title=_('id'), editable=False),
             GridFieldText('nr', title=_('version nr'), key=True, editable=False),
@@ -1711,6 +1712,7 @@ class ForecastList(GridReport):
         GridFieldNumber('normal_qty', title=_('normal qty'), editable=False),
         GridFieldNumber('new_product_plan_qty', title=_('new product plan qty'), editable=False),
         GridFieldNumber('promotion_qty', title=_('promotion qty'), editable=False),
+
         GridFieldChoice('status', title=_('status'), choices=Forecast.forecast_status, editable=False),
         GridFieldText('version', title=_('version nr'), editable=False),
         GridFieldCreateOrUpdateDate('created_at', title=_('created_at'), editable=False),

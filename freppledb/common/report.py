@@ -305,8 +305,6 @@ class GridFieldCreateOrUpdateDate(GridField):
   editable = False
   width = 140
 
-
-
 class GridFieldLastModified(GridField):
   formatter = 'date'
   extra = '"formatoptions":{"srcformat":"Y-m-d H:i:s","newformat":"Y-m-d H:i:s"}'
