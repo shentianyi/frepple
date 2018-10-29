@@ -1372,10 +1372,9 @@ class ForecastFilter(filters.FilterSet):
             'year': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
             'date_number': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
             'ratio': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
-            'version': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
         }
         filter_fields = (
-            'id', 'item__nr', 'location__nr', 'customer__nr', 'year', 'date_number', 'ratio', 'version')
+            'id', 'item__nr', 'location__nr', 'customer__nr', 'year', 'date_number', 'ratio')
 
 
 class ForecastSerializer(BulkSerializerMixin, ModelSerializer):

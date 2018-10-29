@@ -1650,13 +1650,16 @@ class ForecastVersionList(GridReport):
 
         GridFieldText('id', title=_('id'), key=True, formatter='detail', extra='"role":"input/forecastversion"',
                       editable=False),
-        GridFieldVersion('nr', title=_('nr'), formatter='detail', extra='"role":"input/forecast"', editable=False),
+        GridFieldText('nr', title=_('nr'), formatter='detail', extra='"role":"input/forecast"', editable=False),
         GridFieldText('create_user_display', title=_('create_user_display'), field_name='create_user__username', editable=False),
         GridFieldText('create_user', title=_('create_user_id'), field_name='create_user_id', editable=False, hidden=True),
         GridFieldChoice('status', title=_('status'), choices=ForecastVersion.status1, editable=False),
         GridFieldCreateOrUpdateDate('created_at', title=_('created_at'), editable=False),
         GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at'), editable=False),
+        GridFieldText('_pk', field_name='id', editable=False, hidden=True),
+        GridFieldText('_nk', field_name='nr', editable=False, hidden=True),
     )
+
 
 
 class ForecastList(GridReport):
@@ -1683,7 +1686,10 @@ class ForecastList(GridReport):
         GridFieldNumber('new_product_plan_qty', title=_('new product plan qty'), editable=False),
         GridFieldNumber('promotion_qty', title=_('promotion qty'), editable=False),
         GridFieldChoice('status', title=_('status'), choices=ForecastVersion.status1, editable=False),
-        GridFieldText('version', title=_('version'), editable=False),
+        # GridFieldText('version', title=_('version'), editable=False),
+        GridFieldText('version_display', title=_('version_display'), field_name='version__nr', editable=False),
+        GridFieldText('version', title=_('version_id'), field_name='version_id', editable=False, hidden=True),
+
         GridFieldCreateOrUpdateDate('created_at', title=_('created_at'), editable=False),
         GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at'), editable=False),
     )
