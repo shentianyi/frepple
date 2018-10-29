@@ -18,7 +18,7 @@
 from django.utils.translation import ugettext_lazy as _
 
 from freppledb.input.models import Resource, Operation, Location, SetupMatrix, SetupRule, ItemSuccessor, ItemCustomer, \
-    Process
+    ForecastYear, Forecast, ForecastVersion
 from freppledb.input.models import Buffer, Customer, Demand, Item, OperationResource
 from freppledb.input.models import OperationMaterial, Skill, ResourceSkill, Supplier
 from freppledb.input.models import Calendar, CalendarBucket, ManufacturingOrder, SubOperation
@@ -443,26 +443,44 @@ class Resource_admin(MultiDBModelAdmin):
 
 data_site.register(Resource, Resource_admin)
 
-class Process_admin(MultiDBModelAdmin):
-    model = Process
-    raw_id_fields = ('location', 'available')
+class ForecastYear_admin(MultiDBModelAdmin):
+    model = ForecastYear
+    raw_id_fields = ('item', 'location', 'customer')
     save_on_top = True
     exclude = ('source',)
     tabs = [
-        {"name": 'edit', "label": _("edit"), "view": "admin:input_process_change",
-         "permissions": "input.change_process"},
-        # {"name": 'supplypath', "label": _("supply path"), "view": "supplypath_resource"},
-        # {"name": 'whereused', "label": _("where used"), "view": "whereused_resource"},
-        # {"name": 'plan', "label": _("plan"), "view": "output_resource_plandetail"},
-        # {"name": 'plandetail', "label": _("plan detail"), "view": "output_loadplan_plandetail"},
-        # {"name": 'constraint', "label": _("constrained demand"), "view": "output_constraint_resource"},
-        # {"name": 'comments', "label": _("comments"), "view": "admin:input_resource_comment"},
-        # # . Translators: Translation included with Django
-        # {"name": 'history', "label": _("History"), "view": "admin:input_resource_history"},
+        {"name": 'edit', "label": _("edit"), "view": "admin:input_forecastyear_change",
+         "permissions": "input.change_forecastyear"}]
+
+
+data_site.register(ForecastYear, ForecastYear_admin)
+
+
+class ForecastVersion_admin(MultiDBModelAdmin):
+    model = ForecastVersion
+    raw_id_fields = ('create_user',)
+    save_on_top = True
+    exclude = ('source',)
+    tabs = [
+        {"name": 'edit', "label": _("edit"), "view": "admin:input_forecastyear_change",
+         "permissions": "input.change_forecastyear"}
     ]
 
 
-data_site.register(Process, Process_admin)
+data_site.register(ForecastVersion, ForecastVersion_admin)
+
+class Forecast_admin(MultiDBModelAdmin):
+    model = Forecast
+    raw_id_fields = ('item', 'location', 'customer')
+    save_on_top = True
+    exclude = ('source',)
+    tabs = [
+        {"name": 'edit', "label": _("edit"), "view": "admin:input_forecast_change",
+         "permissions": "input.change_forecast"}
+    ]
+
+
+data_site.register(Forecast, Forecast_admin)
 
 
 class OperationMaterial_admin(MultiDBModelAdmin):

@@ -17,7 +17,7 @@
 from freppledb.menu import menu
 
 import freppledb.input.views
-from freppledb.input.models import Buffer, Item, Customer, Location, Demand
+from freppledb.input.models import Buffer, Item, Customer, Location, Demand, ForecastYear, ForecastVersion, Forecast
 from freppledb.input.models import DistributionOrder, ManufacturingOrder, CalendarBucket
 from freppledb.input.models import PurchaseOrder, Supplier, ItemSupplier, OperationMaterial
 from freppledb.input.models import ItemDistribution, Skill, Resource, OperationResource
@@ -43,8 +43,22 @@ menu.addItem(
   )
 
 menu.addItem(
+  "sales", "forecastyears", url="/data/input/forecastyear/",
+  report=freppledb.input.views.ForecastYearList, index=100, model=ForecastYear,
+  dependencies=[Item, Location, Customer]
+  )
+menu.addItem(
+  "sales", "forecastversions", url="/data/input/forecastversion/",
+  report=freppledb.input.views.ForecastVersionList, index=101, model=ForecastVersion,
+  )
+menu.addItem(
+  "sales", "forecasts", url="/data/input/forecast/",
+  report=freppledb.input.views.ForecastList, index=102, model=Forecast,
+  )
+
+menu.addItem(
   "sales", "demand", url="/data/input/demand/",
-  report=freppledb.input.views.DemandList, index=100, model=Demand,
+  report=freppledb.input.views.DemandList, index=110, model=Demand,
   dependencies=[Item, Location, Customer]
   )
 menu.addItem(

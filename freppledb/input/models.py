@@ -22,7 +22,7 @@ from django.db.models import Max
 from django.utils.translation import ugettext_lazy as _
 
 from freppledb.common.fields import JSONBField, AliasDateTimeField
-from freppledb.common.models import HierarchyModel, AuditModel, MultiDBManager
+from freppledb.common.models import HierarchyModel, AuditModel, MultiDBManager, User
 
 searchmode = (
     ('PRIORITY', _('priority')),
@@ -396,7 +396,6 @@ class ItemSuccessor(AuditModel):
         _('ratio %'), max_digits=20, decimal_places=8, default='100.00',
     )
 
-
     effective_start = models.DateTimeField(
         _('effective start'), null=True, blank=True,
         help_text=_('Validity start date'))
@@ -448,7 +447,6 @@ class Operation(AuditModel):
     name = models.CharField(_('name'), max_length=300, primary_key=False, db_index=True)
     type = models.CharField(
         _('type'), max_length=20, null=True, blank=True, choices=types)
-
 
     location = models.ForeignKey(Location, verbose_name=_('location'), related_name='operation_location',
                                  on_delete=models.CASCADE)
@@ -570,7 +568,8 @@ class SubOperation(AuditModel):
 
     class Manager(MultiDBManager):
         def get_by_natural_key(self, parent_operation, suboperation, effective_start):
-            return self.get(parent_operation=parent_operation, suboperation=suboperation, effective_start=effective_start)
+            return self.get(parent_operation=parent_operation, suboperation=suboperation,
+                            effective_start=effective_start)
 
     def natural_key(self):
         return (self.parent_operation, self.suboperation)
@@ -696,7 +695,6 @@ class SetupMatrix(AuditModel):
 
     def __str__(self):
         return self.nr
-
 
     class Meta(AuditModel.Meta):
         db_table = 'setupmatrix'
@@ -923,7 +921,6 @@ class ResourceSkill(AuditModel):
             self.skill.nr if self.skill else 'No skill',
         )
 
-
     class Meta(AuditModel.Meta):
         db_table = 'resourceskill'
         unique_together = (('resource', 'skill'),)
@@ -931,74 +928,6 @@ class ResourceSkill(AuditModel):
         verbose_name_plural = _('resource skills')
         ordering = ['resource', 'skill']
 
-
-class Process(AuditModel):
-    types = (
-        ('fixed_time', _('fixed_time')),
-        ('time_per', _('time_per')),
-        ('alternate', _('alternate')),
-        ('split', _('split')),
-        ('routing', _('routing')),
-    )
-    modes = (
-        ('priority', _('priority')),
-        ('mincost', _('mincost')),
-    )
-
-    id = models.AutoField(_('identifier'), primary_key=True)
-    nr = models.CharField(_('nr'), max_length=300, db_index=True, unique=True)
-    name = models.CharField(_('name'), max_length=300, primary_key=False, db_index=True)
-    type = models.CharField(
-        _('type'), max_length=20, null=True, blank=True, choices=types)
-    location = models.ForeignKey(Location, verbose_name=_('location'), related_name='process_location',
-                                 on_delete=models.CASCADE)
-    category = models.CharField(
-        _('category'), max_length=300, null=True, blank=True, db_index=True
-    )
-    subcategory = models.CharField(
-        _('subcategory'), max_length=300, null=True, blank=True, db_index=True
-    )
-    unit_min_num = models.DecimalField(
-        _('unit min num'), null=True, blank=True, max_digits=20, decimal_places=8)
-    unit_max_num = models.DecimalField(
-        _('unit max num'), null=True, blank=True, max_digits=20, decimal_places=8)
-    unit_num_multiple = models.DecimalField(
-        _('unit num multiple'), null=True, blank=True, max_digits=20, decimal_places=8)
-    unit_cost = models.DecimalField(
-        _('unit cost'), null=True, blank=True, max_digits=20, decimal_places=8)
-    unit_duration = models.DurationField(
-        _('unit duration'), null=True, blank=True)
-    available = models.ForeignKey(Calendar, verbose_name=_('location'), related_name='process_location',
-                                 on_delete=models.CASCADE)
-    effective_start = models.DateTimeField(
-        _('effective start'), null=True, blank=True,
-        help_text=_('Validity start date')
-    )
-    effective_end = models.DateTimeField(
-        _('effective end'), null=True, blank=True,
-        help_text=_('Validity end date')
-    )
-    alternative_process_mode = models.CharField(
-        _('alternative process mode'), max_length=20, null=True, blank=True, choices=modes)
-
-
-    class Manager(MultiDBManager):
-        def get_by_natural_key(self, location, available):
-            return self.get(location=location, available=available)
-
-    def natural_key(self):
-        return (self.location, self.available)
-
-    objects = Manager()
-
-    def __str__(self):
-        return '%s - %s' % (
-            self.location.nr,self.available.name )
-
-    class Meta(AuditModel.Meta):
-        db_table = 'process'
-        verbose_name = _('process')
-        verbose_name_plural = _('processes')
 
 class OperationMaterial(AuditModel):
     # Types of flow
@@ -1137,6 +1066,7 @@ class OperationResource(AuditModel):
     )
     alternative_process_mode = models.CharField(
         _('alternative process mode'), max_length=20, null=True, blank=True, choices=Operation.modes)
+
     # name = models.CharField(
     #     # . Translators: Translation included with Django
     #     _('name'), max_length=300, null=True, blank=True,
@@ -1149,11 +1079,11 @@ class OperationResource(AuditModel):
     # )
 
     class Manager(MultiDBManager):
-        def get_by_natural_key(self, operation, resource,skill ,effective_start):
-            return self.get(operation=operation, resource=resource, skill=skill,effective_start=effective_start)
+        def get_by_natural_key(self, operation, resource, skill, effective_start):
+            return self.get(operation=operation, resource=resource, skill=skill, effective_start=effective_start)
 
     def natural_key(self):
-        return (self.operation, self.resource,self.skill ,self.effective_start)
+        return (self.operation, self.resource, self.skill, self.effective_start)
 
     objects = Manager()
 
@@ -1174,7 +1104,7 @@ class OperationResource(AuditModel):
 
     class Meta(AuditModel.Meta):
         db_table = 'operationresource'
-        unique_together = (('operation', 'resource', 'skill','effective_start'),)
+        unique_together = (('operation', 'resource', 'skill', 'effective_start'),)
         verbose_name = _('operation resource')
         verbose_name_plural = _('operation resources')
 
@@ -1466,6 +1396,147 @@ class Forecast(AuditModel):
         ordering = ['id']
 
 
+class ForecastYear(AuditModel):
+    types = (
+        ('W', _('W')),
+        ('M', _('M')),
+    )
+
+    # id = models.AutoField(_('id'), primary_key=True)
+    id = models.AutoField(_('id'), help_text=_('Unique identifier'), primary_key=True)
+    item = models.ForeignKey(
+        Item, verbose_name=_('item'),
+        db_index=True, related_name='forecastyear_item',
+        null=False, blank=False, on_delete=models.CASCADE
+    )
+    location = models.ForeignKey(
+        Location, verbose_name=_('location'),
+        db_index=True, related_name='forecastyear_locatoin',
+        null=False, blank=False, on_delete=models.CASCADE
+    )
+    customer = models.ForeignKey(
+        Customer, verbose_name=_('customer'),
+        db_index=True, related_name='forecastyear_customer',
+        null=True, blank=True, on_delete=models.CASCADE
+    )
+    year = models.IntegerField(_('year'), db_index=True)
+    data_number = models.IntegerField(_('data number'), db_index=True)
+
+    data_type = models.CharField(
+        _('data_type'), max_length=20, choices=types, default=_('W'),null=True,blank=True)
+    ratio = models.DecimalField(_('ratio %'), max_digits=20, decimal_places=8, default='100', null=True, blank=True)
+    normal_qty = models.DecimalField(_('normal qty'), max_digits=20, decimal_places=8)
+    new_product_plan_qty = models.DecimalField(_('new product plan qty'), max_digits=20, decimal_places=8, null=True,
+                                               blank=True)
+    promotion_qty = models.DecimalField(_('promotion qty'), max_digits=20, decimal_places=8, null=True, blank=True)
+
+    class Manager(MultiDBManager):
+        def get_by_natural_key(self, item,location, customer):
+            return self.get(item=item, location=location,customer=customer)
+
+    def natural_key(self):
+        return (self.item, self.location, self.customer)
+
+    objects = Manager()
+
+    def __str__(self):
+        return '%s - %s - %s' % (
+            self.item.nr, self.location.nr, self.customer.nr)
+
+    class Meta(AuditModel.Meta):
+        db_table = 'forecast_year'
+        unique_together = (('item', 'location', 'customer', 'year'),)
+        verbose_name = _('forecast_year')
+        verbose_name_plural = _('forecast_years')
+
+
+class ForecastVersion(AuditModel):
+    status1 = (
+        ('init', _('init')),
+        ('ok', _('ok')),
+        ('nok', _('nok')),
+        ('cancel', _('cancel')),
+        ('release', _('release')),
+        ('confirm', _('confirm')),
+    )
+
+    id = models.AutoField(_('id'), help_text=_('Unique identifier'), primary_key=True)
+    nr = models.CharField(_('nr'), max_length=300, db_index=True, unique=True)
+    create_user = models.ForeignKey(
+        User, verbose_name=_('create_user'),
+        db_index=True, related_name='forecastversion_create_user',
+        null=False, blank=False, on_delete=models.CASCADE
+    )
+    status = models.CharField(_('status'), max_length=20, choices=status1,default='init')
+
+    class Manager(MultiDBManager):
+        def get_by_natural_key(self, nr):
+            return self.get(nr=nr)
+
+    def natural_key(self):
+        return (self.nr)
+
+    objects = Manager()
+
+    def __str__(self):
+        return self.nr
+
+    class Meta(AuditModel.Meta):
+        db_table = 'forecast_version'
+        verbose_name = _('forecast_version')
+        verbose_name_plural = _('forecast_versions')
+
+
+class Forecast(AuditModel):
+    id = models.AutoField(_('id'), help_text=_('Unique identifier'), primary_key=True)
+    item = models.ForeignKey(
+        Item, verbose_name=_('item'),
+        db_index=True, related_name='forecast_item',
+        null=False, blank=False, on_delete=models.CASCADE
+    )
+    location = models.ForeignKey(
+        Location, verbose_name=_('location'),
+        db_index=True, related_name='forecast_locatoin',
+        null=False, blank=False, on_delete=models.CASCADE
+    )
+    customer = models.ForeignKey(
+        Customer, verbose_name=_('customer'),
+        db_index=True, related_name='forecast_customer',
+        null=True, blank=True, on_delete=models.CASCADE
+    )
+    year = models.IntegerField(_('year'), db_index=True)
+    data_number = models.IntegerField(_('data number'), db_index=True)
+
+    data_type = models.CharField(
+        _('data_type'), max_length=20, choices=ForecastYear.types, default=_('W'),null=True,blank=True)
+    ratio = models.DecimalField(_('ratio %'), max_digits=20, decimal_places=8, default='100', null=True, blank=True)
+    normal_qty = models.DecimalField(_('normal qty'), max_digits=20, decimal_places=8)
+    new_product_plan_qty = models.DecimalField(_('new product plan qty'), max_digits=20, decimal_places=8, null=True,
+                                               blank=True)
+    promotion_qty = models.DecimalField(_('promotion qty'), max_digits=20, decimal_places=8, null=True, blank=True)
+    status = models.CharField(_('status'), max_length=20, choices=ForecastVersion.status1, default='new')
+    version = models.CharField(_('version'), max_length=300)
+
+    class Manager(MultiDBManager):
+        def get_by_natural_key(self, item, location, customer):
+            return self.get(item=item, location=location,customer=customer)
+
+    def natural_key(self):
+        return (self.item, self.location, self.customer)
+
+    objects = Manager()
+
+    def __str__(self):
+        return '%s - %s - %s' % (
+            self.item.nr, self.location.nr, self.customer.nr)
+
+    class Meta(AuditModel.Meta):
+        db_table = 'forecast'
+        unique_together = (('item', 'location', 'customer', 'version'),)
+        verbose_name = _('forecast')
+        verbose_name_plural = _('forecasts')
+
+
 class Demand(AuditModel, HierarchyModel):
     # Status
     demandstatus = (
@@ -1610,7 +1681,7 @@ class OperationPlan(AuditModel):
     plan = JSONBField(default="{}", null=True, blank=True, editable=False)
     # Used only for manufacturing orders
     operation = models.ForeignKey(
-        Operation, verbose_name=_('operation'),related_name='operationplan_operation',
+        Operation, verbose_name=_('operation'), related_name='operationplan_operation',
         db_index=True, null=True, blank=True, on_delete=models.CASCADE
     )
     owner = models.ForeignKey(
