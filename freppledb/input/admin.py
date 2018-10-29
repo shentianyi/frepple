@@ -18,7 +18,7 @@
 from django.utils.translation import ugettext_lazy as _
 
 from freppledb.input.models import Resource, Operation, Location, SetupMatrix, SetupRule, ItemSuccessor, ItemCustomer, \
-    ForecastYear, Forecast
+    ForecastYear, Forecast, ForecastVersion
 from freppledb.input.models import Buffer, Customer, Demand, Item, OperationResource
 from freppledb.input.models import OperationMaterial, Skill, ResourceSkill, Supplier
 from freppledb.input.models import Calendar, CalendarBucket, ManufacturingOrder, SubOperation
@@ -457,7 +457,7 @@ data_site.register(ForecastYear, ForecastYear_admin)
 
 
 class ForecastVersion_admin(MultiDBModelAdmin):
-    model = ForecastYear
+    model = ForecastVersion
     raw_id_fields = ('create_user',)
     save_on_top = True
     exclude = ('source',)
@@ -467,7 +467,7 @@ class ForecastVersion_admin(MultiDBModelAdmin):
     ]
 
 
-data_site.register(ForecastYear, ForecastYear_admin)
+data_site.register(ForecastVersion, ForecastVersion_admin)
 
 class Forecast_admin(MultiDBModelAdmin):
     model = Forecast

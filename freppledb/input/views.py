@@ -1611,6 +1611,7 @@ class OperationMaterialList(GridReport):
         #                       initially_hidden=True, editable=False),
     )
 
+
 class ForecastYearList(GridReport):
     # template = ''
     title = _("forecastyears")
@@ -1649,7 +1650,7 @@ class ForecastVersionList(GridReport):
 
         GridFieldText('id', title=_('id'), key=True, formatter='detail', extra='"role":"input/forecastversion"',
                       editable=False),
-        GridFieldVersion('nr', title=_('nr'), editable=False),
+        GridFieldVersion('nr', title=_('nr'), formatter='detail', extra='"role":"input/forecast"', editable=False),
         GridFieldText('create_user_display', title=_('create_user_display'), field_name='create_user__username', editable=False),
         GridFieldText('create_user', title=_('create_user_id'), field_name='create_user_id', editable=False, hidden=True),
         GridFieldChoice('status', title=_('status'), choices=ForecastVersion.status1, editable=False),

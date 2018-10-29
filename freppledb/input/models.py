@@ -1456,7 +1456,7 @@ class ForecastVersion(AuditModel):
         db_index=True, related_name='forecastversion_create_user',
         null=False, blank=False, on_delete=models.CASCADE
     )
-    status = models.CharField(_('status'), max_length=20, choices=status1,default='new')
+    status = models.CharField(_('status'), max_length=20, choices=status1,default='init')
 
     class Manager(MultiDBManager):
         def get_by_natural_key(self, nr):
