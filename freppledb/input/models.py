@@ -1383,21 +1383,9 @@ class ItemDistribution(AuditModel):
         verbose_name = _('item distribution')
         verbose_name_plural = _('item distributions')
 
-# TODO forecast
-class Forecast(AuditModel):
-    id = models.AutoField(_('id'), primary_key=True)
-
-    class Meta(AuditModel.Meta):
-        db_table = 'forecast'
-        # . Translators: Translation included with Django
-        verbose_name = _('forecast')
-        # . Translators: Translation included with Django
-        verbose_name_plural = _('forecasts')
-        ordering = ['id']
-
 
 class ForecastYear(AuditModel):
-    types = (
+    date_types = (
         ('W', _('W')),
         ('M', _('M')),
     )
@@ -1420,10 +1408,11 @@ class ForecastYear(AuditModel):
         null=True, blank=True, on_delete=models.CASCADE
     )
     year = models.IntegerField(_('year'), db_index=True)
-    data_number = models.IntegerField(_('data number'), db_index=True)
+    date_number = models.IntegerField(_('date number'), db_index=True)
 
-    data_type = models.CharField(
-        _('data_type'), max_length=20, choices=types, default=_('W'),null=True,blank=True)
+    date_type = models.CharField(
+        _('date_type'), max_length=20, choices=date_types, default= 'W',null=True,blank=True)
+
     ratio = models.DecimalField(_('ratio %'), max_digits=20, decimal_places=8, default='100', null=True, blank=True)
     normal_qty = models.DecimalField(_('normal qty'), max_digits=20, decimal_places=8)
     new_product_plan_qty = models.DecimalField(_('new product plan qty'), max_digits=20, decimal_places=8, null=True,
@@ -1460,8 +1449,8 @@ class ForecastVersion(AuditModel):
         ('confirm', _('confirm')),
     )
 
-    id = models.AutoField(_('id'), help_text=_('Unique identifier'), primary_key=True)
-    nr = models.CharField(_('nr'), max_length=300, db_index=True, unique=True)
+    id = models.AutoField(_('id'), help_text=_('Unique identifier'))
+    nr = models.CharField(_('nr'), max_length=300, db_index=True, unique=True, primary_key=True)
     create_user = models.ForeignKey(
         User, verbose_name=_('create_user'),
         db_index=True, related_name='forecastversion_create_user',
@@ -1489,6 +1478,7 @@ class ForecastVersion(AuditModel):
 
 class Forecast(AuditModel):
     id = models.AutoField(_('id'), help_text=_('Unique identifier'), primary_key=True)
+
     item = models.ForeignKey(
         Item, verbose_name=_('item'),
         db_index=True, related_name='forecast_item',
@@ -1496,7 +1486,7 @@ class Forecast(AuditModel):
     )
     location = models.ForeignKey(
         Location, verbose_name=_('location'),
-        db_index=True, related_name='forecast_locatoin',
+        db_index=True, related_name='forecast_location',
         null=False, blank=False, on_delete=models.CASCADE
     )
     customer = models.ForeignKey(
@@ -1505,21 +1495,27 @@ class Forecast(AuditModel):
         null=True, blank=True, on_delete=models.CASCADE
     )
     year = models.IntegerField(_('year'), db_index=True)
-    data_number = models.IntegerField(_('data number'), db_index=True)
+    date_number = models.IntegerField(_('date number'), db_index=True)
 
-    data_type = models.CharField(
-        _('data_type'), max_length=20, choices=ForecastYear.types, default=_('W'),null=True,blank=True)
+    date_type = models.CharField(
+        _('date_type'), max_length=20, choices=ForecastYear.date_types, default='W' ,null=True,blank=True)
+
     ratio = models.DecimalField(_('ratio %'), max_digits=20, decimal_places=8, default='100', null=True, blank=True)
     normal_qty = models.DecimalField(_('normal qty'), max_digits=20, decimal_places=8)
     new_product_plan_qty = models.DecimalField(_('new product plan qty'), max_digits=20, decimal_places=8, null=True,
                                                blank=True)
     promotion_qty = models.DecimalField(_('promotion qty'), max_digits=20, decimal_places=8, null=True, blank=True)
     status = models.CharField(_('status'), max_length=20, choices=ForecastVersion.status1, default='new')
-    version = models.CharField(_('version'), max_length=300)
+
+    version = models.ForeignKey(ForecastVersion, verbose_name=_('forecast version'),
+                                 db_index=True, related_name='forecast version',
+                                 null=False, blank=False, on_delete=models.CASCADE)
+
+    #version = models.CharField(_('version'), max_length=300)
 
     class Manager(MultiDBManager):
         def get_by_natural_key(self, item, location, customer):
-            return self.get(item=item, location=location,customer=customer)
+            return self.get(item=item, location=location, customer=customer)
 
     def natural_key(self):
         return (self.item, self.location, self.customer)
