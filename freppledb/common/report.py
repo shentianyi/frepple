@@ -305,11 +305,6 @@ class GridFieldCreateOrUpdateDate(GridField):
   editable = False
   width = 140
 
-class GridFieldVersion(GridField):
-  formatter = 'version'
-  extra = '"formatoptions":{"srcformat":V+"YmdHis"}'
-  editable = False
-  width = 140
 
 
 class GridFieldLastModified(GridField):

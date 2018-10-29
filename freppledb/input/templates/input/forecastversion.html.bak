@@ -1,0 +1,35 @@
+{% extends "admin/base_site_nav.html" %}
+{% load i18n %}
+
+{% block extrahead %}{{block.super}}
+
+<!--head中的内容,如js-->
+
+{% endblock %}
+{% block content %}
+<div>
+    forecast version
+    <div>
+        <p>上传</p>
+        <form action="/data/input/forecastversion/" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <!--{{ form }}-->
+            <p>时间类型:
+                <select name="date_type">
+                    {%for k,v in date_types%}
+                    <option value="{{k}}">{{v}}</option>
+                    {%endfor%}
+                </select>
+            </p>
+            <p>动作选择: <input type="radio" value="create" name="action" checked="true"/> 创建
+                <input type="radio" value="update" name="action"/>更新
+            </p>
+            <p>
+                <input type="file" name="forecast">
+            </p>
+            <button type="submit">OK</button>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

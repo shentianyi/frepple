@@ -49,7 +49,7 @@ from freppledb.input.models import ResourceSkill, Supplier, ItemSupplier, search
 from freppledb.input.models import ItemDistribution, DistributionOrder, PurchaseOrder
 from freppledb.input.models import OperationPlan, OperationPlanMaterial, OperationPlanResource
 from freppledb.common.report import GridReport, GridFieldBool, GridFieldLastModified, GridFieldCreateOrUpdateDate, \
-    GridFieldDate, GridFieldVersion
+    GridFieldDate
 from freppledb.common.report import GridFieldDateTime, GridFieldTime, GridFieldText
 from freppledb.common.report import GridFieldNumber, GridFieldInteger, GridFieldCurrency
 from freppledb.common.report import GridFieldChoice, GridFieldDuration
@@ -1648,15 +1648,29 @@ class ForecastYearList(GridReport):
     )
 
 
-class ForecastVersionView(View):
-    title = _('forecast vesions')
+class ForecastVersionView(GridReport):
+    title = _("forecastversions")
+    basequeryset = ForecastVersion.objects.all()
+    model = ForecastVersion
+    frozenColumns = 1
+    template = 'input/forecastversion.html'
 
-    def get(self, request, *args, **kwargs):
+    rows = (
+            # GridFieldText('id', title=_('id'), editable=False),
+            GridFieldText('nr', title=_('version nr'), key=True, editable=False),
+            GridFieldText('create_user_display', title=_('create_user_display'), field_name='create_user__username', editable=False),
+            GridFieldText('create_user', title=_('create_user_id'), field_name='create_user_id', editable=False, hidden=True),
+            GridFieldChoice('status', title=_('status'), choices=ForecastVersion.version_status, editable=False),
+            GridFieldCreateOrUpdateDate('created_at', title=_('created_at'), editable=False),
+            GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at'), editable=False),
+        )
+
+    @classmethod
+    def extra_context(reportclass, request, *args, **kwargs):
         data = {
-            "date_types": ForecastYear.date_types
-        }
-
-        return render(request, 'input/forecastversion.html', data)
+                "date_types": ForecastYear.date_types
+            }
+        return data
 
     def post(self, request, *args, **kwargs):
         if request.FILES and len(request.FILES) == 1:
@@ -1672,25 +1686,6 @@ class ForecastVersionView(View):
         # 上传文件
         else:
             Http404('bad request')
-
-
-# class ForecastVersionList(GridReport):
-#     # template = ''
-#     title = _("forecastversions")
-#     basequeryset = ForecastVersion.objects.all()
-#     model = ForecastVersion
-#     frozenColumns = 1
-#     rows = (
-#
-#         GridFieldText('id', title=_('id'), key=True, formatter='detail', extra='"role":"input/forecastversion"',
-#                       editable=False),
-#         GridFieldVersion('nr', title=_('nr'), formatter='detail', extra='"role":"input/forecast"', editable=False),
-#         GridFieldText('create_user_display', title=_('create_user_display'), field_name='create_user__username', editable=False),
-#         GridFieldText('create_user', title=_('create_user_id'), field_name='create_user_id', editable=False, hidden=True),
-#         GridFieldChoice('status', title=_('status'), choices=ForecastVersion.version_status, editable=False),
-#         GridFieldCreateOrUpdateDate('created_at', title=_('created_at'), editable=False),
-#         GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at'), editable=False),
-#     )
 
 
 class ForecastList(GridReport):
@@ -1717,7 +1712,7 @@ class ForecastList(GridReport):
         GridFieldNumber('new_product_plan_qty', title=_('new product plan qty'), editable=False),
         GridFieldNumber('promotion_qty', title=_('promotion qty'), editable=False),
         GridFieldChoice('status', title=_('status'), choices=Forecast.forecast_status, editable=False),
-        GridFieldText('version', title=_('version'), editable=False),
+        GridFieldText('version', title=_('version nr'), editable=False),
         GridFieldCreateOrUpdateDate('created_at', title=_('created_at'), editable=False),
         GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at'), editable=False),
     )

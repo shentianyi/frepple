@@ -11,6 +11,7 @@ class ForecastCompare(View):
 
     def get(self, request, *args, **kwargs):
         if request.method == 'GET':
+            #TODO LA 预测对比
             template = loader.get_template('output/forecast_compare.html')
             return HttpResponse(template.render(None, request))
         else:

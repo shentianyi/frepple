@@ -1329,13 +1329,13 @@ class ForecastVersionFilter(filters.FilterSet):
     class Meta:
         model = freppledb.input.models.ForecastVersion
         fields = {
-            'id': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
+            # 'id': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
             'nr': ['exact', 'in'],
             'create_user__username': ['exact', 'in'],
             'status': ['exact', 'in'],
         }
         filter_fields = (
-            'id', 'nr', 'create_user__username', 'status')
+          'nr', 'create_user__username', 'status')
 
 
 class ForecastVersionSerializer(BulkSerializerMixin, ModelSerializer):
