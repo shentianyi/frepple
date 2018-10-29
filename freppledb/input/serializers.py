@@ -1329,13 +1329,12 @@ class ForecastVersionFilter(filters.FilterSet):
     class Meta:
         model = freppledb.input.models.ForecastVersion
         fields = {
-            'id': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
             'nr': ['exact', 'in'],
             'create_user__username': ['exact', 'in'],
             'status': ['exact', 'in'],
         }
         filter_fields = (
-            'id', 'nr', 'create_user__username', 'status')
+             'nr', 'create_user__username', 'status')
 
 
 class ForecastVersionSerializer(BulkSerializerMixin, ModelSerializer):
@@ -1343,7 +1342,7 @@ class ForecastVersionSerializer(BulkSerializerMixin, ModelSerializer):
         model = freppledb.input.models.ForecastVersion
         fields = '__all__'
         list_serializer_class = BulkListSerializer
-        update_lookup_field = 'id'
+        # update_lookup_field = 'id'
         partial = True
 
 
@@ -1351,7 +1350,7 @@ class ForecastVersionAPI(frePPleListCreateAPIView):
     queryset = freppledb.input.models.ForecastVersion.objects.all()
     serializer_class = ForecastVersionSerializer
     filter_class = ForecastVersionFilter
-    ordering_fields = ('-id')
+    # ordering_fields = ('-id')
 
 
 class ForecastVersiondetailAPI(frePPleRetrieveUpdateDestroyAPIView):

@@ -47,10 +47,16 @@ menu.addItem(
   report=freppledb.input.views.ForecastYearList, index=100, model=ForecastYear,
   dependencies=[Item, Location, Customer]
   )
+# menu.addItem(
+#   "sales", "forecastversions", url="/data/input/forecastversion/",
+#   report=freppledb.input.views.ForecastVersionList, index=101, model=ForecastVersion,
+#   )
+
 menu.addItem(
   "sales", "forecastversions", url="/data/input/forecastversion/",
-  report=freppledb.input.views.ForecastVersionList, index=101, model=ForecastVersion,
+  report=freppledb.input.views.ForecastVersionView, index=101, model=ForecastVersion,
   )
+
 menu.addItem(
   "sales", "forecasts", url="/data/input/forecast/",
   report=freppledb.input.views.ForecastList, index=102, model=Forecast,

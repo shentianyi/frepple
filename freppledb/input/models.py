@@ -1441,7 +1441,7 @@ class ForecastYear(AuditModel):
 
 
 class ForecastVersion(AuditModel):
-    status1 = (
+    version_status = (
         ('init', _('init')),
         ('ok', _('ok')),
         ('nok', _('nok')),
@@ -1450,17 +1450,17 @@ class ForecastVersion(AuditModel):
         ('confirm', _('confirm')),
     )
 
-    id = models.AutoField(_('id'), help_text=_('Unique identifier'), primary_key=True)
+    # id = models.AutoField(_('id'), help_text=_('Unique identifier'), primary_key=True)
     # nr = models.CharField(_('nr'), max_length=300, db_index=True, unique=True)
     nr = models.CharField(_('nr'), max_length=300, editable=False, db_index=True,
-                               default='V' + datetime.now().strftime('%Y%m%d%H%M%S'))
+                              primary_key=True)
 
     create_user = models.ForeignKey(
         User, verbose_name=_('create_user'),
         db_index=True, related_name='forecastversion_create_user',
         null=False, blank=False, on_delete=models.CASCADE
     )
-    status = models.CharField(_('status'), max_length=20, choices=status1, default='init')
+    status = models.CharField(_('status'), max_length=20, choices=version_status, default='init')
 
     class Manager(MultiDBManager):
         def get_by_natural_key(self, nr):
@@ -1481,6 +1481,15 @@ class ForecastVersion(AuditModel):
 
 
 class Forecast(AuditModel):
+    forecast_status = (
+        ('init', _('init')),
+        ('ok', _('ok')),
+        ('nok', _('nok')),
+        ('cancel', _('cancel')),
+        ('release', _('release')),
+        ('confirm', _('confirm')),
+    )
+
     id = models.AutoField(_('id'), help_text=_('Unique identifier'), primary_key=True)
 
     item = models.ForeignKey(
@@ -1509,14 +1518,11 @@ class Forecast(AuditModel):
     new_product_plan_qty = models.DecimalField(_('new product plan qty'), max_digits=20, decimal_places=8, null=True,
                                                blank=True)
     promotion_qty = models.DecimalField(_('promotion qty'), max_digits=20, decimal_places=8, null=True, blank=True)
-    status = models.CharField(_('status'), max_length=20, choices=ForecastVersion.status1, default='new')
+    status = models.CharField(_('status'), max_length=20, choices=forecast_status, default='new')
 
     version = models.ForeignKey(ForecastVersion, verbose_name=_('forecast version'),
                                  db_index=True, related_name='forecast_version',
-                                 null=False, blank=False, on_delete=models.CASCADE)
-    # version = models.CharField(_('version'), max_length=300, editable=False, db_index=True,
-    #                            default='V' + datetime.now().strftime('%Y%m%d%H%M%S'))
-    #
+                                editable=False, on_delete=models.CASCADE)
 
     class Manager(MultiDBManager):
         def get_by_natural_key(self, item, location, customer):
