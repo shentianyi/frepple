@@ -61,7 +61,9 @@ urlpatterns = [
   url(r'^data/input/deliveryorder/$', freppledb.input.views.DeliveryOrderList.as_view(), name="input_deliveryorder_changelist"),
 
   url(r'^data/input/forecastyear/$', freppledb.input.views.ForecastYearList.as_view(), name="input_forecastyear_changelist"),
-  url(r'^data/input/forecastversion/$', freppledb.input.views.ForecastVersionList.as_view(), name="input_forecastversion_changelist"),
+
+  url(r'^data/input/forecastversion/$', freppledb.input.views.ForecastVersionView.as_view(), name="input_forecastversion_changelist"),
+
   url(r'^data/input/forecast/$', freppledb.input.views.ForecastList.as_view(), name="input_forecast_changelist"),
 
   url(r'^data/input/enum/(?P<type>(.+))/(?P<value>(.+))/$', freppledb.input.views.EnumView.as_view(), name="enum_get"),
@@ -111,11 +113,13 @@ urlpatterns = [
 
   url(r'^api/input/forecastyear/$', freppledb.input.serializers.ForecastYearAPI.as_view()),
   url(r'^api/input/forecastversion/$', freppledb.input.serializers.ForecastVersionAPI.as_view()),
+  url(r'^api/input/forecast/$', freppledb.input.serializers.ForecastAPI.as_view()),
 
   url(r'^api/input/buffer/(?P<pk>(.+))/$', freppledb.input.serializers.BufferdetailAPI.as_view()),
   url(r'^api/input/resource/(?P<pk>(.+))/$', freppledb.input.serializers.ResourcedetailAPI.as_view()),
   url(r'^api/input/forecastyear/(?P<pk>(.+))/$', freppledb.input.serializers.ForecastYeardetailAPI.as_view()),
   url(r'^api/input/forecastversion/(?P<pk>(.+))/$', freppledb.input.serializers.ForecastVersiondetailAPI.as_view()),
+  url(r'^api/input/forecast/(?P<pk>(.+))/$', freppledb.input.serializers.ForecastdetailAPI.as_view()),
 
   #　CMARK 主键路由
   url(r'^api/input/location/(?P<pk>(.+))/$', freppledb.input.serializers.LocationdetailAPI.as_view()),

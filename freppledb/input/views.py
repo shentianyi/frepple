@@ -19,11 +19,14 @@ from datetime import datetime
 
 from django.conf import settings
 from django.contrib.admin.views.decorators import staff_member_required
+from django.core import serializers
 from django.db import connections
 from django.db.models import Q
 from django.db.models.fields import CharField
 from django.http import HttpResponse, Http404
-from django.http.response import StreamingHttpResponse, HttpResponseServerError, HttpResponseBadRequest
+from django.http.response import StreamingHttpResponse, HttpResponseServerError, HttpResponseBadRequest, JsonResponse
+from django.shortcuts import render
+from django.template import loader
 from django.utils.decorators import method_decorator
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import ungettext
@@ -34,7 +37,9 @@ from django.views.generic import View
 from django.views.decorators.csrf import csrf_exempt
 
 from freppledb.boot import getAttributeFields
+from freppledb.common.message.responsemessage import ResponseMessage
 from freppledb.common.models import Parameter
+from freppledb.input.forms import ForecastUploadForm
 from freppledb.input.models import Resource, Operation, Location, SetupMatrix, SetupRule, ItemSuccessor, ItemCustomer, \
     ForecastYear, ForecastVersion, Forecast
 from freppledb.input.models import Skill, Buffer, Customer, Demand, DeliveryOrder
@@ -54,6 +59,8 @@ import json
 from django.core.serializers.json import DjangoJSONEncoder
 
 import logging
+
+from freppledb.input.uploader import ForecastUploader
 
 logger = logging.getLogger(__name__)
 
@@ -1253,6 +1260,7 @@ class ItemDistributionList(GridReport):
         # ),
     )
 
+
 # CMARK 枚举API
 class EnumView(View):
     def get(self, request, *args, **kwargs):
@@ -1628,7 +1636,7 @@ class ForecastYearList(GridReport):
         GridFieldText('customer_display', title=_('customer_display'), field_name='customer__nr', editable=False),
         GridFieldText('customer', title=_('customer_id'), field_name='customer_id', editable=False, hidden=True),
         GridFieldInteger('year', title=_('year'), editable=False),
-        GridFieldInteger('date_number', title=_('date number'), editable=False),
+        GridFieldInteger('date_number', title=_('date_number'), editable=False),
         GridFieldText('date_type', title=_('date_type'), editable=False),
         GridFieldNumber('ratio', title=_('ratio %'),
                         extra='"formatoptions":{"suffix":" %","defaultValue":"100.00"}', editable=False),
@@ -1640,28 +1648,53 @@ class ForecastYearList(GridReport):
     )
 
 
-class ForecastVersionList(GridReport):
-    # template = ''
-    title = _("forecastversions")
-    basequeryset = ForecastVersion.objects.all()
-    model = ForecastVersion
-    frozenColumns = 1
-    rows = (
+class ForecastVersionView(View):
+    title = _('forecast vesions')
 
-        GridFieldText('id', title=_('id'), key=True, formatter='detail', extra='"role":"input/forecastversion"',
-                      editable=False),
-        GridFieldVersion('nr', title=_('nr'), formatter='detail', extra='"role":"input/forecast"', editable=False),
-        GridFieldText('create_user_display', title=_('create_user_display'), field_name='create_user__username', editable=False),
-        GridFieldText('create_user', title=_('create_user_id'), field_name='create_user_id', editable=False, hidden=True),
-        GridFieldChoice('status', title=_('status'), choices=ForecastVersion.status1, editable=False),
-        GridFieldCreateOrUpdateDate('created_at', title=_('created_at'), editable=False),
-        GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at'), editable=False),
-    )
+    def get(self, request, *args, **kwargs):
+        data = {
+            "date_types": ForecastYear.date_types
+        }
+
+        return render(request, 'input/forecastversion.html', data)
+
+    def post(self, request, *args, **kwargs):
+        if request.FILES and len(request.FILES) == 1:
+           excel_count = 0
+           for filename, file in  request.FILES.items():
+              if file.content_type== 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
+                  excel_count+=1
+           if excel_count==0:
+               message = ResponseMessage(message = 'no excel file')
+               return HttpResponse(json.dumps(message.__dict__, ensure_ascii=False))
+           else:
+               return HttpResponse(json.dumps(ForecastUploader.upload_excel(request, Forecast).__dict__, ensure_ascii=False))
+        # 上传文件
+        else:
+            Http404('bad request')
+
+
+# class ForecastVersionList(GridReport):
+#     # template = ''
+#     title = _("forecastversions")
+#     basequeryset = ForecastVersion.objects.all()
+#     model = ForecastVersion
+#     frozenColumns = 1
+#     rows = (
+#
+#         GridFieldText('id', title=_('id'), key=True, formatter='detail', extra='"role":"input/forecastversion"',
+#                       editable=False),
+#         GridFieldVersion('nr', title=_('nr'), formatter='detail', extra='"role":"input/forecast"', editable=False),
+#         GridFieldText('create_user_display', title=_('create_user_display'), field_name='create_user__username', editable=False),
+#         GridFieldText('create_user', title=_('create_user_id'), field_name='create_user_id', editable=False, hidden=True),
+#         GridFieldChoice('status', title=_('status'), choices=ForecastVersion.version_status, editable=False),
+#         GridFieldCreateOrUpdateDate('created_at', title=_('created_at'), editable=False),
+#         GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at'), editable=False),
+#     )
 
 
 class ForecastList(GridReport):
     # template = ''
-    Permission = ()
     title = _("forecasts")
     basequeryset = Forecast.objects.all()
     model = Forecast
@@ -1676,15 +1709,15 @@ class ForecastList(GridReport):
         GridFieldText('customer_display', title=_('customer_display'), field_name='customer__nr', editable=False),
         GridFieldText('customer', title=_('customer_id'), field_name='customer_id', editable=False, hidden=True),
         GridFieldInteger('year', title=_('year'), editable=False),
-        GridFieldInteger('date_number', title=_('data number'), editable=False),
-        GridFieldText('date_type', title=_('data_type'), editable=False),
+        GridFieldInteger('date_number', title=_('date_number'), editable=False),
+        GridFieldText('date_type', title=_('date_type'), editable=False),
         GridFieldNumber('ratio', title=_('ratio %'),
                         extra='"formatoptions":{"suffix":" %","defaultValue":"100.00"}', editable=False),
         GridFieldNumber('normal_qty', title=_('normal qty'), editable=False),
         GridFieldNumber('new_product_plan_qty', title=_('new product plan qty'), editable=False),
         GridFieldNumber('promotion_qty', title=_('promotion qty'), editable=False),
-        GridFieldChoice('status', title=_('status'), choices=ForecastVersion.status1, editable=False),
-        GridFieldVersion('version', title=_('version'), editable=False),
+        GridFieldChoice('status', title=_('status'), choices=Forecast.forecast_status, editable=False),
+        GridFieldText('version', title=_('version'), editable=False),
         GridFieldCreateOrUpdateDate('created_at', title=_('created_at'), editable=False),
         GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at'), editable=False),
     )
