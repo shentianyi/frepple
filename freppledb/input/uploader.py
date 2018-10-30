@@ -103,7 +103,7 @@ class ForecastUploader:
                             Forecast.objects.bulk_create(forecasts)
                         elif request.POST['action'] == 'update':
                             # 查找最新的version
-                            forecast_version = Forecast.objects.using(request.database).order_by('-id').latest('id')
+                            forecast_version = ForecastVersion.objects.using(request.database).latest('created_at')
                             if forecast_version == None:
                                 message.result = False
                                 message.message = '版本不存在,不可以更新!'
@@ -112,13 +112,15 @@ class ForecastUploader:
 
                                 for f in forecasts:
                                     # 更新
-                                    update_forecast = Forecast.objects.using(request.database).order_by('-id').filter(
+                                    update_forecast = Forecast.objects.using(request.database).filter(
+                                        # version=forecast_version,
                                         version=forecast_version,
                                         location=f.location,
                                         item=f.item,
                                         customer=f.customer,
                                         year=f.year,
-                                        date_number=f.date_number).latest()
+                                        date_number=f.date_number).latest('id')
+
                                 if update_forecast == None:
                                     # 创建
                                     f.version = forecast_version
@@ -130,7 +132,7 @@ class ForecastUploader:
                                     if 'ratio' in excel_fields:
                                         update_forecast.ratio = f.ratio
                                     # 更新
-                                    f.save()
+                                    update_forecast.save()
 
                         message.result = True
                         message.message = '上传成功'
