@@ -41,7 +41,7 @@ SECRET_KEY = '%@mzit!i8b*$zc&6oev96=RANDOMSTRING'
 DATABASES = {
     # 'default': {
     #     'ENGINE': 'django.db.backends.postgresql',
-    #     'NAME': 'frepple',
+    #     'NAME': 'frepple_dev',
     #     'USER': 'postgres',
     #     'PASSWORD': 'postgres',
     #     'HOST': '127.0.0.1',

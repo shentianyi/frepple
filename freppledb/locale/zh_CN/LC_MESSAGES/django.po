@@ -134,6 +134,21 @@ msgstr "保存并添加"
 msgid "Save and continue editing"
 msgstr "保存继续编辑"
 
+msgid "comment operation"
+msgstr "操作"
+
+
+msgid "operation_forecast_ok"
+msgstr "审批"
+
+msgid "operation_forecast_nok"
+msgstr "打回"
+
+msgid "operation_forecast_cancel"
+msgstr "取消"
+
+msgid "operation_forecast_release"
+msgstr "放行"
 #: common/admin.py:44 common/admin.py:72 common/admin.py:105
 #: common/admin.py:131 common/admin.py:145 common/adminforms.py:484
 #: common/models.py:570 common/views.py:345 common/widget.py:244
