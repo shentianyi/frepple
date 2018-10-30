@@ -150,6 +150,8 @@ $(function() {
 
     jQuery("#grid").jqGrid('setFrozenColumns');{% endif %}{% if reportclass.multiselect and not is_popup %}
 
+//    jQuery("#grid").jqGrid('filterToolbar',{searchOperators : true});
+
     $('#cb_grid.cbox').click(grid.markAllRows);{% endif %}{% if reportclass.editable and haschangeperm %}
 
     $("th").bindFirst('click', upload.validateSort);{% endif %}
