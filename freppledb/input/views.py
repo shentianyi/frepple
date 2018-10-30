@@ -1727,7 +1727,7 @@ class ForecastList(GridReport):
         GridFieldNumber('new_product_plan_qty', title=_('new product plan qty'), editable=False),
         GridFieldNumber('promotion_qty', title=_('promotion qty'), editable=False),
         GridFieldChoice('status', title=_('status'), choices=ForecastCommentOperation.statuses, editable=False),
-        GridFieldText('version', title=_('version nr'), editable=False),
+        GridFieldText('version_nr', title=_('version nr'), field_name='version__nr', editable=False),
         GridFieldCreateOrUpdateDate('created_at', title=_('created_at'), editable=False),
         GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at'), editable=False),
     )
@@ -2371,7 +2371,7 @@ class ManufacturingOrderList(OperationPlanMixin, GridReport):
                       initially_hidden=True, formatter='listdetail', extra='"role":"input/item"'),
         GridFieldText('resource', title=_('resources'), editable=False, search=False, sortable=False,
                       initially_hidden=True, formatter='listdetail', extra='"role":"input/resource"'),
-        GridFieldInteger('owner', title=_('owner'), field_name='owner__id', extra='"formatoptions":{"defaultValue":""}',
+        GridFieldInteger('owner', title=_('owner'), f2018103011304720181030113047ield_name='owner__id', extra='"formatoptions":{"defaultValue":""}',
                          initially_hidden=True),
         GridFieldText('source', title=_('source')),
         GridFieldLastModified('lastmodified'),
