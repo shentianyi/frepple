@@ -307,6 +307,17 @@ function opendetail(event) {
     window.location.href = url_prefix + curlink.replace('key', admin_escape(objectid));
 }
 
+function customerDetail(event) {
+    var el = $(event.target).parent();
+    var curlink = el.attr('href');
+    var objectid = el.attr('objectid');
+    if (objectid === undefined || objectid == false)
+        objectid = el.parent().text().trim();
+    event.preventDefault();
+    event.stopImmediatePropagation();
+
+    window.location.href = url_prefix + curlink.replace('key', '?' + admin_escape(objectid));
+}
 
 function formatDuration(cellvalue, options, rowdata) {
     var days = 0;
@@ -377,6 +388,20 @@ jQuery.extend($.fn.fmatter, {
         }
         if (options['colModel']['popup'] || rowdata.showdrilldown === '0') {
             return cellvalue;
+        }
+        return result;
+    },
+
+    customer: function (cellvalue, options, rowdata) {
+        var result = cellvalue + "<a href='" + options.colModel.role + "/key')' onclick='customerDetail(event)'><span class='leftpadding fa fa-caret-right' role='" + options.colModel.role + "'></span></a>";
+        if (cellvalue === undefined || cellvalue === '' || cellvalue === null) {
+            return '';
+        }
+        if (options['colModel']['popup'] || rowdata.showdrilldown === '0') {
+            return cellvalue;
+        }
+        if (rowdata.hasOwnProperty('type') && (rowdata.type === 'purchase' || rowdata.type === 'distribution' || rowdata.type === 'shipping' )) {
+            return cellvalue; //don't show links for non existing operations
         }
         return result;
     },
@@ -498,7 +523,6 @@ function windowname_to_id(text) {
 
 // 关闭window 弹出窗口界面
 function popClick(win, id) {
-    debugger
     var r = jQuery("#grid").jqGrid("getRowData", id);
 
     var name = windowname_to_id(win.name);
@@ -795,8 +819,6 @@ var grid = {
 
             var perm = [];
             var hiddenrows = [];
-
-            debugger
 
             if(colModel[0].name == "rn") {
                 perm.push(0);

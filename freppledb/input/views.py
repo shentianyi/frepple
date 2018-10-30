@@ -1663,8 +1663,8 @@ class ForecastVersionView(GridReport):
 
     rows = (
             # GridFieldText('id', title=_('id'), editable=False),
-            GridFieldText('nr', title=_('version nr'), key=True, formatter='detail',
-                         extra='"role":"input/forecast"', editable=False),
+            GridFieldText('nr', title=_('version nr'), key=True, formatter='customer',
+                         extra='"role":"/data/input/forecast"', editable=False),
             GridFieldText('create_user_display', title=_('create_user_display'), field_name='create_user__username', editable=False),
             GridFieldText('create_user', title=_('create_user_id'), field_name='create_user_id', editable=False, hidden=True),
             GridFieldChoice('status', title=_('status'), choices=ForecastCommentOperation.statuses, editable=False),
@@ -1727,7 +1727,7 @@ class ForecastList(GridReport):
         GridFieldNumber('new_product_plan_qty', title=_('new product plan qty'), editable=False),
         GridFieldNumber('promotion_qty', title=_('promotion qty'), editable=False),
         GridFieldChoice('status', title=_('status'), choices=ForecastCommentOperation.statuses, editable=False),
-        GridFieldText('version', title=_('version nr'), field_name='forecastversion__nr', editable=False),
+        GridFieldText('version', title=_('version nr'), editable=False),
         GridFieldCreateOrUpdateDate('created_at', title=_('created_at'), editable=False),
         GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at'), editable=False),
     )

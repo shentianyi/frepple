@@ -22,6 +22,30 @@ $(function() {
   {% if reportclass.hasTimeBuckets and not bucketnames %}
   $('#curfilter').html("{% trans 'Error: Missing time buckets or bucket dates' %}");
 {% else %}
+
+    var hasVersionSearch = false
+    initialfilter.rules.map(d => {
+        if(d.field === 'version'){
+            hasVersionSearch = true
+            return
+        }
+    })
+
+    console.log(hasVersionSearch)
+
+    if(window.location.search !== "" && !hasVersionSearch){
+        const initFilter = {
+            field: "version",
+            op: "in",
+            data: window.location.search.substr(1, window.location.search.length)
+        };
+
+        initialfilter.rules.push(initFilter)
+    }
+
+    console.log(initialfilter)
+    console.log(JSON.stringify(initialfilter))
+
   jQuery("#grid").jqGrid({
    	url: (location.href.indexOf("#") != -1 ? location.href.substr(0,location.href.indexOf("#")) : location.href)
    	  + (location.search.length > 0 ? "&format=json" : "?format=json"),
@@ -58,7 +82,9 @@ $(function() {
     //scroll: 1,      // Enables scrolling over all records, instead of paging. But not compatible with frozen columns.
     //sortable: true, // Allows columns to be dragged and dropped between positions. But not compatible with frozen columns
     autowidth: true,{% if filters %}
-    postData: {filters: JSON.stringify(initialfilter)},
+    postData: {
+   	    filters: JSON.stringify(initialfilter)
+    },
     search : true,{% endif %}
     shrinkToFit: false,
     searching: {
@@ -213,6 +239,7 @@ $(function() {
 {% endblock %}
 {% block content %}
 {% block before_table %}{% endblock %}
+
 <div class="row" style="padding: 15px 0 5px 0;">
     <div class="col-xs-8">
         <div style="display: flex;">
