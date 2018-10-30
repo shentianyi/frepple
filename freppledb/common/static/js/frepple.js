@@ -316,7 +316,7 @@ function customerDetail(event) {
     event.preventDefault();
     event.stopImmediatePropagation();
 
-    window.location.href = url_prefix + curlink.replace('key', '?' + admin_escape(objectid));
+    window.location.href = url_prefix + curlink.replace('#key#',  admin_escape(objectid));
 }
 
 function formatDuration(cellvalue, options, rowdata) {
@@ -393,7 +393,7 @@ jQuery.extend($.fn.fmatter, {
     },
 
     customer: function (cellvalue, options, rowdata) {
-        var result = cellvalue + "<a href='" + options.colModel.role + "/key')' onclick='customerDetail(event)'><span class='leftpadding fa fa-caret-right' role='" + options.colModel.role + "'></span></a>";
+        var result = cellvalue + "<a href='" + options.colModel.role + "#key#')' onclick='customerDetail(event)'><span class='leftpadding fa fa-caret-right' role='" + options.colModel.role + "'></span></a>";
         if (cellvalue === undefined || cellvalue === '' || cellvalue === null) {
             return '';
         }
