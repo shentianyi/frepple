@@ -1214,7 +1214,7 @@ class GridReport(View):
       for k, v in reportclass.extra_context(request, *args, **kwargs).items():
         context[k] = v
       # CMARK 返回数据list页面
-      # TODO 判断是否有URL参数, 写入filter
+      # TODO 判断是否有URL参数, 写入filter, 但是范围查询目前不支持
       filters={}
       if len(request.GET)>0:
         filters['groupOp']="AND"
