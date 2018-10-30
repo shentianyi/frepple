@@ -209,33 +209,27 @@ $(function() {
   });
 
 });
+
 </script>
 {% endblock %}
 {% block content %}
 {% block before_table %}{% endblock %}
 
-<div>
-    forecast version
-    <div>
-        <p>上传</p>
-        <form action="/data/input/forecastversion/" method="post" enctype="multipart/form-data">
-            {% csrf_token %}
-            <!--{{ form }}-->
-            <p>时间类型:
-                <select name="date_type">
-                    {%for k,v in date_types%}
-                    <option value="{{k}}">{{v}}</option>
-                    {%endfor%}
-                </select>
-            </p>
-            <p>动作选择: <input type="radio" value="create" name="action" checked="true"/> 创建
-                <input type="radio" value="update" name="action"/>更新
-            </p>
-            <p>
-                <input type="file" name="forecast">
-            </p>
-            <button type="submit">OK</button>
-        </form>
+<!-- 在import 弹框中使用到的内容 , 记得加 display: none -->
+<div id="import_forecast_version" style="display: none;">
+    <div class="input-group">
+        <span class="input-group-addon" id="basic-date-type">时间类型:</span>
+        <select name="date_type" class="form-control" aria-describedby="basic-date-type">
+            {%for k,v in date_types%}
+            <option value="{{k}}">{{v}}</option>
+            {%endfor%}
+        </select>
+    </div>
+
+    <div style="margin-top: 20px; margin-bottom: 20px;">
+        <span>动作选择:</span>
+        <input type="radio" value="create" name="action" checked="true"/> 创建
+        <input type="radio" value="update" name="action"/> 更新
     </div>
 </div>
 
@@ -314,7 +308,7 @@ $(function() {
     {% if hasaddperm %}
     <button class="btn btn-xs btn-default btn-table-icon" id="csvimport" data-toggle="tooltip" data-placement="top"
             data-original-title="{% trans 'import CSV or Excel file'|capfirst|force_escape %}"
-            onclick="import_show()">
+            onclick="import_custom_show('import_forecast_version', 'forecast')">
         <!--<span class="fa fa-arrow-up"></span>-->
         <img src="{{STATIC_URL}}img/table/import.png" alt="{% trans 'import CSV or Excel file'|capfirst|force_escape %}">
     </button>
