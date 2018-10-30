@@ -1664,7 +1664,10 @@ class ForecastVersionView(GridReport):
             GridFieldChoice('status', title=_('status'), choices=ForecastVersion.version_status, editable=False),
             GridFieldCreateOrUpdateDate('created_at', title=_('created_at'), editable=False),
             GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at'), editable=False),
-        )
+
+            GridFieldText('_pk', field_name='nr', editable=False, hidden=True),
+
+    )
 
     @classmethod
     def extra_context(reportclass, request, *args, **kwargs):

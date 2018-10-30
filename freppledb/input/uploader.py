@@ -52,7 +52,7 @@ class ForecastUploader:
                         values = [i.value for i in row]
                         none_len = 0
                         for v in values:
-                            if v == None:
+                            if v is None:
                                 none_len += 1
 
                         if none_len == len(values):
@@ -68,10 +68,7 @@ class ForecastUploader:
                             elif field_name == 'item':
                                 forecast.item = Item.objects.using(request.database).get(nr=value)
                             elif field_name == 'customer':
-                                if not value:
-                                    forecast.customer = value
-                                else:
-                                    forecast.customer = Customer.objects.using(request.database).get(nr=value)
+                                forecast.customer = Customer.objects.using(request.database).get(nr=value)
                             elif field_name == 'year':
                                 forecast.year = value
                             elif field_name == 'date_number':
@@ -80,8 +77,6 @@ class ForecastUploader:
                                 forecast.normal_qty = value
                             elif field_name == 'ratio':
                                 forecast.ratio = value
-                            elif field_name == 'date_number':
-                                forecast.date_number = value
 
                         forecasts.append(forecast)
                 if row_count < 2:
@@ -103,8 +98,8 @@ class ForecastUploader:
                             Forecast.objects.bulk_create(forecasts)
                         elif request.POST['action'] == 'update':
                             # 查找最新的version
-                            forecast_version = Forecast.objects.using(request.database).order_by('-id').latest('id')
-                            if forecast_version == None:
+                            forecast_version = ForecastVersion.objects.using(request.database).latest('created_at')
+                            if forecast_version is None:
                                 message.result = False
                                 message.message = '版本不存在,不可以更新!'
                             else:
@@ -112,14 +107,16 @@ class ForecastUploader:
 
                                 for f in forecasts:
                                     # 更新
-                                    update_forecast = Forecast.objects.using(request.database).order_by('-id').filter(
+                                    update_forecast = Forecast.objects.using(request.database).filter(
+                                        # version=forecast_version,
                                         version=forecast_version,
                                         location=f.location,
                                         item=f.item,
                                         customer=f.customer,
                                         year=f.year,
-                                        date_number=f.date_number).latest()
-                                if update_forecast == None:
+                                        date_number=f.date_number).latest('id')
+
+                                if update_forecast is None:
                                     # 创建
                                     f.version = forecast_version
                                     f.save()
@@ -130,7 +127,7 @@ class ForecastUploader:
                                     if 'ratio' in excel_fields:
                                         update_forecast.ratio = f.ratio
                                     # 更新
-                                    f.save()
+                                    update_forecast.save()
 
                         message.result = True
                         message.message = '上传成功'
