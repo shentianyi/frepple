@@ -31,8 +31,6 @@ $(function() {
         }
     })
 
-    console.log(hasVersionSearch)
-
     if(window.location.search !== "" && !hasVersionSearch){
         const initFilter = {
             field: "version",
@@ -43,15 +41,12 @@ $(function() {
         initialfilter.rules.push(initFilter)
     }
 
-    console.log(initialfilter)
-    console.log(JSON.stringify(initialfilter))
-
   jQuery("#grid").jqGrid({
    	url: (location.href.indexOf("#") != -1 ? location.href.substr(0,location.href.indexOf("#")) : location.href)
    	  + (location.search.length > 0 ? "&format=json" : "?format=json"),
 	  datatype: "json",
 	  jsonReader : {repeatitems:false},
-    colModel:[{{colmodel|safe}}],
+    colModel:[{name: 'Actions', index: 'Actions', align: 'center'}, {{colmodel|safe}}],
     rownumbers: true,
    	rowNum: {{request.pagesize}},
    	autoencode: false, {% if is_popup %}
@@ -102,7 +97,7 @@ $(function() {
         .tooltip({"delay": {"show": 500}, "container": "#workarea"})
         .on('blur', function() {
           $('#grid [data-toggle="tooltip"]').tooltip('hide');
-          });
+      });
       },
     loadError: function(xhr,st,err) {
       if (xhr.status == 200)
@@ -165,10 +160,21 @@ $(function() {
         return true;
     },{% endif %}
     loadComplete: function() {
-      $(".invStatus").each( function(value) {
-        $(this).parent().css('background',$(this).css('background-color'));
-      });
-      upload.restoreSelection();
+        var ret = jQuery("#grid").jqGrid('getRowData');
+
+        for(var i = 0; i< ret.length; i++){
+            console.log(ret[i])
+            jQuery("#grid").jqGrid('setRowData', ret[i].id, { Actions: "<span onclick=''>备注</span>" })
+
+            if(ret[i].status == 'ok'){
+                jQuery("#grid").jqGrid('setRowData', ret[i].id, { status: "<span style='color: red'>"+ret[i].status+"</span>" })
+            }
+        }
+
+        $(".invStatus").each( function(value) {
+            $(this).parent().css('background',$(this).css('background-color'));
+        });
+        upload.restoreSelection();
     },
     {% block extra_grid %}{% endblock %}
     height: {% if reportclass.height %}{% if "height" in preferences %}{{preferences.height}}{% else %}{{reportclass.height}}{% endif %}{% else %}($(window).height() - $("#grid").offset().top - 63 < 150) ? 150 : $(window).height() - $("#grid").offset().top - 63{% endif %}
