@@ -19,8 +19,10 @@ from datetime import datetime
 
 from django.conf import settings
 from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.contenttypes.models import ContentType
 from django.core import serializers
-from django.db import connections
+from django.core.exceptions import ObjectDoesNotExist
+from django.db import connections, transaction
 from django.db.models import Q
 from django.db.models.fields import CharField
 from django.http import HttpResponse, Http404
@@ -38,7 +40,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from freppledb.boot import getAttributeFields
 from freppledb.common.message.responsemessage import ResponseMessage
-from freppledb.common.models import Parameter
+from freppledb.common.models import Parameter, Comment
 from freppledb.input.forms import ForecastUploadForm
 from freppledb.input.models import Resource, Operation, Location, SetupMatrix, SetupRule, ItemSuccessor, ItemCustomer, \
     ForecastYear, ForecastVersion, Forecast
@@ -1650,11 +1652,13 @@ class ForecastYearList(GridReport):
 
 class ForecastVersionView(GridReport):
     title = _("forecastversions")
-    basequeryset = ForecastVersion.objects.all()
+    basequeryset = ForecastVersion.objects.all().order_by('-created_at')
     model = ForecastVersion
     frozenColumns = 1
     template = 'input/forecastversion.html'
 
+    # CMARK 设置默认的排序字段, 这个方法不是很好
+    default_sort = None
 
     rows = (
             # GridFieldText('id', title=_('id'), editable=False),
@@ -1664,9 +1668,7 @@ class ForecastVersionView(GridReport):
             GridFieldChoice('status', title=_('status'), choices=ForecastVersion.version_status, editable=False),
             GridFieldCreateOrUpdateDate('created_at', title=_('created_at'), editable=False),
             GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at'), editable=False),
-
             GridFieldText('_pk', field_name='nr', editable=False, hidden=True),
-
     )
 
     @classmethod
@@ -1676,6 +1678,7 @@ class ForecastVersionView(GridReport):
             }
         return data
 
+    @method_decorator(staff_member_required)
     def post(self, request, *args, **kwargs):
         if request.FILES and len(request.FILES) == 1:
             excel_count = 0
@@ -1690,7 +1693,8 @@ class ForecastVersionView(GridReport):
                     json.dumps(ForecastUploader.upload_excel(request, Forecast).__dict__, ensure_ascii=False))
         # 上传文件
         else:
-            Http404('bad request')
+            message = ResponseMessage(message='no excel file or file size>1')
+            return HttpResponse(json.dumps(message.__dict__, ensure_ascii=False))
 
 
 class ForecastList(GridReport):
@@ -1721,6 +1725,94 @@ class ForecastList(GridReport):
         GridFieldCreateOrUpdateDate('created_at', title=_('created_at'), editable=False),
         GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at'), editable=False),
     )
+
+
+# TODO 预测/预测版本的备注
+class ForecastCommentView(View):
+    # CMARK 免除csrf
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    @method_decorator(staff_member_required)
+    def get(self, request, *args, **kwargs):
+        # 根据Forecast, ForecastVersion 获取comment
+        # request
+        content_type_parameter = request.GET['content_type']
+        content_id  = request.GET['content_id']
+
+        content_type = ContentType.objects.filter(app_label='input', model= request.GET['content_type'].lower()).first()
+
+        if content_type:
+            fields = [f.name for f  in Comment._meta.fields]
+            fields.append('user__username')
+            comments =[]
+            for c in Comment.objects.filter(content_type=content_type, object_pk=content_id).order_by('-id').values(*fields):
+                # 翻译
+                for f in Comment._meta.fields:
+                    if f.choices is not None and len(f.choices)>0:
+                        c[f.name]=_(c[f.name])
+                comments.append(c)
+            return HttpResponse(json.dumps(comments,
+                                           ensure_ascii=False,
+                                           cls=DjangoJSONEncoder), content_type='application/json')
+        else:
+            return  HttpResponseBadRequest('parameter is not correct')
+        return HttpResponse(json.dumps([]))
+
+    @method_decorator(staff_member_required)
+    def post(self,request, *args,**kwargs):
+
+        try:
+            data = json.JSONDecoder().decode(request.read().decode(request.encoding or settings.DEFAULT_CHARSET))
+            content_id= data['content_id']
+            content_type_parameter =data['content_type'].lower()
+            content_type = ContentType.objects.filter(app_label='input',
+                                                      model=content_type_parameter).first()
+
+            if content_type_parameter == 'forecast':
+                content_object = Forecast.objects.get(id=content_id)
+            elif content_type_parameter == 'forecastvesion':
+                content_object = ForecastVersion.objects.get(nr=content_id)
+
+            if content_type is None or content_object is None:
+                return  HttpResponseBadRequest('parameter error')
+
+            message = ResponseMessage(result=True)
+
+            with transaction.atomic(using=request.database, savepoint=False):
+                # TODO 修改状态
+                operation = request.POST['operation']
+
+                if 'operation_forecast_ok' == operation:
+                    # 审批
+
+                    print(1)
+                elif 'operation_forecast_nok' == operation:
+                    # 打回
+                    print(1)
+                elif 'operation_forecast_cancel' == operation:
+                    print(1)
+                elif 'operation_forecast_release' == operation:
+                    print(1)
+                else:
+                    message.result = False
+                    message.message = 'operation参数错误, 不存在'
+
+
+                if message.result:
+                    # 创建comment
+                    comment = Comment(user=request.user, content_type=content_type,
+                              content_object=content_object,comment=data['comment'],operation=data['operation'])
+
+                    comment.save()
+                    message.result=True
+            return HttpResponse(json.dumps(message.__dict__,ensure_ascii=False),content_type='application/json')
+        except ObjectDoesNotExist as e:
+            return HttpResponseBadRequest("parameter error, "+str(e),content_type='application/json')
+        except Exception as e:
+            return HttpResponseServerError("server error, "+str(e),content_type='application/json')
+
 
 
 class DemandList(GridReport):

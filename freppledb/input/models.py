@@ -22,7 +22,7 @@ from django.db.models import Max
 from django.utils.translation import ugettext_lazy as _
 
 from freppledb.common.fields import JSONBField, AliasDateTimeField
-from freppledb.common.models import HierarchyModel, AuditModel, MultiDBManager, User
+from freppledb.common.models import HierarchyModel, AuditModel, MultiDBManager, User, Comment
 
 searchmode = (
     ('PRIORITY', _('priority')),
@@ -1469,8 +1469,20 @@ class ForecastVersion(AuditModel):
         verbose_name = _('forecast_version')
         verbose_name_plural = _('forecast_versions')
 
+class ForecastCommentOperation:
+    def can_ok(self):
+        return self.status
 
-class Forecast(AuditModel):
+    def can_nok(self):
+        return False
+
+    def can_release(self):
+        return False
+
+    def can_cancel(self):
+        return False
+
+class Forecast(AuditModel, ForecastCommentOperation):
     forecast_status = (
         ('init', _('init')),
         ('ok', _('ok')),
@@ -1529,7 +1541,7 @@ class Forecast(AuditModel):
 
     class Meta(AuditModel.Meta):
         db_table = 'forecast'
-        unique_together = (('item', 'location', 'customer', 'version'),)
+        unique_together = (('item', 'location', 'customer', 'date_number', 'version'),)
         verbose_name = _('forecast')
         verbose_name_plural = _('forecasts')
 

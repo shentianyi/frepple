@@ -66,6 +66,8 @@ urlpatterns = [
 
   url(r'^data/input/forecast/$', freppledb.input.views.ForecastList.as_view(), name="input_forecast_changelist"),
 
+  url(r'^data/input/forecastcomment/$', freppledb.input.views.ForecastCommentView.as_view(), name="input_forecastcomment_list"),
+
   url(r'^data/input/enum/(?P<type>(.+))/(?P<value>(.+))/$', freppledb.input.views.EnumView.as_view(), name="enum_get"),
 
 
