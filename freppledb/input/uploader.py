@@ -78,6 +78,10 @@ class ForecastUploader:
                                 forecast.date_number = value
                             elif field_name == 'normal_qty':
                                 forecast.normal_qty = value
+                            elif field_name == 'ratio':
+                                forecast.ratio = value
+                            elif field_name == 'date_number':
+                                forecast.date_number = value
 
                         forecasts.append(forecast)
                 if row_count < 2:
@@ -90,16 +94,16 @@ class ForecastUploader:
                             forecast_version = ForecastVersion()
                             forecast_version.create_user = request.user
                             forecast_version.created_at = timezone.now
-                            forecast_version.status = ForecastVersion.version_status[0]
-                            forecast_version.nr = timezone.now().strftime('%y%m%d%H%M%S')
+                            forecast_version.status = ForecastVersion.version_status[0][0]
+                            forecast_version.nr = timezone.now().strftime('%Y%m%d%H%M%S')
                             forecast_version.save()
                             for f in forecasts:
-                                f.version =forecast_version
+                                f.version = forecast_version
                             # 创建forecast
                             Forecast.objects.bulk_create(forecasts)
                         elif request.POST['action'] == 'update':
                             # 查找最新的version
-                            forecast_version = Forecast.objects.using(request.database).order_by('-id').latest()
+                            forecast_version = Forecast.objects.using(request.database).order_by('-id').latest('id')
                             if forecast_version == None:
                                 message.result = False
                                 message.message = '版本不存在,不可以更新!'

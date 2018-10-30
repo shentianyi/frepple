@@ -290,6 +290,10 @@ msgstr "读取版本信息的错误"
 msgid "Import CSV or Excel file"
 msgstr "导入CSV或Excel文件"
 
+
+msgid "Import Excel file"
+msgstr "导入CExcel文件"
+
 #: common/static/js/frepple.js:2446 common/static/js/frepple.min.js:11
 msgid "Load an Excel file or a CSV-formatted text file."
 msgstr "载入一个的Excel档或CSV-formatted格式的文字档。"

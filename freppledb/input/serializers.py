@@ -1334,7 +1334,8 @@ class ForecastVersionFilter(filters.FilterSet):
             'status': ['exact', 'in'],
         }
         filter_fields = (
-             'nr', 'create_user__username', 'status')
+          'nr', 'create_user__username', 'status')
+
 
 
 class ForecastVersionSerializer(BulkSerializerMixin, ModelSerializer):

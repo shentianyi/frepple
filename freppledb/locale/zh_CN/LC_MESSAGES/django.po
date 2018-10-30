@@ -80,6 +80,9 @@ msgstr "年初预测"
 msgid "forecastversions"
 msgstr "预测版本"
 
+msgid "version nr"
+msgstr "版本号"
+
 msgid "normal qty"
 msgstr "手工数量"
 
@@ -114,7 +117,7 @@ msgid "create_user_display"
 msgstr "创建人"
 
 msgid "create_user_id"
-msgstr "创建人"
+msgstr "创建人Id"
 
 msgid "promotion qty"
 msgstr "促销量"

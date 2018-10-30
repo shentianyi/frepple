@@ -1453,23 +1453,13 @@ class ForecastVersion(AuditModel):
     # id = models.AutoField(_('id'), help_text=_('Unique identifier'), primary_key=True)
     # nr = models.CharField(_('nr'), max_length=300, db_index=True, unique=True)
     nr = models.CharField(_('nr'), max_length=300, editable=False, db_index=True,
-                              primary_key=True)
-
+                          primary_key=True)
     create_user = models.ForeignKey(
         User, verbose_name=_('create_user'),
         db_index=True, related_name='forecastversion_create_user',
         null=False, blank=False, on_delete=models.CASCADE
     )
     status = models.CharField(_('status'), max_length=20, choices=version_status, default='init')
-
-    class Manager(MultiDBManager):
-        def get_by_natural_key(self, nr):
-            return self.get(nr=nr)
-
-    def natural_key(self):
-        return (self.nr)
-
-    objects = Manager()
 
     def __str__(self):
         return self.nr
@@ -1521,7 +1511,7 @@ class Forecast(AuditModel):
     status = models.CharField(_('status'), max_length=20, choices=forecast_status, default='init')
 
     version = models.ForeignKey(ForecastVersion, verbose_name=_('forecast version'),
-                                 db_index=True, related_name='forecast_version',
+                                db_index=True, related_name='forecast_version',
                                 editable=False, on_delete=models.CASCADE)
 
     class Manager(MultiDBManager):
