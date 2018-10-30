@@ -68,10 +68,7 @@ class ForecastUploader:
                             elif field_name == 'item':
                                 forecast.item = Item.objects.using(request.database).get(nr=value)
                             elif field_name == 'customer':
-                                if not value:
-                                    forecast.customer = value
-                                else:
-                                    forecast.customer = Customer.objects.using(request.database).get(nr=value)
+                                forecast.customer = Customer.objects.using(request.database).get(nr=value)
                             elif field_name == 'year':
                                 forecast.year = value
                             elif field_name == 'date_number':
@@ -80,8 +77,6 @@ class ForecastUploader:
                                 forecast.normal_qty = value
                             elif field_name == 'ratio':
                                 forecast.ratio = value
-                            elif field_name == 'date_number':
-                                forecast.date_number = value
 
                         forecasts.append(forecast)
                 if row_count < 2:
