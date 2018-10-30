@@ -52,7 +52,7 @@ class ForecastUploader:
                         values = [i.value for i in row]
                         none_len = 0
                         for v in values:
-                            if v == None:
+                            if v is None:
                                 none_len += 1
 
                         if none_len == len(values):
@@ -104,7 +104,7 @@ class ForecastUploader:
                         elif request.POST['action'] == 'update':
                             # 查找最新的version
                             forecast_version = ForecastVersion.objects.using(request.database).latest('created_at')
-                            if forecast_version == None:
+                            if forecast_version is None:
                                 message.result = False
                                 message.message = '版本不存在,不可以更新!'
                             else:
@@ -121,7 +121,7 @@ class ForecastUploader:
                                         year=f.year,
                                         date_number=f.date_number).latest('id')
 
-                                if update_forecast == None:
+                                if update_forecast is None:
                                     # 创建
                                     f.version = forecast_version
                                     f.save()
