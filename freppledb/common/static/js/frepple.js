@@ -2733,7 +2733,7 @@ function about_show() {
 // Display import dialog for CSV-files
 //----------------------------------------------------------------------------
 
-function import_forcast_version_show(title, paragraph, multiple, fxhr) {
+function import_show(title, paragraph, multiple, fxhr) {
     var xhr = {
         abort: function () {
         }
@@ -2936,6 +2936,7 @@ function import_forcast_version_show(title, paragraph, multiple, fxhr) {
         }
     )
 }
+
 
 //----------------------------------------------------------------------------
 // This function returns all arguments in the current URL as a dictionary.
