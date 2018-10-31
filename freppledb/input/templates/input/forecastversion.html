@@ -337,7 +337,7 @@ $(function() {
 
     <!-- 打回按钮 -->
     {% if not is_popup %}
-        <button class="btn btn-xs btn-default btn-table-icon" id="reject" onclick="grid.showFilter()" data-toggle="tooltip"
+        <button class="btn btn-xs btn-default btn-table-icon" id="reject_selected" disabled onclick="Forecast.operate('forecast', 'operation_forecast_nok', 'forecastversionModal')" data-toggle="tooltip"
                 data-placement="top" data-original-title="打回">
             <!--<span class="fa fa-search"></span>-->
             <img src="{{STATIC_URL}}img/table/reject.png" alt="打回">
@@ -346,7 +346,7 @@ $(function() {
 
     <!-- 审批按钮 -->
     {% if not is_popup %}
-        <button class="btn btn-xs btn-default btn-table-icon" id="approval" onclick="grid.showFilter()" data-toggle="tooltip"
+        <button class="btn btn-xs btn-default btn-table-icon" id="approval_selected" disabled onclick="Forecast.operate('forecast', 'operation_forecast_ok', 'forecastversionModal')" data-toggle="tooltip"
                 data-placement="top" data-original-title="审批">
             <!--<span class="fa fa-search"></span>-->
             <img src="{{STATIC_URL}}img/table/pass.png" alt="审批">
@@ -355,7 +355,7 @@ $(function() {
 
     <!--放行按钮 -->
     {% if not is_popup %}
-        <button class="btn btn-xs btn-default btn-table-icon" id="pass" onclick="grid.showFilter()" data-toggle="tooltip"
+        <button class="btn btn-xs btn-default btn-table-icon" id="pass_selected" disabled onclick="Forecast.operate('forecast', 'operation_forecast_release', 'forecastversionModal')" data-toggle="tooltip"
                 data-placement="top" data-original-title="通过">
             <!--<span class="fa fa-search"></span>-->
             <img src="{{STATIC_URL}}img/table/pass.png" alt="通过">

@@ -2379,7 +2379,7 @@ def _buildMaskedNames(model, exportConfig):
   del keys
 
 
-def _getCellValue(data, field=None, exportConfig=None):
+def f_getCellValue(data, field=None, exportConfig=None):
   if data is None:
     return ''
   elif isinstance(data, numericTypes) or isinstance(data, (date, datetime)):

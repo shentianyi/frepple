@@ -1,10 +1,15 @@
 from django.db import transaction
 from django.utils import timezone
-from openpyxl import load_workbook
-
+from django.utils.encoding import force_text
+from freppledb.common.models import User
+from openpyxl import load_workbook, Workbook
+from openpyxl.styles import NamedStyle, PatternFill
+from openpyxl.writer.write_only import WriteOnlyCell
+from io import BytesIO
 from freppledb.common.dataload import parseExcelWorksheet
 from freppledb.common.message.responsemessage import ResponseMessage
-from freppledb.input.models import Forecast, Location, Item, Customer, ForecastVersion
+from freppledb.input.models import Forecast, Location, Item, Customer, ForecastVersion, ForecastCommentOperation
+from openpyxl.cell import cell
 
 
 class ForecastUploader:
@@ -59,6 +64,7 @@ class ForecastUploader:
                             continue
 
                         forecast = Forecast()
+                        forecast.date_type = request.POST['date_type']
                         for k, v in headers_index.items():
                             value = values[v]
                             field_name = headers_field_name[k]
@@ -68,7 +74,11 @@ class ForecastUploader:
                             elif field_name == 'item':
                                 forecast.item = Item.objects.using(request.database).get(nr=value)
                             elif field_name == 'customer':
-                                forecast.customer = Customer.objects.using(request.database).get(nr=value)
+                                try:
+                                    forecast.customer = Customer.objects.using(request.database).get(nr=value)
+                                except Customer.DoesNotExist as e:
+                                    print(e)
+                                    # forecast.customer = None
                             elif field_name == 'year':
                                 forecast.year = value
                             elif field_name == 'date_number':
@@ -77,8 +87,14 @@ class ForecastUploader:
                                 forecast.normal_qty = value
                             elif field_name == 'ratio':
                                 forecast.ratio = value
+                            elif field_name == 'new_product_plan_qty':
+                                forecast.new_product_plan_qty = value
+                            elif field_name == 'promotion_qty':
+                                forecast.promotion_qty = value
 
+                        forecast.create_user = request.user
                         forecasts.append(forecast)
+
                 if row_count < 2:
                     message.result = False
                     message.message = '文件没有数据'
@@ -89,7 +105,7 @@ class ForecastUploader:
                             forecast_version = ForecastVersion()
                             forecast_version.create_user = request.user
                             forecast_version.created_at = timezone.now
-                            forecast_version.status = ForecastVersion.version_status[0][0]
+                            # forecast_version.status = ForecastCommentOperation.statuses[0][0]
                             forecast_version.nr = timezone.now().strftime('%Y%m%d%H%M%S')
                             forecast_version.save()
                             for f in forecasts:
@@ -114,23 +130,95 @@ class ForecastUploader:
                                         item=f.item,
                                         customer=f.customer,
                                         year=f.year,
+                                        date_type=f.date_type,
                                         date_number=f.date_number).latest('id')
 
-                                if update_forecast is None:
-                                    # 创建
-                                    f.version = forecast_version
-                                    f.save()
-                                else:
-                                    # 判断是否在excel中传了值
-                                    if 'date_type' in excel_fields:
-                                        update_forecast.date_type = f.date_type
-                                    if 'ratio' in excel_fields:
-                                        update_forecast.ratio = f.ratio
-                                    # 更新
-                                    update_forecast.save()
+                                    if update_forecast is None:
+                                        # 创建
+                                        f.version = forecast_version
+                                        f.save()
+                                    else:
+                                        # 判断是否在excel中传了值
+                                        if 'date_type' in excel_fields:
+                                            update_forecast.date_type = f.date_type
+                                        elif 'ratio' in excel_fields:
+                                            update_forecast.ratio = f.ratio
+                                        elif 'normal_qty' in excel_fields:
+                                            update_forecast.normal_qty = f.normal_qty
+                                        elif 'new_product_plan_qty' in excel_fields:
+                                            update_forecast.new_product_plan_qty = f.new_product_plan_qty
+                                        elif 'promotion_qty' in excel_fields:
+                                            update_forecast.promotion_qty = f.promotion_qty
+                                        elif 'status' in excel_fields:
+                                            update_forecast.status = f.status
+                                        # 更新
+                                        update_forecast.save()
 
                         message.result = True
                         message.message = '上传成功'
+        except Exception as e:
+            message.message = str(e)
+        return message
+
+
+class ForecastDownloader:
+    @classmethod
+    def download_excel(cls, request, model, output):
+        message = ResponseMessage()
+        try:
+            wb = Workbook()
+            # 第一个sheet是ws,不然会自动生成一个sheet表
+            ws = wb.worksheets[0]
+            title = force_text(model._meta.verbose_name or model.title)
+            ws.title = title
+            headerstyle = NamedStyle(name="headerstyle")
+            headerstyle.fill = PatternFill(fill_type="solid", fgColor='70c4f4')
+            wb.add_named_style(headerstyle)
+
+            download_forecast = Forecast.objects.all().order_by('-id')
+            if not download_forecast:
+                message.result = False
+                message.message = '没有下载数据'
+            else:
+                # 写入表头数据
+                header = []
+                for field in model._meta.fields:
+                    cell = WriteOnlyCell(ws, value=force_text(field).title())
+                    cell.style = 'headerstyle'
+                    header.append(cell)
+                ws.append(header)
+
+                excel_row = 2
+
+                for f in download_forecast:
+                    a = str(f.item)
+                    print(a)
+                    ws.cell(row=excel_row, column=1, value=f.id)
+                    ws.cell(row=excel_row, column=2, value=f.item.nr)
+                    ws.cell(row=excel_row, column=3, value=f.location.nr)
+                    if f.customer:
+                        ws.cell(row=excel_row, column=4, value=f.customer.nr)
+                    else:
+                        ws.cell(row=excel_row, column=4, value=None)
+                    ws.cell(row=excel_row, column=5, value=f.year)
+                    ws.cell(row=excel_row, column=6, value=f.date_number)
+                    ws.cell(row=excel_row, column=7, value=f.date_type)
+                    ws.cell(row=excel_row, column=8, value=f.ratio)
+                    ws.cell(row=excel_row, column=9, value=f.normal_qty)
+                    ws.cell(row=excel_row, column=10, value=f.new_product_plan_qty)
+                    ws.cell(row=excel_row, column=11, value=f.promotion_qty)
+                    ws.cell(row=excel_row, column=13, value=f.status)
+                    ws.cell(row=excel_row, column=14, value=f.create_user.username)
+                    ws.cell(row=excel_row, column=15, value=f.version.nr)
+                    ws.cell(row=excel_row, column=16, value=f.created_at)
+                    ws.cell(row=excel_row, column=17, value=f.updated_at)
+                    excel_row += 1
+
+                wb.save(output)
+                message.result = True
+                message.message = '下载成功'
+                message.content = output.getvalue()
+
         except Exception as e:
             message.message = str(e)
         return message
