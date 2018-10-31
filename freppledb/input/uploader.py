@@ -106,7 +106,7 @@ class ForecastUploader:
                             forecast_version.create_user = request.user
                             forecast_version.created_at = timezone.now
                             # forecast_version.status = ForecastCommentOperation.statuses[0][0]
-                            forecast_version.nr = timezone.now().strftime('%Y%m%d%H%M%S')
+                            forecast_version.nr = timezone.now().strftime('%y%m%d%H%M%S')
                             forecast_version.save()
                             for f in forecasts:
                                 f.version = forecast_version

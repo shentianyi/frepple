@@ -1715,10 +1715,13 @@ class ForecastVersionView(GridReport):
 class ForecastList(GridReport):
     # template = ''
     title = _("forecasts")
-    basequeryset = Forecast.objects.all()
+    # 版本倒排, 时间正排, 不考虑id
+    basequeryset = Forecast.objects.all().order_by('-version_id', 'year', 'date_number')
     model = Forecast
     frozenColumns = 1
     template = 'input/forecast.html'
+
+    default_sort = None
 
     @classmethod
     def extra_context(reportclass, request, *args, **kwargs):
