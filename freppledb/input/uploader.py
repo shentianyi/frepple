@@ -126,7 +126,8 @@ class ForecastUploader:
                                 update_fields =['date_type','ratio','normal_qty','normal_qty','new_product_plan_qty','promotion_qty']
                                 for f in forecasts:
                                     # 更新
-                                    update_forecast = Forecast.objects.using(request.database).filter(
+                                    try:
+                                        update_forecast = Forecast.objects.using(request.database).filter(
                                         # version=forecast_version,
                                         version=forecast_version,
                                         location=f.location,
@@ -136,17 +137,16 @@ class ForecastUploader:
                                         date_type=f.date_type,
                                         date_number=f.date_number).latest('id')
 
-                                    if update_forecast is None:
-                                        # 创建
-                                        f.version = forecast_version
-                                        f.save()
-                                    else:
                                         # 判断是否在excel中传了值
                                         for field in update_fields:
                                             if field in excel_fields:
                                                 setattr(update_forecast, field, getattr(f, field, None))
-                                                
+
                                         update_forecast.save()
+                                    except Forecast.DoesNotExist as e:
+                                        f.version = forecast_version
+                                        f.save()
+
 
                         message.result = True
                         message.message = '上传成功'
