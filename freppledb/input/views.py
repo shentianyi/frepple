@@ -1793,7 +1793,7 @@ class ForecastCommentView(View):
             return  HttpResponseBadRequest('parameter is not correct')
         return HttpResponse(json.dumps([]))
 
-    def update(self, request, operation, content_type_parameter, content_type, content_id,comment):
+    def operate(self, request, operation, content_type_parameter, content_type, content_id,comment):
 
         message = ResponseMessage(result=True)
         content_object = None
@@ -1838,7 +1838,7 @@ class ForecastCommentView(View):
                     content_object.save()
                 else:
                     message.result = False
-                    message.message = '状态不可进行审批操作'
+                    message.message = '状态不可进行取消操作'
             elif 'operation_forecast_release' == operation:
                 if content_object.can_release():
                     content_object.status = 'release'
@@ -1877,10 +1877,10 @@ class ForecastCommentView(View):
             with transaction.atomic(using=request.database, savepoint=False):
                 if 'content_id' in data:
                    content_id = data['content_id']
-                   message = self.update(request, operation, content_type_parameter, content_type, content_id,data['comment'])
+                   message = self.operate(request, operation, content_type_parameter, content_type, content_id,data['comment'])
                 elif 'content_ids' in data:
                    for content_id in data['content_ids']:
-                       message = self.update(request, operation, content_type_parameter, content_type, content_id,data['comment'])
+                       message = self.operate(request, operation, content_type_parameter, content_type, content_id,data['comment'])
                    if len(data['content_ids']) > 1:
                         message.result = True
                         message.message = None
