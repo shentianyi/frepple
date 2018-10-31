@@ -473,7 +473,7 @@ class Forecast_admin(MultiDBModelAdmin):
     model = Forecast
     raw_id_fields = ('item', 'location', 'customer')
     save_on_top = True
-    exclude = ('source',)
+    exclude = ('source', 'create_user')
     tabs = [
         {"name": 'edit', "label": _("edit"), "view": "admin:input_forecast_change",
          "permissions": "input.change_forecast"}
