@@ -119,8 +119,11 @@ class ForecastUploader:
                                 message.result = False
                                 message.message = '版本不存在,不可以更新!'
                             else:
+                                # excel 中传的字段
                                 excel_fields = [v for k, v in headers_field_name.items()]
 
+                                # 可以被更新的字段
+                                update_fields =['date_type','ratio','normal_qty','normal_qty','new_product_plan_qty','promotion_qty']
                                 for f in forecasts:
                                     # 更新
                                     update_forecast = Forecast.objects.using(request.database).filter(
@@ -139,19 +142,10 @@ class ForecastUploader:
                                         f.save()
                                     else:
                                         # 判断是否在excel中传了值
-                                        if 'date_type' in excel_fields:
-                                            update_forecast.date_type = f.date_type
-                                        elif 'ratio' in excel_fields:
-                                            update_forecast.ratio = f.ratio
-                                        elif 'normal_qty' in excel_fields:
-                                            update_forecast.normal_qty = f.normal_qty
-                                        elif 'new_product_plan_qty' in excel_fields:
-                                            update_forecast.new_product_plan_qty = f.new_product_plan_qty
-                                        elif 'promotion_qty' in excel_fields:
-                                            update_forecast.promotion_qty = f.promotion_qty
-                                        elif 'status' in excel_fields:
-                                            update_forecast.status = f.status
-                                        # 更新
+                                        for field in update_fields:
+                                            if field in excel_fields:
+                                                setattr(update_forecast, field, getattr(f, field, None))
+                                                
                                         update_forecast.save()
 
                         message.result = True

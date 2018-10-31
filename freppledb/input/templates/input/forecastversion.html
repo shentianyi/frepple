@@ -31,7 +31,7 @@ $(function() {
    	  + (location.search.length > 0 ? "&format=json" : "?format=json"),
 	  datatype: "json",
 	  jsonReader : {repeatitems:false},
-    colModel:[{{colmodel|safe}}, {name: 'Actions', index: 'Actions', title:'Actions', align: 'center'}],
+    colModel:[{{colmodel|safe}}, {name: 'Actions', label: '备注详情', index: 'Actions', title:'Actions', align: 'center'}],
     rownumbers: true,
    	rowNum: {{request.pagesize}},
    	autoencode: false, {% if is_popup %}
@@ -150,8 +150,8 @@ $(function() {
 
             $("#"+ret[i].nr).find("[aria-describedby=grid_nr]").css('color', '#2C84FF');
 
-            if(ret[i].status == 'ok'){
-                $("#"+ret[i].nr).find("[aria-describedby=grid_status]").html("<i style='font-size: 2em;' class='fa fa-check-circle' />").css('color', '#28BB87')
+            if(ret[i].status == 'release'){
+                $("#"+ret[i].nr).find("[aria-describedby=grid_status]").html("<img src='{{STATIC_URL}}img/table/release.png' alt='备注' />")
             }else if(ret[i].status == 'nok'){
                 $("#"+ret[i].nr).find("[aria-describedby=grid_status]").css('color', '#FF3E7F')
             }else {
@@ -169,8 +169,6 @@ $(function() {
     });{% if reportclass.frozenColumns > 0 %}
 
     jQuery("#grid").jqGrid('setFrozenColumns');{% endif %}{% if reportclass.multiselect and not is_popup %}
-
-//    jQuery("#grid").jqGrid('filterToolbar',{searchOperators : true});
 
     $('#cb_grid.cbox').click(grid.markAllRows);{% endif %}{% if reportclass.editable and haschangeperm %}
 
@@ -237,7 +235,7 @@ $(function() {
 {% block content %}
 {% block before_table %}{% endblock %}
 
-<!-- 确认弹框 -->
+<!-- 备注详情弹框 -->
 <div class="modal fade" id="remarkDetail" tabindex="-1" role="dialog">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
@@ -252,9 +250,9 @@ $(function() {
                   <tr>
                       <th>No.</th>
                       <th>操作</th>
+                      <th>备注</th>
                       <th>操作人</th>
                       <th>操作时间</th>
-                      <th>备注</th>
                   </tr>
               </thead>
                 <tbody id="remarkDetailTbody"></tbody>
@@ -378,9 +376,9 @@ $(function() {
     <!--放行按钮 -->
     {% if not is_popup %}
         <button class="btn btn-xs btn-default btn-table-icon" id="pass_selected" disabled onclick="Forecast.operate('forecastversion', 'operation_forecast_release', 'forecastversionModal')" data-toggle="tooltip"
-                data-placement="top" data-original-title="通过">
+                data-placement="top" data-original-title="放行">
             <!--<span class="fa fa-search"></span>-->
-            <img src="{{STATIC_URL}}img/table/pass.png" alt="通过">
+            <img src="{{STATIC_URL}}img/table/pass.png" alt="放行">
         </button>
     {% endif %}
 
