@@ -8,8 +8,9 @@ from openpyxl.writer.write_only import WriteOnlyCell
 from io import BytesIO
 from freppledb.common.dataload import parseExcelWorksheet
 from freppledb.common.message.responsemessage import ResponseMessage
-from freppledb.input.models import Forecast, Location, Item, Customer, ForecastVersion
+from freppledb.input.models import Forecast, Location, Item, Customer, ForecastVersion, ForecastCommentOperation
 from openpyxl.cell import cell
+
 
 class ForecastUploader:
     @classmethod
@@ -91,7 +92,9 @@ class ForecastUploader:
                             elif field_name == 'promotion_qty':
                                 forecast.promotion_qty = value
 
+                        forecast.create_user = request.user
                         forecasts.append(forecast)
+
                 if row_count < 2:
                     message.result = False
                     message.message = '文件没有数据'
@@ -102,7 +105,7 @@ class ForecastUploader:
                             forecast_version = ForecastVersion()
                             forecast_version.create_user = request.user
                             forecast_version.created_at = timezone.now
-                            forecast_version.status = ForecastVersion.version_status[0][0]
+                            # forecast_version.status = ForecastCommentOperation.statuses[0][0]
                             forecast_version.nr = timezone.now().strftime('%Y%m%d%H%M%S')
                             forecast_version.save()
                             for f in forecasts:
@@ -127,6 +130,7 @@ class ForecastUploader:
                                         item=f.item,
                                         customer=f.customer,
                                         year=f.year,
+                                        date_type=f.date_type,
                                         date_number=f.date_number).latest('id')
 
                                     if update_forecast is None:
@@ -159,14 +163,14 @@ class ForecastUploader:
 
 class ForecastDownloader:
     @classmethod
-    def download_excel(cls, request, model,output):
+    def download_excel(cls, request, model, output):
         message = ResponseMessage()
         try:
             wb = Workbook()
             # 第一个sheet是ws,不然会自动生成一个sheet表
             ws = wb.worksheets[0]
             title = force_text(model._meta.verbose_name or model.title)
-            ws.title =title
+            ws.title = title
             headerstyle = NamedStyle(name="headerstyle")
             headerstyle.fill = PatternFill(fill_type="solid", fgColor='70c4f4')
             wb.add_named_style(headerstyle)
@@ -213,6 +217,7 @@ class ForecastDownloader:
                 wb.save(output)
                 message.result = True
                 message.message = '下载成功'
+                message.content = output.getvalue()
 
         except Exception as e:
             message.message = str(e)

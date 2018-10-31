@@ -22,7 +22,7 @@ from django.db.models import Max
 from django.utils.translation import ugettext_lazy as _
 
 from freppledb.common.fields import JSONBField, AliasDateTimeField
-from freppledb.common.models import HierarchyModel, AuditModel, MultiDBManager, User
+from freppledb.common.models import HierarchyModel, AuditModel, MultiDBManager, User, Comment
 
 searchmode = (
     ('PRIORITY', _('priority')),
@@ -193,7 +193,7 @@ class Customer(AuditModel, HierarchyModel):
     # 设置owner显示的值
     # owner_display_key = 'nr'
     id = models.AutoField(_('id'), help_text=_('Unique identifier'), primary_key=True)
-    nr = models.CharField(_('nr'), max_length=300, db_index=True, unique=True)
+    nr = models.CharField(_('customer nr'), max_length=300, db_index=True, unique=True)
     name = models.CharField(_('name'), max_length=300, primary_key=False, db_index=True)
     area = models.CharField(_('area'), max_length=300, db_index=True, null=True, blank=True)
     address = models.CharField(_('address'), max_length=300, db_index=True, null=True, blank=True)
@@ -262,7 +262,7 @@ class Item(AuditModel, HierarchyModel):
     # 设置外键导入的值
     foreign_input_key = 'nr'
     id = models.AutoField(_('id'), help_text=_('Unique identifier'), primary_key=True)
-    nr = models.CharField(_('nr'), max_length=300, db_index=True, unique=True)
+    nr = models.CharField(_('item nr'), max_length=300, db_index=True, unique=True)
     name = models.CharField(_('name'), max_length=300, primary_key=False, db_index=True)
     barcode = models.CharField(_('barcode'), max_length=300, db_index=True, null=True, blank=True)
     status = models.CharField(_('status'), max_length=20, null=True, blank=True, choices=fg_status)
@@ -1120,7 +1120,7 @@ class Supplier(AuditModel, HierarchyModel):
     # owner_display_key = 'nr'
     # 添加自增列
     id = models.AutoField(_('id'), help_text=_('Unique identifier'), primary_key=True)
-    nr = models.CharField(_('nr'), max_length=300, db_index=True, unique=True)
+    nr = models.CharField(_('supplier nr'), max_length=300, db_index=True, unique=True)
     # 设置name为非主键
     name = models.CharField(_('name'), max_length=300, primary_key=False, db_index=True)
     area = models.CharField(_('area'), max_length=300, db_index=True, null=True, blank=True)
@@ -1440,8 +1440,8 @@ class ForecastYear(AuditModel):
         verbose_name_plural = _('forecast_years')
 
 
-class ForecastVersion(AuditModel):
-    version_status = (
+class ForecastCommentOperation:
+    statuses = (
         ('init', _('init')),
         ('ok', _('ok')),
         ('nok', _('nok')),
@@ -1449,6 +1449,27 @@ class ForecastVersion(AuditModel):
         ('release', _('release')),
         ('confirm', _('confirm')),
     )
+
+    can_ok_status = ('init', 'nok', 'cancel')
+    can_nok_status = ('init', 'ok')
+    can_cancel_status = ('init', 'nok', 'ok')
+    can_release_status = ('ok')
+
+    def can_ok(self):
+        return self.status in self.can_ok_status
+
+    def can_nok(self):
+        return self.status in self.can_nok_status
+
+    def can_cancel(self):
+        return self.status in self.can_cancel_status
+
+    def can_release(self):
+        return self.status in self.can_release_status
+
+
+
+class ForecastVersion(AuditModel, ForecastCommentOperation):
 
     # id = models.AutoField(_('id'), help_text=_('Unique identifier'), primary_key=True)
     # nr = models.CharField(_('nr'), max_length=300, db_index=True, unique=True)
@@ -1459,7 +1480,7 @@ class ForecastVersion(AuditModel):
         db_index=True, related_name='forecastversion_create_user',
         null=False, blank=False, on_delete=models.CASCADE
     )
-    status = models.CharField(_('status'), max_length=20, choices=version_status, default='init')
+    status = models.CharField(_('status'), max_length=20, choices=ForecastCommentOperation.statuses, default='init')
 
     def __str__(self):
         return self.nr
@@ -1470,16 +1491,7 @@ class ForecastVersion(AuditModel):
         verbose_name_plural = _('forecast_versions')
 
 
-class Forecast(AuditModel):
-    forecast_status = (
-        ('init', _('init')),
-        ('ok', _('ok')),
-        ('nok', _('nok')),
-        ('cancel', _('cancel')),
-        ('release', _('release')),
-        ('confirm', _('confirm')),
-    )
-
+class Forecast(AuditModel, ForecastCommentOperation):
     id = models.AutoField(_('id'), help_text=_('Unique identifier'), primary_key=True)
 
     item = models.ForeignKey(
@@ -1508,13 +1520,12 @@ class Forecast(AuditModel):
     new_product_plan_qty = models.DecimalField(_('new product plan qty'), max_digits=20, decimal_places=8, null=True,
                                                blank=True)
     promotion_qty = models.DecimalField(_('promotion qty'), max_digits=20, decimal_places=8, null=True, blank=True)
-    status = models.CharField(_('status'), max_length=20, choices=forecast_status, default='init')
+    status = models.CharField(_('status'), max_length=20, choices=ForecastCommentOperation.statuses, default='init')
     create_user = models.ForeignKey(
         User, verbose_name=_('create_user'),
         db_index=True, related_name='forecast_create_user',
         null=False, blank=False, on_delete=models.CASCADE
     )
-
     version = models.ForeignKey(ForecastVersion, verbose_name=_('forecast version'),
                                 db_index=True, related_name='forecast_version',
                                 editable=False, on_delete=models.CASCADE)
@@ -1534,7 +1545,7 @@ class Forecast(AuditModel):
 
     class Meta(AuditModel.Meta):
         db_table = 'forecast'
-        unique_together = (('item', 'location', 'customer', 'version'),)
+        unique_together = (('item', 'location', 'customer', 'date_number', 'version'),)
         verbose_name = _('forecast')
         verbose_name_plural = _('forecasts')
 

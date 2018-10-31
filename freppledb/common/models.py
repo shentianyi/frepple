@@ -542,8 +542,17 @@ class UserPreference(models.Model):
 def delete_user(sender, instance, **kwargs):
     raise PermissionDenied
 
+
 class Comment(AuditModel):
-# class Comment(models.Model):
+    operations = (
+        ('operation_forecast_ok', _('operation_forecast_ok')),
+        ('operation_forecast_nok', _('operation_forecast_nok')),
+        ('operation_forecast_cancel', _('operation_forecast_cancel')),
+        ('operation_forecast_release', _('operation_forecast_release')),
+    )
+
+
+    # class Comment(models.Model):
     id = models.AutoField(_('identifier'), primary_key=True)
     content_type = models.ForeignKey(
         # Translators: Translation included with Django
@@ -560,6 +569,8 @@ class Comment(AuditModel):
         User, verbose_name=_('user'), blank=True, null=True,
         editable=False, on_delete=models.CASCADE
     )
+    # 动作
+    operation = models.TextField(_('comment operation'), blank=True, null=True,choices=operations)
     # lastmodified = models.DateTimeField(
     #     _('last modified'), default=timezone.now, editable=False
     # )

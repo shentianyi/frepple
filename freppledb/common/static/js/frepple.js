@@ -307,6 +307,17 @@ function opendetail(event) {
     window.location.href = url_prefix + curlink.replace('key', admin_escape(objectid));
 }
 
+function customerDetail(event) {
+    var el = $(event.target).parent();
+    var curlink = el.attr('href');
+    var objectid = el.attr('objectid');
+    if (objectid === undefined || objectid == false)
+        objectid = el.parent().text().trim();
+    event.preventDefault();
+    event.stopImmediatePropagation();
+
+    window.location.href = url_prefix + curlink.replace('#key#',  admin_escape(objectid));
+}
 
 function formatDuration(cellvalue, options, rowdata) {
     var days = 0;
@@ -377,6 +388,20 @@ jQuery.extend($.fn.fmatter, {
         }
         if (options['colModel']['popup'] || rowdata.showdrilldown === '0') {
             return cellvalue;
+        }
+        return result;
+    },
+
+    customer: function (cellvalue, options, rowdata) {
+        var result = cellvalue + "<a href='" + options.colModel.role + "#key#')' onclick='customerDetail(event)'><span class='leftpadding fa fa-caret-right' role='" + options.colModel.role + "'></span></a>";
+        if (cellvalue === undefined || cellvalue === '' || cellvalue === null) {
+            return '';
+        }
+        if (options['colModel']['popup'] || rowdata.showdrilldown === '0') {
+            return cellvalue;
+        }
+        if (rowdata.hasOwnProperty('type') && (rowdata.type === 'purchase' || rowdata.type === 'distribution' || rowdata.type === 'shipping' )) {
+            return cellvalue; //don't show links for non existing operations
         }
         return result;
     },
@@ -498,7 +523,6 @@ function windowname_to_id(text) {
 
 // 关闭window 弹出窗口界面
 function popClick(win, id) {
-    debugger
     var r = jQuery("#grid").jqGrid("getRowData", id);
 
     var name = windowname_to_id(win.name);
@@ -795,8 +819,6 @@ var grid = {
 
             var perm = [];
             var hiddenrows = [];
-
-            debugger
 
             if(colModel[0].name == "rn") {
                 perm.push(0);
@@ -2797,9 +2819,11 @@ function import_show(title, paragraph, multiple, fxhr) {
     if (!multiple) {
         $("#selected_files").removeAttr(multiple);
     }
+
     if (title !== '') {
         $("#modal_title").text(title);
     }
+
     if (paragraph === null) {
         $("#extra_text").remove();
     } else if (paragraph !== '') {
@@ -2937,6 +2961,221 @@ function import_show(title, paragraph, multiple, fxhr) {
     )
 }
 
+// upload use define modal content
+function import_custom_show(modalcontentId, title, paragraph, multiple, fxhr) {
+    var xhr = {
+        abort: function () {
+        }
+    };
+
+    $('#timebuckets').modal('hide');
+    $.jgrid.hideModal("#searchmodfbox_grid");
+    $('#popup').modal({keyboard: false, backdrop: 'static'});
+
+    var modalcontent = '<div class="modal-dialog">' +
+        '<div class="modal-content">' +
+        '<div class="modal-header">' +
+        '<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>' +
+        '<h4 class="modal-title">' +
+        '<span id="modal_title">' + gettext("Import CSV or Excel file") + '</span>' + '&nbsp;' +
+        '<span id="animatedcog" class="fa fa-cog fa-spin fa-2x fa-fw" style="visibility: hidden;"></span>' +
+        '</h4>' +
+        '</div>' +
+        '<div class="modal-body">' +
+        '<form id="uploadform">' +
+        '<p id="extra_text">' + gettext('Load an Excel file or a CSV-formatted text file.') + '<br>' +
+        gettext('The first row should contain the field names.') + '<br><br>' +
+        '</p>';
+
+    modalcontent += $("#"+modalcontentId).clone().css('display', 'block').html();
+
+    if (isDragnDropUploadCapable()) {
+        modalcontent += '' +
+            '<div class="box" style="outline: 2px dashed black; outline-offset: -10px">' +
+            '<div class="box__input" style="text-align: center; padding: 20px;">' +
+            '<i class="fa fa-sign-in fa-5x fa-rotate-270"></i>' +
+            '<input class="box__file invisible" type="file" id="csv_file" name="csv_file" data-multiple-caption="{count} ' + gettext("files selected") + '" multiple/>' +
+            '<label id="uploadlabel" for="csv_file">' +
+            '<kbd>' +
+            gettext('Select files') +
+            '</kbd>&nbsp;' +
+            '<span class="box__dragndrop" style="display: inline;">' +
+            gettext('or drop them here') +
+            '</span>.' +
+            '</label>' +
+            '</div>' +
+            '<div class="box__uploading" style="display: none;">Uploading&hellip;</div>' +
+            '<div class="box__success" style="display: none;">Done!</div>' +
+            '<div class="box__error" style="display: none;">Error!<span></span>.</div>' +
+            '</div>';
+    } else {
+        modalcontent += gettext('Data file') + ':<input type="file" id="csv_file" name="csv_file"/>';
+    }
+    modalcontent += '' +
+        '</form><br>' +
+        '<div style="margin: 5px 0">' +
+        '<div id="uploadResponse" style="height: auto; resize: vertical; display: none; background-color: inherit; border: none; overflow: auto;"></div>' +
+        '</div>' +
+        '</div>' +
+        '<div class="modal-footer">' +
+        '<input type="submit" id="importbutton" role="button" class="btn btn-primary btn-dialog-confirm" value="' + gettext('Import') + '">' +
+        '<input type="submit" id="cancelimportbutton" role="button" class="btn btn-danger pull-left" value="' + gettext('Cancel Import') + '" style="display: none;">' +
+        '<input type="submit" id="cancelbutton" role="button" class="btn btn-default btn-dialog-cancel pull-right" data-dismiss="modal" value="' + gettext('Close') + '">' +
+        '<input type="submit" id="copytoclipboard" role="button" class="btn btn-primary pull-left" value="' + gettext('Copy to Clipboard') + '" style="display: none;">' +
+        '</div>' +
+        '</div>' +
+        '</div>';
+
+    $('#popup').html(modalcontent).modal('show');
+
+    if (!multiple) {
+        $("#selected_files").removeAttr(multiple);
+    }
+    if (title !== '') {
+        $("#modal_title").text(title);
+    }
+    if (paragraph === null) {
+        $("#extra_text").remove();
+    } else if (paragraph !== '') {
+        $("#extra_text").text(paragraph);
+    }
+
+    var filesdropped = false;
+    var filesselected = false;
+    if (isDragnDropUploadCapable()) {
+        $('.box').on('drag dragstart dragend dragover dragenter dragleave drop', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        })
+            .on('dragover dragenter', function () {
+                $('.box').removeClass('bg-warning').addClass('bg-warning');
+            })
+            .on('dragleave dragend drop', function () {
+                $('.box').removeClass('bg-warning');
+            })
+            .on('drop', function (e) {
+                if (multiple) {
+                    filesdropped = e.originalEvent.dataTransfer.files;
+                } else {
+                    filesdropped = [e.originalEvent.dataTransfer.files[0]];
+                }
+                $("#uploadlabel").text(filesdropped.length > 1 ? ($("#csv_file").attr('data-multiple-caption') || '').replace('{count}', filesdropped.length) : filesdropped[0].name);
+            });
+    }
+
+    $("#csv_file").on('change', function (e) {
+        if (multiple) {
+            filesselected = e.target.files;
+        } else {
+            filesselected = [e.target.files[0]];
+        }
+
+        $("#uploadlabel").text(filesselected.length > 1 ? ($("#csv_file").attr('data-multiple-caption') || '').replace('{count}', filesselected.length) : filesselected[0].name);
+    });
+
+    $('#importbutton').on('click', function () {
+            if ($("#csv_file").val() === "" && !filesdropped) {
+                return;
+            }
+            var filesdata = '';
+
+            $('#uploadResponse').css('display', 'block');
+            $('#uploadResponse').html(gettext('Importing...'));
+            $('#uploadResponse').on('scroll', function () {
+                if (parseInt($('#uploadResponse').attr('data-scrolled')) !== $('#uploadResponse').scrollTop()) {
+                    $('#uploadResponse').attr('data-scrolled', true);
+                    $('#uploadResponse').off('scroll');
+                }
+            });
+
+            // $('#importbutton').hide();
+
+            $("#animatedcog").css('visibility', 'visible');
+
+            // $('#uploadform').css('display', 'none');
+
+            $('#copytoclipboard').on('click', function () {
+                var sometextcontent = document.createRange();
+                sometextcontent.selectNode(document.getElementById("uploadResponse"));
+                window.getSelection().removeAllRanges();
+                window.getSelection().addRange(sometextcontent);
+                document.execCommand('copy');
+            });
+
+            $('#cancelimportbutton').show().on('click', function () {
+                var theclone = $("#uploadResponse").clone();
+                theclone.append('<div><strong>' + gettext('Canceled') + '</strong></div>');
+                xhr.abort();
+                $("#animatedcog").css('visibility', 'hidden');
+                $("#uploadResponse").append(theclone.contents());
+                $("#uploadResponse").scrollTop($("#uploadResponse")[0].scrollHeight);
+                $('#cancelimportbutton').hide();
+                $('#copytoclipboard').show();
+            });
+
+            // Empty the csv-file field
+            //$("#csv_file").wrap('<form>').closest('form').get(0).reset();
+            //$("#csv_file").unwrap();
+
+            // Prepare formdata
+            filesdata = new FormData($("#uploadform")[0]);
+            if (filesdropped) {
+                $.each(filesdropped, function (i, fdropped) {
+                    filesdata.append(fdropped.name, fdropped);
+                });
+            }
+            if (filesselected) {
+                filesdata.delete('csv_file');
+                $.each(filesselected, function (i, fdropped) {
+                    filesdata.append(fdropped.name, fdropped);
+                });
+            }
+
+            // Upload the files
+            xhr = $.ajax(
+                Object.assign({
+                    type: 'post',
+                    url: typeof(url) != 'undefined' ? url : '',
+                    cache: false,
+                    data: filesdata,
+                    success: function (data) {
+                        var el = $('#uploadResponse');
+                        el.html(data);
+                        if (el.attr('data-scrolled') !== "true") {
+                            el.scrollTop(el[0].scrollHeight - el.height());
+                        }
+                        $('#cancelbutton').html(gettext('Close'));
+                        // $('#importbutton').hide();
+                        $("#animatedcog").css('visibility', 'hidden');
+                        $('#cancelimportbutton').hide();
+                        if (document.queryCommandSupported('copy')) {
+                            $('#copytoclipboard').show();
+                        }
+                        $("#grid").trigger("reloadGrid");
+                    },
+                    xhrFields: {
+                        onprogress: function (e) {
+                            var el = $('#uploadResponse');
+                            el.html(e.currentTarget.response);
+                            if (el.attr('data-scrolled') !== "true") {
+                                el.attr('data-scrolled', el[0].scrollHeight - el.height());
+                                el.scrollTop(el[0].scrollHeight - el.height());
+                            }
+                        }
+                    },
+                    error: function () {
+                        $('#cancelimportbutton').hide();
+                        $('#copytoclipboard').show();
+                        $("#animatedcog").css('visibility', 'hidden');
+                        $("#uploadResponse").scrollTop($("#uploadResponse")[0].scrollHeight);
+                    },
+                    processData: false,
+                    contentType: false
+                }, fxhr)
+            );
+        }
+    )
+}
 
 //----------------------------------------------------------------------------
 // This function returns all arguments in the current URL as a dictionary.

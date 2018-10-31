@@ -1214,6 +1214,17 @@ class GridReport(View):
       for k, v in reportclass.extra_context(request, *args, **kwargs).items():
         context[k] = v
       # CMARK 返回数据list页面
+      # TODO 判断是否有URL参数, 写入filter, 但是范围查询目前不支持
+      filters={}
+      if len(request.GET)>0:
+        filters['groupOp']="AND"
+        filters['rules']=[]
+        for k,v in request.GET.items():
+          filters['rules'].append({'field': k, 'op': 'eq','data': v})
+
+      if len(filters)>0:
+         context['filters'] = filters
+
       return render(request, reportclass.template, context)
     elif fmt == 'json':
       # Return JSON data to fill the grid.
