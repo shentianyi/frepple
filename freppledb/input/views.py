@@ -1717,7 +1717,7 @@ class ForecastList(GridReport):
                 "date_types": ForecastYear.date_types
             }
         return data
-    
+
     rows = (
         GridFieldInteger('id', title=_('id'), key=True, formatter='detail',
                          extra='"role":"input/forecast"', editable=False),
