@@ -411,7 +411,7 @@ msgstr "拥有者"
 msgid "owner_id"
 msgstr "拥有者id"
 
-msgid "ship_address"
+msgid "ship address"
 msgstr "目的地"
 
 msgid "address"
