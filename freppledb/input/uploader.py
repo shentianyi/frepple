@@ -138,10 +138,8 @@ class ForecastUploader:
                                         f.version = forecast_version
                                         f.save()
                                     else:
-                                        # 判断是否在excel中传了值
-                                        if 'date_type' in excel_fields:
-                                            update_forecast.date_type = f.date_type
-                                        elif 'ratio' in excel_fields:
+                                    # 判断是否在excel中传了值
+                                        if 'ratio' in excel_fields:
                                             update_forecast.ratio = f.ratio
                                         elif 'normal_qty' in excel_fields:
                                             update_forecast.normal_qty = f.normal_qty
