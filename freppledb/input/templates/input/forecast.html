@@ -27,7 +27,7 @@ $(function() {
    	  + (location.search.length > 0 ? "&format=json" : "?format=json"),
 	  datatype: "json",
 	  jsonReader : {repeatitems:false},
-    colModel:[{{colmodel|safe}}],
+    colModel:[{{colmodel|safe}}, {name: 'Actions', index: 'Actions', title:'Actions', align: 'center'}],
     rownumbers: true,
    	rowNum: {{request.pagesize}},
    	autoencode: false, {% if is_popup %}
@@ -144,7 +144,7 @@ $(function() {
    	    var ret = jQuery("#grid").jqGrid('getRowData');
 
         for(var i = 0; i< ret.length; i++){
-            jQuery("#grid").jqGrid('setRowData', ret[i].id, { Actions: "<span onclick=''>备注</span>" })
+            $("#"+ret[i].id).find("[aria-describedby=grid_Actions]").attr('title', '备注').css('cursor', 'pointer').html("<img onclick=Forecast.showDetail('"+ ret[i].id + "','forecast') src='{{STATIC_URL}}img/table/remark.png' alt='备注'>")
 
             if(ret[i].status == 'ok'){
                 $("#"+ret[i].id).find("[aria-describedby=grid_status]").html("<i style='font-size: 2em;' class='fa fa-check-circle' />").css('color', '#28BB87')
@@ -337,7 +337,7 @@ $(function() {
         <button class="btn btn-xs btn-default btn-table-icon" id="approval_selected" disabled onclick="Forecast.operate('forecast', 'operation_forecast_ok', 'forecastversionModal')" data-toggle="tooltip"
                 data-placement="top" data-original-title="审批">
             <!--<span class="fa fa-search"></span>-->
-            <img src="{{STATIC_URL}}img/table/pass.png" alt="审批">
+            <img src="{{STATIC_URL}}img/table/approval.png" alt="审批">
         </button>
     {% endif %}
 

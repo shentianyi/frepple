@@ -43,22 +43,22 @@ Forecast.operate = function (content_type, type, modalId) {
 
             $("#confirmDialog").find("#confirmDialogSubmit").unbind('click').bind('click', function () {
                 const data = {
-                        content_ids: sel,
-                        content_type: content_type,
-                        operation: type,
-                        comment: remark
-                    }
+                    content_ids: sel,
+                    content_type: content_type,
+                    operation: type,
+                    comment: remark
+                }
 
                 $.ajax({
                     url: '/data/input/forecastcomment/',
                     method: 'post',
-                    contentType : 'application/json; charset=utf-8',
+                    contentType: 'application/json; charset=utf-8',
                     dataType: "json",
                     data: JSON.stringify(data),
                     success: function (data) {
-                        if(data.result){
+                        if (data.result) {
                             window.location.reload();
-                        }else{
+                        } else {
                             alert(data.message)
                         }
                     },
@@ -69,4 +69,37 @@ Forecast.operate = function (content_type, type, modalId) {
             })
         })
     }
+};
+
+
+Forecast.showDetail = function (id, type) {
+    $("#remarkDetail").modal('show');
+
+    $.ajax({
+        url: '/data/input/forecastcomment/',
+        type: 'get',
+        contentType: 'application/json',
+        dataType: 'json',
+        data: {
+            content_id: id,
+            content_type: type
+        },
+        success: function (data) {
+            var html = '';
+            for(var i = 0; i< data.length; i++){
+                // remarkDetailTbody
+                html += '<tr><td>'+(i+1)+'</td>' +
+                    '<td>'+data[i].operation+'</td>' +
+                    '<td>'+data[i].user__username+'</td>' +
+                    '<td>'+data[i].created_at+'</td>' +
+                    '<td>'+data[i].comment+'</td></tr>';
+            }
+
+            $("#remarkDetailTbody").empty();
+            $("#remarkDetailTbody").html(html);
+        },
+        error: function (error) {
+            alert(error.status + "\n" + error.responseText)
+        }
+    })
 };
