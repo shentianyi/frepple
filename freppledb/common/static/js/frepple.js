@@ -2973,7 +2973,7 @@ function import_show(title, paragraph, multiple, fxhr) {
 }
 
 // upload use define modal content
-function import_custom_show(modalcontentId, title, paragraph, multiple, fxhr) {
+function import_custom_show(modalcontentId, myUrl, title, paragraph, multiple, fxhr) {
     var xhr = {
         abort: function () {
         }
@@ -3146,23 +3146,27 @@ function import_custom_show(modalcontentId, title, paragraph, multiple, fxhr) {
             xhr = $.ajax(
                 Object.assign({
                     type: 'post',
-                    url: typeof(url) != 'undefined' ? url : '',
+                    url: myUrl,
                     cache: false,
                     data: filesdata,
                     success: function (data) {
-                        var el = $('#uploadResponse');
-                        el.html(data);
-                        if (el.attr('data-scrolled') !== "true") {
-                            el.scrollTop(el[0].scrollHeight - el.height());
+                        if(data.result){
+                            window.location.reload();
+                        }else {
+                            var el = $('#uploadResponse');
+                            el.html(data);
+                            if (el.attr('data-scrolled') !== "true") {
+                                el.scrollTop(el[0].scrollHeight - el.height());
+                            }
+                            $('#cancelbutton').html(gettext('Close'));
+                            // $('#importbutton').hide();
+                            $("#animatedcog").css('visibility', 'hidden');
+                            $('#cancelimportbutton').hide();
+                            if (document.queryCommandSupported('copy')) {
+                                $('#copytoclipboard').show();
+                            }
+                            $("#grid").trigger("reloadGrid");
                         }
-                        $('#cancelbutton').html(gettext('Close'));
-                        // $('#importbutton').hide();
-                        $("#animatedcog").css('visibility', 'hidden');
-                        $('#cancelimportbutton').hide();
-                        if (document.queryCommandSupported('copy')) {
-                            $('#copytoclipboard').show();
-                        }
-                        $("#grid").trigger("reloadGrid");
                     },
                     xhrFields: {
                         onprogress: function (e) {
