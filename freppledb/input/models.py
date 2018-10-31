@@ -16,6 +16,8 @@
 #
 
 from datetime import datetime, time
+
+from django.contrib.contenttypes.fields import GenericRelation
 from django.utils import timezone
 
 from django.db import models, DEFAULT_DB_ALIAS
@@ -1491,6 +1493,11 @@ class ForecastVersion(AuditModel, ForecastCommentOperation):
         verbose_name = _('forecast_version')
         verbose_name_plural = _('forecast_versions')
 
+    # comment
+    comments = GenericRelation(Comment, verbose_name='forecastversion comment',related_name='forecast_version_comment',
+                               object_id_field ='object_pk',
+                               on_delete=models.CASCADE)
+
 
 class Forecast(AuditModel, ForecastCommentOperation):
     id = models.AutoField(_('id'), help_text=_('Unique identifier'), primary_key=True)
@@ -1530,6 +1537,11 @@ class Forecast(AuditModel, ForecastCommentOperation):
     version = models.ForeignKey(ForecastVersion, verbose_name=_('forecast version'),
                                 db_index=True, related_name='forecast_version',
                                 editable=False, on_delete=models.CASCADE)
+
+    # comment
+    comments = GenericRelation(Comment, verbose_name='forecast comment',related_name='forecast_comment',
+                               object_id_field ='object_pk',
+                               on_delete=models.CASCADE)
 
     class Manager(MultiDBManager):
         def get_by_natural_key(self, item, location, customer):
