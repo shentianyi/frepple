@@ -486,3 +486,16 @@ msgstr "当前库存"
 
 #~ msgid "Application tour"
 #~ msgstr "应用程序之旅"
+
+
+msgid "operation_forecast_ok"
+msgstr "审批"
+
+msgid "operation_forecast_nok"
+msgstr "打回"
+
+msgid "operation_forecast_cancel"
+msgstr "取消"
+
+msgid "operation_forecast_release"
+msgstr "放行"

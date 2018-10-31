@@ -17,6 +17,9 @@
 
 from datetime import datetime, time
 
+from django.contrib.contenttypes.fields import GenericRelation
+from django.utils import timezone
+
 from django.db import models, DEFAULT_DB_ALIAS
 from django.db.models import Max
 from django.utils.translation import ugettext_lazy as _
@@ -197,7 +200,7 @@ class Customer(AuditModel, HierarchyModel):
     name = models.CharField(_('name'), max_length=300, primary_key=False, db_index=True)
     area = models.CharField(_('area'), max_length=300, db_index=True, null=True, blank=True)
     address = models.CharField(_('address'), max_length=300, db_index=True, null=True, blank=True)
-    ship_address = models.CharField(_('ship_address'), max_length=300, db_index=True, null=True, blank=True)
+    ship_address = models.CharField(_('ship address'), max_length=300, db_index=True, null=True, blank=True)
     available = models.ForeignKey(
         Calendar, verbose_name=_('available'),
         null=True, blank=True, on_delete=models.CASCADE,
@@ -1125,7 +1128,7 @@ class Supplier(AuditModel, HierarchyModel):
     name = models.CharField(_('name'), max_length=300, primary_key=False, db_index=True)
     area = models.CharField(_('area'), max_length=300, db_index=True, null=True, blank=True)
     address = models.CharField(_('address'), max_length=300, db_index=True, null=True, blank=True)
-    ship_address = models.CharField(_('ship_address'), max_length=300, db_index=True, null=True, blank=True)
+    ship_address = models.CharField(_('ship address'), max_length=300, db_index=True, null=True, blank=True)
     available = models.ForeignKey(
         Calendar, verbose_name=_('available'),
         null=True, blank=True, on_delete=models.CASCADE,
@@ -1442,12 +1445,12 @@ class ForecastYear(AuditModel):
 
 class ForecastCommentOperation:
     statuses = (
-        ('init', _('init')),
-        ('ok', _('ok')),
-        ('nok', _('nok')),
-        ('cancel', _('cancel')),
-        ('release', _('release')),
-        ('confirm', _('confirm')),
+        ('init', _('forecast init')),
+        ('ok', _('forecast ok')),
+        ('nok', _('forecast nok')),
+        ('cancel', _('forecast cancel')),
+        ('release', _('forecast release')),
+        ('confirm', _('forecast confirm')),
     )
 
     can_ok_status = ('init', 'nok', 'cancel')
@@ -1490,6 +1493,11 @@ class ForecastVersion(AuditModel, ForecastCommentOperation):
         verbose_name = _('forecast_version')
         verbose_name_plural = _('forecast_versions')
 
+    # comment
+    comments = GenericRelation(Comment, verbose_name='forecastversion comment',related_name='forecast_version_comment',
+                               object_id_field ='object_pk',
+                               on_delete=models.CASCADE)
+
 
 class Forecast(AuditModel, ForecastCommentOperation):
     id = models.AutoField(_('id'), help_text=_('Unique identifier'), primary_key=True)
@@ -1529,6 +1537,11 @@ class Forecast(AuditModel, ForecastCommentOperation):
     version = models.ForeignKey(ForecastVersion, verbose_name=_('forecast version'),
                                 db_index=True, related_name='forecast_version',
                                 editable=False, on_delete=models.CASCADE)
+
+    # comment
+    comments = GenericRelation(Comment, verbose_name='forecast comment',related_name='forecast_comment',
+                               object_id_field ='object_pk',
+                               on_delete=models.CASCADE)
 
     class Manager(MultiDBManager):
         def get_by_natural_key(self, item, location, customer):

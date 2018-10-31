@@ -1495,6 +1495,9 @@ var grid = {
 
             // 预测
             $("#cancel_selected").prop('disabled', false).addClass("bold");
+            $("#reject_selected").prop('disabled', false).addClass("bold");
+            $("#approval_selected").prop('disabled', false).addClass("bold");
+            $("#pass_selected").prop('disabled', false).addClass("bold");
 
             if (sel === 1) {
                 $('#edit_selected').prop('disabled', false);
@@ -1519,6 +1522,9 @@ var grid = {
             $('#edit_selected').prop('disabled', true);
 
             $("#cancel_selected").prop('disabled', false).addClass("bold");
+            $("#reject_selected").prop('disabled', false).addClass("bold");
+            $("#approval_selected").prop('disabled', false).addClass("bold");
+            $("#pass_selected").prop('disabled', false).addClass("bold");
         }
         else {
             $("#copy_selected").prop('disabled', true).removeClass("bold");

@@ -95,17 +95,23 @@ msgstr "周"
 msgid "M"
 msgstr "月"
 
-msgid "init"
+msgid "forecast init"
 msgstr "新建"
 
-msgid "ok"
+msgid "forecast ok"
 msgstr "过审"
 
-msgid "nok"
+msgid "forecast nok"
 msgstr "未过审"
 
-msgid "confirm"
+msgid "forecast confirm"
 msgstr "确认"
+
+msgid "forecast release"
+msgstr "放行"
+
+msgid "forecast cancel"
+msgstr "取消"
 
 msgid "date_number"
 msgstr "月份/周数"
@@ -411,7 +417,7 @@ msgstr "拥有者"
 msgid "owner_id"
 msgstr "拥有者id"
 
-msgid "ship_address"
+msgid "ship address"
 msgstr "目的地"
 
 msgid "address"

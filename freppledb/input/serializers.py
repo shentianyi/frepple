@@ -1334,8 +1334,7 @@ class ForecastVersionFilter(filters.FilterSet):
             'status': ['exact', 'in'],
         }
         filter_fields = (
-          'nr', 'create_user__username', 'status')
-
+            'nr', 'create_user__username', 'status')
 
 
 class ForecastVersionSerializer(BulkSerializerMixin, ModelSerializer):
@@ -1362,6 +1361,11 @@ class ForecastVersiondetailAPI(frePPleRetrieveUpdateDestroyAPIView):
 # CMARK end ForecastVersion API--------------------------------------------------
 # CMARK begin Forecast API-------------------------------------------------------
 class ForecastFilter(filters.FilterSet):
+    created_at__gte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='gte')
+    created_at__lte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='lte')
+    updated_at__gte = django_filters.DateTimeFilter(field_name="updated_at", lookup_expr='gte')
+    updated_at__lte = django_filters.DateTimeFilter(field_name="updated_at", lookup_expr='lte')
+
     class Meta:
         model = freppledb.input.models.Forecast
         fields = {
@@ -1372,9 +1376,11 @@ class ForecastFilter(filters.FilterSet):
             'year': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
             'date_number': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
             'ratio': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
+            'version': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
         }
         filter_fields = (
-            'id', 'item__nr', 'location__nr', 'customer__nr', 'year', 'date_number', 'ratio')
+            'id', 'item__nr', 'location__nr', 'customer__nr', 'year', 'date_number', 'ratio', 'version', 'create_at',
+            'updated_at')
 
 
 class ForecastSerializer(BulkSerializerMixin, ModelSerializer):
@@ -1394,6 +1400,12 @@ class ForecastAPI(frePPleListCreateAPIView):
 
 
 class ForecastdetailAPI(frePPleRetrieveUpdateDestroyAPIView):
+    queryset = freppledb.input.models.Forecast.objects.all()
+    serializer_class = ForecastSerializer
+
+
+class ForecastdetailVersionAPI(frePPleRetrieveUpdateDestroyAPIView):
+    lookup_field = 'version'
     queryset = freppledb.input.models.Forecast.objects.all()
     serializer_class = ForecastSerializer
 

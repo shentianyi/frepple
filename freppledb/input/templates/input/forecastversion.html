@@ -15,11 +15,6 @@ var editcol;
 var currency = "";
 
 
-function showDetail(nr) {
-    console.log("nr")
-    console.log(nr)
-}
-
 {% if reportclass.hasTimeBuckets %}var numbuckets = {{request.report_bucketlist|length}};
 {% endif %}
 
@@ -36,7 +31,7 @@ $(function() {
    	  + (location.search.length > 0 ? "&format=json" : "?format=json"),
 	  datatype: "json",
 	  jsonReader : {repeatitems:false},
-    colModel:[{{colmodel|safe}}, {name: 'Actions', index: 'Actions', title:'Actions', align: 'center'}],
+    colModel:[{{colmodel|safe}}, {name: 'Actions', label: '备注详情', index: 'Actions', title:'Actions', align: 'center'}],
     rownumbers: true,
    	rowNum: {{request.pagesize}},
    	autoencode: false, {% if is_popup %}
@@ -151,12 +146,12 @@ $(function() {
         var ret = jQuery("#grid").jqGrid('getRowData');
 
         for(var i = 0; i< ret.length; i++){
-            $("#"+ret[i].nr).find("[aria-describedby=grid_Actions]").attr('title', '备注').css('cursor', 'pointer').html("<img onclick='showDetail(" + ret[i].nr +")' src='{{STATIC_URL}}img/table/remark.png' alt='备注'>")
+            $("#"+ret[i].nr).find("[aria-describedby=grid_Actions]").attr('title', '备注').css('cursor', 'pointer').html("<img onclick=Forecast.showDetail('"+ ret[i].nr + "','forecastversion') src='{{STATIC_URL}}img/table/remark.png' alt='备注'>")
 
             $("#"+ret[i].nr).find("[aria-describedby=grid_nr]").css('color', '#2C84FF');
 
-            if(ret[i].status == 'ok'){
-                $("#"+ret[i].nr).find("[aria-describedby=grid_status]").html("<i style='font-size: 2em;' class='fa fa-check-circle' />").css('color', '#28BB87')
+            if(ret[i].status == 'release'){
+                $("#"+ret[i].nr).find("[aria-describedby=grid_status]").html("<img src='{{STATIC_URL}}img/table/release.png' alt='备注' />")
             }else if(ret[i].status == 'nok'){
                 $("#"+ret[i].nr).find("[aria-describedby=grid_status]").css('color', '#FF3E7F')
             }else {
@@ -174,8 +169,6 @@ $(function() {
     });{% if reportclass.frozenColumns > 0 %}
 
     jQuery("#grid").jqGrid('setFrozenColumns');{% endif %}{% if reportclass.multiselect and not is_popup %}
-
-//    jQuery("#grid").jqGrid('filterToolbar',{searchOperators : true});
 
     $('#cb_grid.cbox').click(grid.markAllRows);{% endif %}{% if reportclass.editable and haschangeperm %}
 
@@ -242,6 +235,33 @@ $(function() {
 {% block content %}
 {% block before_table %}{% endblock %}
 
+<!-- 备注详情弹框 -->
+<div class="modal fade" id="remarkDetail" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="remarkDetailTitle"> 备注详情 </h4>
+      </div>
+      <div class="modal-body">
+          <div id="remarkDetailTable">
+            <table class="table table-condensed">
+              <thead>
+                  <tr>
+                      <th>No.</th>
+                      <th>操作</th>
+                      <th>备注</th>
+                      <th>操作人</th>
+                      <th>操作时间</th>
+                  </tr>
+              </thead>
+                <tbody id="remarkDetailTbody"></tbody>
+            </table>
+          </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- 填充备注的框 -->
 <div class="modal fade" id="forecastversionModal" tabindex="-1" role="dialog" aria-labelledby="operateModalRemark">
@@ -328,7 +348,7 @@ $(function() {
     {% block actions %}
     <!-- 取消按钮 -->
     {% if not is_popup %}
-        <button class="btn btn-xs btn-default btn-table-icon" id="cancel_selected" disabled onclick="Forecast.operate('forecast', 'operation_forecast_cancel', 'forecastversionModal')" data-toggle="tooltip"
+        <button class="btn btn-xs btn-default btn-table-icon" id="cancel_selected" disabled onclick="Forecast.operate('forecastversion', 'operation_forecast_cancel', 'forecastversionModal')" data-toggle="tooltip"
                 data-placement="top" data-original-title="取消">
             <!--<span class="fa fa-search"></span>-->
             <img src="{{STATIC_URL}}img/table/cancel.png" alt="取消">
@@ -337,7 +357,7 @@ $(function() {
 
     <!-- 打回按钮 -->
     {% if not is_popup %}
-        <button class="btn btn-xs btn-default btn-table-icon" id="reject" onclick="grid.showFilter()" data-toggle="tooltip"
+        <button class="btn btn-xs btn-default btn-table-icon" id="reject_selected" disabled onclick="Forecast.operate('forecastversion', 'operation_forecast_nok', 'forecastversionModal')" data-toggle="tooltip"
                 data-placement="top" data-original-title="打回">
             <!--<span class="fa fa-search"></span>-->
             <img src="{{STATIC_URL}}img/table/reject.png" alt="打回">
@@ -346,19 +366,19 @@ $(function() {
 
     <!-- 审批按钮 -->
     {% if not is_popup %}
-        <button class="btn btn-xs btn-default btn-table-icon" id="approval" onclick="grid.showFilter()" data-toggle="tooltip"
+        <button class="btn btn-xs btn-default btn-table-icon" id="approval_selected" disabled onclick="Forecast.operate('forecastversion', 'operation_forecast_ok', 'forecastversionModal')" data-toggle="tooltip"
                 data-placement="top" data-original-title="审批">
             <!--<span class="fa fa-search"></span>-->
-            <img src="{{STATIC_URL}}img/table/pass.png" alt="审批">
+            <img src="{{STATIC_URL}}img/table/approval.png" alt="审批">
         </button>
     {% endif %}
 
     <!--放行按钮 -->
     {% if not is_popup %}
-        <button class="btn btn-xs btn-default btn-table-icon" id="pass" onclick="grid.showFilter()" data-toggle="tooltip"
-                data-placement="top" data-original-title="通过">
+        <button class="btn btn-xs btn-default btn-table-icon" id="pass_selected" disabled onclick="Forecast.operate('forecastversion', 'operation_forecast_release', 'forecastversionModal')" data-toggle="tooltip"
+                data-placement="top" data-original-title="放行">
             <!--<span class="fa fa-search"></span>-->
-            <img src="{{STATIC_URL}}img/table/pass.png" alt="通过">
+            <img src="{{STATIC_URL}}img/table/pass.png" alt="放行">
         </button>
     {% endif %}
 

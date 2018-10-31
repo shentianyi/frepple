@@ -942,7 +942,7 @@ class CustomerList(GridReport):
         GridFieldText('name', title=_('name'), editable=False),
         GridFieldText('area', title=_('area'), editable=False),
         GridFieldText('address', title=_('address'), editable=False),
-        GridFieldText('ship_address', title=_('ship_address'), editable=False),
+        GridFieldText('ship_address', title=_('ship address'), editable=False),
         GridFieldText('source', title=_('source'), editable=False),
         GridFieldText('available', title=_('available'), field_name='available__name', editable=False),
         GridFieldText('owner_display', title=_('owner_display'), field_name='owner__nr', editable=False),
@@ -978,7 +978,7 @@ class SupplierList(GridReport):
         GridFieldText('name', title=_('name'), editable=False),
         GridFieldText('area', title=_('area'), editable=False),
         GridFieldText('address', title=_('address'), editable=False),
-        GridFieldText('ship_address', title=_('ship_address'), editable=False),
+        GridFieldText('ship_address', title=_('ship address'), editable=False),
         GridFieldText('source', title=_('source'), editable=False),
         GridFieldText('available', title=_('available'), field_name='available__name', editable=False),
         GridFieldText('owner_display', title=_('owner_display'), field_name='owner__nr', editable=False),
@@ -1657,7 +1657,7 @@ class ForecastVersionView(GridReport):
     basequeryset = ForecastVersion.objects.all().order_by('-created_at')
     model = ForecastVersion
     frozenColumns = 1
-    template = 'input/forecastversion.html.bak'
+    template = 'input/forecastversion.html'
 
     # CMARK 设置默认的排序字段, 这个方法不是很好
     default_sort = None
@@ -1715,10 +1715,20 @@ class ForecastVersionView(GridReport):
 class ForecastList(GridReport):
     # template = ''
     title = _("forecasts")
-    basequeryset = Forecast.objects.all()
+    # 版本倒排, 时间正排, 不考虑id
+    basequeryset = Forecast.objects.all().order_by('-version_id', 'year', 'date_number')
     model = Forecast
     frozenColumns = 1
     template = 'input/forecast.html'
+
+    default_sort = None
+
+    @classmethod
+    def extra_context(reportclass, request, *args, **kwargs):
+        data = {
+                "date_types": ForecastYear.date_types
+            }
+        return data
 
     rows = (
         GridFieldInteger('id', title=_('id'), key=True, formatter='detail',
@@ -1747,6 +1757,7 @@ class ForecastList(GridReport):
                       editable=False),
         GridFieldText('create_user', title=_('create_user_id'), field_name='create_user_id', editable=False,
                       hidden=True),
+        GridFieldText('version', title=_('version'), field_name='version',hidden=True ,editable=False),
         GridFieldText('version_nr', title=_('version nr'), field_name='version__nr', editable=False),
         GridFieldCreateOrUpdateDate('created_at', title=_('created_at'), editable=False),
         GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at'), editable=False),
@@ -1765,16 +1776,15 @@ class ForecastCommentView(View):
         # 根据Forecast, ForecastVersion 获取comment
         # request
         content_type_parameter = request.GET['content_type']
-        content_id = request.GET['content_id']
+        content_id  = request.GET['content_id']
 
-        content_type = ContentType.objects.filter(app_label='input', model=request.GET['content_type'].lower()).first()
+        content_type = ContentType.objects.filter(app_label='input', model= request.GET['content_type'].lower()).first()
 
         if content_type:
             fields = [f.name for f in Comment._meta.fields]
             fields.append('user__username')
-            comments = []
-            for c in Comment.objects.filter(content_type=content_type, object_pk=content_id).order_by('-id').values(
-                    *fields):
+            comments =[]
+            for c in Comment.objects.filter(content_type=content_type, object_pk=content_id).order_by('-id').values(*fields):
                 # 翻译
                 for f in Comment._meta.fields:
                     if f.choices is not None and len(f.choices)>0:
@@ -1784,10 +1794,10 @@ class ForecastCommentView(View):
                                            ensure_ascii=False,
                                            cls=DjangoJSONEncoder), content_type='application/json')
         else:
-            return HttpResponseBadRequest('parameter is not correct')
+            return  HttpResponseBadRequest('parameter is not correct')
         return HttpResponse(json.dumps([]))
 
-    def update(self, request, operation, content_type_parameter, content_type, content_id,comment):
+    def operate(self, request, operation, content_type_parameter, content_type, content_id,comment):
 
         message = ResponseMessage(result=True)
         content_object = None
@@ -1832,7 +1842,7 @@ class ForecastCommentView(View):
                     content_object.save()
                 else:
                     message.result = False
-                    message.message = '状态不可进行审批操作'
+                    message.message = '状态不可进行取消操作'
             elif 'operation_forecast_release' == operation:
                 if content_object.can_release():
                     content_object.status = 'release'
@@ -1858,91 +1868,30 @@ class ForecastCommentView(View):
         return message
 
     @method_decorator(staff_member_required)
-    def post(self, request, *args, **kwargs):
+    def post(self,request, *args,**kwargs):
 
         try:
             data = json.JSONDecoder().decode(request.read().decode(request.encoding or settings.DEFAULT_CHARSET))
-            content_id = data['content_id']
+
             content_type_parameter = data['content_type'].lower()
             content_type = ContentType.objects.filter(app_label='input',
                                                       model=content_type_parameter).first()
-            content_object = None
-            if content_type_parameter == 'forecast':
-                content_object = Forecast.objects.get(id=content_id)
-            elif content_type_parameter == 'forecastversion':
-                content_object = ForecastVersion.objects.get(nr=content_id)
-
-            if content_type is None or content_object is None:
-                return HttpResponseBadRequest('parameter error')
-
-            message = ResponseMessage(result=True)
-
+            operation = data['operation']
+            message = ResponseMessage
             with transaction.atomic(using=request.database, savepoint=False):
-                # TODO 修改状态
-                operation = data['operation']
-
-                if 'operation_forecast_ok' == operation:
-                    # 审批
-                    if content_object.can_ok():
-                        content_object.status = 'ok'
-                        if isinstance(content_object, ForecastVersion):
-                            Forecast.objects.filter(version=content_object,
-                                                    status__in=ForecastCommentOperation.can_ok_status).update(
-                                status='ok')
-                        content_object.save()
-                    else:
-                        message.result = False
-                        message.message = '状态不可进行审批操作'
-                elif 'operation_forecast_nok' == operation:
-                    # 打回
-                    if content_object.can_nok():
-                        content_object.status = 'nok'
-                        if isinstance(content_object, ForecastVersion):
-                            Forecast.objects.filter(version=content_object,
-                                                    status__in=ForecastCommentOperation.can_nok_status).update(
-                                status='nok')
-                        content_object.save()
-                    else:
-                        message.result = False
-                        message.message = '状态不可进行打回操作'
-                elif 'operation_forecast_cancel' == operation:
-                    if content_object.can_cancel():
-                        content_object.status = 'cancel'
-                        if isinstance(content_object, ForecastVersion):
-                            Forecast.objects.filter(version=content_object,
-                                                    status__in=ForecastCommentOperation.can_cancel_status).update(
-                                status='cancel')
-                        content_object.save()
-                    else:
-                        message.result = False
-                        message.message = '状态不可进行审批操作'
-                elif 'operation_forecast_release' == operation:
-                    if content_object.can_release():
-                        content_object.status = 'release'
-                        if isinstance(content_object, ForecastVersion):
-                            Forecast.objects.filter(version=content_object,
-                                                    status__in=ForecastCommentOperation.can_release_status).update(
-                                status='release')
-                        content_object.save()
-                    else:
-                        message.result = False
-                        message.message = '状态不可进行审批操作'
-                else:
-                    message.result = False
-                    message.message = 'operation参数错误, 不存在'
-
-                if message.result:
-                    # 创建comment
-                    comment = Comment(user=request.user, content_type=content_type,
-                                      content_object=content_object, comment=data['comment'],
-                                      operation=data['operation'])
-                    comment.save()
-                    message.result = True
+                if 'content_id' in data:
+                   content_id = data['content_id']
+                   message = self.operate(request, operation, content_type_parameter, content_type, content_id,data['comment'])
+                elif 'content_ids' in data:
+                   for content_id in data['content_ids']:
+                       message = self.operate(request, operation, content_type_parameter, content_type, content_id,data['comment'])
+                   if len(data['content_ids']) > 1:
+                        message.result = True
+                        message.message = None
             return HttpResponse(json.dumps(message.__dict__, ensure_ascii=False), content_type='application/json')
         except ObjectDoesNotExist as e:
             print(e)
             traceback.print_exc()
-
             return HttpResponseBadRequest("parameter error, "+str(e), content_type='application/json')
         except Exception as e:
             print(e)

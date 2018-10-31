@@ -106,7 +106,7 @@ class ForecastUploader:
                             forecast_version.create_user = request.user
                             forecast_version.created_at = timezone.now
                             # forecast_version.status = ForecastCommentOperation.statuses[0][0]
-                            forecast_version.nr = timezone.now().strftime('%Y%m%d%H%M%S')
+                            forecast_version.nr = timezone.now().strftime('%y%m%d%H%M%S')
                             forecast_version.save()
                             for f in forecasts:
                                 f.version = forecast_version
@@ -119,38 +119,34 @@ class ForecastUploader:
                                 message.result = False
                                 message.message = '版本不存在,不可以更新!'
                             else:
+                                # excel 中传的字段
                                 excel_fields = [v for k, v in headers_field_name.items()]
 
+                                # 可以被更新的字段
+                                update_fields = ['date_type', 'ratio', 'normal_qty', 'normal_qty',
+                                                 'new_product_plan_qty', 'promotion_qty']
                                 for f in forecasts:
                                     # 更新
-                                    update_forecast = Forecast.objects.using(request.database).filter(
-                                        # version=forecast_version,
-                                        version=forecast_version,
-                                        location=f.location,
-                                        item=f.item,
-                                        customer=f.customer,
-                                        year=f.year,
-                                        date_type=f.date_type,
-                                        date_number=f.date_number).latest('id')
+                                    try:
+                                        update_forecast = Forecast.objects.using(request.database).filter(
+                                            # version=forecast_version,
+                                            version=forecast_version,
+                                            location=f.location,
+                                            item=f.item,
+                                            customer=f.customer,
+                                            year=f.year,
+                                            date_type=f.date_type,
+                                            date_number=f.date_number).latest('id')
 
-                                    if update_forecast is None:
-                                        # 创建
+                                        # 判断是否在excel中传了值
+                                        for field in update_fields:
+                                            if field in excel_fields:
+                                                setattr(update_forecast, field, getattr(f, field, None))
+
+                                        update_forecast.save()
+                                    except Forecast.DoesNotExist as e:
                                         f.version = forecast_version
                                         f.save()
-                                    else:
-                                    # 判断是否在excel中传了值
-                                        if 'ratio' in excel_fields:
-                                            update_forecast.ratio = f.ratio
-                                        elif 'normal_qty' in excel_fields:
-                                            update_forecast.normal_qty = f.normal_qty
-                                        elif 'new_product_plan_qty' in excel_fields:
-                                            update_forecast.new_product_plan_qty = f.new_product_plan_qty
-                                        elif 'promotion_qty' in excel_fields:
-                                            update_forecast.promotion_qty = f.promotion_qty
-                                        elif 'status' in excel_fields:
-                                            update_forecast.status = f.status
-                                        # 更新
-                                        update_forecast.save()
 
                         message.result = True
                         message.message = '上传成功'
