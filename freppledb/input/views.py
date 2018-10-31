@@ -1777,7 +1777,7 @@ class ForecastCommentView(View):
                     *fields):
                 # 翻译
                 for f in Comment._meta.fields:
-                    if f.choices is not None and len(f.choices) > 0:
+                    if f.choices is not None and len(f.choices)>0:
                         c[f.name] = _(c[f.name])
                 comments.append(c)
             return HttpResponse(json.dumps(comments,
@@ -1786,6 +1786,76 @@ class ForecastCommentView(View):
         else:
             return HttpResponseBadRequest('parameter is not correct')
         return HttpResponse(json.dumps([]))
+
+    def update(self, request, operation, content_type_parameter, content_type, content_id,comment):
+
+        message = ResponseMessage(result=True)
+        content_object = None
+        if content_type_parameter == 'forecast':
+            content_object = Forecast.objects.get(id=content_id)
+        elif content_type_parameter == 'forecastversion':
+            content_object = ForecastVersion.objects.get(nr=content_id)
+
+        if content_type is None or content_object is None:
+            message.result = False
+            message.message = 'parameter error'
+        else:
+            if 'operation_forecast_ok' == operation:
+                # 审批
+                if content_object.can_ok():
+                    content_object.status = 'ok'
+                    if isinstance(content_object, ForecastVersion):
+                        Forecast.objects.filter(version=content_object,
+                                                status__in=ForecastCommentOperation.can_ok_status).update(status='ok')
+                    content_object.save()
+                else:
+                    message.result = False
+                    message.message = '状态不可进行审批操作'
+            elif 'operation_forecast_nok' == operation:
+                # 打回
+                if content_object.can_nok():
+                    content_object.status = 'nok'
+                    if isinstance(content_object, ForecastVersion):
+                        Forecast.objects.filter(version=content_object,
+                                                status__in=ForecastCommentOperation.can_nok_status).update(status='nok')
+                    content_object.save()
+                else:
+                    message.result = False
+                    message.message = '状态不可进行打回操作'
+            elif 'operation_forecast_cancel' == operation:
+                if content_object.can_cancel():
+                    content_object.status = 'cancel'
+                    if isinstance(content_object, ForecastVersion):
+                        Forecast.objects.filter(version=content_object,
+                                                status__in=ForecastCommentOperation.can_cancel_status).update(
+                            status='cancel')
+                    content_object.save()
+                else:
+                    message.result = False
+                    message.message = '状态不可进行审批操作'
+            elif 'operation_forecast_release' == operation:
+                if content_object.can_release():
+                    content_object.status = 'release'
+                    if isinstance(content_object, ForecastVersion):
+                        Forecast.objects.filter(version=content_object,
+                                                status__in=ForecastCommentOperation.can_release_status).update(
+                            status='release')
+                    content_object.save()
+                else:
+                    message.result = False
+                    message.message = '状态不可进行审批操作'
+            else:
+                message.result = False
+                message.message = 'operation参数错误, 不存在'
+
+            if message.result:
+                # 创建comment
+                comment = Comment(user=request.user, content_type=content_type,
+                                  content_object=content_object, comment=comment, operation=operation)
+                comment.save()
+                message.result = True
+
+        return message
 
     @method_decorator(staff_member_required)
     def post(self, request, *args, **kwargs):
@@ -1872,11 +1942,13 @@ class ForecastCommentView(View):
         except ObjectDoesNotExist as e:
             print(e)
             traceback.print_exc()
-            return HttpResponseBadRequest("parameter error, " + str(e), content_type='application/json')
+
+            return HttpResponseBadRequest("parameter error, "+str(e), content_type='application/json')
         except Exception as e:
             print(e)
             traceback.print_exc()
-            return HttpResponseServerError("server error, " + str(e), content_type='application/json')
+            return HttpResponseServerError("server error, "+str(e), content_type='application/json')
+
 
 
 class DemandList(GridReport):
