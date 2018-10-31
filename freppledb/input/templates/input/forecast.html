@@ -93,7 +93,9 @@ $(function() {
     noCellSelection: true,
     onSelectRow: function(rowid, status, e) {
       var selection = $(this).jqGrid('getGridParam','selarrrow').slice(); //this makes this list a static list of values
-      grid.markSelectedRow(selection.length);
+//      grid.markSelectedRow(selection.length);
+
+
     },
     formatCell: function(rowid, cellname, value, iRow, iCol) {
       editrow = iRow;
@@ -139,6 +141,20 @@ $(function() {
         return true;
     },{% endif %}
     loadComplete: function() {
+   	    var ret = jQuery("#grid").jqGrid('getRowData');
+
+        for(var i = 0; i< ret.length; i++){
+            jQuery("#grid").jqGrid('setRowData', ret[i].id, { Actions: "<span onclick=''>备注</span>" })
+
+            if(ret[i].status == 'ok'){
+                $("#"+ret[i].id).find("[aria-describedby=grid_status]").html("<i style='font-size: 2em;' class='fa fa-check-circle' />").css('color', '#28BB87')
+            }else if(ret[i].status == 'confirm'){
+                $("#"+ret[i].id).find("[aria-describedby=grid_status]").css('color', '#FF3E7F')
+            }else {
+                $("#"+ret[i].id).find("[aria-describedby=grid_status]").css('color', '#333333')
+            }
+        }
+
       $(".invStatus").each( function(value) {
         $(this).parent().css('background',$(this).css('background-color'));
       });
@@ -213,6 +229,24 @@ $(function() {
 {% endblock %}
 {% block content %}
 {% block before_table %}{% endblock %}
+
+<!-- 在import 弹框中使用到的内容 , 记得加 display: none -->
+<div id="import_forecast_version" style="display: none;">
+    <div class="input-group">
+        <span class="input-group-addon" id="basic-date-type">时间类型:</span>
+        <select name="date_type" class="form-control" aria-describedby="basic-date-type">
+            {%for k,v in date_types%}
+            <option value="{{k}}">{{v}}</option>
+            {%endfor%}
+        </select>
+    </div>
+
+    <div style="margin-top: 20px; margin-bottom: 20px;">
+        <span>动作选择:</span>
+        <input type="radio" value="create" name="action" checked="true"/> 创建
+        <input type="radio" value="update" name="action"/> 更新
+    </div>
+</div>
 
 <div class="row" style="padding: 15px 0 5px 0;">
     <div class="col-xs-8">
@@ -312,7 +346,7 @@ $(function() {
     {% if hasaddperm %}
     <button class="btn btn-xs btn-default btn-table-icon" id="csvimport" data-toggle="tooltip" data-placement="top"
             data-original-title="{% trans 'import CSV or Excel file'|capfirst|force_escape %}"
-            onclick="import_show()">
+            onclick="import_custom_show('import_forecast_version', 'forecast')">
         <!--<span class="fa fa-arrow-up"></span>-->
         <img src="{{STATIC_URL}}img/table/import.png" alt="{% trans 'import CSV or Excel file'|capfirst|force_escape %}">
     </button>

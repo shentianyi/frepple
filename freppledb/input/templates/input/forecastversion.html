@@ -2,6 +2,9 @@
 {% load i18n %}
 
 {% block extrahead %}{{block.super}}
+
+<script src="{{STATIC_URL}}js/forecast.js" type="application/javascript"></script>
+
 <script type="text/javascript">
 
 var reportkey = '{{reportkey|safe}}';
@@ -10,6 +13,12 @@ var resizing;
 var editrow;
 var editcol;
 var currency = "";
+
+
+function showDetail(nr) {
+    console.log("nr")
+    console.log(nr)
+}
 
 {% if reportclass.hasTimeBuckets %}var numbuckets = {{request.report_bucketlist|length}};
 {% endif %}
@@ -27,7 +36,7 @@ $(function() {
    	  + (location.search.length > 0 ? "&format=json" : "?format=json"),
 	  datatype: "json",
 	  jsonReader : {repeatitems:false},
-    colModel:[{{colmodel|safe}}],
+    colModel:[{{colmodel|safe}}, {name: 'Actions', index: 'Actions', title:'Actions', align: 'center'}],
     rownumbers: true,
    	rowNum: {{request.pagesize}},
    	autoencode: false, {% if is_popup %}
@@ -139,6 +148,22 @@ $(function() {
         return true;
     },{% endif %}
     loadComplete: function() {
+        var ret = jQuery("#grid").jqGrid('getRowData');
+
+        for(var i = 0; i< ret.length; i++){
+            $("#"+ret[i].nr).find("[aria-describedby=grid_Actions]").attr('title', '备注').css('cursor', 'pointer').html("<img onclick='showDetail(" + ret[i].nr +")' src='{{STATIC_URL}}img/table/remark.png' alt='备注'>")
+
+            $("#"+ret[i].nr).find("[aria-describedby=grid_nr]").css('color', '#2C84FF');
+
+            if(ret[i].status == 'ok'){
+                $("#"+ret[i].nr).find("[aria-describedby=grid_status]").html("<i style='font-size: 2em;' class='fa fa-check-circle' />").css('color', '#28BB87')
+            }else if(ret[i].status == 'nok'){
+                $("#"+ret[i].nr).find("[aria-describedby=grid_status]").css('color', '#FF3E7F')
+            }else {
+                $("#"+ret[i].nr).find("[aria-describedby=grid_status]").css('color', '#333333')
+            }
+        }
+
       $(".invStatus").each( function(value) {
         $(this).parent().css('background',$(this).css('background-color'));
       });
@@ -217,6 +242,29 @@ $(function() {
 {% block content %}
 {% block before_table %}{% endblock %}
 
+
+<!-- 填充备注的框 -->
+<div class="modal fade" id="forecastversionModal" tabindex="-1" role="dialog" aria-labelledby="operateModalRemark">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="operateModalTitle"> 取消 </h4>
+      </div>
+      <div class="modal-body">
+          <div class="form-group">
+            <label for="operateModalRemark" class="control-label">备注:</label>
+            <textarea class="form-control" id="operateModalRemark"></textarea>
+          </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+        <button type="button" id="operate_modal_confirm" class="btn btn-primary">确认</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- 在import 弹框中使用到的内容 , 记得加 display: none -->
 <div id="import_forecast_version" style="display: none;">
     <div class="input-group">
@@ -278,6 +326,41 @@ $(function() {
 
     <div id="toolicons" class="col-xs-4 hor-align-right ver-align-middle pull-right" style="text-align: right;">
     {% block actions %}
+    <!-- 取消按钮 -->
+    {% if not is_popup %}
+        <button class="btn btn-xs btn-default btn-table-icon" id="cancel_selected" disabled onclick="Forecast.operate('forecast', 'operation_forecast_cancel', 'forecastversionModal')" data-toggle="tooltip"
+                data-placement="top" data-original-title="取消">
+            <!--<span class="fa fa-search"></span>-->
+            <img src="{{STATIC_URL}}img/table/cancel.png" alt="取消">
+        </button>
+    {% endif %}
+
+    <!-- 打回按钮 -->
+    {% if not is_popup %}
+        <button class="btn btn-xs btn-default btn-table-icon" id="reject" onclick="grid.showFilter()" data-toggle="tooltip"
+                data-placement="top" data-original-title="打回">
+            <!--<span class="fa fa-search"></span>-->
+            <img src="{{STATIC_URL}}img/table/reject.png" alt="打回">
+        </button>
+    {% endif %}
+
+    <!-- 审批按钮 -->
+    {% if not is_popup %}
+        <button class="btn btn-xs btn-default btn-table-icon" id="approval" onclick="grid.showFilter()" data-toggle="tooltip"
+                data-placement="top" data-original-title="审批">
+            <!--<span class="fa fa-search"></span>-->
+            <img src="{{STATIC_URL}}img/table/pass.png" alt="审批">
+        </button>
+    {% endif %}
+
+    <!--放行按钮 -->
+    {% if not is_popup %}
+        <button class="btn btn-xs btn-default btn-table-icon" id="pass" onclick="grid.showFilter()" data-toggle="tooltip"
+                data-placement="top" data-original-title="通过">
+            <!--<span class="fa fa-search"></span>-->
+            <img src="{{STATIC_URL}}img/table/pass.png" alt="通过">
+        </button>
+    {% endif %}
 
     {% if reportclass.filterable %}
         <button class="btn btn-xs btn-default btn-table-icon" id="filter" onclick="grid.showFilter()" data-toggle="tooltip"
@@ -286,7 +369,6 @@ $(function() {
             <img src="{{STATIC_URL}}img/table/filter.png" alt="{% trans 'filter data'|capfirst|force_escape %}">
         </button>
     {% endif %}
-
 
     <!--删除按钮-->
     {% if hasdeleteperm and not is_popup %}
@@ -310,7 +392,7 @@ $(function() {
     {% if hasaddperm %}
     <button class="btn btn-xs btn-default btn-table-icon" id="csvimport" data-toggle="tooltip" data-placement="top"
             data-original-title="{% trans 'import CSV or Excel file'|capfirst|force_escape %}"
-            onclick="import_custom_show('import_forecast_version', 'forecast')">
+            onclick="import_custom_show('import_forecast_version', 'forecastversion')">
         <!--<span class="fa fa-arrow-up"></span>-->
         <img src="{{STATIC_URL}}img/table/import.png" alt="{% trans 'import CSV or Excel file'|capfirst|force_escape %}">
     </button>
