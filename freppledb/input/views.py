@@ -1754,14 +1754,14 @@ class ForecastCommentView(View):
         content_type = ContentType.objects.filter(app_label='input', model= request.GET['content_type'].lower()).first()
 
         if content_type:
-            fields = [f.name for f  in Comment._meta.fields]
+            fields = [f.name for f in Comment._meta.fields]
             fields.append('user__username')
             comments =[]
             for c in Comment.objects.filter(content_type=content_type, object_pk=content_id).order_by('-id').values(*fields):
                 # 翻译
                 for f in Comment._meta.fields:
                     if f.choices is not None and len(f.choices)>0:
-                        c[f.name]=_(c[f.name])
+                        c[f.name] = _(c[f.name])
                 comments.append(c)
             return HttpResponse(json.dumps(comments,
                                            ensure_ascii=False,
@@ -1770,87 +1770,106 @@ class ForecastCommentView(View):
             return  HttpResponseBadRequest('parameter is not correct')
         return HttpResponse(json.dumps([]))
 
+    def update(self, request, operation, content_type_parameter, content_type, content_id,comment):
+
+        message = ResponseMessage(result=True)
+        content_object = None
+        if content_type_parameter == 'forecast':
+            content_object = Forecast.objects.get(id=content_id)
+        elif content_type_parameter == 'forecastversion':
+            content_object = ForecastVersion.objects.get(nr=content_id)
+
+        if content_type is None or content_object is None:
+            message.result = False
+            message.message = 'parameter error'
+        else:
+            if 'operation_forecast_ok' == operation:
+                # 审批
+                if content_object.can_ok():
+                    content_object.status = 'ok'
+                    if isinstance(content_object, ForecastVersion):
+                        Forecast.objects.filter(version=content_object,
+                                                status__in=ForecastCommentOperation.can_ok_status).update(status='ok')
+                    content_object.save()
+                else:
+                    message.result = False
+                    message.message = '状态不可进行审批操作'
+            elif 'operation_forecast_nok' == operation:
+                # 打回
+                if content_object.can_nok():
+                    content_object.status = 'nok'
+                    if isinstance(content_object, ForecastVersion):
+                        Forecast.objects.filter(version=content_object,
+                                                status__in=ForecastCommentOperation.can_nok_status).update(status='nok')
+                    content_object.save()
+                else:
+                    message.result = False
+                    message.message = '状态不可进行打回操作'
+            elif 'operation_forecast_cancel' == operation:
+                if content_object.can_cancel():
+                    content_object.status = 'cancel'
+                    if isinstance(content_object, ForecastVersion):
+                        Forecast.objects.filter(version=content_object,
+                                                status__in=ForecastCommentOperation.can_cancel_status).update(
+                            status='cancel')
+                    content_object.save()
+                else:
+                    message.result = False
+                    message.message = '状态不可进行审批操作'
+            elif 'operation_forecast_release' == operation:
+                if content_object.can_release():
+                    content_object.status = 'release'
+                    if isinstance(content_object, ForecastVersion):
+                        Forecast.objects.filter(version=content_object,
+                                                status__in=ForecastCommentOperation.can_release_status).update(
+                            status='release')
+                    content_object.save()
+                else:
+                    message.result = False
+                    message.message = '状态不可进行审批操作'
+            else:
+                message.result = False
+                message.message = 'operation参数错误, 不存在'
+
+            if message.result:
+                # 创建comment
+                comment = Comment(user=request.user, content_type=content_type,
+                                  content_object=content_object, comment=comment, operation=operation)
+                comment.save()
+                message.result = True
+
+        return message
+
     @method_decorator(staff_member_required)
     def post(self,request, *args,**kwargs):
 
         try:
             data = json.JSONDecoder().decode(request.read().decode(request.encoding or settings.DEFAULT_CHARSET))
-            content_id= data['content_id']
-            content_type_parameter =data['content_type'].lower()
+
+            content_type_parameter = data['content_type'].lower()
             content_type = ContentType.objects.filter(app_label='input',
                                                       model=content_type_parameter).first()
-            content_object = None
-            if content_type_parameter == 'forecast':
-                content_object = Forecast.objects.get(id=content_id)
-            elif content_type_parameter == 'forecastversion':
-                content_object = ForecastVersion.objects.get(nr=content_id)
-
-            if content_type is None or content_object is None:
-                return  HttpResponseBadRequest('parameter error')
-
-            message = ResponseMessage(result=True)
-
+            operation = data['operation']
+            message = ResponseMessage
             with transaction.atomic(using=request.database, savepoint=False):
-                # TODO 修改状态
-                operation = data['operation']
-
-                if 'operation_forecast_ok' == operation:
-                    # 审批
-                    if content_object.can_ok():
-                        content_object.status = 'ok'
-                        if isinstance(content_object, ForecastVersion):
-                            Forecast.objects.filter(version=content_object, status__in=ForecastCommentOperation.can_ok_status).update(status='ok')
-                        content_object.save()
-                    else:
-                        message.result = False
-                        message.message = '状态不可进行审批操作'
-                elif 'operation_forecast_nok' == operation:
-                    # 打回
-                    if content_object.can_nok():
-                        content_object.status = 'nok'
-                        if isinstance(content_object, ForecastVersion):
-                            Forecast.objects.filter(version=content_object, status__in=ForecastCommentOperation.can_nok_status).update(status='nok')
-                        content_object.save()
-                    else:
-                        message.result = False
-                        message.message = '状态不可进行打回操作'
-                elif 'operation_forecast_cancel' == operation:
-                    if content_object.can_cancel():
-                        content_object.status = 'cancel'
-                        if isinstance(content_object, ForecastVersion):
-                            Forecast.objects.filter(version=content_object, status__in=ForecastCommentOperation.can_cancel_status).update(status='cancel')
-                        content_object.save()
-                    else:
-                        message.result = False
-                        message.message = '状态不可进行审批操作'
-                elif 'operation_forecast_release' == operation:
-                    if content_object.can_release():
-                        content_object.status = 'release'
-                        if isinstance(content_object, ForecastVersion):
-                            Forecast.objects.filter(version=content_object, status__in=ForecastCommentOperation.can_release_status).update(status='release')
-                        content_object.save()
-                    else:
-                        message.result = False
-                        message.message = '状态不可进行审批操作'
-                else:
-                    message.result = False
-                    message.message = 'operation参数错误, 不存在'
-
-                if message.result:
-                    # 创建comment
-                    comment = Comment(user=request.user, content_type=content_type,
-                              content_object=content_object,comment=data['comment'],operation=data['operation'])
-                    comment.save()
-                    message.result=True
-            return HttpResponse(json.dumps(message.__dict__,ensure_ascii=False),content_type='application/json')
+                if 'content_id' in data:
+                   content_id = data['content_id']
+                   message = self.update(request, operation, content_type_parameter, content_type, content_id,data['comment'])
+                elif 'content_ids' in data:
+                   for content_id in data['content_ids']:
+                       message = self.update(request, operation, content_type_parameter, content_type, content_id,data['comment'])
+                   if len(data['content_ids']) > 1:
+                        message.result = True
+                        message.message = None
+            return HttpResponse(json.dumps(message.__dict__, ensure_ascii=False), content_type='application/json')
         except ObjectDoesNotExist as e:
             print(e)
             traceback.print_exc()
-            return HttpResponseBadRequest("parameter error, "+str(e),content_type='application/json')
+            return HttpResponseBadRequest("parameter error, "+str(e), content_type='application/json')
         except Exception as e:
             print(e)
             traceback.print_exc()
-            return HttpResponseServerError("server error, "+str(e),content_type='application/json')
+            return HttpResponseServerError("server error, "+str(e), content_type='application/json')
 
 
 
