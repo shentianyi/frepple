@@ -1711,6 +1711,13 @@ class ForecastList(GridReport):
     frozenColumns = 1
     template = 'input/forecast.html'
 
+    @classmethod
+    def extra_context(reportclass, request, *args, **kwargs):
+        data = {
+                "date_types": ForecastYear.date_types
+            }
+        return data
+    
     rows = (
         GridFieldInteger('id', title=_('id'), key=True, formatter='detail',
                          extra='"role":"input/forecast"', editable=False),
@@ -1748,8 +1755,7 @@ class ForecastCommentView(View):
     def get(self, request, *args, **kwargs):
         # 根据Forecast, ForecastVersion 获取comment
         # request
-        content_type_parameter = request.GET['content_type']
-        content_id  = request.GET['content_id']
+        content_id = request.GET['content_id']
 
         content_type = ContentType.objects.filter(app_label='input', model= request.GET['content_type'].lower()).first()
 
