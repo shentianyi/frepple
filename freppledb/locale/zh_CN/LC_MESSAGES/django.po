@@ -122,6 +122,15 @@ msgstr "创建人Id"
 msgid "promotion qty"
 msgstr "促销量"
 
+msgid "item nr"
+msgstr "物料编码"
+
+msgid "supplier nr"
+msgstr "供应商代码"
+
+msgid "customer nr"
+msgstr "客户代码"
+
 #: common/admin.py:39
 msgid "Important dates"
 msgstr "重要日期"

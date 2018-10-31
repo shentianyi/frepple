@@ -17,6 +17,7 @@
 import sys
 import traceback
 from datetime import datetime
+from io import BytesIO
 
 from django.conf import settings
 from django.contrib.admin.views.decorators import staff_member_required
@@ -63,7 +64,7 @@ from django.core.serializers.json import DjangoJSONEncoder
 
 import logging
 
-from freppledb.input.uploader import ForecastUploader
+from freppledb.input.uploader import ForecastUploader, ForecastDownloader
 
 logger = logging.getLogger(__name__)
 
@@ -937,7 +938,7 @@ class CustomerList(GridReport):
         # . Translators: Translation included with Django
         GridFieldText('id', title=_('id'), key=True, formatter='detail', extra='"role":"input/customer"',
                       editable=False),
-        GridFieldText('nr', title=_('nr'), editable=False),
+        GridFieldText('nr', title=_('customer nr'), editable=False),
         GridFieldText('name', title=_('name'), editable=False),
         GridFieldText('area', title=_('area'), editable=False),
         GridFieldText('address', title=_('address'), editable=False),
@@ -973,7 +974,7 @@ class SupplierList(GridReport):
         # . Translators: Translation included with Django
         GridFieldText('id', title=_('id'), key=True, formatter='detail', extra='"role":"input/supplier"',
                       editable=False),
-        GridFieldText('nr', title=_('nr'), editable=False),
+        GridFieldText('nr', title=_('supplier nr'), editable=False),
         GridFieldText('name', title=_('name'), editable=False),
         GridFieldText('area', title=_('area'), editable=False),
         GridFieldText('address', title=_('address'), editable=False),
@@ -1293,7 +1294,7 @@ class ItemList(GridReport):
     rows = (
         # . Translators: Translation included with Django
         GridFieldInteger('id', title=_('id'), key=True, formatter='detail', extra='"role":"input/item"'),
-        GridFieldText('nr', title=_('nr'), editable=False),
+        GridFieldText('nr', title=_('item nr'), editable=False),
         GridFieldText('name', title=_('name'), editable=False),
         GridFieldText('barcode', title=_('barcode'), editable=False),
         GridFieldText('status', field_name='status', title=_('status'), editable=False),
@@ -1656,32 +1657,34 @@ class ForecastVersionView(GridReport):
     basequeryset = ForecastVersion.objects.all().order_by('-created_at')
     model = ForecastVersion
     frozenColumns = 1
-    template = 'input/forecastversion.html'
+    template = 'input/forecastversion.html.bak'
 
     # CMARK 设置默认的排序字段, 这个方法不是很好
     default_sort = None
 
     rows = (
-            # GridFieldText('id', title=_('id'), editable=False),
-            GridFieldText('nr', title=_('version nr'), key=True, formatter='customer',
-                         extra='"role":"/data/input/forecast/?version_nr="', editable=False),
-            GridFieldText('create_user_display', title=_('create_user_display'), field_name='create_user__username', editable=False),
-            GridFieldText('create_user', title=_('create_user_id'), field_name='create_user_id', editable=False, hidden=True,search=False),
-            GridFieldChoice('status', title=_('status'), choices=ForecastCommentOperation.statuses, editable=False),
-            GridFieldText('status_value', title=_('status_value'), field_name='status', editable=False, hidden=True,
-                          search=False),
-            GridFieldCreateOrUpdateDate('created_at', title=_('created_at'), editable=False),
-            GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at'), editable=False),
-            GridFieldText('_pk', field_name='nr', editable=False, hidden=True,search=False),
-            GridFieldText('_nk', field_name='nr', editable=False, hidden=True,search=False),
+        # GridFieldText('id', title=_('id'), editable=False),
+        GridFieldText('nr', title=_('version nr'), key=True, formatter='customer',
+                      extra='"role":"/data/input/forecast/?version_nr="', editable=False),
+        GridFieldText('create_user_display', title=_('create_user_display'), field_name='create_user__username',
+                      editable=False),
+        GridFieldText('create_user', title=_('create_user_id'), field_name='create_user_id', editable=False,
+                      hidden=True, search=False),
+        GridFieldChoice('status', title=_('status'), choices=ForecastCommentOperation.statuses, editable=False),
+        GridFieldText('status_value', title=_('status_value'), field_name='status', editable=False, hidden=True,
+                      search=False),
+        GridFieldCreateOrUpdateDate('created_at', title=_('created_at'), editable=False),
+        GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at'), editable=False),
+        GridFieldText('_pk', field_name='nr', editable=False, hidden=True, search=False),
+        GridFieldText('_nk', field_name='nr', editable=False, hidden=True, search=False),
 
     )
 
     @classmethod
     def extra_context(reportclass, request, *args, **kwargs):
         data = {
-                "date_types": ForecastYear.date_types
-            }
+            "date_types": ForecastYear.date_types
+        }
         return data
 
     @method_decorator(staff_member_required)
@@ -1702,6 +1705,12 @@ class ForecastVersionView(GridReport):
             message = ResponseMessage(message='no excel file or file size>1')
             return HttpResponse(json.dumps(message.__dict__, ensure_ascii=False))
 
+    # def get(self, request, *args, **kwargs):
+    #     output = BytesIO()
+    #     return HttpResponse(
+    #         json.dumps(ForecastDownloader.download_excel(request, Forecast, output).__dict__, ensure_ascii=False),
+    #         content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    #
 
 class ForecastList(GridReport):
     # template = ''
@@ -1715,11 +1724,14 @@ class ForecastList(GridReport):
         GridFieldInteger('id', title=_('id'), key=True, formatter='detail',
                          extra='"role":"input/forecast"', editable=False),
         GridFieldText('item_display', title=_('item_display'), field_name='item__nr', editable=False),
-        GridFieldText('item', title=_('location_id'), field_name='location_id', editable=False, hidden=True,search=False),
+        GridFieldText('item', title=_('location_id'), field_name='location_id', editable=False, hidden=True,
+                      search=False),
         GridFieldText('location_display', title=_('location_display'), field_name='location__nr', editable=False),
-        GridFieldText('location', title=_('location_id'), field_name='location_id', editable=False, hidden=True,search=False),
+        GridFieldText('location', title=_('location_id'), field_name='location_id', editable=False, hidden=True,
+                      search=False),
         GridFieldText('customer_display', title=_('customer_display'), field_name='customer__nr', editable=False),
-        GridFieldText('customer', title=_('customer_id'), field_name='customer_id', editable=False, hidden=True,search=False),
+        GridFieldText('customer', title=_('customer_id'), field_name='customer_id', editable=False, hidden=True,
+                      search=False),
         GridFieldInteger('year', title=_('year'), editable=False),
         GridFieldInteger('date_number', title=_('date_number'), editable=False),
         GridFieldText('date_type', title=_('date_type'), editable=False),
@@ -1729,8 +1741,12 @@ class ForecastList(GridReport):
         GridFieldNumber('new_product_plan_qty', title=_('new product plan qty'), editable=False),
         GridFieldNumber('promotion_qty', title=_('promotion qty'), editable=False),
         GridFieldChoice('status', title=_('status'), choices=ForecastCommentOperation.statuses, editable=False),
-
-        GridFieldText('status_value', title=_('status_value'),field_name='status', editable=False, hidden=True,search=False),
+        GridFieldText('status_value', title=_('status_value'), field_name='status', editable=False, hidden=True,
+                      search=False),
+        GridFieldText('create_user_display', title=_('create_user_display'), field_name='create_user__username',
+                      editable=False),
+        GridFieldText('create_user', title=_('create_user_id'), field_name='create_user_id', editable=False,
+                      hidden=True),
         GridFieldText('version_nr', title=_('version nr'), field_name='version__nr', editable=False),
         GridFieldCreateOrUpdateDate('created_at', title=_('created_at'), editable=False),
         GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at'), editable=False),
@@ -1749,15 +1765,16 @@ class ForecastCommentView(View):
         # 根据Forecast, ForecastVersion 获取comment
         # request
         content_type_parameter = request.GET['content_type']
-        content_id  = request.GET['content_id']
+        content_id = request.GET['content_id']
 
-        content_type = ContentType.objects.filter(app_label='input', model= request.GET['content_type'].lower()).first()
+        content_type = ContentType.objects.filter(app_label='input', model=request.GET['content_type'].lower()).first()
 
         if content_type:
             fields = [f.name for f in Comment._meta.fields]
             fields.append('user__username')
-            comments =[]
-            for c in Comment.objects.filter(content_type=content_type, object_pk=content_id).order_by('-id').values(*fields):
+            comments = []
+            for c in Comment.objects.filter(content_type=content_type, object_pk=content_id).order_by('-id').values(
+                    *fields):
                 # 翻译
                 for f in Comment._meta.fields:
                     if f.choices is not None and len(f.choices)>0:
@@ -1767,7 +1784,7 @@ class ForecastCommentView(View):
                                            ensure_ascii=False,
                                            cls=DjangoJSONEncoder), content_type='application/json')
         else:
-            return  HttpResponseBadRequest('parameter is not correct')
+            return HttpResponseBadRequest('parameter is not correct')
         return HttpResponse(json.dumps([]))
 
     def update(self, request, operation, content_type_parameter, content_type, content_id,comment):
@@ -1841,30 +1858,91 @@ class ForecastCommentView(View):
         return message
 
     @method_decorator(staff_member_required)
-    def post(self,request, *args,**kwargs):
+    def post(self, request, *args, **kwargs):
 
         try:
             data = json.JSONDecoder().decode(request.read().decode(request.encoding or settings.DEFAULT_CHARSET))
-
+            content_id = data['content_id']
             content_type_parameter = data['content_type'].lower()
             content_type = ContentType.objects.filter(app_label='input',
                                                       model=content_type_parameter).first()
-            operation = data['operation']
-            message = ResponseMessage
+            content_object = None
+            if content_type_parameter == 'forecast':
+                content_object = Forecast.objects.get(id=content_id)
+            elif content_type_parameter == 'forecastversion':
+                content_object = ForecastVersion.objects.get(nr=content_id)
+
+            if content_type is None or content_object is None:
+                return HttpResponseBadRequest('parameter error')
+
+            message = ResponseMessage(result=True)
+
             with transaction.atomic(using=request.database, savepoint=False):
-                if 'content_id' in data:
-                   content_id = data['content_id']
-                   message = self.update(request, operation, content_type_parameter, content_type, content_id,data['comment'])
-                elif 'content_ids' in data:
-                   for content_id in data['content_ids']:
-                       message = self.update(request, operation, content_type_parameter, content_type, content_id,data['comment'])
-                   if len(data['content_ids']) > 1:
-                        message.result = True
-                        message.message = None
+                # TODO 修改状态
+                operation = data['operation']
+
+                if 'operation_forecast_ok' == operation:
+                    # 审批
+                    if content_object.can_ok():
+                        content_object.status = 'ok'
+                        if isinstance(content_object, ForecastVersion):
+                            Forecast.objects.filter(version=content_object,
+                                                    status__in=ForecastCommentOperation.can_ok_status).update(
+                                status='ok')
+                        content_object.save()
+                    else:
+                        message.result = False
+                        message.message = '状态不可进行审批操作'
+                elif 'operation_forecast_nok' == operation:
+                    # 打回
+                    if content_object.can_nok():
+                        content_object.status = 'nok'
+                        if isinstance(content_object, ForecastVersion):
+                            Forecast.objects.filter(version=content_object,
+                                                    status__in=ForecastCommentOperation.can_nok_status).update(
+                                status='nok')
+                        content_object.save()
+                    else:
+                        message.result = False
+                        message.message = '状态不可进行打回操作'
+                elif 'operation_forecast_cancel' == operation:
+                    if content_object.can_cancel():
+                        content_object.status = 'cancel'
+                        if isinstance(content_object, ForecastVersion):
+                            Forecast.objects.filter(version=content_object,
+                                                    status__in=ForecastCommentOperation.can_cancel_status).update(
+                                status='cancel')
+                        content_object.save()
+                    else:
+                        message.result = False
+                        message.message = '状态不可进行审批操作'
+                elif 'operation_forecast_release' == operation:
+                    if content_object.can_release():
+                        content_object.status = 'release'
+                        if isinstance(content_object, ForecastVersion):
+                            Forecast.objects.filter(version=content_object,
+                                                    status__in=ForecastCommentOperation.can_release_status).update(
+                                status='release')
+                        content_object.save()
+                    else:
+                        message.result = False
+                        message.message = '状态不可进行审批操作'
+                else:
+                    message.result = False
+                    message.message = 'operation参数错误, 不存在'
+
+                if message.result:
+                    # 创建comment
+                    comment = Comment(user=request.user, content_type=content_type,
+                                      content_object=content_object, comment=data['comment'],
+                                      operation=data['operation'])
+                    comment.save()
+                    message.result = True
             return HttpResponse(json.dumps(message.__dict__, ensure_ascii=False), content_type='application/json')
         except ObjectDoesNotExist as e:
             print(e)
             traceback.print_exc()
+
             return HttpResponseBadRequest("parameter error, "+str(e), content_type='application/json')
         except Exception as e:
             print(e)
@@ -2394,7 +2472,8 @@ class ManufacturingOrderList(OperationPlanMixin, GridReport):
                       initially_hidden=True, formatter='listdetail', extra='"role":"input/item"'),
         GridFieldText('resource', title=_('resources'), editable=False, search=False, sortable=False,
                       initially_hidden=True, formatter='listdetail', extra='"role":"input/resource"'),
-        GridFieldInteger('owner', title=_('owner'), f2018103011304720181030113047ield_name='owner__id', extra='"formatoptions":{"defaultValue":""}',
+        GridFieldInteger('owner', title=_('owner'), f2018103011304720181030113047ield_name='owner__id',
+                         extra='"formatoptions":{"defaultValue":""}',
                          initially_hidden=True),
         GridFieldText('source', title=_('source')),
         GridFieldLastModified('lastmodified'),

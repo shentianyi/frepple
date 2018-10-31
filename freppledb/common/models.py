@@ -542,6 +542,7 @@ class UserPreference(models.Model):
 def delete_user(sender, instance, **kwargs):
     raise PermissionDenied
 
+
 class Comment(AuditModel):
     operations = (
         ('operation_forecast_ok', _('operation_forecast_ok')),
