@@ -16,6 +16,7 @@
 #
 
 from datetime import datetime
+from io import BytesIO
 
 from django.conf import settings
 from django.contrib.admin.views.decorators import staff_member_required
@@ -60,7 +61,7 @@ from django.core.serializers.json import DjangoJSONEncoder
 
 import logging
 
-from freppledb.input.uploader import ForecastUploader
+from freppledb.input.uploader import ForecastUploader, ForecastDownloader
 
 logger = logging.getLogger(__name__)
 
@@ -1692,6 +1693,13 @@ class ForecastVersionView(GridReport):
         else:
             Http404('bad request')
 
+    def get(self, request, *args, **kwargs):
+        output = BytesIO()
+        return HttpResponse(
+            json.dumps(ForecastDownloader.download_excel(request, Forecast, output).__dict__, ensure_ascii=False),
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        content=output.getvalue())
+
 
 class ForecastList(GridReport):
     # template = ''
@@ -1717,6 +1725,10 @@ class ForecastList(GridReport):
         GridFieldNumber('new_product_plan_qty', title=_('new product plan qty'), editable=False),
         GridFieldNumber('promotion_qty', title=_('promotion qty'), editable=False),
         GridFieldChoice('status', title=_('status'), choices=Forecast.forecast_status, editable=False),
+        GridFieldText('create_user_display', title=_('create_user_display'), field_name='create_user__username',
+                      editable=False),
+        GridFieldText('create_user', title=_('create_user_id'), field_name='create_user_id', editable=False,
+                      hidden=True),
         GridFieldText('version', title=_('version nr'), editable=False),
         GridFieldCreateOrUpdateDate('created_at', title=_('created_at'), editable=False),
         GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at'), editable=False),

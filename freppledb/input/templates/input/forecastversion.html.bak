@@ -29,6 +29,9 @@
             </p>
             <button type="submit">OK</button>
         </form>
+        <form method="get" >
+            <input type="radio" value="excel"> excel表
+         </form>
     </div>
 </div>
 

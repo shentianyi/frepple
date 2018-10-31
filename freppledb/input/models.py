@@ -1509,6 +1509,11 @@ class Forecast(AuditModel):
                                                blank=True)
     promotion_qty = models.DecimalField(_('promotion qty'), max_digits=20, decimal_places=8, null=True, blank=True)
     status = models.CharField(_('status'), max_length=20, choices=forecast_status, default='init')
+    create_user = models.ForeignKey(
+        User, verbose_name=_('create_user'),
+        db_index=True, related_name='forecast_create_user',
+        null=False, blank=False, on_delete=models.CASCADE
+    )
 
     version = models.ForeignKey(ForecastVersion, verbose_name=_('forecast version'),
                                 db_index=True, related_name='forecast_version',
