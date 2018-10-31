@@ -1442,12 +1442,12 @@ class ForecastYear(AuditModel):
 
 class ForecastCommentOperation:
     statuses = (
-        ('init', _('init')),
-        ('ok', _('ok')),
-        ('nok', _('nok')),
-        ('cancel', _('cancel')),
-        ('release', _('release')),
-        ('confirm', _('confirm')),
+        ('init', _('forecast init')),
+        ('ok', _('forecast ok')),
+        ('nok', _('forecast nok')),
+        ('cancel', _('forecast cancel')),
+        ('release', _('forecast release')),
+        ('confirm', _('forecast confirm')),
     )
 
     can_ok_status = ('init', 'nok', 'cancel')
