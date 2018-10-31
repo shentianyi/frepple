@@ -2,6 +2,8 @@
 {% load i18n %}
 
 {% block extrahead %}{{block.super}}
+<script src="{{STATIC_URL}}js/forecast.js" type="application/javascript"></script>
+
 <script type="text/javascript">
 
 var reportkey = '{{reportkey|safe}}';
@@ -27,7 +29,7 @@ $(function() {
    	  + (location.search.length > 0 ? "&format=json" : "?format=json"),
 	  datatype: "json",
 	  jsonReader : {repeatitems:false},
-    colModel:[{{colmodel|safe}}, {name: 'Actions', index: 'Actions', title:'Actions', align: 'center'}],
+    colModel:[{{colmodel|safe}}, {name: 'Actions', label: '备注详情', index: 'Actions', title:'备注', align: 'center'}],
     rownumbers: true,
    	rowNum: {{request.pagesize}},
    	autoencode: false, {% if is_popup %}
@@ -93,9 +95,7 @@ $(function() {
     noCellSelection: true,
     onSelectRow: function(rowid, status, e) {
       var selection = $(this).jqGrid('getGridParam','selarrrow').slice(); //this makes this list a static list of values
-//      grid.markSelectedRow(selection.length);
-
-
+      grid.markSelectedRow(selection.length);
     },
     formatCell: function(rowid, cellname, value, iRow, iCol) {
       editrow = iRow;
@@ -142,12 +142,11 @@ $(function() {
     },{% endif %}
     loadComplete: function() {
    	    var ret = jQuery("#grid").jqGrid('getRowData');
-
         for(var i = 0; i< ret.length; i++){
-            $("#"+ret[i].id).find("[aria-describedby=grid_Actions]").attr('title', '备注').css('cursor', 'pointer').html("<img onclick=Forecast.showDetail('"+ ret[i].id + "','forecast') src='{{STATIC_URL}}img/table/remark.png' alt='备注'>")
+            $("#"+ret[i].id).find("[aria-describedby=grid_Actions]").attr('title', '备注').css('cursor', 'pointer').html("<img onclick=Forecast.showDetail('"+ ret[i].id + "','forecast') src='{{STATIC_URL}}img/table/remark.png' alt='备注' />")
 
-            if(ret[i].status == 'ok'){
-                $("#"+ret[i].id).find("[aria-describedby=grid_status]").html("<i style='font-size: 2em;' class='fa fa-check-circle' />").css('color', '#28BB87')
+            if(ret[i].status == 'release'){
+                $("#"+ret[i].id).find("[aria-describedby=grid_status]").html("<img src='{{STATIC_URL}}img/table/release.png' alt='备注' />")
             }else if(ret[i].status == 'confirm'){
                 $("#"+ret[i].id).find("[aria-describedby=grid_status]").css('color', '#FF3E7F')
             }else {
@@ -229,6 +228,35 @@ $(function() {
 {% endblock %}
 {% block content %}
 {% block before_table %}{% endblock %}
+
+
+<!-- 备注详情弹框 -->
+<div class="modal fade" id="remarkDetail" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="remarkDetailTitle"> 备注详情 </h4>
+      </div>
+      <div class="modal-body">
+          <div id="remarkDetailTable">
+            <table class="table table-condensed">
+              <thead>
+                  <tr>
+                      <th>No.</th>
+                      <th>操作</th>
+                      <th>备注</th>
+                      <th>操作人</th>
+                      <th>操作时间</th>
+                  </tr>
+              </thead>
+                <tbody id="remarkDetailTbody"></tbody>
+            </table>
+          </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- 填充备注的框 -->
 <div class="modal fade" id="forecastversionModal" tabindex="-1" role="dialog" aria-labelledby="operateModalRemark">
@@ -344,9 +372,9 @@ $(function() {
     <!--放行按钮 -->
     {% if not is_popup %}
         <button class="btn btn-xs btn-default btn-table-icon" id="pass_selected" disabled onclick="Forecast.operate('forecast', 'operation_forecast_release', 'forecastversionModal')" data-toggle="tooltip"
-                data-placement="top" data-original-title="通过">
+                data-placement="top" data-original-title="放行">
             <!--<span class="fa fa-search"></span>-->
-            <img src="{{STATIC_URL}}img/table/pass.png" alt="通过">
+            <img src="{{STATIC_URL}}img/table/pass.png" alt="放行">
         </button>
     {% endif %}
 

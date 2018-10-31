@@ -1,12 +1,12 @@
 var Forecast = {}
 
+var title = "取消";
 Forecast.operate = function (content_type, type, modalId) {
     if ($('#cancel').hasClass("disabled")) return;
     var sel = jQuery("#grid").jqGrid('getGridParam', 'selarrrow');
     if (sel.length > 0) {
         $("#" + modalId).modal('show');
 
-        var title = "取消";
         switch (type) {
             case "operation_forecast_ok":
                 title = "审批";
@@ -24,22 +24,21 @@ Forecast.operate = function (content_type, type, modalId) {
                 break;
         }
 
-        $("#" + modalId).find("#operateModalTitle").html(title);
+        debugger
 
+        $("#" + modalId).find("#operateModalTitle").html(title);
         $("#" + modalId).find("#operate_modal_confirm").unbind('click').bind('click', function () {
             var remark = $("#" + modalId).find("#operateModalRemark").val();
 
             // 再次确认弹框
             $("#" + modalId).modal('hide');
-            $('#' + modalId).on('hidden.bs.modal', function (e) {
+            $('#' + modalId).on('hidden.bs.modal', function () {
                 $("#" + modalId).find("#operateModalRemark").val('');
             });
 
             $("#confirmDialog").modal('show');
-            $("#confirmDialog").on('show.bs.modal', function () {
-                $("#confirmDialog").find("#confirmDialogTitle").html(title);
-                $("#confirmDialog").find("#confirmDialogContent").html('是否确认' + title + '?');
-            });
+            $("#confirmDialog").find("#confirmDialogTitle").html(title);
+            $("#confirmDialog").find("#confirmDialogContent").html('是否确认' + title + '?');
 
             $("#confirmDialog").find("#confirmDialogSubmit").unbind('click').bind('click', function () {
                 const data = {
@@ -47,7 +46,7 @@ Forecast.operate = function (content_type, type, modalId) {
                     content_type: content_type,
                     operation: type,
                     comment: remark
-                }
+                };
 
                 $.ajax({
                     url: '/data/input/forecastcomment/',
@@ -87,12 +86,12 @@ Forecast.showDetail = function (id, type) {
         success: function (data) {
             var html = '';
             for(var i = 0; i< data.length; i++){
-                // remarkDetailTbody
                 html += '<tr><td>'+(i+1)+'</td>' +
                     '<td>'+data[i].operation+'</td>' +
+                    '<td>'+data[i].comment+'</td>' +
                     '<td>'+data[i].user__username+'</td>' +
                     '<td>'+data[i].created_at+'</td>' +
-                    '<td>'+data[i].comment+'</td></tr>';
+                    '</tr>';
             }
 
             $("#remarkDetailTbody").empty();
