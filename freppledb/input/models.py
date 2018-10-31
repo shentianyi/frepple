@@ -16,6 +16,7 @@
 #
 
 from datetime import datetime, time
+from django.utils import timezone
 
 from django.db import models, DEFAULT_DB_ALIAS
 from django.db.models import Max
@@ -197,7 +198,7 @@ class Customer(AuditModel, HierarchyModel):
     name = models.CharField(_('name'), max_length=300, primary_key=False, db_index=True)
     area = models.CharField(_('area'), max_length=300, db_index=True, null=True, blank=True)
     address = models.CharField(_('address'), max_length=300, db_index=True, null=True, blank=True)
-    ship_address = models.CharField(_('ship_address'), max_length=300, db_index=True, null=True, blank=True)
+    ship_address = models.CharField(_('ship address'), max_length=300, db_index=True, null=True, blank=True)
     available = models.ForeignKey(
         Calendar, verbose_name=_('available'),
         null=True, blank=True, on_delete=models.CASCADE,
@@ -1125,7 +1126,7 @@ class Supplier(AuditModel, HierarchyModel):
     name = models.CharField(_('name'), max_length=300, primary_key=False, db_index=True)
     area = models.CharField(_('area'), max_length=300, db_index=True, null=True, blank=True)
     address = models.CharField(_('address'), max_length=300, db_index=True, null=True, blank=True)
-    ship_address = models.CharField(_('ship_address'), max_length=300, db_index=True, null=True, blank=True)
+    ship_address = models.CharField(_('ship address'), max_length=300, db_index=True, null=True, blank=True)
     available = models.ForeignKey(
         Calendar, verbose_name=_('available'),
         null=True, blank=True, on_delete=models.CASCADE,
