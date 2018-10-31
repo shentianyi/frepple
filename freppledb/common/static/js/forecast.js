@@ -6,23 +6,8 @@ Forecast.operate = function (content_type, type, modalId) {
     if (sel.length > 0) {
         $("#" + modalId).modal('show');
 
-        var title = "取消";
-        switch (type) {
-            case "operation_forecast_ok":
-                title = "审批";
-                break;
-            case "operation_forecast_nok":
-                title = "打回";
-                break;
-            case "operation_forecast_cancel":
-                title = "取消";
-                break;
-            case "operation_forecast_release":
-                title = "放行";
-                break;
-            default:
-                break;
-        }
+        // I18n
+        var title =gettext(type);
 
         $("#" + modalId).find("#operateModalTitle").html(title);
 
