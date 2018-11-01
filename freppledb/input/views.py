@@ -1712,6 +1712,7 @@ class ForecastVersionView(GridReport):
     #         content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     #
 
+
 class ForecastList(GridReport):
     # template = ''
     title = _("forecasts")
@@ -1726,8 +1727,8 @@ class ForecastList(GridReport):
     @classmethod
     def extra_context(reportclass, request, *args, **kwargs):
         data = {
-                "date_types": ForecastYear.date_types
-            }
+            "date_types": ForecastYear.date_types
+        }
         return data
 
     rows = (
@@ -1742,7 +1743,7 @@ class ForecastList(GridReport):
         GridFieldText('customer_display', title=_('customer_display'), field_name='customer__nr', editable=False),
         GridFieldText('customer', title=_('customer_id'), field_name='customer_id', editable=False, hidden=True,
                       search=False),
-        GridFieldInteger('year', title=_('year'), editable=False),
+        GridFieldText('year', title=_('year'), editable=False),
         GridFieldInteger('date_number', title=_('date_number'), editable=False),
         GridFieldText('date_type', title=_('date_type'), editable=False),
         GridFieldNumber('ratio', title=_('ratio %'),
@@ -1757,7 +1758,7 @@ class ForecastList(GridReport):
                       editable=False),
         GridFieldText('create_user', title=_('create_user_id'), field_name='create_user_id', editable=False,
                       hidden=True),
-        GridFieldText('version', title=_('version'), field_name='version',hidden=True ,editable=False),
+        GridFieldText('version', title=_('version'), field_name='version', hidden=True, editable=False),
         GridFieldText('version_nr', title=_('version nr'), field_name='version__nr', editable=False),
         GridFieldCreateOrUpdateDate('created_at', title=_('created_at'), editable=False),
         GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at'), editable=False),
@@ -1776,28 +1777,29 @@ class ForecastCommentView(View):
         # 根据Forecast, ForecastVersion 获取comment
         # request
         content_type_parameter = request.GET['content_type']
-        content_id  = request.GET['content_id']
+        content_id = request.GET['content_id']
 
-        content_type = ContentType.objects.filter(app_label='input', model= request.GET['content_type'].lower()).first()
+        content_type = ContentType.objects.filter(app_label='input', model=request.GET['content_type'].lower()).first()
 
         if content_type:
             fields = [f.name for f in Comment._meta.fields]
             fields.append('user__username')
-            comments =[]
-            for c in Comment.objects.filter(content_type=content_type, object_pk=content_id).order_by('-id').values(*fields):
+            comments = []
+            for c in Comment.objects.filter(content_type=content_type, object_pk=content_id).order_by('-id').values(
+                    *fields):
                 # 翻译
                 for f in Comment._meta.fields:
-                    if f.choices is not None and len(f.choices)>0:
+                    if f.choices is not None and len(f.choices) > 0:
                         c[f.name] = _(c[f.name])
                 comments.append(c)
             return HttpResponse(json.dumps(comments,
                                            ensure_ascii=False,
                                            cls=DjangoJSONEncoder), content_type='application/json')
         else:
-            return  HttpResponseBadRequest('parameter is not correct')
+            return HttpResponseBadRequest('parameter is not correct')
         return HttpResponse(json.dumps([]))
 
-    def operate(self, request, operation, content_type_parameter, content_type, content_id,comment):
+    def operate(self, request, operation, content_type_parameter, content_type, content_id, comment):
 
         message = ResponseMessage(result=True)
         content_object = None
@@ -1868,7 +1870,7 @@ class ForecastCommentView(View):
         return message
 
     @method_decorator(staff_member_required)
-    def post(self,request, *args,**kwargs):
+    def post(self, request, *args, **kwargs):
 
         try:
             data = json.JSONDecoder().decode(request.read().decode(request.encoding or settings.DEFAULT_CHARSET))
@@ -1880,24 +1882,25 @@ class ForecastCommentView(View):
             message = ResponseMessage
             with transaction.atomic(using=request.database, savepoint=False):
                 if 'content_id' in data:
-                   content_id = data['content_id']
-                   message = self.operate(request, operation, content_type_parameter, content_type, content_id,data['comment'])
+                    content_id = data['content_id']
+                    message = self.operate(request, operation, content_type_parameter, content_type, content_id,
+                                           data['comment'])
                 elif 'content_ids' in data:
-                   for content_id in data['content_ids']:
-                       message = self.operate(request, operation, content_type_parameter, content_type, content_id,data['comment'])
-                   if len(data['content_ids']) > 1:
+                    for content_id in data['content_ids']:
+                        message = self.operate(request, operation, content_type_parameter, content_type, content_id,
+                                               data['comment'])
+                    if len(data['content_ids']) > 1:
                         message.result = True
                         message.message = None
             return HttpResponse(json.dumps(message.__dict__, ensure_ascii=False), content_type='application/json')
         except ObjectDoesNotExist as e:
             print(e)
             traceback.print_exc()
-            return HttpResponseBadRequest("parameter error, "+str(e), content_type='application/json')
+            return HttpResponseBadRequest("parameter error, " + str(e), content_type='application/json')
         except Exception as e:
             print(e)
             traceback.print_exc()
-            return HttpResponseServerError("server error, "+str(e), content_type='application/json')
-
+            return HttpResponseServerError("server error, " + str(e), content_type='application/json')
 
 
 class DemandList(GridReport):

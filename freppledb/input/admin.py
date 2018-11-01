@@ -471,7 +471,7 @@ data_site.register(ForecastVersion, ForecastVersion_admin)
 
 class Forecast_admin(MultiDBModelAdmin):
     model = Forecast
-    raw_id_fields = ('item', 'location', 'customer')
+    raw_id_fields = ('item', 'location', 'customer','version')
     save_on_top = True
     exclude = ('source', 'create_user')
     tabs = [

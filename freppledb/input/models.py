@@ -1471,9 +1471,7 @@ class ForecastCommentOperation:
         return self.status in self.can_release_status
 
 
-
 class ForecastVersion(AuditModel, ForecastCommentOperation):
-
     # id = models.AutoField(_('id'), help_text=_('Unique identifier'), primary_key=True)
     # nr = models.CharField(_('nr'), max_length=300, db_index=True, unique=True)
     nr = models.CharField(_('nr'), max_length=300, editable=False, db_index=True,
@@ -1494,8 +1492,8 @@ class ForecastVersion(AuditModel, ForecastCommentOperation):
         verbose_name_plural = _('forecast_versions')
 
     # comment
-    comments = GenericRelation(Comment, verbose_name='forecastversion comment',related_name='forecast_version_comment',
-                               object_id_field ='object_pk',
+    comments = GenericRelation(Comment, verbose_name='forecastversion comment', related_name='forecast_version_comment',
+                               object_id_field='object_pk',
                                on_delete=models.CASCADE)
 
 
@@ -1517,7 +1515,7 @@ class Forecast(AuditModel, ForecastCommentOperation):
         db_index=True, related_name='forecast_customer',
         null=True, blank=True, on_delete=models.CASCADE
     )
-    year = models.IntegerField(_('year'), db_index=True)
+    year = models.IntegerField(_('year'), max_length=300, db_index=True)
     date_number = models.IntegerField(_('date_number'), db_index=True)
 
     date_type = models.CharField(
@@ -1535,12 +1533,11 @@ class Forecast(AuditModel, ForecastCommentOperation):
         null=False, blank=False, on_delete=models.CASCADE
     )
     version = models.ForeignKey(ForecastVersion, verbose_name=_('forecast version'),
-                                db_index=True, related_name='forecast_version',
-                                editable=False, on_delete=models.CASCADE)
+                                db_index=True, related_name='forecast_version', on_delete=models.CASCADE)
 
     # comment
-    comments = GenericRelation(Comment, verbose_name='forecast comment',related_name='forecast_comment',
-                               object_id_field ='object_pk',
+    comments = GenericRelation(Comment, verbose_name='forecast comment', related_name='forecast_comment',
+                               object_id_field='object_pk',
                                on_delete=models.CASCADE)
 
     class Manager(MultiDBManager):
