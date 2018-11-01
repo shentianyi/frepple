@@ -412,7 +412,7 @@ $(function() {
     {% if hasaddperm %}
     <button class="btn btn-xs btn-default btn-table-icon" id="csvimport" data-toggle="tooltip" data-placement="top"
             data-original-title="{% trans 'import CSV or Excel file'|capfirst|force_escape %}"
-            onclick="import_custom_show('import_forecast_version', 'forecastversion')">
+            onclick="import_custom_show('import_forecast_version', '/data/input/forecastversion/', 'forecastversion')">
         <!--<span class="fa fa-arrow-up"></span>-->
         <img src="{{STATIC_URL}}img/table/import.png" alt="{% trans 'import CSV or Excel file'|capfirst|force_escape %}">
     </button>
