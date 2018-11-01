@@ -2,14 +2,107 @@
 {% load i18n %}
 
 {% block extrahead %}{{block.super}}
-
 <!--head中的内容,如js-->
+<script type="text/javascript">
+    var reportkey = '{{reportkey|safe}}';
 
+    var hide_client= {%if report_type == "detail"%}false{%else%}true{%endif%};
+    var tableColModel = [
+        {
+            name: 'item__nr',
+            label: '物料',
+        },
+        {
+            name: 'location__nr',
+            label: '地点',
+        },
+        {
+            name: 'client__nr',
+            label: '客户',
+            hidden: hide_client,
+        },
+        {
+            name: 'total_year_qty',
+            label: '全年计划量'
+        },
+        {
+            name: 'year_qty',
+            label: '年初计划量'
+        },
+        {
+            name: 'last_qty', label: '上月预测'
+        },
+        {
+            name: 'current_year_qty', label: '当月VS年初'
+        },
+        {
+            name: 'current_last_qty', label: '当月VS上月'
+        },
+        {
+            name: 'current_next_qty', label: '当月VS下月'
+        }
+    ];
+    $(function () {
+        jQuery("#grid").jqGrid({
+            url: (location.href.indexOf("#") != -1 ? location.href.substr(0, location.href.indexOf("#")) : location.href)
+                + (location.search.length > 0 ? "&format=json" : "?format=json"),
+            datatype: "json",
+            jsonReader: {
+                repeatitems: false
+            },
+            colModel: tableColModel,
+            pager: '#gridpager',
+            viewrecords: true,
+            sortorder: "asc",
+            iconSet: "fontAwesome",
+            guiStyle: "bootstrapPrimary",
+            hidegrid: false,
+            resizeStop: grid.saveColumnConfiguration,
+            scrollRows: true,
+            multiSort: true,
+            maxSortColumns: 3,
+            viewSort: true,
+            onSortCol: grid.saveColumnConfiguration,
+            onPaging: grid.saveColumnConfiguration,
+            autowidth: true,
+            searching: {
+                multipleSearch: true,
+                multipleGroup: true,
+                closeOnEscape: true,
+                searchOnEnter: true,
+                searchOperators: true,
+                zIndex: 5000,
+                width: 550
+            }
+        });
+    });
+
+    $(window).bind('resize', function () {
+        $("#grid")
+            .setGridWidth($('#content-main').width())
+            .setGridHeight($(window).height() - $("#grid").offset().top);
+    });
+
+</script>
 {% endblock %}
 {% block content %}
+{% block before_table %}{% endblock %}
+<div class="row">
 
-<div>
-    forecast compare
+    <!--操作内容-->
 </div>
 
+
+<div class="row">
+    <!--表格 内容-->
+    <div id="content-main" class="col-md-12" style="min-height: 150px; margin-top: 0.7em">
+        <table id="grid" class="table table-striped pivotgrid"></table>
+    </div>
+    <div id="gridpager" class="col-md-12"></div>
+</div>
+
+{% block after_table %}{% endblock %}
+
+
+{{colmodel}}
 {% endblock %}
