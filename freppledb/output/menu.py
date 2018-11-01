@@ -31,7 +31,7 @@ import freppledb.output.views.kpi
 # Adding reports. We use an index value to keep the same order of the entries in all languages.
 
 menu.addItem(
-  "sales", "forecast report", url="/data/output/forecast/compare/",
+  "sales", "forecast compare report", url="/data/output/forecast/compare/",
   report=freppledb.output.views.forecast.ForecastCompare, index=180,
   dependencies=[Forecast]
 )
