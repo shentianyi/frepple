@@ -1,4 +1,6 @@
 from django.contrib.admin.views.decorators import staff_member_required
+from django.db.models import Sum
+from django.db.models.functions import TruncMonth, TruncYear
 from django.http import HttpResponse, Http404, JsonResponse
 from django.shortcuts import render
 from django.utils.decorators import method_decorator
@@ -6,6 +8,7 @@ from django.views import View
 from django.utils.translation import ugettext_lazy as _
 import dateutil
 import datetime
+from django.db.models import F
 
 from freppledb.input.models import Forecast
 
@@ -45,6 +48,13 @@ class ForecastCompare(View):
             raise Http404('PAGE NOT FOUND')
 
     def _get_json_data(self, request):
+        # .extra(select={'item_nr': 'item.nr', 'location_nr': 'location__nr', 'customer_nr': 'customer__nr'}) \
+
+        forecasts = Forecast.objects \
+            .annotate(month=TruncMonth('parsed_date')) \
+            .extra(select={'t':'normal_qty'})\
+            .values('item__nr', 'location__nr', 'customer__nr', 'year', 'month') \
+            .annotate(total_value=Sum(F('normal_qty')+F('new_product_plan_qty')+F('promotion_qty'))).first()
 
         data = {
             'page': 2,
