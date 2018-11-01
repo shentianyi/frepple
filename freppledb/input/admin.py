@@ -479,6 +479,10 @@ class Forecast_admin(MultiDBModelAdmin):
          "permissions": "input.change_forecast"}
     ]
 
+    def save_model(self, request, obj, form, change):
+      # Tell Django to save objects to the 'other' database.
+      obj.create_user = request.user
+      super().save_model(request,obj,form,change)
 
 data_site.register(Forecast, Forecast_admin)
 

@@ -1696,14 +1696,14 @@ class ForecastVersionView(GridReport):
                     excel_count += 1
             if excel_count == 0:
                 message = ResponseMessage(message='no excel file')
-                return HttpResponse(json.dumps(message.__dict__, ensure_ascii=False))
+                return HttpResponse(json.dumps(message.__dict__, ensure_ascii=False), content_type='application/json')
             else:
                 return HttpResponse(
-                    json.dumps(ForecastUploader.upload_excel(request, Forecast).__dict__, ensure_ascii=False))
+                    json.dumps(ForecastUploader.upload_excel(request, Forecast).__dict__, ensure_ascii=False), content_type='application/json')
         # 上传文件
         else:
             message = ResponseMessage(message='no excel file or file size>1')
-            return HttpResponse(json.dumps(message.__dict__, ensure_ascii=False))
+            return HttpResponse(json.dumps(message.__dict__, ensure_ascii=False), content_type='application/json')
 
     # def get(self, request, *args, **kwargs):
     #     output = BytesIO()
