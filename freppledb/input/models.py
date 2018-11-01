@@ -1428,18 +1428,18 @@ class ForecastYear(AuditModel):
     parsed_date = models.DateTimeField(_('parsed_date'), editable=False, db_index=True, default=timezone.now)
 
     class Manager(MultiDBManager):
-        def get_by_natural_key(self, item, location, customer, date_type, date_number):
-            return self.get(item=item, location=location, customer=customer, date_type=date_type,
-                            date_number=date_number)
+        # def get_by_natural_key(self, item, location, customer,year, date_type, date_number):
+        #     return self.get(item=item, location=location, customer=customer,year=year, date_type=date_type,
+        #                     date_number=date_number)
 
         # 批量创建复写
         def bulk_create(self, objs, batch_size=None):
             for o in objs:
                 o.set_parsed_date()
-            super(Forecast.Manager, self).bulk_create(objs, batch_size)
+            super(ForecastYear.Manager, self).bulk_create(objs, batch_size)
 
-    def natural_key(self):
-        return (self.item, self.location, self.customer, self.date_type, self.date_number)
+    # def natural_key(self):
+    #     return (self.item, self.location, self.customer,self.year, self.date_type, self.date_number)
 
     def set_parsed_date(self):
         self.parsed_date = Forecast.parse_date(self.date_type, self.year, self.date_number)
@@ -1453,7 +1453,7 @@ class ForecastYear(AuditModel):
 
     class Meta(AuditModel.Meta):
         db_table = 'forecast_year'
-        unique_together = (('item', 'location', 'customer', 'year'),)
+        unique_together = (('item', 'location', 'customer', 'year','date_type','date_number'),)
         verbose_name = _('forecast_year')
         verbose_name_plural = _('forecast_years')
 
@@ -1554,6 +1554,7 @@ class Forecast(AuditModel, ForecastCommentOperation):
     )
     version = models.ForeignKey(ForecastVersion, verbose_name=_('forecast version'),
                                 db_index=True, related_name='forecast_version', on_delete=models.CASCADE)
+
     # 解析过的时间, 通过 date_type + date number
     parsed_date = models.DateTimeField(_('parsed_date'), editable=False, db_index=True, default=timezone.now)
 
@@ -1573,8 +1574,8 @@ class Forecast(AuditModel, ForecastCommentOperation):
 
 
     class Manager(MultiDBManager):
-        def get_by_natural_key(self, item, location, customer,date_type,date_number):
-            return self.get(item=item, location=location, customer=customer,date_type=date_type,date_number=date_number)
+        # def get_by_natural_key(self, item, location, customer,year,date_type,date_number,version_id):
+        #     return self.get(item=item, location=location, customer=customer,year=year,date_type=date_type,date_number=date_number,version_id=version_id)
 
         # 批量创建复写
         def bulk_create(self, objs, batch_size=None):
@@ -1583,8 +1584,8 @@ class Forecast(AuditModel, ForecastCommentOperation):
             super(Forecast.Manager, self).bulk_create(objs,batch_size)
 
 
-    def natural_key(self):
-        return (self.item, self.location, self.customer,self.date_type,self.date_number)
+    # def natural_key(self):
+    #     return (self.item, self.location, self.customer,self.year,self.date_type,self.date_number,self.version_id)
 
     def set_parsed_date(self):
         self.parsed_date = Forecast.parse_date(self.date_type, self.year,   self.date_number)
@@ -1597,7 +1598,7 @@ class Forecast(AuditModel, ForecastCommentOperation):
 
     class Meta(AuditModel.Meta):
         db_table = 'forecast'
-        unique_together = (('item', 'location', 'customer', 'date_number', 'version'),)
+        unique_together = (('item', 'location', 'customer', 'year', 'date_type', 'date_number', 'version'),)
         verbose_name = _('forecast')
         verbose_name_plural = _('forecasts')
 
