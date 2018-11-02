@@ -82,7 +82,12 @@ class ForecastCompare(View):
 
         count = float(pageObjectsQ.count())
         page = 'page' in request.GET and int(request.GET['page']) or 1
-        total_pages = math.ceil(count) / request.pagesize
+        total_pages = math.ceil(float(count) / request.pagesize)
+        if page > total_pages:
+            page = total_pages
+        if page < 1:
+            page = 1
+
         cnt = (page - 1) * request.pagesize+1
 
         pageObjects = pageObjectsQ[cnt - 1: cnt + request.pagesize]
