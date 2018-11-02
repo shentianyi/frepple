@@ -9,59 +9,69 @@
 {% block content %}
 {% block before_table %}{% endblock %}
 
-<div class="row pull-right" style="margin: 20px;">
-    <!--操作内容-->
-    {% if not is_popup %}
-        <button class="btn btn-xs btn-default btn-table-icon" id="table" onclick="transferModeAndType('shape', 'table')" data-toggle="tooltip"
+<div class="row" style="margin: 20px;">
+
+    <div>预测对比-汇总</div>
+
+    <div class="pull-right">
+        <!--操作内容-->
+        {% if not is_popup %}
+        <button class="btn btn-xs btn-default btn-table-icon" id="table" onclick="transferModeAndType('shape', 'table')"
+                data-toggle="tooltip"
                 data-placement="top" data-original-title="表格">
             <!--<span class="fa fa-search"></span>-->
             <img src="{{STATIC_URL}}img/forecast/table_active.png" alt="表格">
         </button>
-    {% endif  %}
+        {% endif %}
 
-    {% if not is_popup %}
-        <button class="btn btn-xs btn-default btn-table-icon" id="graph" onclick="transferModeAndType('shape', 'graph')" data-toggle="tooltip"
+        {% if not is_popup %}
+        <button class="btn btn-xs btn-default btn-table-icon" id="graph" onclick="transferModeAndType('shape', 'graph')"
+                data-toggle="tooltip"
                 data-placement="top" data-original-title="图形">
             <!--<span class="fa fa-search"></span>-->
             <img src="{{STATIC_URL}}img/forecast/graph.png" alt="图形">
         </button>
-    {% endif  %}
+        {% endif %}
 
         <!--操作内容-->
         <!--查询-->
-    <!--操作内容-->
-    {% if not is_popup %}
-        <button class="btn btn-xs btn-default btn-table-icon" id="aggre" onclick="transferModeAndType('agg', 'aggre')" data-toggle="tooltip"
+        <!--操作内容-->
+        {% if not is_popup %}
+        <button class="btn btn-xs btn-default btn-table-icon" id="aggre" onclick="transferModeAndType('agg', 'aggre')"
+                data-toggle="tooltip"
                 data-placement="top" data-original-title="汇总">
             <!--<span class="fa fa-search"></span>-->
             <img src="{{STATIC_URL}}img/forecast/aggre_active.png" alt="汇总">
         </button>
-    {% endif  %}
+        {% endif %}
 
-    {% if not is_popup %}
-        <button class="btn btn-xs btn-default btn-table-icon" id="detail" onclick="transferModeAndType('agg', 'detail')" data-toggle="tooltip"
+        {% if not is_popup %}
+        <button class="btn btn-xs btn-default btn-table-icon" id="detail" onclick="transferModeAndType('agg', 'detail')"
+                data-toggle="tooltip"
                 data-placement="top" data-original-title="明细">
             <!--<span class="fa fa-search"></span>-->
             <img src="{{STATIC_URL}}img/forecast/detail.png" alt="明细">
         </button>
-    {% endif  %}
+        {% endif %}
 
-    {% if not is_popup %}
+        {% if not is_popup %}
         <button class="btn btn-xs btn-default btn-table-icon" id="filter" onclick="showFilter()" data-toggle="tooltip"
                 data-placement="top" data-original-title="{% trans 'filter data'|capfirst|force_escape %}">
             <!--<span class="fa fa-search"></span>-->
             <img src="{{STATIC_URL}}img/forecast/search.png" alt="{% trans 'filter data'|capfirst|force_escape %}">
         </button>
 
-    {% endif  %}
+        {% endif %}
 
-    {% if not is_popup %}
-        <button class="btn btn-xs btn-default btn-table-icon" id="download" onclick="Forecast.download()" data-toggle="tooltip"
+        {% if not is_popup %}
+        <button class="btn btn-xs btn-default btn-table-icon" id="download" onclick="Forecast.download()"
+                data-toggle="tooltip"
                 data-placement="top" data-original-title="下载">
             <!--<span class="fa fa-search"></span>-->
             <img src="{{STATIC_URL}}img/forecast/download.png" alt="下载">
         </button>
-    {% endif  %}
+        {% endif %}
+    </div>
 </div>
 
 <div class="row">
@@ -95,15 +105,14 @@
                     break;
             }
 
-
-//            var postdata = $("#grid").jqGrid('getGridParam', 'postData');
             $("#" + value).find('img').attr('src', '{{STATIC_URL}}img/forecast/' + value + '_active.png');
 
             queryForecastCompare(currentMode, currentType)
         }
 
         function queryForecastCompare(mode, type) {
-            var hide_customer= type === 'detail' ? false : true
+            var hide_customer = type === 'detail' ? false : true;
+            var hide_table_column = mode === 'table' ? false : true;
 
             var tableColModel = [
             // 为了查询
@@ -145,39 +154,51 @@
             {
                 name: 'year_qty',
                 label: '年初计划量',
-                search:false
+                search:false,
+                hidden: hide_table_column
             },
             {
                 name: 'last_qty',
                 label: '上月预测',
-                search:false
+                search:false,
+                hidden: hide_table_column
             },
             {
                 name: 'current_qty',
                 label: '当月预测',
-                search:false
+                search:false,
+                hidden: hide_table_column
             },
             {
                 name: 'next_qty',
                 label: '下月预测',
-                search:false
+                search:false,
+                hidden: hide_table_column
             },
             {
                 name: 'current_year_qty',
                 label: '当月VS年初',
-                search:false
+                search:false,
+                hidden: hide_table_column
             },
             {
                 name: 'current_last_qty',
                 label: '当月VS上月',
-                search:false
+                search:false,
+                hidden: hide_table_column
             },
             {
                 name: 'current_next_qty',
                 label: '当月VS下月',
-                search:false
+                search:false,
+                hidden: hide_table_column
             },
-
+            {
+                name: 'graph',
+                label: '图',
+                search: false,
+                hidden: !hide_table_column
+            }
         ];
             $("#grid").GridDestroy();
             $("#content-main").append('<table id="grid" class="table table-striped pivotgrid"></table>');
@@ -216,6 +237,51 @@
                     searchOperators: true,
                     zIndex: 5000,
                     width: 550
+                },
+                loadComplete: function() {
+
+                    if(currentMode === 'graph'){
+                        var ret = jQuery("#grid").jqGrid('getRowData');
+                        console.log(ret);
+
+                        for(var i = 0; i < ret.length; i++){
+                            var graphDom = $('#grid').find('tr').eq(i + 1).find("[aria-describedby=grid_graph]");
+
+                            graphDom.css('height', '100px');
+
+                            var myChart = echarts.init(graphDom[0]);
+
+                            var option = {
+                                title: {
+                                    show: false
+                                },
+                                tooltip: {
+                                    position: [0, 0]
+                                },
+                                legend: {
+                                    show: false
+                                },
+                                xAxis: {
+                                    data: ["上月预测","当月预测", "下月预测"]
+                                },
+                                yAxis: {
+                                    show: false,
+                                },
+                                series: [{
+                                    name: '年初计划值',
+                                    type: 'line',
+                                    data: [ret[i].year_qty, ret[i].year_qty, ret[i].year_qty]
+                                },
+                                {
+                                    name: '预测值',
+                                    type: 'bar',
+                                    data: [ret[i].last_qty, ret[i].current_qty, ret[i].next_qty]
+                                }]
+                            };
+
+                            myChart.setOption(option);
+                        }
+                    }
                 }
             });
         }
