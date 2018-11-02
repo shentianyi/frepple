@@ -28,7 +28,7 @@
         // 表值
         {
             name: 'item__nr',
-            label: '物料',
+            label: '物料编码',
         },
         {
             name: 'location__nr',
@@ -36,7 +36,7 @@
         },
         {
             name: 'customer__nr',
-            label: '客户',
+            label: '客户代码',
             hidden: hide_customer,
         },
         {
@@ -143,12 +143,21 @@
 {% block before_table %}{% endblock %}
 <div class="row">
 
-    <!--操作内容-->
+        <!--操作内容-->
+        <!--查询-->
         <button class="btn btn-xs btn-default btn-table-icon" id="filter" onclick="showFilter()" data-toggle="tooltip"
                 data-placement="top" data-original-title="{% trans 'filter data'|capfirst|force_escape %}">
             <!--<span class="fa fa-search"></span>-->
             <img src="{{STATIC_URL}}img/table/filter.png" alt="{% trans 'filter data'|capfirst|force_escape %}">
         </button>
+
+     <!--导出-->
+      <button class="btn btn-xs btn-default btn-table-icon" onclick="grid.showExport(true)" data-toggle="tooltip"
+            data-placement="top"
+            data-original-title="{% trans 'export as CSV or Excel file'|capfirst|force_escape %}">
+        <!--<span class="fa fa-arrow-down"></span>-->
+        <img src="{{STATIC_URL}}img/table/export.png" alt="{% trans 'export as CSV or Excel file'|capfirst|force_escape %}">
+    </button>
 </div>
 
 
