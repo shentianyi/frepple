@@ -945,7 +945,6 @@ var grid = {
                 skipped++;
         }
 
-        debugger
 
         var result = {};
         var filter = $('#grid').getGridParam("postData").filters;

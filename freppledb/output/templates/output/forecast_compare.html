@@ -6,8 +6,26 @@
 <script type="text/javascript">
     var reportkey = '{{reportkey|safe}}';
 
-    var hide_client= {%if report_type == "detail"%}false{%else%}true{%endif%};
+    var hide_customer= {%if report_type == "detail"%}false{%else%}true{%endif%};
     var tableColModel = [
+        // 为了查询
+        {
+            name: 'year',
+            label: '年份',
+            hidden: true,
+            alwayshidden: true,
+            searchoptions: {searchhidden: true, sopt: ['eq']}, // 只可以等于
+        },
+        {
+
+            name: 'month',
+            label: '月份',
+            hidden: true,
+            alwayshidden:true,
+            searchoptions: {searchhidden: true, sopt: ['eq']}, // 只可以等于
+        },
+
+        // 表值
         {
             name: 'item__nr',
             label: '物料',
@@ -17,33 +35,54 @@
             label: '地点',
         },
         {
-            name: 'client__nr',
+            name: 'customer__nr',
             label: '客户',
-            hidden: hide_client,
+            hidden: hide_customer,
         },
         {
             name: 'total_year_qty',
-            label: '全年计划量'
+            label: '全年计划量',
+            search:false
         },
         {
             name: 'year_qty',
-            label: '年初计划量'
+            label: '年初计划量',
+            search:false
         },
         {
-            name: 'last_qty', label: '上月预测'
+            name: 'last_qty',
+            label: '上月预测',
+            search:false
         },
         {
-            name: 'current_year_qty', label: '当月VS年初'
+            name: 'current_qty',
+            label: '当月预测',
+            search:false
         },
         {
-            name: 'current_last_qty', label: '当月VS上月'
+            name: 'next_qty',
+            label: '下月预测',
+            search:false
         },
         {
-            name: 'current_next_qty', label: '当月VS下月'
-        }
+            name: 'current_year_qty',
+            label: '当月VS年初',
+            search:false
+        },
+        {
+            name: 'current_last_qty',
+            label: '当月VS上月',
+            search:false
+        },
+        {
+            name: 'current_next_qty',
+            label: '当月VS下月',
+            search:false
+        },
+
     ];
     $(function () {
-        jQuery("#grid").jqGrid({
+      jQuery("#grid").jqGrid({
             url: (location.href.indexOf("#") != -1 ? location.href.substr(0, location.href.indexOf("#")) : location.href)
                 + (location.search.length > 0 ? "&format=json" : "?format=json"),
             datatype: "json",
@@ -52,6 +91,7 @@
             },
             colModel: tableColModel,
             pager: '#gridpager',
+            rowNum: {{request.pagesize}},
             viewrecords: true,
             sortorder: "asc",
             iconSet: "fontAwesome",
@@ -65,9 +105,10 @@
             onSortCol: grid.saveColumnConfiguration,
             onPaging: grid.saveColumnConfiguration,
             autowidth: true,
+            search:true,
             searching: {
                 multipleSearch: true,
-                multipleGroup: true,
+                multipleGroup: false, // 不可以组搜索
                 closeOnEscape: true,
                 searchOnEnter: true,
                 searchOperators: true,
@@ -77,11 +118,24 @@
         });
     });
 
+    function showFilter() {
+        if ($('#filter').hasClass("disabled")) return;
+        $('.modal').modal('hide');
+        jQuery("#grid").jqGrid('searchGrid', {
+            closeOnEscape: true,
+            multipleSearch: true,
+            multipleGroup: false,
+            overlay: 0,
+            sopt: ['eq', 'ne', 'lt', 'le', 'gt', 'ge', 'bw', 'bn', 'in', 'ni', 'ew', 'en', 'cn', 'nc']
+        });
+    }
     $(window).bind('resize', function () {
         $("#grid")
             .setGridWidth($('#content-main').width())
             .setGridHeight($(window).height() - $("#grid").offset().top);
     });
+
+
 
 </script>
 {% endblock %}
@@ -90,6 +144,11 @@
 <div class="row">
 
     <!--操作内容-->
+        <button class="btn btn-xs btn-default btn-table-icon" id="filter" onclick="showFilter()" data-toggle="tooltip"
+                data-placement="top" data-original-title="{% trans 'filter data'|capfirst|force_escape %}">
+            <!--<span class="fa fa-search"></span>-->
+            <img src="{{STATIC_URL}}img/table/filter.png" alt="{% trans 'filter data'|capfirst|force_escape %}">
+        </button>
 </div>
 
 

@@ -1063,12 +1063,12 @@ class GridReport(View):
       if tmp:
         yield tmp
     yield '"rows":[\n'
-    cnt = (page - 1) * pagesize
+    cnt = (page - 1) * pagesize+1
     first = True
 
     # GridReport
     fields = [ i.field_name for i in reportclass.rows if i.field_name ]
-    for i in hasattr(reportclass, 'query') and reportclass.query(request, query[cnt - 1:cnt + request.pagesize]) or query[cnt:cnt + pagesize].values(*fields):
+    for i in hasattr(reportclass, 'query') and reportclass.query(request, query[cnt - 1:cnt + request.pagesize]) or query[cnt-1:cnt + pagesize].values(*fields):
       if first:
         r = [ '{' ]
         first = False
@@ -1951,7 +1951,7 @@ class GridPivot(GridReport):
         page = total_pages
       if page < 1:
         page = 1
-      cnt = (page - 1) * request.pagesize + 1
+      cnt = (page - 1) * request.pagesize+1
       if isinstance(reportclass.basequeryset, collections.Callable):
         query = reportclass.query(
           request,

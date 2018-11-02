@@ -1418,7 +1418,7 @@ class ForecastYear(AuditModel):
     date_type = models.CharField(
         _('date_type'), max_length=20, choices=date_types, default='W', null=True, blank=True)
 
-    ratio = models.DecimalField(_('ratio %'), max_digits=20, decimal_places=8, default='100', null=True, blank=True)
+    ratio = models.DecimalField(_('forecast ratio'), max_digits=20, decimal_places=8, default=100, null=False, blank=True)
     normal_qty = models.DecimalField(_('normal qty'), max_digits=20, decimal_places=8)
     new_product_plan_qty = models.DecimalField(_('new product plan qty'), max_digits=20, decimal_places=8, null=True,
                                                blank=True)
@@ -1541,7 +1541,7 @@ class Forecast(AuditModel, ForecastCommentOperation):
     date_type = models.CharField(
         _('date_type'), max_length=20, choices=ForecastYear.date_types, default='W', null=True, blank=True)
 
-    ratio = models.DecimalField(_('ratio %'), max_digits=20, decimal_places=8, default='100', null=True, blank=True)
+    ratio = models.DecimalField(_('forecast ratio'), max_digits=20, decimal_places=8, default=100, null=False, blank=True)
     normal_qty = models.DecimalField(_('normal qty'), max_digits=20, decimal_places=8)
     new_product_plan_qty = models.DecimalField(_('new product plan qty'), max_digits=20, decimal_places=8, null=True,
                                                blank=True)
