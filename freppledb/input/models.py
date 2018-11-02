@@ -42,7 +42,7 @@ class Calendar(AuditModel):
     name = models.CharField(_('name'), max_length=300, primary_key=True)
     defaultvalue = models.DecimalField(
         _('default value'), max_digits=20,
-        decimal_places=8, default='0.00', null=True, blank=True,
+        decimal_places=8, default=0.00, null=True, blank=True,
         help_text=_('Value to be used when no entry is effective')
     )
     description = models.CharField(
@@ -81,10 +81,10 @@ class CalendarBucket(AuditModel):
     startdate = models.DateField(_('start date'), null=True, blank=True)
     enddate = models.DateField(_('end date'), null=True, blank=True, default=datetime(2030, 12, 31))
     value = models.DecimalField(
-        _('value'), default='0.00', blank=True,
+        _('value'), default=0.00, blank=True,
         max_digits=20, decimal_places=8
     )
-    priority = models.IntegerField(_('priority'), default='0', blank=True, null=True)
+    priority = models.IntegerField(_('priority'), default=0, blank=True, null=True)
 
     # . Translators: Translation included with Django
     monday = models.BooleanField(_('Monday'), blank=True, default=True)
@@ -396,9 +396,9 @@ class ItemSuccessor(AuditModel):
         db_index=True, related_name='itemsuccessor_successor',
         null=False, blank=False, on_delete=models.CASCADE)
 
-    priority = models.IntegerField(_('priority'), default='0')
+    priority = models.IntegerField(_('priority'), default=0)
     ratio = models.DecimalField(
-        _('ratio %'), max_digits=20, decimal_places=8, default='100.00',
+        _('ratio'), max_digits=20, decimal_places=8, default=100.00,
     )
 
     effective_start = models.DateTimeField(
@@ -463,7 +463,7 @@ class Operation(AuditModel):
     )
     min_num_per = models.DecimalField(
         _('min num per'), max_digits=20, decimal_places=8,
-        null=True, blank=True, default='1.0',
+        null=True, blank=True, default=1.0,
         help_text=_("A minimum quantity for operationplans")
     )
     max_num_per = models.DecimalField(
@@ -718,7 +718,7 @@ class SetupRule(AuditModel):
         SetupMatrix, verbose_name=_('setup matrix'), related_name='rules',
         on_delete=models.CASCADE
     )
-    priority = models.IntegerField(_('priority'), default='0')
+    priority = models.IntegerField(_('priority'), default=0)
     fromsetup = models.CharField(
         _('from setup'), max_length=300, blank=True, null=True,
         help_text=_("Name of the old setup (wildcard characters are supported)")
@@ -808,12 +808,12 @@ class Resource(AuditModel, HierarchyModel):
         help_text=_("Cost for using 1 unit of the resource for 1 hour"))
 
     efficiency = models.DecimalField(
-        _('efficiency %'), null=True, blank=True, max_digits=20, decimal_places=8, default='100.00',
+        _('efficiency'), null=True, blank=True, max_digits=20, decimal_places=8, default=100.00,
         help_text=_("Efficiency percentage of the resource")
     )
 
     efficiency_calendar = models.ForeignKey(
-        Calendar, verbose_name=_('efficiency % calendar'), related_name='resource_efficiency_calendar',
+        Calendar, verbose_name=_('efficiency calendar'), related_name='resource_efficiency_calendar',
         null=True, blank=True, on_delete=models.CASCADE,
         help_text=_('Calendar defining the efficiency percentage of the resource varying over time')
     )
@@ -963,7 +963,7 @@ class OperationMaterial(AuditModel):
         help_text=_('Priority of this operation material in a group of alternates')
     )
     quantity = models.DecimalField(
-        _('quantity'), default='1.00', blank=True, null=True,
+        _('quantity'), default=1.00, blank=True, null=True,
         max_digits=20, decimal_places=8,
         help_text=_('Quantity to consume or produce per operationplan unit')
     )
@@ -1046,7 +1046,7 @@ class OperationResource(AuditModel):
         blank=False, null=False, on_delete=models.CASCADE
     )
     quantity = models.DecimalField(
-        _('quantity'), default='1.00',
+        _('quantity'), default=1.00,
         max_digits=20, decimal_places=8
     )
     priority = models.IntegerField(
@@ -1183,16 +1183,16 @@ class ItemSupplier(AuditModel):
     cost = models.DecimalField(_('cost'), max_digits=20, decimal_places=8)
     monetary_unit = models.CharField(_('monetary unit'), max_length=20)
     cost_unit = models.DecimalField(_('cost unit'), max_digits=20, decimal_places=8)
-    priority = models.IntegerField(_('priority'), default='0', help_text=_('Priority among all alternates'))
-    ratio = models.DecimalField(_('ratio %'), max_digits=20, decimal_places=8, default='100', null=True, blank=True)
+    priority = models.IntegerField(_('priority'), default=0, help_text=_('Priority among all alternates'))
+    ratio = models.DecimalField(_('ratio'), max_digits=20, decimal_places=8, default=100, null=True, blank=True)
     moq = models.DecimalField(_('MOQ'), max_digits=20, decimal_places=8)
-    product_time = models.DecimalField(_('product time'), max_digits=20, decimal_places=8, default='0.00', null=True,
+    product_time = models.DecimalField(_('product time'), max_digits=20, decimal_places=8, default=0.00, null=True,
                                        blank=True)
-    load_time = models.DecimalField(_('load time'), null=True, max_digits=20, decimal_places=8, default='0.00',
+    load_time = models.DecimalField(_('load time'), null=True, max_digits=20, decimal_places=8, default=0.00,
                                     blank=True)
-    transit_time = models.DecimalField(_('transit time'), max_digits=20, decimal_places=8, default='0.00', null=True,
+    transit_time = models.DecimalField(_('transit time'), max_digits=20, decimal_places=8, default=0.00, null=True,
                                        blank=True)
-    receive_time = models.DecimalField(_('receive time'), max_digits=20, decimal_places=8, default='0.00', null=True,
+    receive_time = models.DecimalField(_('receive time'), max_digits=20, decimal_places=8, default=0.00, null=True,
                                        blank=True)
     mpq = models.DecimalField(_('mpq'), max_digits=20, decimal_places=8, null=True, blank=True)
     earliest_order_date = models.DateField(_('earliest order date'), null=True, blank=True)
@@ -1303,23 +1303,23 @@ class ItemDistribution(AuditModel):
         _('cost'), max_digits=20, decimal_places=8, help_text=_("Shipping cost per unit"))
     load_time = models.DecimalField(
         _('load time'), null=True, blank=True,
-        max_digits=20, decimal_places=8, default='0.0'
+        max_digits=20, decimal_places=8, default=0.0
     )
     transit_time = models.DecimalField(
         _('transit time'), null=True, blank=True,
-        max_digits=20, decimal_places=8, default='0.0'
+        max_digits=20, decimal_places=8, default=0.0
     )
     receive_time = models.DecimalField(
         _('receive time'), null=True, blank=True,
-        max_digits=20, decimal_places=8, default='0.0'
+        max_digits=20, decimal_places=8, default=0.0
     )
     size_minimum = models.DecimalField(
         _('size minimum'), null=True, blank=True,
-        max_digits=20, decimal_places=8, default='1.0'
+        max_digits=20, decimal_places=8, default=1.0
     )
     size_multiple = models.DecimalField(
         _('size multiple'), null=True, blank=True,
-        max_digits=20, decimal_places=8, default='0.0'
+        max_digits=20, decimal_places=8, default=0.0
     )
     priority = models.IntegerField(
         _('priority'), default=1, null=True, blank=True,
@@ -1332,7 +1332,7 @@ class ItemDistribution(AuditModel):
     )
     resource_qty = models.DecimalField(
         _('resource quantity'), null=True, blank=True,
-        max_digits=20, decimal_places=8, default='1.0',
+        max_digits=20, decimal_places=8, default=1.0,
         help_text=_("Resource capacity consumed per distributed unit")
     )
     effective_start = models.DateTimeField(
@@ -1726,11 +1726,11 @@ class OperationPlan(AuditModel):
     )
     quantity = models.DecimalField(
         _('quantity'), max_digits=20,
-        decimal_places=8, default='1.00'
+        decimal_places=8, default=1.00
     )
     color = models.DecimalField(
         _('color'), max_digits=20, null=True, blank=True,
-        decimal_places=8, default='0.00'
+        decimal_places=8, default=0.00
     )
     startdate = models.DateTimeField(
         _('start date'), help_text=_('start date'),
