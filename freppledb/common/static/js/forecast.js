@@ -8,7 +8,7 @@ Forecast.operate = function (content_type, type, modalId) {
         $("#" + modalId).modal('show');
 
         // I18n
-        var title =gettext(type);
+        var title = gettext(type);
 
         $("#" + modalId).find("#operateModalTitle").html(title);
         $("#" + modalId).find("#operate_modal_confirm").unbind('click').bind('click', function () {
@@ -54,7 +54,6 @@ Forecast.operate = function (content_type, type, modalId) {
     }
 };
 
-
 Forecast.showDetail = function (id, type) {
     $("#remarkDetail").modal('show');
 
@@ -69,12 +68,12 @@ Forecast.showDetail = function (id, type) {
         },
         success: function (data) {
             var html = '';
-            for(var i = 0; i< data.length; i++){
-                html += '<tr><td>'+(i+1)+'</td>' +
-                    '<td>'+data[i].operation+'</td>' +
-                    '<td>'+data[i].comment+'</td>' +
-                    '<td>'+data[i].user__username+'</td>' +
-                    '<td>'+data[i].created_at+'</td>' +
+            for (var i = 0; i < data.length; i++) {
+                html += '<tr><td>' + (i + 1) + '</td>' +
+                    '<td>' + data[i].operation + '</td>' +
+                    '<td>' + data[i].comment + '</td>' +
+                    '<td>' + data[i].user__username + '</td>' +
+                    '<td>' + data[i].created_at + '</td>' +
                     '</tr>';
             }
 
@@ -85,4 +84,17 @@ Forecast.showDetail = function (id, type) {
             alert(error.status + "\n" + error.responseText)
         }
     })
+};
+
+
+Forecast.download = function (mode, type, queryJson) {
+    var url =  'url?mode=' + mode + '&report_type=' + type;
+
+
+
+
+
+    // url +=
+
+    window.location.href = url;
 };
