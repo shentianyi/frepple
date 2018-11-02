@@ -1417,7 +1417,7 @@ class ForecastYear(AuditModel):
     date_type = models.CharField(
         _('date_type'), max_length=20, choices=date_types, default='W', null=True, blank=True)
 
-    ratio = models.DecimalField(_('ratio %'), max_digits=20, decimal_places=8, default='100', null=True, blank=True)
+    ratio = models.DecimalField(_('quota ratio %'), max_digits=20, decimal_places=8, default='100', null=True, blank=True)
     normal_qty = models.DecimalField(_('normal qty'), max_digits=20, decimal_places=8)
     new_product_plan_qty = models.DecimalField(_('new product plan qty'), max_digits=20, decimal_places=8, null=True,
                                                blank=True)
@@ -1472,16 +1472,14 @@ class ForecastCommentOperation:
 
 
 class ForecastVersion(AuditModel, ForecastCommentOperation):
-    # id = models.AutoField(_('id'), help_text=_('Unique identifier'), primary_key=True)
-    # nr = models.CharField(_('nr'), max_length=300, db_index=True, unique=True)
     nr = models.CharField(_('nr'), max_length=300, editable=False, db_index=True,
                           primary_key=True)
+    status = models.CharField(_('status'), max_length=20, choices=ForecastCommentOperation.statuses, default='init')
     create_user = models.ForeignKey(
         User, verbose_name=_('create_user'),
         db_index=True, related_name='forecastversion_create_user',
         null=False, blank=False, on_delete=models.CASCADE
     )
-    status = models.CharField(_('status'), max_length=20, choices=ForecastCommentOperation.statuses, default='init')
 
     def __str__(self):
         return self.nr
@@ -1555,6 +1553,8 @@ class Forecast(AuditModel, ForecastCommentOperation):
 
     class Meta(AuditModel.Meta):
         db_table = 'forecast'
+        # unique_together = (('item', 'location', 'customer', 'year', 'date_number', 'date_type', 'ratio', 'normal_qty',
+        #                     'new_product_plan_qty', 'promotion_qty', 'version'),)
         unique_together = (('item', 'location', 'customer', 'date_number', 'version'),)
         verbose_name = _('forecast')
         verbose_name_plural = _('forecasts')

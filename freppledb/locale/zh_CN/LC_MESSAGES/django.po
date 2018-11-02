@@ -80,8 +80,14 @@ msgstr "年初预测"
 msgid "forecastversions"
 msgstr "预测版本"
 
+msgid "forecast compare"
+msgstr "预测对比"
+
 msgid "version nr"
 msgstr "版本号"
+
+msgid "forecast version"
+msgstr "预测版本"
 
 msgid "normal qty"
 msgstr "手工数量"
@@ -307,7 +313,7 @@ msgstr "退市计划"
 
 #: input/view.py:910
 msgid "item_display"
-msgstr "物料"
+msgstr "物料编码"
 
 #: input/models.py:911
 msgid "supplier_display"
@@ -331,6 +337,9 @@ msgstr "比重"
 
 msgid "ratio %"
 msgstr "比重"
+
+msgid "quota ratio %"
+msgstr "配额系数"
 
 #: input/models.py:976 input/views.py:916
 msgid "MOQ"

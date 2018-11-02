@@ -3154,7 +3154,7 @@ function import_custom_show(modalcontentId, myUrl, title, paragraph, multiple, f
                             window.location.reload();
                         }else {
                             var el = $('#uploadResponse');
-                            el.html(data);
+                            el.html(data.message);
                             if (el.attr('data-scrolled') !== "true") {
                                 el.scrollTop(el[0].scrollHeight - el.height());
                             }

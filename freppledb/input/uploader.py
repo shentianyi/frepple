@@ -19,7 +19,7 @@ class ForecastUploader:
 
         try:
             for name, file in request.FILES.items():
-                print(name)
+                # print(name)
                 # 读excel
                 wb = load_workbook(filename=file, read_only=True, data_only=True)
                 # 第一个sheet
@@ -151,6 +151,7 @@ class ForecastUploader:
                         message.result = True
                         message.message = '上传成功'
         except Exception as e:
+            message.result = False
             message.message = str(e)
         return message
 

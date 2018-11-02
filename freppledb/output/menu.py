@@ -32,7 +32,7 @@ import freppledb.output.views.kpi
 
 menu.addItem(
   "sales", "forecast report", url="/data/output/forecast/compare/",
-  report=freppledb.output.views.forecast.ForecastCompare, index=180,
+  report=freppledb.output.views.forecast.ForecastCompare, index=103,
   dependencies=[Forecast]
 )
 
