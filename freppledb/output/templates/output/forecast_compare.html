@@ -3,165 +3,246 @@
 
 {% block extrahead %}{{block.super}}
 <!--head中的内容,如js-->
-<script type="text/javascript">
-    var reportkey = '{{reportkey|safe}}';
+<script src="{{STATIC_URL}}js/forecast.js" type="application/javascript"></script>
 
-    var hide_customer= {%if report_type == "detail"%}false{%else%}true{%endif%};
-    var tableColModel = [
-        // 为了查询
-        {
-            name: 'year',
-            label: '年份',
-            hidden: true,
-            alwayshidden: true,
-            searchoptions: {searchhidden: true, sopt: ['eq']}, // 只可以等于
-        },
-        {
-
-            name: 'month',
-            label: '月份',
-            hidden: true,
-            alwayshidden:true,
-            searchoptions: {searchhidden: true, sopt: ['eq']}, // 只可以等于
-        },
-
-        // 表值
-        {
-            name: 'item__nr',
-            label: '物料',
-        },
-        {
-            name: 'location__nr',
-            label: '地点',
-        },
-        {
-            name: 'customer__nr',
-            label: '客户',
-            hidden: hide_customer,
-        },
-        {
-            name: 'total_year_qty',
-            label: '全年计划量',
-            search:false
-        },
-        {
-            name: 'year_qty',
-            label: '年初计划量',
-            search:false
-        },
-        {
-            name: 'last_qty',
-            label: '上月预测',
-            search:false
-        },
-        {
-            name: 'current_qty',
-            label: '当月预测',
-            search:false
-        },
-        {
-            name: 'next_qty',
-            label: '下月预测',
-            search:false
-        },
-        {
-            name: 'current_year_qty',
-            label: '当月VS年初',
-            search:false
-        },
-        {
-            name: 'current_last_qty',
-            label: '当月VS上月',
-            search:false
-        },
-        {
-            name: 'current_next_qty',
-            label: '当月VS下月',
-            search:false
-        },
-
-    ];
-    $(function () {
-      jQuery("#grid").jqGrid({
-            url: (location.href.indexOf("#") != -1 ? location.href.substr(0, location.href.indexOf("#")) : location.href)
-                + (location.search.length > 0 ? "&format=json" : "?format=json"),
-            datatype: "json",
-            jsonReader: {
-                repeatitems: false
-            },
-            colModel: tableColModel,
-            pager: '#gridpager',
-            rowNum: {{request.pagesize}},
-            viewrecords: true,
-            sortorder: "asc",
-            iconSet: "fontAwesome",
-            guiStyle: "bootstrapPrimary",
-            hidegrid: false,
-            resizeStop: grid.saveColumnConfiguration,
-            scrollRows: true,
-            multiSort: true,
-            maxSortColumns: 3,
-            viewSort: true,
-            onSortCol: grid.saveColumnConfiguration,
-            onPaging: grid.saveColumnConfiguration,
-            autowidth: true,
-            search:true,
-            searching: {
-                multipleSearch: true,
-                multipleGroup: false, // 不可以组搜索
-                closeOnEscape: true,
-                searchOnEnter: true,
-                searchOperators: true,
-                zIndex: 5000,
-                width: 550
-            }
-        });
-    });
-
-    function showFilter() {
-        if ($('#filter').hasClass("disabled")) return;
-        $('.modal').modal('hide');
-        jQuery("#grid").jqGrid('searchGrid', {
-            closeOnEscape: true,
-            multipleSearch: true,
-            multipleGroup: false,
-            overlay: 0,
-            sopt: ['eq', 'ne', 'lt', 'le', 'gt', 'ge', 'bw', 'bn', 'in', 'ni', 'ew', 'en', 'cn', 'nc']
-        });
-    }
-    $(window).bind('resize', function () {
-        $("#grid")
-            .setGridWidth($('#content-main').width())
-            .setGridHeight($(window).height() - $("#grid").offset().top);
-    });
-
-
-
-</script>
 {% endblock %}
 {% block content %}
 {% block before_table %}{% endblock %}
-<div class="row">
 
+<div class="row pull-right" style="margin: 20px;">
     <!--操作内容-->
+    {% if not is_popup %}
+        <button class="btn btn-xs btn-default btn-table-icon" id="table" onclick="transferModeAndType('shape', 'table')" data-toggle="tooltip"
+                data-placement="top" data-original-title="表格">
+            <!--<span class="fa fa-search"></span>-->
+            <img src="{{STATIC_URL}}img/forecast/table_active.png" alt="表格">
+        </button>
+    {% endif  %}
+
+    {% if not is_popup %}
+        <button class="btn btn-xs btn-default btn-table-icon" id="graph" onclick="transferModeAndType('shape', 'graph')" data-toggle="tooltip"
+                data-placement="top" data-original-title="图形">
+            <!--<span class="fa fa-search"></span>-->
+            <img src="{{STATIC_URL}}img/forecast/graph.png" alt="图形">
+        </button>
+    {% endif  %}
+
+        <!--操作内容-->
+        <!--查询-->
+    <!--操作内容-->
+    {% if not is_popup %}
+        <button class="btn btn-xs btn-default btn-table-icon" id="aggre" onclick="transferModeAndType('agg', 'aggre')" data-toggle="tooltip"
+                data-placement="top" data-original-title="汇总">
+            <!--<span class="fa fa-search"></span>-->
+            <img src="{{STATIC_URL}}img/forecast/aggre_active.png" alt="汇总">
+        </button>
+    {% endif  %}
+
+    {% if not is_popup %}
+        <button class="btn btn-xs btn-default btn-table-icon" id="detail" onclick="transferModeAndType('agg', 'detail')" data-toggle="tooltip"
+                data-placement="top" data-original-title="明细">
+            <!--<span class="fa fa-search"></span>-->
+            <img src="{{STATIC_URL}}img/forecast/detail.png" alt="明细">
+        </button>
+    {% endif  %}
+
+    {% if not is_popup %}
         <button class="btn btn-xs btn-default btn-table-icon" id="filter" onclick="showFilter()" data-toggle="tooltip"
                 data-placement="top" data-original-title="{% trans 'filter data'|capfirst|force_escape %}">
             <!--<span class="fa fa-search"></span>-->
-            <img src="{{STATIC_URL}}img/table/filter.png" alt="{% trans 'filter data'|capfirst|force_escape %}">
+            <img src="{{STATIC_URL}}img/forecast/search.png" alt="{% trans 'filter data'|capfirst|force_escape %}">
         </button>
-</div>
 
+    {% endif  %}
+
+    {% if not is_popup %}
+        <button class="btn btn-xs btn-default btn-table-icon" id="download" onclick="Forecast.download()" data-toggle="tooltip"
+                data-placement="top" data-original-title="下载">
+            <!--<span class="fa fa-search"></span>-->
+            <img src="{{STATIC_URL}}img/forecast/download.png" alt="下载">
+        </button>
+    {% endif  %}
+</div>
 
 <div class="row">
     <!--表格 内容-->
     <div id="content-main" class="col-md-12" style="min-height: 150px; margin-top: 0.7em">
-        <table id="grid" class="table table-striped pivotgrid"></table>
     </div>
+
     <div id="gridpager" class="col-md-12"></div>
 </div>
 
-{% block after_table %}{% endblock %}
+{% block after_table %}
+    <script type="text/javascript">
+        var currentMode = 'table';
+        var currentType = 'aggre';
 
+        queryForecastCompare(currentMode, currentType);
+
+        var reportkey = '{{reportkey|safe}}';
+
+        function transferModeAndType(category, value) {
+            switch (category){
+                case "shape":
+                    $("#" + currentMode).find('img').attr('src', '{{STATIC_URL}}img/forecast/' + currentMode + '.png');
+                    currentMode = value;
+                    break;
+                case "agg":
+                    $("#" + currentType).find('img').attr('src', '{{STATIC_URL}}img/forecast/' + currentType + '.png');
+                    currentType = value;
+                    break;
+                default:
+                    break;
+            }
+
+            $("#" + value).find('img').attr('src', '{{STATIC_URL}}img/forecast/' + value + '_active.png');
+
+            queryForecastCompare(currentMode, currentType)
+        }
+
+        function queryForecastCompare(mode, type) {
+            var hide_customer= type === 'detail' ? false : true
+
+            var tableColModel = [
+            // 为了查询
+            {
+                name: 'year',
+                label: '年份',
+                hidden: true,
+                alwayshidden: true,
+                searchoptions: {searchhidden: true, sopt: ['eq']}, // 只可以等于
+            },
+            {
+
+                name: 'month',
+                label: '月份',
+                hidden: true,
+                alwayshidden:true,
+                searchoptions: {searchhidden: true, sopt: ['eq']}, // 只可以等于
+            },
+
+            // 表值
+            {
+                name: 'item__nr',
+                label: '物料编码',
+            },
+            {
+                name: 'location__nr',
+                label: '地点',
+            },
+            {
+                name: 'customer__nr',
+                label: '客户代码',
+                hidden: hide_customer,
+            },
+            {
+                name: 'total_year_qty',
+                label: '全年计划量',
+                search:false
+            },
+            {
+                name: 'year_qty',
+                label: '年初计划量',
+                search:false
+            },
+            {
+                name: 'last_qty',
+                label: '上月预测',
+                search:false
+            },
+            {
+                name: 'current_qty',
+                label: '当月预测',
+                search:false
+            },
+            {
+                name: 'next_qty',
+                label: '下月预测',
+                search:false
+            },
+            {
+                name: 'current_year_qty',
+                label: '当月VS年初',
+                search:false
+            },
+            {
+                name: 'current_last_qty',
+                label: '当月VS上月',
+                search:false
+            },
+            {
+                name: 'current_next_qty',
+                label: '当月VS下月',
+                search:false
+            },
+
+        ];
+            $("#grid").GridDestroy();
+            $("#content-main").append('<table id="grid" class="table table-striped pivotgrid"></table>');
+
+            jQuery("#grid").jqGrid({
+                url: (location.href.indexOf("#") != -1 ? location.href.substr(0, location.href.indexOf("#")) : location.href)
+                    + (location.search.length > 0 ? "&format=json" : "?format=json") + "&mode=" + mode + "&report_type=" + type,
+                datatype: "json",
+                jsonReader: {
+                    repeatitems: false
+                },
+                colModel: tableColModel,
+                pager: '#gridpager',
+                rownumbers: true,
+                rowNum: {{ request.pagesize }},
+                viewrecords: true,
+                sortorder: "asc",
+                iconSet: "fontAwesome",
+                guiStyle: "bootstrapPrimary",
+                hidegrid: false,
+                resizeStop: grid.saveColumnConfiguration,
+                scrollRows: true,
+                multiSort: true,
+                maxSortColumns: 3,
+                viewSort: true,
+                onSortCol: grid.saveColumnConfiguration,
+                onPaging: grid.saveColumnConfiguration,
+                autowidth: true,
+//                postData: {filters: JSON.stringify({{ request.filters }})},
+                search:true,
+                searching: {
+                    multipleSearch: true,
+                    multipleGroup: false, // 不可以组搜索
+                    closeOnEscape: true,
+                    searchOnEnter: true,
+                    searchOperators: true,
+                    zIndex: 5000,
+                    width: 550
+                }
+            });
+        }
+
+        function showFilter() {
+            if ($('#filter').hasClass("disabled")) return;
+            $('.modal').modal('hide');
+
+            jQuery("#grid").jqGrid('searchGrid', {
+                closeOnEscape: true,
+                multipleSearch: true,
+                multipleGroup: false,
+                overlay: 0,
+                sopt: ['eq', 'ne', 'lt', 'le', 'gt', 'ge', 'bw', 'bn', 'in', 'ni', 'ew', 'en', 'cn', 'nc'],
+                onSearch: function () {
+                    console.log(jQuery("#grid").jqGrid('getGridParam'))
+                    console.log(jQuery("#grid").jqGrid('getGridParam'))
+                }
+            });
+        }
+
+        $(window).bind('resize', function () {
+            $("#grid")
+                .setGridWidth($('#content-main').width())
+                .setGridHeight($(window).height() - $("#grid").offset().top);
+        });
+
+    </script>
+{% endblock %}
 
 {{colmodel}}
 {% endblock %}
