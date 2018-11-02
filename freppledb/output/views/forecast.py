@@ -76,14 +76,15 @@ class ForecastCompare(View):
                     headers.append(cell)
                 ws.append(headers)
 
-                # 写入表体
-                # body_fields = ('item__nr','location__nr','customer__nr','total_year_qty','year_qty','last_qty','current_qty','next_qty','current_year_qty','current_last_qty','current_next_qty')
-                # for data in json['rows']:
-                #     body = []
-                #     for field in body_fields:
-                #
-                #
-
+                # 写入表体, 顺序和
+                body_fields = ('item__nr','location__nr','customer__nr','total_year_qty','year_qty','last_qty','current_qty','next_qty','current_year_qty','current_last_qty','current_next_qty')
+                for data in json['rows']:
+                    body = []
+                    for field in body_fields:
+                        if field in data:
+                            cell = WriteOnlyCell(ws,value=data[field])
+                            body.append(cell)
+                    ws.append(body)
 
                 output = BytesIO()
                 wb.save(output)
