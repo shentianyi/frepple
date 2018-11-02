@@ -80,9 +80,6 @@ msgstr "年初预测"
 msgid "forecastversions"
 msgstr "预测版本"
 
-msgid "forecast compare"
-msgstr "预测对比"
-
 msgid "version nr"
 msgstr "版本号"
 
@@ -341,10 +338,7 @@ msgstr "计价单位"
 msgid "ratio"
 msgstr "比重"
 
-msgid "ratio %"
-msgstr "比重"
-
-msgid "quota ratio %"
+msgid "forecast ratio"
 msgstr "配额系数"
 
 #: input/models.py:976 input/views.py:916
@@ -2889,10 +2883,10 @@ msgstr "换线准备规则矩阵"
 msgid "from setup"
 msgstr "前一个换线准备"
 
-msgid "efficiency %"
+msgid "efficiency"
 msgstr "效率"
 
-msgid "efficiency % calendar"
+msgid "efficiency calendar"
 msgstr "效率日历"
 
 msgid "setupmatrix_display"

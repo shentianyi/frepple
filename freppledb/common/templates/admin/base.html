@@ -64,6 +64,30 @@
       </div>
     </div>
 
+   <!-- 确认弹框 -->
+    <div class="modal fade" id="downloadDialog" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="downloadDialogTitle"> 出口CSV或Excel文件 </h4>
+                </div>
+                <div class="modal-body">
+                    <p id="downloadDialogContent">导出格式</p>
+                    <input type="radio" id="spreadsheet" value="spreadsheet" name="downloadType" checked/>
+                    <label for="spreadsheet">Excel列表</label>
+                    <br/>
+                    <input type="radio" id="csv" value="csv" name="downloadType"/>
+                    <label for="csv">CSV列表</label>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                    <button type="button" id="downloadDialogSubmit" class="btn btn-primary">输出</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div> <!-- end container -->
 {% block modal %}{% endblock %}
 </body>

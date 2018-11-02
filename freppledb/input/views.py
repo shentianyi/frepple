@@ -1024,7 +1024,7 @@ class ItemSupplierList(GridReport):
         GridFieldText('monetary_unit', title=_('monetary unit'), editable=False),
         GridFieldNumber('cost_unit', title=_('cost unit'), editable=False),
         GridFieldInteger('priority', title=_('priority'), editable=False),
-        GridFieldNumber('ratio', title=_('ratio %'),
+        GridFieldNumber('ratio', title=_('ratio'),
                         extra='"formatoptions":{"suffix":" %","defaultValue":"100.00"}', editable=False),
 
         GridFieldNumber('moq', title=_('MOQ'), editable=False),
@@ -1391,7 +1391,7 @@ class ItemSuccessorList(GridReport):
         GridFieldText('item_successor', title=_('item_successor'), field_name='item_successor_id', editable=False,
                       hidden=True),
         GridFieldInteger('priority', title=_('priority'), editable=False),
-        GridFieldNumber('ratio', title=_('ratio %'),
+        GridFieldNumber('ratio', title=_('ratio'),
                         extra='"formatoptions":{"suffix":" %","defaultValue":"100.00"}', editable=False),
 
         GridFieldDateTime('effective_start', title=_('effective start'), editable=False),

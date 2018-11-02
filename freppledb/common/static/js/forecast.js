@@ -86,15 +86,16 @@ Forecast.showDetail = function (id, type) {
     })
 };
 
+Forecast.download = function () {
+    $("#downloadDialog").modal('show');
 
-Forecast.download = function (mode, type, queryJson) {
-    var url =  'url?mode=' + mode + '&report_type=' + type;
+    $("#downloadDialogSubmit").unbind('click').bind('click', function () {
+        var postdata = $("#grid").jqGrid('getGridParam', 'postData');
+        var format = $("[name=downloadType]:checked").val();
 
+        var url = '/data/output/forecast/compare/?format=' + format + '&mode=' + currentMode + '&report_type=' + currentType;
+        url += "&" + jQuery.param(postdata);
 
-
-
-
-    // url +=
-
-    window.location.href = url;
+        window.location.href = url;
+    });
 };
