@@ -27,6 +27,8 @@
         </button>
     {% endif  %}
 
+        <!--操作内容-->
+        <!--查询-->
     <!--操作内容-->
     {% if not is_popup %}
         <button class="btn btn-xs btn-default btn-table-icon" id="aggre" onclick="transferModeAndType('agg', 'aggre')" data-toggle="tooltip"
@@ -50,6 +52,7 @@
             <!--<span class="fa fa-search"></span>-->
             <img src="{{STATIC_URL}}img/forecast/search.png" alt="{% trans 'filter data'|capfirst|force_escape %}">
         </button>
+
     {% endif  %}
 
     {% if not is_popup %}
@@ -121,7 +124,7 @@
             // 表值
             {
                 name: 'item__nr',
-                label: '物料',
+                label: '物料编码',
             },
             {
                 name: 'location__nr',
@@ -129,7 +132,7 @@
             },
             {
                 name: 'customer__nr',
-                label: '客户',
+                label: '客户代码',
                 hidden: hide_customer,
             },
             {
