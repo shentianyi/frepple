@@ -119,7 +119,7 @@ class MultiDBModelAdmin(admin.ModelAdmin):
     # Tell Django to get objects from the 'other' database.
     return super().get_queryset(request).using(request.database)
 
-
+  # 如果想在admin接口中编辑，可以在admin.py中注册
   def formfield_for_foreignkey(self, db_field, request, **kwargs):
     # Tell Django to get objects from the 'other' database.
     return super().formfield_for_foreignkey(db_field, request=request, using=request.database, **kwargs)

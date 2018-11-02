@@ -1,0 +1,47 @@
+msgid "owner_display"
+msgstr "owner"
+
+msgid "item_display"
+msgstr "item"
+
+msgid "supplier_display"
+msgstr "supplier"
+
+msgid "distribute origin location"
+msgstr "origin"
+
+msgid "distribute destination location"
+msgstr "destination"
+
+msgid "resource_display"
+msgstr "resource"
+
+msgid "sale_item_display"
+msgstr "sale_item"
+
+msgid "product_item_display"
+msgstr "product_item"
+
+msgid "customer_display"
+msgstr "customer"
+
+msgid "location_display"
+msgstr "location"
+
+msgid "item_successor_display"
+msgstr "item_successor"
+
+msgid "setupmatrix_display"
+msgstr "setupmatrix"
+
+msgid "skill_display"
+msgstr "skill"
+
+msgid "parent_operation_display"
+msgstr "parent_operation"
+
+msgid "suboperation_display"
+msgstr "suboperation"
+
+msgid "operation_display"
+msgstr "operation"

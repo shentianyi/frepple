@@ -1135,12 +1135,12 @@ class ItemDistributionList(GridReport):
         #               extra='"role":"input/item"', editable=False),
 
         # 新建一个显示列
-        GridFieldText('item_display', title=_('distribute item'), field_name='item__name', editable=False),
+        GridFieldText('item_display', title=_('distribute item'), field_name='item__nr', editable=False),
 
         # 因为是id 让外键永远不显示
         GridFieldText('item_id', title=_('item_id'), field_name='item_id', editable=False, hidden=True),
 
-        GridFieldText('origin_display', title=_('distribute origin location'), field_name='origin__name',
+        GridFieldText('origin_display', title=_('distribute origin location'), field_name='origin__nr',
                       editable=False),
         GridFieldText('origin_id', title=_('origin_id'), field_name='origin_id', editable=False, hidden=True),
 
@@ -1160,9 +1160,9 @@ class ItemDistributionList(GridReport):
         GridFieldInteger('priority', title=_('priority'), editable=False),
         # GridFieldDuration('fence', title=_('fence'), initially_hidden=True),
 
-        GridFieldText('resource', title=_('resource'), field_name='resource__name', editable=False),
-        # GridFieldText('resource', title=_('resource_id'), field_name='resource_id', editable=False,
-        #               hidden=True),
+        GridFieldText('resource_display', title=_('resource_display'), field_name='resource__nr', editable=False),
+        GridFieldText('resource', title=_('resource_id'), field_name='resource_id', editable=False,
+                      hidden=True),
 
         GridFieldNumber('resource_qty', title=_('resource quantity'), editable=False),
 
@@ -1634,16 +1634,15 @@ class ForecastYearList(GridReport):
         GridFieldInteger('id', title=_('id'), key=True, formatter='detail',
                          extra='"role":"input/forecastyear"', editable=False),
         GridFieldText('item_display', title=_('item_display'), field_name='item__nr', editable=False),
-        GridFieldText('item', title=_('location_id'), field_name='location_id', editable=False, hidden=True),
-        GridFieldText('location_display', title=_('location_display'), field_name='location__nr', editable=False),
+        GridFieldText('item', title=_('item_id'), field_name='item_id', editable=False, hidden=True),
+        GridFieldText('location_display', title=_('location'), field_name='location__nr', editable=False),
         GridFieldText('location', title=_('location_id'), field_name='location_id', editable=False, hidden=True),
-        GridFieldText('customer_display', title=_('customer_display'), field_name='customer__nr', editable=False),
+        GridFieldText('customer_display', title=_('customer'), field_name='customer__nr', editable=False),
         GridFieldText('customer', title=_('customer_id'), field_name='customer_id', editable=False, hidden=True),
-        GridFieldInteger('year', title=_('year'), editable=False),
+        GridFieldText('year', title=_('year'), editable=False),
         GridFieldInteger('date_number', title=_('date_number'), editable=False),
         GridFieldText('date_type', title=_('date_type'), editable=False),
-        GridFieldNumber('ratio', title=_('forecast ratio'),
-                        extra='"formatoptions":{"suffix":" %","defaultValue":"100.00"}', editable=False),
+        GridFieldNumber('ratio', title=_('forecast ratio'),extra='"formatoptions":{"suffix":" %","defaultValue":"100.00"}', editable=False),
         GridFieldNumber('normal_qty', title=_('normal qty'), editable=False),
         GridFieldNumber('new_product_plan_qty', title=_('new product plan qty'), editable=False),
         GridFieldNumber('promotion_qty', title=_('promotion qty'), editable=False),
@@ -1666,13 +1665,13 @@ class ForecastVersionView(GridReport):
         # GridFieldText('id', title=_('id'), editable=False),
         GridFieldText('nr', title=_('version nr'), key=True, formatter='customer',
                       extra='"role":"/data/input/forecast/?version_nr="', editable=False),
+        GridFieldChoice('status', title=_('status'), choices=ForecastCommentOperation.statuses, editable=False),
+        GridFieldText('status_value', title=_('status_value'), field_name='status', editable=False, hidden=True,
+                      search=False),
         GridFieldText('create_user_display', title=_('create_user_display'), field_name='create_user__username',
                       editable=False),
         GridFieldText('create_user', title=_('create_user_id'), field_name='create_user_id', editable=False,
                       hidden=True, search=False),
-        GridFieldChoice('status', title=_('status'), choices=ForecastCommentOperation.statuses, editable=False),
-        GridFieldText('status_value', title=_('status_value'), field_name='status', editable=False, hidden=True,
-                      search=False),
         GridFieldCreateOrUpdateDate('created_at', title=_('created_at'), editable=False),
         GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at'), editable=False),
         GridFieldText('_pk', field_name='nr', editable=False, hidden=True, search=False),
@@ -2194,7 +2193,7 @@ class SubOperationList(GridReport):
         GridFieldText('parent_operation', title=_('parent_operation_id'), field_name='parent_operation_id', hidden=True,
                       editable=False),
 
-        GridFieldText('suboperation', title=_('suboperation'), field_name='suboperation__nr', editable=False),
+        GridFieldText('suboperation_display', title=_('suboperation_display'), field_name='suboperation__nr', editable=False),
         GridFieldText('suboperation', title=_('suboperation_id'), field_name='suboperation_id', hidden=True,
                       editable=False),
 

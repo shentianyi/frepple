@@ -1492,16 +1492,14 @@ class ForecastCommentOperation:
 
 
 class ForecastVersion(AuditModel, ForecastCommentOperation):
-    # id = models.AutoField(_('id'), help_text=_('Unique identifier'), primary_key=True)
-    # nr = models.CharField(_('nr'), max_length=300, db_index=True, unique=True)
     nr = models.CharField(_('nr'), max_length=300, editable=False, db_index=True,
                           primary_key=True)
+    status = models.CharField(_('status'), max_length=20, choices=ForecastCommentOperation.statuses, default='init')
     create_user = models.ForeignKey(
         User, verbose_name=_('create_user'),
         db_index=True, related_name='forecastversion_create_user',
         null=False, blank=False, on_delete=models.CASCADE
     )
-    status = models.CharField(_('status'), max_length=20, choices=ForecastCommentOperation.statuses, default='init')
 
     def __str__(self):
         return self.nr

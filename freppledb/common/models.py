@@ -554,6 +554,7 @@ class Comment(AuditModel):
 
     # class Comment(models.Model):
     id = models.AutoField(_('identifier'), primary_key=True)
+    # 指向ContentType的外键
     content_type = models.ForeignKey(
         # Translators: Translation included with Django
         ContentType, verbose_name=_('content type'),
@@ -561,7 +562,9 @@ class Comment(AuditModel):
         on_delete=models.CASCADE
     )
     # Translators: Translation included with Django
+    # 对象的主键
     object_pk = models.TextField(_('object id'))
+    # 评论的对象
     content_object = GenericForeignKey(ct_field="content_type", fk_field="object_pk")
     comment = models.TextField(_('comment'), max_length=3000)
     # Translators: Translation included with Django
