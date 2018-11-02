@@ -9,7 +9,6 @@ Forecast.operate = function (content_type, type, modalId) {
 
         // I18n
         var title =gettext(type);
-        debugger
 
         $("#" + modalId).find("#operateModalTitle").html(title);
         $("#" + modalId).find("#operate_modal_confirm").unbind('click').bind('click', function () {

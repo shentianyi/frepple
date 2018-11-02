@@ -26,6 +26,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from freppledb.common.fields import JSONBField, AliasDateTimeField
 from freppledb.common.models import HierarchyModel, AuditModel, MultiDBManager, User, Comment
+from freppledb.common.utils import la_time
 
 searchmode = (
     ('PRIORITY', _('priority')),
@@ -1417,20 +1418,34 @@ class ForecastYear(AuditModel):
     date_type = models.CharField(
         _('date_type'), max_length=20, choices=date_types, default='W', null=True, blank=True)
 
-    ratio = models.DecimalField(_('quota ratio %'), max_digits=20, decimal_places=8, default='100', null=True, blank=True)
+    ratio = models.DecimalField(_('forecast ratio'), max_digits=20, decimal_places=8, default=100, null=False, blank=True)
     normal_qty = models.DecimalField(_('normal qty'), max_digits=20, decimal_places=8)
     new_product_plan_qty = models.DecimalField(_('new product plan qty'), max_digits=20, decimal_places=8, null=True,
                                                blank=True)
     promotion_qty = models.DecimalField(_('promotion qty'), max_digits=20, decimal_places=8, null=True, blank=True)
 
-    class Manager(MultiDBManager):
-        def get_by_natural_key(self, item, location, customer):
-            return self.get(item=item, location=location, customer=customer)
+    # 解析过的时间, 通过 date type + date number
+    parsed_date = models.DateTimeField(_('parsed_date'), editable=False, db_index=True, default=timezone.now)
 
-    def natural_key(self):
-        return (self.item, self.location, self.customer)
+    class Manager(MultiDBManager):
+        # def get_by_natural_key(self, item, location, customer,year, date_type, date_number):
+        #     return self.get(item=item, location=location, customer=customer,year=year, date_type=date_type,
+        #                     date_number=date_number)
+
+        # 批量创建复写
+        def bulk_create(self, objs, batch_size=None):
+            for o in objs:
+                o.set_parsed_date()
+            super(ForecastYear.Manager, self).bulk_create(objs, batch_size)
+
+    # def natural_key(self):
+    #     return (self.item, self.location, self.customer,self.year, self.date_type, self.date_number)
+
+    def set_parsed_date(self):
+        self.parsed_date = Forecast.parse_date(self.date_type, self.year, self.date_number)
 
     objects = Manager()
+
 
     # def __str__(self):
     #     return '%s - %s - %s' % (
@@ -1438,10 +1453,15 @@ class ForecastYear(AuditModel):
 
     class Meta(AuditModel.Meta):
         db_table = 'forecast_year'
-        unique_together = (('item', 'location', 'customer', 'year'),)
+        unique_together = (('item', 'location', 'customer', 'year','date_type','date_number'),)
         verbose_name = _('forecast_year')
         verbose_name_plural = _('forecast_years')
 
+    def save(self, *args, **kwargs):
+        # 解析方法
+        # Call the real save() method
+        self.set_parsed_date()
+        super(ForecastYear, self).save(*args, **kwargs)
 
 class ForecastCommentOperation:
     statuses = (
@@ -1519,7 +1539,7 @@ class Forecast(AuditModel, ForecastCommentOperation):
     date_type = models.CharField(
         _('date_type'), max_length=20, choices=ForecastYear.date_types, default='W', null=True, blank=True)
 
-    ratio = models.DecimalField(_('ratio %'), max_digits=20, decimal_places=8, default='100', null=True, blank=True)
+    ratio = models.DecimalField(_('forecast ratio'), max_digits=20, decimal_places=8, default=100, null=False, blank=True)
     normal_qty = models.DecimalField(_('normal qty'), max_digits=20, decimal_places=8)
     new_product_plan_qty = models.DecimalField(_('new product plan qty'), max_digits=20, decimal_places=8, null=True,
                                                blank=True)
@@ -1533,17 +1553,40 @@ class Forecast(AuditModel, ForecastCommentOperation):
     version = models.ForeignKey(ForecastVersion, verbose_name=_('forecast version'),
                                 db_index=True, related_name='forecast_version', on_delete=models.CASCADE)
 
+    # 解析过的时间, 通过 date_type + date number
+    parsed_date = models.DateTimeField(_('parsed_date'), editable=False, db_index=True, default=timezone.now)
+
     # comment
     comments = GenericRelation(Comment, verbose_name='forecast comment', related_name='forecast_comment',
                                object_id_field='object_pk',
                                on_delete=models.CASCADE)
 
-    class Manager(MultiDBManager):
-        def get_by_natural_key(self, item, location, customer):
-            return self.get(item=item, location=location, customer=customer)
+    @classmethod
+    def parse_date(cls, date_type, year, date_number):
+        if date_type == 'W':
+            return la_time.weeknum2datetime(year, date_number)
+        elif date_type == 'M':
+            return la_time.monthnum2datetime(year, date_number)
+        else:
+            raise Exception('Error datetype in forecast')
 
-    def natural_key(self):
-        return (self.item, self.location, self.customer)
+
+    class Manager(MultiDBManager):
+        # def get_by_natural_key(self, item, location, customer,year,date_type,date_number,version_id):
+        #     return self.get(item=item, location=location, customer=customer,year=year,date_type=date_type,date_number=date_number,version_id=version_id)
+
+        # 批量创建复写
+        def bulk_create(self, objs, batch_size=None):
+            for o in objs:
+                o.set_parsed_date()
+            super(Forecast.Manager, self).bulk_create(objs,batch_size)
+
+
+    # def natural_key(self):
+    #     return (self.item, self.location, self.customer,self.year,self.date_type,self.date_number,self.version_id)
+
+    def set_parsed_date(self):
+        self.parsed_date = Forecast.parse_date(self.date_type, self.year,   self.date_number)
 
     objects = Manager()
 
@@ -1553,12 +1596,15 @@ class Forecast(AuditModel, ForecastCommentOperation):
 
     class Meta(AuditModel.Meta):
         db_table = 'forecast'
-        # unique_together = (('item', 'location', 'customer', 'year', 'date_number', 'date_type', 'ratio', 'normal_qty',
-        #                     'new_product_plan_qty', 'promotion_qty', 'version'),)
-        unique_together = (('item', 'location', 'customer', 'date_number', 'version'),)
+        unique_together = (('item', 'location', 'customer', 'year', 'date_type', 'date_number', 'version'),)
         verbose_name = _('forecast')
         verbose_name_plural = _('forecasts')
 
+    def save(self, *args, **kwargs):
+        # 解析方法
+        # Call the real save() method
+        self.set_parsed_date()
+        super(Forecast, self).save(*args, **kwargs)
 
 class Demand(AuditModel, HierarchyModel):
     # Status

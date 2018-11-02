@@ -2,14 +2,166 @@
 {% load i18n %}
 
 {% block extrahead %}{{block.super}}
-
 <!--head中的内容,如js-->
+<script type="text/javascript">
+    var reportkey = '{{reportkey|safe}}';
 
+    var hide_customer= {%if report_type == "detail"%}false{%else%}true{%endif%};
+    var tableColModel = [
+        // 为了查询
+        {
+            name: 'year',
+            label: '年份',
+            hidden: true,
+            alwayshidden: true,
+            searchoptions: {searchhidden: true, sopt: ['eq']}, // 只可以等于
+        },
+        {
+
+            name: 'month',
+            label: '月份',
+            hidden: true,
+            alwayshidden:true,
+            searchoptions: {searchhidden: true, sopt: ['eq']}, // 只可以等于
+        },
+
+        // 表值
+        {
+            name: 'item__nr',
+            label: '物料',
+        },
+        {
+            name: 'location__nr',
+            label: '地点',
+        },
+        {
+            name: 'customer__nr',
+            label: '客户',
+            hidden: hide_customer,
+        },
+        {
+            name: 'total_year_qty',
+            label: '全年计划量',
+            search:false
+        },
+        {
+            name: 'year_qty',
+            label: '年初计划量',
+            search:false
+        },
+        {
+            name: 'last_qty',
+            label: '上月预测',
+            search:false
+        },
+        {
+            name: 'current_qty',
+            label: '当月预测',
+            search:false
+        },
+        {
+            name: 'next_qty',
+            label: '下月预测',
+            search:false
+        },
+        {
+            name: 'current_year_qty',
+            label: '当月VS年初',
+            search:false
+        },
+        {
+            name: 'current_last_qty',
+            label: '当月VS上月',
+            search:false
+        },
+        {
+            name: 'current_next_qty',
+            label: '当月VS下月',
+            search:false
+        },
+
+    ];
+    $(function () {
+      jQuery("#grid").jqGrid({
+            url: (location.href.indexOf("#") != -1 ? location.href.substr(0, location.href.indexOf("#")) : location.href)
+                + (location.search.length > 0 ? "&format=json" : "?format=json"),
+            datatype: "json",
+            jsonReader: {
+                repeatitems: false
+            },
+            colModel: tableColModel,
+            pager: '#gridpager',
+            rowNum: {{request.pagesize}},
+            viewrecords: true,
+            sortorder: "asc",
+            iconSet: "fontAwesome",
+            guiStyle: "bootstrapPrimary",
+            hidegrid: false,
+            resizeStop: grid.saveColumnConfiguration,
+            scrollRows: true,
+            multiSort: true,
+            maxSortColumns: 3,
+            viewSort: true,
+            onSortCol: grid.saveColumnConfiguration,
+            onPaging: grid.saveColumnConfiguration,
+            autowidth: true,
+            search:true,
+            searching: {
+                multipleSearch: true,
+                multipleGroup: false, // 不可以组搜索
+                closeOnEscape: true,
+                searchOnEnter: true,
+                searchOperators: true,
+                zIndex: 5000,
+                width: 550
+            }
+        });
+    });
+
+    function showFilter() {
+        if ($('#filter').hasClass("disabled")) return;
+        $('.modal').modal('hide');
+        jQuery("#grid").jqGrid('searchGrid', {
+            closeOnEscape: true,
+            multipleSearch: true,
+            multipleGroup: false,
+            overlay: 0,
+            sopt: ['eq', 'ne', 'lt', 'le', 'gt', 'ge', 'bw', 'bn', 'in', 'ni', 'ew', 'en', 'cn', 'nc']
+        });
+    }
+    $(window).bind('resize', function () {
+        $("#grid")
+            .setGridWidth($('#content-main').width())
+            .setGridHeight($(window).height() - $("#grid").offset().top);
+    });
+
+
+
+</script>
 {% endblock %}
 {% block content %}
+{% block before_table %}{% endblock %}
+<div class="row">
 
-<div>
-    forecast compare
+    <!--操作内容-->
+        <button class="btn btn-xs btn-default btn-table-icon" id="filter" onclick="showFilter()" data-toggle="tooltip"
+                data-placement="top" data-original-title="{% trans 'filter data'|capfirst|force_escape %}">
+            <!--<span class="fa fa-search"></span>-->
+            <img src="{{STATIC_URL}}img/table/filter.png" alt="{% trans 'filter data'|capfirst|force_escape %}">
+        </button>
 </div>
 
+
+<div class="row">
+    <!--表格 内容-->
+    <div id="content-main" class="col-md-12" style="min-height: 150px; margin-top: 0.7em">
+        <table id="grid" class="table table-striped pivotgrid"></table>
+    </div>
+    <div id="gridpager" class="col-md-12"></div>
+</div>
+
+{% block after_table %}{% endblock %}
+
+
+{{colmodel}}
 {% endblock %}
