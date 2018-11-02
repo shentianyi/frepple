@@ -95,6 +95,8 @@
                     break;
             }
 
+
+//            var postdata = $("#grid").jqGrid('getGridParam', 'postData');
             $("#" + value).find('img').attr('src', '{{STATIC_URL}}img/forecast/' + value + '_active.png');
 
             queryForecastCompare(currentMode, currentType)
