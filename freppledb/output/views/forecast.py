@@ -1,21 +1,27 @@
 import calendar
+import functools
 import math
+import operator
 import urllib
 from io import BytesIO
 
 from django.contrib.admin.views.decorators import staff_member_required
 from django.db.models import Sum, Q, Max
+from django.db import connections
 from django.db.models.functions import TruncMonth, TruncYear
 from django.http import HttpResponse, Http404, JsonResponse
 from django.shortcuts import render
 from django.utils import timezone
 from django.utils.decorators import method_decorator
-from django.utils.encoding import force_str
+from django.utils.encoding import force_str, smart_str
 from django.views import View
 from django.utils.translation import ugettext_lazy as _
 from datetime import datetime, timedelta
-
+import json
 from django.db.models import F
+
+import freppledb
+from freppledb.common import report
 from openpyxl import Workbook
 from openpyxl.cell import WriteOnlyCell
 
@@ -77,12 +83,14 @@ class ForecastCompare(View):
                 ws.append(headers)
 
                 # 写入表体, 顺序和
-                body_fields = ('item__nr','location__nr','customer__nr','total_year_qty','year_qty','last_qty','current_qty','next_qty','current_year_qty','current_last_qty','current_next_qty')
+                body_fields = (
+                    'item__nr', 'location__nr', 'customer__nr', 'total_year_qty', 'year_qty', 'last_qty', 'current_qty',
+                    'next_qty', 'current_year_qty', 'current_last_qty', 'current_next_qty')
                 for data in json['rows']:
                     body = []
                     for field in body_fields:
                         if field in data:
-                            cell = WriteOnlyCell(ws,value=data[field])
+                            cell = WriteOnlyCell(ws, value=data[field])
                             body.append(cell)
                     ws.append(body)
 
@@ -114,15 +122,26 @@ class ForecastCompare(View):
         :param in_page: 是否分页,默认True
         :return:
         """
+
+        report_type = request.GET.get('report_type', 'detail')
+        # 查询条件&时间
+        filters = {
+            'groupOp': 'AND',
+            'rules': []
+        }
+
+        if 'filters' in request.GET:
+            filters = json.loads(request.GET.get('filters'))
+
         current_date = timezone.now()
-        current_year = current_date.year
-        current_month = current_date.month
+        current_year = int(self._get_query_filter(filters, 'year', current_date.year)['data'])  # current_date.year
+        current_month = int(self._get_query_filter(filters, 'month', current_date.month)['data'])
 
         search_start_time = datetime(current_year - 1, 1, 1) if current_month == 1 else datetime(current_year,
                                                                                                  current_month - 1, 1)
 
         search_end_time = datetime(current_year + 1, 1, 31, 23, 59, 59, 9999) if current_month == 12 else datetime(
-            current_year, current_month + 1, calendar.monthrange(current_year, current_month)[1], 23, 59, 59, 999)
+            current_year, current_month + 1, calendar.monthrange(current_year, current_month + 1)[1], 23, 59, 59, 999)
 
         last_year = current_year - 1 if current_month == 1 else current_year
         last_month = 12 if current_month == 1 else current_month - 1
@@ -130,10 +149,34 @@ class ForecastCompare(View):
         next_year = current_year + 1 if current_month == 12 else current_year
         next_month = 1 if current_month == 12 else current_month + 1
 
+        filter_fields = ('item__nr', 'location__nr', 'customer__nr')
+        q_filters = []
+        q_filters.append(Q(**{'parsed_date__range': (search_start_time, search_start_time)}))
+        for rule in self._get_query_filters(filters, filter_fields):
+            op, field, data = rule['op'], rule['field'], rule['data']
+            filter_fmt, exclude = freppledb.common.report.GridReport._filter_map_jqgrid_django[op]
+            filter_str = smart_str(filter_fmt % {'field': field})
+
+            if filter_fmt.endswith('__in'):
+                filter_kwargs = {filter_str: data.split(',')}
+            else:
+                filter_kwargs = {filter_str: smart_str(data)}
+
+            if exclude:
+                q_filters.append(~Q(**filter_kwargs))
+            else:
+                q_filters.append(Q(**filter_kwargs))
+
+        # 分页计算
+        page_group_fields = ['item_id', 'location_id']
+
+        if report_type == 'detail':
+            page_group_fields.append('customer_id')
+
         pageObjectsQ = Forecast.objects.annotate(month=TruncMonth('parsed_date')) \
-            .filter(parsed_date__range=(search_start_time, search_end_time)) \
-            .order_by('item_id', 'location_id', 'customer_id') \
-            .values('item_id', 'location_id', 'customer_id') \
+            .filter(functools.reduce(operator.iand, q_filters)) \
+            .order_by(*page_group_fields) \
+            .values(*page_group_fields) \
             .distinct()
 
         count = float(pageObjectsQ.count())
@@ -149,45 +192,92 @@ class ForecastCompare(View):
 
         pageObjects = pageObjectsQ[cnt - 1: cnt + pagesize]
 
-        item_ids = list(set([i['item_id'] for i in pageObjects]))
-        location_ids = list(set([i['location_id'] for i in pageObjects]))
-        customer_ids = list(set([i['customer_id'] for i in pageObjects]))
+        item_ids = (0,) if count == 0 else tuple(set([i['item_id'] for i in pageObjects]))
+        location_ids = (0,) if count == 0 else tuple(set([i['location_id'] for i in pageObjects]))
+        if report_type == 'detail':
+            customer_ids = (0,) if count == 0 else tuple(set([i['customer_id'] for i in pageObjects]))
 
         items = Item.objects.filter(id__in=item_ids).values('id', 'nr')
         locations = Location.objects.filter(id__in=location_ids).values('id', 'nr')
-        customers = Customer.objects.filter(id__in=customer_ids).values('id', 'nr')
+        if report_type == 'detail':
+            customers = Customer.objects.filter(id__in=customer_ids).values('id', 'nr')
         #
         #
-        foreact_query = Forecast.objects \
-            .annotate(month=TruncMonth('parsed_date')) \
-            .values('item_id', 'location_id', 'customer_id', 'year', 'month') \
-            .filter(parsed_date__range=(search_start_time, search_end_time),
-                    item_id__in=item_ids,
-                    location_id__in=location_ids,
-                    customer_id__in=customer_ids) \
-            .filter(~Q(status='cancel')) \
-            .annotate(version=Max('version_id')) \
-            .annotate(qty=Sum((F('normal_qty') + F('new_product_plan_qty') + F('promotion_qty')) * F('ratio') / 100)) \
-            # .order_by('-version_id')
+        # foreact_query = Forecast.objects \
+        #     .annotate(month=TruncMonth('parsed_date')) \
+        #     .values('item_id', 'location_id', 'customer_id', 'year', 'month') \
+        #     .filter(parsed_date__range=(search_start_time, search_end_time),
+        #             item_id__in=item_ids,
+        #             location_id__in=location_ids,
+        #             customer_id__in=customer_ids) \
+        #     .filter(~Q(status='cancel')) \
+        #     .annotate(version=Max('version_id')) \
+        #     .annotate(qty=Sum((F('normal_qty') + F('new_product_plan_qty') + F('promotion_qty')) * F('ratio') / 100)) \
+        #     # .order_by('-version_id')
+
+        # 年初查询主查询
+        forecast_query_values = ['item_id', 'location_id', 'year', 'month']
+        forecast_query_total_values = ['item_id', 'location_id']
+
+        forecast_year_filters = []
+        forecast_year_filters.append(Q(**{'parsed_date__range': (search_start_time, search_start_time)}))
+        forecast_year_filters.append(Q(**{'item_id__in': item_ids}))
+        forecast_year_filters.append(Q(**{'location_id__in': location_ids}))
+
+        if report_type == 'detail':
+            forecast_query_values.append('customer_id')
+            forecast_query_total_values.append('customer_id')
+            forecast_year_filters.append(Q(**{'customer_id__in': (search_start_time, search_start_time)}))
 
         forecastyear_query = ForecastYear.objects \
             .annotate(month=TruncMonth('parsed_date')) \
-            .values('item_id', 'location_id', 'customer_id', 'year', 'month') \
-            .filter(parsed_date__range=(search_start_time, search_end_time),
-                    item_id__in=item_ids,
-                    location_id__in=location_ids,
-                    customer_id__in=customer_ids) \
+            .values(*forecast_query_values) \
+            .filter(functools.reduce(operator.iand, forecast_year_filters)) \
             .annotate(qty=Sum((F('normal_qty') + F('new_product_plan_qty') + F('promotion_qty')) * F('ratio') / 100))
 
         foreactyear_total_query = ForecastYear.objects \
-            .values('item_id', 'location_id', 'customer_id', 'year') \
-            .filter(year=current_year,
-                    item_id__in=item_ids,
-                    location_id__in=location_ids,
-                    customer_id__in=customer_ids) \
+            .values(*forecast_query_total_values) \
+            .filter(functools.reduce(operator.iand, forecast_year_filters)) \
             .annotate(qty=Sum((F('normal_qty') + F('new_product_plan_qty') + F('promotion_qty')) * F('ratio') / 100))
 
+        # 预测查询
+        cursor = connections[request.database].cursor()
+        if report_type == 'detail':
+            forecast_query = '''
+            select a.item_id,a.location_id,a.customer_id,a.year,DATE_TRUNC('month',a.parsed_date) as month,
+            SUM(((((a.normal_qty + a.new_product_plan_qty) + a.promotion_qty) * a.ratio) / 100)) AS qty from
+            forecast as a inner join (select c.item_id,c.location_id,c.customer_id,c.parsed_date,max(c.version_id) as version_id 
+            from forecast as c
+            where c.parsed_date between %s and %s and c.item_id in %s and c.location_id in %s and c.customer_id in %s
+            group by c.item_id,c.location_id,c.customer_id,c.parsed_date) as b
+            on a.item_id=b.item_id and a.location_id=b.location_id and a.customer_id=b.customer_id and a.parsed_date=b.parsed_date and a.version_id=b.version_id
+            where a.parsed_date between %s and %s and a.item_id in %s and a.location_id in %s  and a.customer_id in %s
+            group by a.item_id,a.location_id,a.customer_id,a.year,DATE_TRUNC('month', a.parsed_date)
+            '''
+
+            cursor.execute(forecast_query,
+                           [search_start_time, search_end_time, item_ids, location_ids, customer_ids, search_start_time,
+                            search_end_time,
+                            item_ids, location_ids, customer_ids])
+        else:
+            forecast_query = '''
+            select a.item_id,a.location_id,a.year,DATE_TRUNC('month',a.parsed_date) as month,
+            SUM(((((a.normal_qty + a.new_product_plan_qty) + a.promotion_qty) * a.ratio) / 100)) AS qty from
+            forecast as a inner join (select c.item_id,c.location_id,c.parsed_date,max(c.version_id) as version_id 
+            from forecast as c
+            where c.parsed_date between %s and %s and c.item_id in %s and c.location_id in %s
+            group by c.item_id,c.location_id,c.parsed_date) as b
+            on a.item_id=b.item_id and a.location_id=b.location_id and a.parsed_date=b.parsed_date and a.version_id=b.version_id
+            where a.parsed_date between %s and %s and a.item_id in %s and a.location_id in %s
+            group by a.item_id,a.location_id,a.year,DATE_TRUNC('month', a.parsed_date)
+            '''
+            cursor.execute(forecast_query,
+                           [search_start_time, search_end_time, item_ids, location_ids, search_start_time,
+                            search_end_time,
+                            item_ids, location_ids])
+
         datas = []
+        rows = [x for x in cursor.fetchall()]
 
         for c in pageObjects:
             data = {
@@ -216,43 +306,69 @@ class ForecastCompare(View):
                     data['location__nr'] = i['nr']
                     break
 
-            for i in customers:
-                if i['id'] == c['customer_id']:
-                    data['customer__nr'] = i['nr']
-                    break
+            if report_type == 'detail':
+                for i in customers:
+                    if i['id'] == c['customer_id']:
+                        data['customer__nr'] = i['nr']
+                        break
 
             # 全年值
             for i in foreactyear_total_query:
-                if i['item_id'] == c['item_id'] \
-                        and i['location_id'] == c['location_id'] \
-                        and i['customer_id'] == c['customer_id']:
+                if (report_type == 'detail' and i['item_id'] == c['item_id'] \
+                    and i['location_id'] == c['location_id'] \
+                    and i['customer_id'] == c['customer_id']) \
+                        or (report_type == 'aggre' and i['item_id'] == c['item_id'] \
+                            and i['location_id'] == c['location_id']):
                     data['total_year_qty'] = round(i['qty'], 2)
                     break
 
             # 年初值
             for i in forecastyear_query:
-                if i['item_id'] == c['item_id'] \
-                        and i['location_id'] == c['location_id'] \
-                        and i['customer_id'] == c['customer_id'] \
-                        and i['year'] == current_year and i['month'].month == current_month:
+                if (report_type == 'detail' and i['item_id'] == c['item_id'] \
+                    and i['location_id'] == c['location_id'] \
+                    and i['customer_id'] == c['customer_id'] \
+                    and i['year'] == current_year and i['month'].month == current_month) \
+                        or (report_type == 'aggre' and i['item_id'] == c['item_id'] \
+                            and i['location_id'] == c['location_id'] \
+                            and i['year'] == current_year and i['month'].month == current_month):
                     data['year_qty'] = round(i['qty'], 2)
                     break
 
             # 上月值 当月值 下月值
-            for i in foreact_query:
-                if i['item_id'] == c['item_id'] \
+            for row in rows:
+                if report_type == 'detail':
+                    i = {
+                        'item_id': row[0],
+                        'location_id': row[1],
+                        'customer_id': row[2],
+                        'year': row[3],
+                        'month': row[4],
+                        'qty': row[5]
+                    }
+                else:
+                    i = {
+                        'item_id': row[0],
+                        'location_id': row[1],
+                        'year': row[2],
+                        'month': row[3],
+                        'qty': row[4]
+                    }
+
+                if report_type == 'detail':
+                    if (report_type == 'detail' and i['item_id'] == c['item_id'] \
                         and i['location_id'] == c['location_id'] \
-                        and i['customer_id'] == c['customer_id']:
+                        and i['customer_id'] == c['customer_id']) \
+                            or (report_type == 'aggre' and i['item_id'] == c['item_id'] \
+                                and i['location_id'] == c['location_id']):
 
-                    if i['year'] == last_year and i['month'].month == last_month:
-                        data['last_qty'] = round(i['qty'], 2)
+                        if i['year'] == last_year and i['month'].month == last_month:
+                            data['last_qty'] = round(i['qty'], 2)
 
-                    if i['year'] == current_year and i['month'].month == current_month:
-                        data['current_qty'] = round(i['qty'], 2)
+                        if i['year'] == current_year and i['month'].month == current_month:
+                            data['current_qty'] = round(i['qty'], 2)
 
-                    if i['year'] == next_year and i['month'].month == next_month:
-                        data['next_qty'] = round(i['qty'], 2)
-
+                        if i['year'] == next_year and i['month'].month == next_month:
+                            data['next_qty'] = round(i['qty'], 2)
             # 对比值
             if data['current_qty'] is not None:
                 if data['year_qty'] is not None and data['year_qty'] != 0:
@@ -277,3 +393,19 @@ class ForecastCompare(View):
         }
 
         return data
+
+    def _get_query_filter(self, filters, key, default_value=None):
+        for f in filters['rules']:
+            for k, v in f.items():
+                if k == 'field' and v == key:
+                    return f
+        return {'op': 'eq', 'field': key, 'data': default_value}
+
+    def _get_query_filters(self, filters, keys):
+        fs = []
+        for key in keys:
+            for f in filters['rules']:
+                for k, v in f.items():
+                    if k == 'field' and v == key:
+                        fs.append(f)
+        return fs
