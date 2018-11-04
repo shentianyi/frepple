@@ -151,7 +151,7 @@ class ForecastCompare(View):
 
         filter_fields = ('item__nr', 'location__nr', 'customer__nr')
         q_filters = []
-        q_filters.append(Q(**{'parsed_date__range': (search_start_time, search_start_time)}))
+        q_filters.append(Q(**{'parsed_date__range': (search_start_time, search_end_time)}))
         for rule in self._get_query_filters(filters, filter_fields):
             op, field, data = rule['op'], rule['field'], rule['data']
             filter_fmt, exclude = freppledb.common.report.GridReport._filter_map_jqgrid_django[op]
@@ -220,14 +220,14 @@ class ForecastCompare(View):
         forecast_query_total_values = ['item_id', 'location_id']
 
         forecast_year_filters = []
-        forecast_year_filters.append(Q(**{'parsed_date__range': (search_start_time, search_start_time)}))
+        forecast_year_filters.append(Q(**{'parsed_date__range': (search_start_time, search_end_time)}))
         forecast_year_filters.append(Q(**{'item_id__in': item_ids}))
         forecast_year_filters.append(Q(**{'location_id__in': location_ids}))
 
         if report_type == 'detail':
             forecast_query_values.append('customer_id')
             forecast_query_total_values.append('customer_id')
-            forecast_year_filters.append(Q(**{'customer_id__in': (search_start_time, search_start_time)}))
+            forecast_year_filters.append(Q(**{'customer_id__in': customer_ids}))
 
         forecastyear_query = ForecastYear.objects \
             .annotate(month=TruncMonth('parsed_date')) \
@@ -261,16 +261,16 @@ class ForecastCompare(View):
                             item_ids, location_ids, customer_ids])
         else:
             forecast_query = '''
-            select a.item_id,a.location_id,a.year,DATE_TRUNC('month',a.parsed_date) as month,
-            SUM(((((a.normal_qty + a.new_product_plan_qty) + a.promotion_qty) * a.ratio) / 100)) AS qty from
-            forecast as a inner join (select c.item_id,c.location_id,c.parsed_date,max(c.version_id) as version_id 
-            from forecast as c
-            where c.parsed_date between %s and %s and c.item_id in %s and c.location_id in %s
-            group by c.item_id,c.location_id,c.parsed_date) as b
-            on a.item_id=b.item_id and a.location_id=b.location_id and a.parsed_date=b.parsed_date and a.version_id=b.version_id
-            where a.parsed_date between %s and %s and a.item_id in %s and a.location_id in %s
-            group by a.item_id,a.location_id,a.year,DATE_TRUNC('month', a.parsed_date)
-            '''
+                        select a.item_id,a.location_id,a.customer_id,a.year,DATE_TRUNC('month',a.parsed_date) as month,
+                        SUM(((((a.normal_qty + a.new_product_plan_qty) + a.promotion_qty) * a.ratio) / 100)) AS qty from
+                        forecast as a inner join (select c.item_id,c.location_id,c.customer_id,c.parsed_date,max(c.version_id) as version_id 
+                        from forecast as c
+                        where c.parsed_date between %s and %s and c.item_id in %s and c.location_id in %s
+                        group by c.item_id,c.location_id,c.customer_id,c.parsed_date) as b
+                        on a.item_id=b.item_id and a.location_id=b.location_id and a.customer_id=b.customer_id and a.parsed_date=b.parsed_date and a.version_id=b.version_id
+                        where a.parsed_date between %s and %s and a.item_id in %s and a.location_id in %s
+                        group by a.item_id,a.location_id,a.customer_id,a.year,DATE_TRUNC('month', a.parsed_date)
+                        '''
             cursor.execute(forecast_query,
                            [search_start_time, search_end_time, item_ids, location_ids, search_start_time,
                             search_end_time,
@@ -336,39 +336,35 @@ class ForecastCompare(View):
 
             # 上月值 当月值 下月值
             for row in rows:
-                if report_type == 'detail':
-                    i = {
+
+                i = {
                         'item_id': row[0],
                         'location_id': row[1],
                         'customer_id': row[2],
                         'year': row[3],
                         'month': row[4],
                         'qty': row[5]
-                    }
-                else:
-                    i = {
-                        'item_id': row[0],
-                        'location_id': row[1],
-                        'year': row[2],
-                        'month': row[3],
-                        'qty': row[4]
-                    }
+                }
+                if (report_type == 'detail' and i['item_id'] == c['item_id'] \
+                    and i['location_id'] == c['location_id'] \
+                    and i['customer_id'] == c['customer_id']) \
+                        or (report_type == 'aggre' and i['item_id'] == c['item_id'] \
+                            and i['location_id'] == c['location_id']):
 
-                if report_type == 'detail':
-                    if (report_type == 'detail' and i['item_id'] == c['item_id'] \
-                        and i['location_id'] == c['location_id'] \
-                        and i['customer_id'] == c['customer_id']) \
-                            or (report_type == 'aggre' and i['item_id'] == c['item_id'] \
-                                and i['location_id'] == c['location_id']):
+                    if i['year'] == last_year and i['month'].month == last_month:
+                        if data['last_qty'] is None:
+                            data['last_qty'] = 0
+                        data['last_qty'] += round(i['qty'], 2)
 
-                        if i['year'] == last_year and i['month'].month == last_month:
-                            data['last_qty'] = round(i['qty'], 2)
+                    if i['year'] == current_year and i['month'].month == current_month:
+                        if data['current_qty'] is None:
+                            data['current_qty'] = 0
+                        data['current_qty'] += round(i['qty'], 2)
 
-                        if i['year'] == current_year and i['month'].month == current_month:
-                            data['current_qty'] = round(i['qty'], 2)
-
-                        if i['year'] == next_year and i['month'].month == next_month:
-                            data['next_qty'] = round(i['qty'], 2)
+                    if i['year'] == next_year and i['month'].month == next_month:
+                        if data['next_qty'] is None:
+                            data['next_qty'] = 0
+                        data['next_qty'] += round(i['qty'], 2)
             # 对比值
             if data['current_qty'] is not None:
                 if data['year_qty'] is not None and data['year_qty'] != 0:

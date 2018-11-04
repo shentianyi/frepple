@@ -85,7 +85,7 @@ class ForecastUploader:
                                 forecast.date_number = value
                             elif field_name == 'normal_qty':
                                 forecast.normal_qty = value
-                            elif field_name == 'ratio':
+                            elif field_name == 'ratio' and value is not None:
                                 forecast.ratio = value
                             elif field_name == 'new_product_plan_qty':
                                 forecast.new_product_plan_qty = value

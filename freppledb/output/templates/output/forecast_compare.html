@@ -86,8 +86,8 @@
 {% block after_table %}
     <script type="text/javascript">
 
-        var currentMode = 'table';
-        var currentType = 'aggre';
+        var currentMode = '{{mode}}';
+        var currentType = '{{report_type}}';
 
         queryForecastCompare(currentMode, currentType);
 
