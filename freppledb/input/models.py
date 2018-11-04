@@ -1478,6 +1478,9 @@ class ForecastCommentOperation:
     can_cancel_status = ('init', 'nok', 'ok')
     can_release_status = ('ok')
 
+    # 报表状态
+    compare_report_status =('init', 'nok', 'ok','release','confirm',)
+
     def can_ok(self):
         return self.status in self.can_ok_status
 

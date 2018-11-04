@@ -25,7 +25,7 @@ from freppledb.common import report
 from openpyxl import Workbook
 from openpyxl.cell import WriteOnlyCell
 
-from freppledb.input.models import Forecast, ForecastYear, Item, Location, Customer
+from freppledb.input.models import Forecast, ForecastYear, Item, Location, Customer, ForecastCommentOperation
 
 
 class ForecastCompare(View):
@@ -248,15 +248,16 @@ class ForecastCompare(View):
             SUM(((((a.normal_qty + a.new_product_plan_qty) + a.promotion_qty) * a.ratio) / 100)) AS qty from
             forecast as a inner join (select c.item_id,c.location_id,c.customer_id,c.parsed_date,max(c.version_id) as version_id 
             from forecast as c
-            where c.parsed_date between %s and %s and c.item_id in %s and c.location_id in %s and c.customer_id in %s
+            where c.status in %s and c.parsed_date between %s and %s and c.item_id in %s and c.location_id in %s and c.customer_id in %s
             group by c.item_id,c.location_id,c.customer_id,c.parsed_date) as b
             on a.item_id=b.item_id and a.location_id=b.location_id and a.customer_id=b.customer_id and a.parsed_date=b.parsed_date and a.version_id=b.version_id
-            where a.parsed_date between %s and %s and a.item_id in %s and a.location_id in %s  and a.customer_id in %s
+            where a.status in %s and a.parsed_date between %s and %s and a.item_id in %s and a.location_id in %s  and a.customer_id in %s
             group by a.item_id,a.location_id,a.customer_id,a.year,DATE_TRUNC('month', a.parsed_date)
             '''
 
             cursor.execute(forecast_query,
-                           [search_start_time, search_end_time, item_ids, location_ids, customer_ids, search_start_time,
+                           [ForecastCommentOperation.compare_report_status,search_start_time, search_end_time, item_ids, location_ids,
+                            customer_ids, ForecastCommentOperation.compare_report_status,search_start_time,
                             search_end_time,
                             item_ids, location_ids, customer_ids])
         else:
@@ -265,14 +266,15 @@ class ForecastCompare(View):
                         SUM(((((a.normal_qty + a.new_product_plan_qty) + a.promotion_qty) * a.ratio) / 100)) AS qty from
                         forecast as a inner join (select c.item_id,c.location_id,c.customer_id,c.parsed_date,max(c.version_id) as version_id 
                         from forecast as c
-                        where c.parsed_date between %s and %s and c.item_id in %s and c.location_id in %s
+                        where c.status in %s and c.parsed_date between %s and %s and c.item_id in %s and c.location_id in %s
                         group by c.item_id,c.location_id,c.customer_id,c.parsed_date) as b
                         on a.item_id=b.item_id and a.location_id=b.location_id and a.customer_id=b.customer_id and a.parsed_date=b.parsed_date and a.version_id=b.version_id
-                        where a.parsed_date between %s and %s and a.item_id in %s and a.location_id in %s
+                        where a.status in %s and a.parsed_date between %s and %s and a.item_id in %s and a.location_id in %s
                         group by a.item_id,a.location_id,a.customer_id,a.year,DATE_TRUNC('month', a.parsed_date)
                         '''
             cursor.execute(forecast_query,
-                           [search_start_time, search_end_time, item_ids, location_ids, search_start_time,
+                           [ForecastCommentOperation.compare_report_status,search_start_time, search_end_time, item_ids,
+                             location_ids,ForecastCommentOperation.compare_report_status, search_start_time,
                             search_end_time,
                             item_ids, location_ids])
 
