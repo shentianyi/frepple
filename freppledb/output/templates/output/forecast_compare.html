@@ -9,9 +9,10 @@
 {% block content %}
 {% block before_table %}{% endblock %}
 
-<div class="row" style="margin: 20px;">
+<div id="forecastCompare" class="row" style="margin: 20px 0;">
 
-    <div>预测对比-汇总</div>
+    <div id="forecastTitle" class="col-xs-4" style="padding: 0; font-size: 20px;">预测对比-汇总</div>
+    <!--<div id="forecastTitle">{{forecastCompareTitle}}</div>-->
 
     <div class="pull-right">
         <!--操作内容-->
@@ -84,6 +85,7 @@
 
 {% block after_table %}
     <script type="text/javascript">
+
         var currentMode = 'table';
         var currentType = 'aggre';
 
@@ -100,12 +102,23 @@
                 case "agg":
                     $("#" + currentType).find('img').attr('src', '{{STATIC_URL}}img/forecast/' + currentType + '.png');
                     currentType = value;
+
+                    var parent = document.getElementById("forecastCompare");
+                    var child = document.getElementById("forecastTitle");
+                    parent.removeChild(child);
+                    if (currentType === 'aggre') {
+                        $("#forecastCompare").append('<div id="forecastTitle" class="col-xs-4" style="padding: 0; font-size: 20px;">预测对比-汇总</div>');
+                    } else  {
+                        $("#forecastCompare").append('<div id="forecastTitle" class="col-xs-4" style="padding: 0; font-size: 20px;">预测对比-明细</div>');
+                    }
                     break;
                 default:
                     break;
             }
 
-            $("#" + value).find('img').attr('src', '{{STATIC_URL}}img/forecast/' + value + '_active.png');
+        $("#filter").find('img').attr('src', '{{STATIC_URL}}img/forecast/search.png');
+        $("#download").find('img').attr('src', '{{STATIC_URL}}img/forecast/download.png');
+        $("#" + value).find('img').attr('src', '{{STATIC_URL}}img/forecast/' + value + '_active.png');
 
             queryForecastCompare(currentMode, currentType)
         }
@@ -200,6 +213,7 @@
                 hidden: !hide_table_column
             }
         ];
+
             $("#grid").GridDestroy();
             $("#content-main").append('<table id="grid" class="table table-striped pivotgrid"></table>');
 
@@ -275,6 +289,7 @@
                                 {
                                     name: '预测值',
                                     type: 'bar',
+                                    barWidth : 30,
                                     data: [ret[i].last_qty, ret[i].current_qty, ret[i].next_qty]
                                 }]
                             };
@@ -290,6 +305,9 @@
             if ($('#filter').hasClass("disabled")) return;
             $('.modal').modal('hide');
 
+            $("#aggre").find('img').attr('src', '{{STATIC_URL}}img/forecast/aggre.png');
+            $("#detail").find('img').attr('src', '{{STATIC_URL}}img/forecast/detail.png');
+            $("#filter").find('img').attr('src', '{{STATIC_URL}}img/forecast/search_active.png');
             jQuery("#grid").jqGrid('searchGrid', {
                 closeOnEscape: true,
                 multipleSearch: true,
