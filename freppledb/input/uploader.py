@@ -182,6 +182,7 @@ class ForecastDownloader:
                     cell.style = 'headerstyle'
                     header.append(cell)
                 ws.append(header)
+                body_fields = ()
 
                 excel_row = 2
 
@@ -202,11 +203,11 @@ class ForecastDownloader:
                     ws.cell(row=excel_row, column=9, value=f.normal_qty)
                     ws.cell(row=excel_row, column=10, value=f.new_product_plan_qty)
                     ws.cell(row=excel_row, column=11, value=f.promotion_qty)
-                    ws.cell(row=excel_row, column=13, value=f.status)
-                    ws.cell(row=excel_row, column=14, value=f.create_user.username)
-                    ws.cell(row=excel_row, column=15, value=f.version.nr)
-                    ws.cell(row=excel_row, column=16, value=f.created_at)
-                    ws.cell(row=excel_row, column=17, value=f.updated_at)
+                    ws.cell(row=excel_row, column=12, value=f.status)
+                    ws.cell(row=excel_row, column=13, value=f.create_user.username)
+                    ws.cell(row=excel_row, column=14, value=f.version.nr)
+                    ws.cell(row=excel_row, column=15, value=f.created_at)
+                    ws.cell(row=excel_row, column=16, value=f.updated_at)
                     excel_row += 1
 
                 wb.save(output)

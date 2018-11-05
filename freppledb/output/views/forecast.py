@@ -1,18 +1,22 @@
 import calendar
+import csv
 import functools
 import math
 import operator
 import urllib
-from io import BytesIO
+from io import BytesIO, StringIO
 
+from django.conf import settings
 from django.contrib.admin.views.decorators import staff_member_required
 from django.db.models import Sum, Q, Max
 from django.db import connections
 from django.db.models.functions import TruncMonth, TruncYear
 from django.http import HttpResponse, Http404, JsonResponse
 from django.shortcuts import render
-from django.utils import timezone
+from django.utils import timezone, translation
 from django.utils.decorators import method_decorator
+from django.utils.encoding import force_str, force_text
+from django.utils.formats import get_format
 from django.utils.encoding import force_str, smart_str
 from django.views import View
 from django.utils.translation import ugettext_lazy as _
@@ -108,7 +112,38 @@ class ForecastCompare(View):
 
             elif fmt in ('csvlist', 'csvtable', 'csv'):
                 # 下载 csv
-                i = 2
+                sf = StringIO()
+                json = self._get_json_data(request, in_page=False)
+                title = '对比报表-%s' % ('详细' if report_type == 'detail' else '汇总')
+                encoding = settings.CSV_CHARSET
+                body_fields = (
+                    'item__nr', 'location__nr', 'customer__nr', 'total_year_qty', 'year_qty', 'last_qty', 'current_qty',
+                    'next_qty', 'current_year_qty', 'current_last_qty', 'current_next_qty')
+                decimal_separator = get_format('DECIMAL_SEPARATOR', request.LANGUAGE_CODE, True)
+                if decimal_separator == ",":
+                    writer = csv.writer(sf, quoting=csv.QUOTE_NONNUMERIC, delimiter=';')
+                else:
+                    writer = csv.writer(sf, quoting=csv.QUOTE_NONNUMERIC, delimiter=',')
+                file_headers = reprot_detail_headers if report_type == 'detail' else reprot_aggre_headers
+                writer.writerow(file_headers)
+
+                for data in json['rows']:
+                    body = []
+                    for field in body_fields:
+                        if field in data:
+                            body.append(data[field])
+                    writer.writerow(body)
+
+                response = HttpResponse(
+                    content_type='text/csv; charset=%s' % settings.CSV_CHARSET,
+                    content=sf.getvalue()
+                )
+                # Filename parameter is encoded as specified in rfc5987
+                response['Content-Disposition'] = "attachment; filename*=utf-8''%s.csv" % urllib.parse.quote(
+                    force_str(title))
+                response['Cache-Control'] = "no-cache, no-store"
+                return response
+
         else:
             raise Http404('PAGE NOT FOUND')
 
@@ -257,8 +292,9 @@ class ForecastCompare(View):
             '''
 
             cursor.execute(forecast_query,
-                           [ForecastCommentOperation.compare_report_status,search_start_time, search_end_time, item_ids, location_ids,
-                            customer_ids, ForecastCommentOperation.compare_report_status,search_start_time,
+                           [ForecastCommentOperation.compare_report_status, search_start_time, search_end_time,
+                            item_ids, location_ids,
+                            customer_ids, ForecastCommentOperation.compare_report_status, search_start_time,
                             search_end_time,
                             item_ids, location_ids, customer_ids])
         else:
@@ -274,8 +310,9 @@ class ForecastCompare(View):
                         group by a.item_id,a.location_id,a.customer_id,a.year,DATE_TRUNC('month', a.parsed_date)
                         '''
             cursor.execute(forecast_query,
-                           [ForecastCommentOperation.compare_report_status,search_start_time, search_end_time, item_ids,
-                             location_ids,ForecastCommentOperation.compare_report_status, search_start_time,
+                           [ForecastCommentOperation.compare_report_status, search_start_time, search_end_time,
+                            item_ids,
+                            location_ids, ForecastCommentOperation.compare_report_status, search_start_time,
                             search_end_time,
                             item_ids, location_ids])
 
@@ -341,12 +378,12 @@ class ForecastCompare(View):
             for row in rows:
 
                 i = {
-                        'item_id': row[0],
-                        'location_id': row[1],
-                        'customer_id': row[2],
-                        'year': row[3],
-                        'month': row[4],
-                        'qty': row[5]
+                    'item_id': row[0],
+                    'location_id': row[1],
+                    'customer_id': row[2],
+                    'year': row[3],
+                    'month': row[4],
+                    'qty': row[5]
                 }
                 if (report_type == 'detail' and i['item_id'] == c['item_id'] \
                     and i['location_id'] == c['location_id'] \
