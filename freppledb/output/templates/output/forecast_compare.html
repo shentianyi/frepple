@@ -89,12 +89,20 @@
         var currentMode = '{{mode}}';
         var currentType = '{{report_type}}';
         var initialfilter{% if filters %} = {{filters|safe}}{% endif %};
+//        history.pushState('','','/data/output/forecast/compare/')
+
 
         queryForecastCompare(currentMode, currentType);
 
         var reportkey = '{{reportkey|safe}}';
 
         function transferModeAndType(category, value) {
+
+//            history.pushState('','','/data/output/forecast/compare/')
+
+            var postdata = $("#grid").jqGrid('getGridParam', 'postData') ? $("#grid").jqGrid('getGridParam', 'postData') : [];
+//            var postdata = $("#grid").jqGrid('getGridParam', 'postData') ? $("#grid").jqGrid('getGridParam', 'postData') : [];
+            console.log(postdata)
             switch (category){
                 case "shape":
                     $("#" + currentMode).find('img').attr('src', '{{STATIC_URL}}img/forecast/' + currentMode + '.png');
@@ -117,14 +125,18 @@
                     break;
             }
 
-        $("#filter").find('img').attr('src', '{{STATIC_URL}}img/forecast/search.png');
-        $("#download").find('img').attr('src', '{{STATIC_URL}}img/forecast/download.png');
-        $("#" + value).find('img').attr('src', '{{STATIC_URL}}img/forecast/' + value + '_active.png');
+            $("#filter").find('img').attr('src', '{{STATIC_URL}}img/forecast/search.png');
+            $("#download").find('img').attr('src', '{{STATIC_URL}}img/forecast/download.png');
+            $("#" + value).find('img').attr('src', '{{STATIC_URL}}img/forecast/' + value + '_active.png');
 
-            queryForecastCompare(currentMode, currentType)
+            queryForecastCompare(currentMode, currentType, postdata.filters !== undefined ? postdata.filters : {})
+
+//            var currenturl = window.location.href;
+//            var newUrl = (currenturl.split("?"))[0];
+//            history.pushState('','',newUrl + '?mode=' + currentMode + '&report_type=' + currentType);//前两个参数可省略
         }
 
-        function queryForecastCompare(mode, type) {
+        function queryForecastCompare(mode, type, filterParams) {
             var hide_customer = type === 'detail' ? false : true;
             var hide_table_column = mode === 'table' ? false : true;
 
@@ -217,6 +229,7 @@
 
             $("#grid").GridDestroy();
             $("#content-main").append('<table id="grid" class="table table-striped pivotgrid"></table>');
+            $("#content-main").append('<div id="gridpager" class="col-md-12"></div>');
 
             jQuery("#grid").jqGrid({
                 url: (location.href.indexOf("#") != -1 ? location.href.substr(0, location.href.indexOf("#")) : location.href)
@@ -227,6 +240,7 @@
                 },
                 colModel: tableColModel,
                 pager: '#gridpager',
+                emptyrecords: "无数据显示",
                 rownumbers: true,
                 rowNum: {{ request.pagesize }},
                 viewrecords: true,
@@ -241,9 +255,10 @@
                 viewSort: true,
                 onSortCol: grid.saveColumnConfiguration,
                 onPaging: grid.saveColumnConfiguration,
-                autowidth: true,{% if filters %}
-                postData: {filters: JSON.stringify(initialfilter)},
-                search : true,{% endif %}
+                autowidth: true,
+//                postData: {filters: JSON.stringify(filterParams)},
+                postData: {filters: filterParams},
+                search:true,
                 searching: {
                     multipleSearch: true,
                     multipleGroup: false, // 不可以组搜索
@@ -294,7 +309,6 @@
                                     data: [ret[i].last_qty, ret[i].current_qty, ret[i].next_qty]
                                 }]
                             };
-
                             myChart.setOption(option);
                         }
                     }

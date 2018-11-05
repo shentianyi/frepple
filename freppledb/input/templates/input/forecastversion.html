@@ -392,8 +392,8 @@ $(function() {
 
     <!--删除按钮-->
     {% if hasdeleteperm and not is_popup %}
-    <button class="btn btn-xs btn-default btn-table-icon" id="delete_selected" disabled data-toggle="tooltip" data-placement="top"
-            data-original-title="{% trans 'Delete selected objects'|escape %}" onclick="grid.showDelete()">
+    <button class="btn btn-xs btn-default btn-table-icon" id="delete_selected" data-toggle="tooltip" data-placement="top"
+            data-original-title="{% trans 'Delete selected objects'|escape %}" onclick="showDeleteDialog()">
         <!--<span class="fa fa-minus"></span>-->
         <img src="{{STATIC_URL}}img/table/delete.png" alt="{% trans 'Delete selected objects'|escape %}">
     </button>
@@ -448,7 +448,26 @@ $(function() {
     <span id="resize-handle" class="fa fa-bars handle" style="display: none;"></span>
 </div>
 
-{% block after_table %}{% endblock %}
+{% block after_table %}
+<script type="text/javascript">
+    function showDeleteDialog() {
+        if ($('#delete_selected').hasClass("disabled")) return;
+
+        var sel = jQuery("#grid").jqGrid('getGridParam', 'selarrrow');
+        if (sel.length >= 1) {
+            $("#deleteDialog").modal('show');
+        } else  {
+            alert("请选择需要删除的数据")
+        }
+//        $("#deleteDialogSubmit").unbind('click').bind('click', function () {
+//
+//        var url = '/data/output/forecast/compare/?format=' + format + '&mode=' + currentMode + '&report_type=' + currentType;
+//        url += "&" + jQuery.param(postdata);
+//
+//        window.location.href = url;
+    }
+</script>
+{% endblock %}
 
 {% if reportclass.hasTimeBuckets %}
 {% include "admin/subtemplate_timebuckets.html" %}

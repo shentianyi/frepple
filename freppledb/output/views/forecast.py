@@ -88,15 +88,21 @@ class ForecastCompare(View):
                 ws.append(headers)
 
                 # 写入表体, 顺序和
-                body_fields = (
+                reprot_detail_fields = (
                     'item__nr', 'location__nr', 'customer__nr', 'total_year_qty', 'year_qty', 'last_qty', 'current_qty',
                     'next_qty', 'current_year_qty', 'current_last_qty', 'current_next_qty')
+                reprot_aggre_fields = (
+                    'item__nr', 'location__nr', 'total_year_qty', 'year_qty', 'last_qty', 'current_qty',
+                    'next_qty', 'current_year_qty', 'current_last_qty', 'current_next_qty')
+
+                body_fields = reprot_detail_fields if report_type == 'detail' else reprot_aggre_fields
                 for data in json['rows']:
                     body = []
                     for field in body_fields:
                         if field in data:
                             cell = WriteOnlyCell(ws, value=data[field])
                             body.append(cell)
+
                     ws.append(body)
 
                 output = BytesIO()
@@ -116,9 +122,7 @@ class ForecastCompare(View):
                 json = self._get_json_data(request, in_page=False)
                 title = '对比报表-%s' % ('详细' if report_type == 'detail' else '汇总')
                 encoding = settings.CSV_CHARSET
-                body_fields = (
-                    'item__nr', 'location__nr', 'customer__nr', 'total_year_qty', 'year_qty', 'last_qty', 'current_qty',
-                    'next_qty', 'current_year_qty', 'current_last_qty', 'current_next_qty')
+
                 decimal_separator = get_format('DECIMAL_SEPARATOR', request.LANGUAGE_CODE, True)
                 if decimal_separator == ",":
                     writer = csv.writer(sf, quoting=csv.QUOTE_NONNUMERIC, delimiter=';')
@@ -127,6 +131,14 @@ class ForecastCompare(View):
                 file_headers = reprot_detail_headers if report_type == 'detail' else reprot_aggre_headers
                 writer.writerow(file_headers)
 
+                reprot_detail_fields = (
+                    'item__nr', 'location__nr', 'customer__nr', 'total_year_qty', 'year_qty', 'last_qty', 'current_qty',
+                    'next_qty', 'current_year_qty', 'current_last_qty', 'current_next_qty')
+                reprot_aggre_fields = (
+                    'item__nr', 'location__nr', 'total_year_qty', 'year_qty', 'last_qty', 'current_qty',
+                    'next_qty', 'current_year_qty', 'current_last_qty', 'current_next_qty')
+
+                body_fields = reprot_detail_fields if report_type == 'detail' else reprot_aggre_fields
                 for data in json['rows']:
                     body = []
                     for field in body_fields:

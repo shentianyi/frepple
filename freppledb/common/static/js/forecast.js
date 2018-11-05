@@ -87,10 +87,17 @@ Forecast.showDetail = function (id, type) {
 };
 
 Forecast.download = function () {
+    // $("#aggre").find('img').attr('src', '{{STATIC_URL}}img/forecast/aggre.png');
+    // $("#detail").find('img').attr('src', '{{STATIC_URL}}img/forecast/detail.png');
+    // $("#filter").find('img').attr('src', '{{STATIC_URL}}img/forecast/search.png');
+    // $("#download").find('img').attr('src', '{{STATIC_URL}}img/forecast/download_active.png');
+
     $("#downloadDialog").modal('show');
 
     $("#downloadDialogSubmit").unbind('click').bind('click', function () {
         var postdata = $("#grid").jqGrid('getGridParam', 'postData');
+
+        console.log('postdata', postdata);
         var format = $("[name=downloadType]:checked").val();
 
         var url = '/data/output/forecast/compare/?format=' + format + '&mode=' + currentMode + '&report_type=' + currentType;
@@ -99,3 +106,7 @@ Forecast.download = function () {
         window.location.href = url;
     });
 };
+
+// Forecast.showDeleteDialog = function () {
+//     $("#deleteDialog").modal('show');
+// };
