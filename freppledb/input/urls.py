@@ -72,8 +72,9 @@ urlpatterns = [
   url(r'^data/input/forecastcomment/$', freppledb.input.views.ForecastCommentView.as_view(), name="input_forecastcomment_list"),
 
   url(r'^data/input/enum/(?P<type>(.+))/(?P<value>(.+))/$', freppledb.input.views.EnumView.as_view(), name="enum_get"),
-  url(r'^data/input/forecast/version/(?P<version>(.+))/$',
-      freppledb.input.serializers.ForecastdetailVersionAPI.as_view()),
+  url(r'^data/input/forecast/version/(?P<version>(.+))/$',freppledb.input.serializers.ForecastdetailVersionAPI.as_view()),
+
+  url(r'^data/input/item_detail/(?P<version>(.+))/$',freppledb.input.views),
 
   # Special reports
   url(r'^supplypath/item/(.+)/$', freppledb.input.views.UpstreamItemPath.as_view(), name="supplypath_item"),
