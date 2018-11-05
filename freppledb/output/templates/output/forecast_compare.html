@@ -86,10 +86,11 @@
 {% block after_table %}
     <script type="text/javascript">
 
+        var currentMode = '{{mode}}';
+        var currentType = '{{report_type}}';
+        var initialfilter{% if filters %} = {{filters|safe}}{% endif %};
 //        history.pushState('','','/data/output/forecast/compare/')
 
-        var currentMode = 'table';
-        var currentType = 'aggre';
 
         queryForecastCompare(currentMode, currentType);
 

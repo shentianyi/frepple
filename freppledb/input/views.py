@@ -1331,6 +1331,19 @@ class ItemList(GridReport):
     )
 
 
+# TODO 物料详情
+class ItemDetail(View):
+    def get(self, request, *args, **kwargs):
+        # 默认为main
+        # main:         主数据
+        # supplier:     供应商
+        # plan:         计划
+        # simulation: 　模拟
+        # forecast:     预测
+        template_name = "input/item/item_detail_%s.html" % request.GET.get('template', 'main')
+
+        return render(request, template_name, {'template_name': template_name})
+
 class ItemCustomerList(GridReport):
     '''
     A list report to show items.
@@ -1900,6 +1913,11 @@ class ForecastCommentView(View):
             print(e)
             traceback.print_exc()
             return HttpResponseServerError("server error, " + str(e), content_type='application/json')
+
+    #
+    # @classmethod
+    # def _generate_spreadsheet_data(reportclass, request, output, *args, **kwargs):
+    #     i=1
 
 
 class DemandList(GridReport):
