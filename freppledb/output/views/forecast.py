@@ -1,16 +1,19 @@
 import calendar
+import csv
 import math
 import urllib
-from io import BytesIO
+from io import BytesIO, StringIO
 
+from django.conf import settings
 from django.contrib.admin.views.decorators import staff_member_required
 from django.db.models import Sum, Q, Max
 from django.db.models.functions import TruncMonth, TruncYear
 from django.http import HttpResponse, Http404, JsonResponse
 from django.shortcuts import render
-from django.utils import timezone
+from django.utils import timezone, translation
 from django.utils.decorators import method_decorator
-from django.utils.encoding import force_str
+from django.utils.encoding import force_str, force_text
+from django.utils.formats import get_format
 from django.views import View
 from django.utils.translation import ugettext_lazy as _
 from datetime import datetime, timedelta
@@ -77,12 +80,14 @@ class ForecastCompare(View):
                 ws.append(headers)
 
                 # 写入表体, 顺序和
-                body_fields = ('item__nr','location__nr','customer__nr','total_year_qty','year_qty','last_qty','current_qty','next_qty','current_year_qty','current_last_qty','current_next_qty')
+                body_fields = (
+                'item__nr', 'location__nr', 'customer__nr', 'total_year_qty', 'year_qty', 'last_qty', 'current_qty',
+                'next_qty', 'current_year_qty', 'current_last_qty', 'current_next_qty')
                 for data in json['rows']:
                     body = []
                     for field in body_fields:
                         if field in data:
-                            cell = WriteOnlyCell(ws,value=data[field])
+                            cell = WriteOnlyCell(ws, value=data[field])
                             body.append(cell)
                     ws.append(body)
 
@@ -99,7 +104,38 @@ class ForecastCompare(View):
 
             elif fmt in ('csvlist', 'csvtable', 'csv'):
                 # 下载 csv
-                i = 2
+                sf = StringIO()
+                json = self._get_json_data(request, in_page=False)
+                title = '对比报表-%s' % ('详细' if report_type == 'detail' else '汇总')
+                encoding = settings.CSV_CHARSET
+                body_fields = (
+                'item__nr', 'location__nr', 'customer__nr', 'total_year_qty', 'year_qty', 'last_qty', 'current_qty',
+                'next_qty', 'current_year_qty', 'current_last_qty', 'current_next_qty')
+                decimal_separator = get_format('DECIMAL_SEPARATOR', request.LANGUAGE_CODE, True)
+                if decimal_separator == ",":
+                    writer = csv.writer(sf, quoting=csv.QUOTE_NONNUMERIC, delimiter=';')
+                else:
+                    writer = csv.writer(sf, quoting=csv.QUOTE_NONNUMERIC, delimiter=',')
+                file_headers = reprot_detail_headers if report_type == 'detail' else reprot_aggre_headers
+                writer.writerow(file_headers)
+
+                for data in json['rows']:
+                    body = []
+                    for field in body_fields:
+                        if field in data:
+                            body.append(data[field])
+                    writer.writerow(body)
+
+                response = HttpResponse(
+                    content_type='text/csv; charset=%s' % settings.CSV_CHARSET,
+                    content=sf.getvalue()
+                )
+                # Filename parameter is encoded as specified in rfc5987
+                response['Content-Disposition'] = "attachment; filename*=utf-8''%s.csv" % urllib.parse.quote(
+                    force_str(title))
+                response['Cache-Control'] = "no-cache, no-store"
+                return response
+
         else:
             raise Http404('PAGE NOT FOUND')
 
