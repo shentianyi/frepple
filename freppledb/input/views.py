@@ -3526,3 +3526,4 @@ class OperationPlanDetail(View):
                 # Swallow the exception and move on
                 logger.error("Error updating operationplan: %s" % e)
         return HttpResponse(content="OK")
+
