@@ -1419,11 +1419,11 @@ class ForecastYear(AuditModel):
         _('date_type'), max_length=20, choices=date_types, default='W', null=True, blank=True)
 
     ratio = models.DecimalField(_('forecast ratio'), max_digits=20, decimal_places=8, default=100, null=False, blank=True)
-    normal_qty = models.DecimalField(_('normal qty'), max_digits=20, decimal_places=8)
-    new_product_plan_qty = models.DecimalField(_('new product plan qty'), max_digits=20, decimal_places=8, null=True,
-                                               blank=True)
-    promotion_qty = models.DecimalField(_('promotion qty'), max_digits=20, decimal_places=8, null=True, blank=True)
-
+    normal_qty = models.DecimalField(_('normal qty'), max_digits=20, decimal_places=8, null=False, default=0)
+    new_product_plan_qty = models.DecimalField(_('new product plan qty'), max_digits=20, decimal_places=8, null=False,
+                                               blank=True, default=0)
+    promotion_qty = models.DecimalField(_('promotion qty'), max_digits=20, decimal_places=8, null=False,
+                                        blank=True, default=0)
     # 解析过的时间, 通过 date type + date number
     parsed_date = models.DateTimeField(_('parsed_date'), editable=False, db_index=True, default=timezone.now)
 
@@ -1477,6 +1477,9 @@ class ForecastCommentOperation:
     can_nok_status = ('init', 'ok')
     can_cancel_status = ('init', 'nok', 'ok')
     can_release_status = ('ok')
+
+    # 报表状态
+    compare_report_status =('init', 'nok', 'ok','release','confirm',)
 
     def can_ok(self):
         return self.status in self.can_ok_status
@@ -1533,17 +1536,18 @@ class Forecast(AuditModel, ForecastCommentOperation):
         db_index=True, related_name='forecast_customer',
         null=True, blank=True, on_delete=models.CASCADE
     )
-    year = models.IntegerField(_('year'), max_length=300, db_index=True)
+    year = models.IntegerField(_('year'), db_index=True)
     date_number = models.IntegerField(_('date_number'), db_index=True)
 
     date_type = models.CharField(
         _('date_type'), max_length=20, choices=ForecastYear.date_types, default='W', null=True, blank=True)
 
     ratio = models.DecimalField(_('forecast ratio'), max_digits=20, decimal_places=8, default=100, null=False, blank=True)
-    normal_qty = models.DecimalField(_('normal qty'), max_digits=20, decimal_places=8)
-    new_product_plan_qty = models.DecimalField(_('new product plan qty'), max_digits=20, decimal_places=8, null=True,
-                                               blank=True)
-    promotion_qty = models.DecimalField(_('promotion qty'), max_digits=20, decimal_places=8, null=True, blank=True)
+    normal_qty = models.DecimalField(_('normal qty'), max_digits=20, decimal_places=8,null=False,default=0)
+    new_product_plan_qty = models.DecimalField(_('new product plan qty'), max_digits=20, decimal_places=8, null=False,
+                                               blank=True, default=0)
+    promotion_qty = models.DecimalField(_('promotion qty'), max_digits=20, decimal_places=8, null=False,
+                                               blank=True, default=0)
     status = models.CharField(_('status'), max_length=20, choices=ForecastCommentOperation.statuses, default='init')
     create_user = models.ForeignKey(
         User, verbose_name=_('create_user'),
