@@ -88,6 +88,7 @@
 
         var currentMode = '{{mode}}';
         var currentType = '{{report_type}}';
+        var initialfilter{% if filters %} = {{filters|safe}}{% endif %};
 
         queryForecastCompare(currentMode, currentType);
 
@@ -240,9 +241,9 @@
                 viewSort: true,
                 onSortCol: grid.saveColumnConfiguration,
                 onPaging: grid.saveColumnConfiguration,
-                autowidth: true,
-//                postData: {filters: JSON.stringify({{ request.filters }})},
-                search:true,
+                autowidth: true,{% if filters %}
+                postData: {filters: JSON.stringify(initialfilter)},
+                search : true,{% endif %}
                 searching: {
                     multipleSearch: true,
                     multipleGroup: false, // 不可以组搜索

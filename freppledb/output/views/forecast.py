@@ -60,6 +60,7 @@ class ForecastCompare(View):
                     'reportkey': reportkey,
                     'mode': request.GET.get('mode', 'table'),
                     'actions': None,
+                    'filters': request.GET.get('filters'),
                     'report_type': request.GET.get('report_type', 'detail')
                 }
 
