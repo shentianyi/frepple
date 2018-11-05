@@ -1212,25 +1212,26 @@ var grid = {
         // }
         // else
             if (sel.length > 0) {
-            $('#timebuckets').modal('hide');
-            $.jgrid.hideModal("#searchmodfbox_grid");
-            $('#popup').html('<div class="modal-dialog">' +
-                '<div class="modal-content">' +
-                '<div class="modal-header">' +
-                '<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true" class="fa fa-times"></span></button>' +
-                '<h4 class="modal-title">' + gettext('Delete data') + '</h4>' +
-                '</div>' +
-                '<div class="modal-body">' +
-                '<p>' + interpolate(gettext('You are about to delete %s objects AND ALL RELATED RECORDS!'), [sel.length], false) + '</p>' +
-                '</div>' +
-                '<div class="modal-footer">' +
-                '<input type="submit" id="delbutton" role="button" class="btn btn-danger pull-left" value="' + gettext('Confirm') + '">' +
-                '<input type="submit" id="cancelbutton" role="button" class="btn btn-primary pull-right" data-dismiss="modal" value="' + gettext('Cancel') + '">' +
-                '</div>' +
-                '</div>' +
-                '</div>')
-                .modal('show');
-            $('#delbutton').on('click', function () {
+                $("#deleteDialog").modal('show');
+            // $('#timebuckets').modal('hide');
+            // $.jgrid.hideModal("#searchmodfbox_grid");
+            // $('#popup').html('<div class="modal-dialog">' +
+            //     '<div class="modal-content">' +
+            //     '<div class="modal-header">' +
+            //     '<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true" class="fa fa-times"></span></button>' +
+            //     '<h4 class="modal-title">' + gettext('Delete data') + '</h4>' +
+            //     '</div>' +
+            //     '<div class="modal-body">' +
+            //     '<p>' + interpolate(gettext('You are about to delete %s objects AND ALL RELATED RECORDS!'), [sel.length], false) + '</p>' +
+            //     '</div>' +
+            //     '<div class="modal-footer">' +
+            //     '<input type="submit" id="delbutton" role="button" class="btn btn-danger pull-left" value="' + gettext('Confirm') + '">' +
+            //     '<input type="submit" id="cancelbutton" role="button" class="btn btn-primary pull-right" data-dismiss="modal" value="' + gettext('Cancel') + '">' +
+            //     '</div>' +
+            //     '</div>' +
+            //     '</div>')
+            //     .modal('show');
+            $('#deleteDialogSubmit').on('click', function () {
                 $.ajax({
                     url: location.pathname,
                     data: JSON.stringify([{'delete': sel}]),
@@ -1252,6 +1253,9 @@ var grid = {
                 })
             })
         }
+        // else {
+        //         alert("请选择需要删除的数据")
+        //     }
     },
 
     showCopy: function () {
