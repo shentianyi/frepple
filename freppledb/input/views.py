@@ -1340,7 +1340,7 @@ class ItemDetail(View):
         # plan:         计划
         # simulation: 　模拟
         # forecast:     预测
-        template_name = "input/item/item_detail_%s.html" % request.GET.get('template', 'main')
+        template_name = "input/item/detail_base.html"
 
         return render(request, template_name, {'template_name': template_name})
 

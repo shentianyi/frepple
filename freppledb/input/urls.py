@@ -33,7 +33,7 @@ urlpatterns = [
   url(r'^data/input/demand/$', freppledb.input.views.DemandList.as_view(), name="input_demand_changelist"),
   url(r'^data/input/item/$', freppledb.input.views.ItemList.as_view(), name="input_item_changelist"),
   # TODO CMARK 物料详细页面
-  url(r'^data/input/item_detail/$', freppledb.input.views.ItemDetail.as_view(),name="input_item_detail"),
+  url(r'^data/input/item_detail/(.+)/$', freppledb.input.views.ItemDetail.as_view(),name="input_item_detail"),
 
   url(r'^data/input/itemcustomer/$', freppledb.input.views.ItemCustomerList.as_view(), name="input_itemcustomer_changelist"),
   url(r'^data/input/itemsuccessor/$', freppledb.input.views.ItemSuccessorList.as_view(), name="input_itemsuccessor_changelist"),
@@ -74,7 +74,6 @@ urlpatterns = [
   url(r'^data/input/enum/(?P<type>(.+))/(?P<value>(.+))/$', freppledb.input.views.EnumView.as_view(), name="enum_get"),
   url(r'^data/input/forecast/version/(?P<version>(.+))/$',freppledb.input.serializers.ForecastdetailVersionAPI.as_view()),
 
-  url(r'^data/input/item_detail/(?P<version>(.+))/$',freppledb.input.views),
 
   # Special reports
   url(r'^supplypath/item/(.+)/$', freppledb.input.views.UpstreamItemPath.as_view(), name="supplypath_item"),
