@@ -86,7 +86,7 @@
 {% block after_table %}
     <script type="text/javascript">
 
-        history.pushState('','','/data/output/forecast/compare/')
+//        history.pushState('','','/data/output/forecast/compare/')
 
         var currentMode = 'table';
         var currentType = 'aggre';
@@ -97,10 +97,11 @@
 
         function transferModeAndType(category, value) {
 
-            history.pushState('','','/data/output/forecast/compare/')
+//            history.pushState('','','/data/output/forecast/compare/')
 
-            var postdata = $("#grid").jqGrid('getGridParam', 'postData');
-
+            var postdata = $("#grid").jqGrid('getGridParam', 'postData') ? $("#grid").jqGrid('getGridParam', 'postData') : [];
+//            var postdata = $("#grid").jqGrid('getGridParam', 'postData') ? $("#grid").jqGrid('getGridParam', 'postData') : [];
+            console.log(postdata)
             switch (category){
                 case "shape":
                     $("#" + currentMode).find('img').attr('src', '{{STATIC_URL}}img/forecast/' + currentMode + '.png');
@@ -127,14 +128,11 @@
             $("#download").find('img').attr('src', '{{STATIC_URL}}img/forecast/download.png');
             $("#" + value).find('img').attr('src', '{{STATIC_URL}}img/forecast/' + value + '_active.png');
 
-            queryForecastCompare(currentMode, currentType, postdata)
+            queryForecastCompare(currentMode, currentType, postdata.filters !== undefined ? postdata.filters : {})
 
-            var currenturl = window.location.href;
-            var newUrl = (currenturl.split("?"))[0];
-            history.pushState('','',newUrl + '?mode=' + currentMode + '&report_type=' + currentType);//前两个参数可省略
-
-//            setParmsValue('mode', currentMode);
-//            setParmsValue('report_type', currentType);
+//            var currenturl = window.location.href;
+//            var newUrl = (currenturl.split("?"))[0];
+//            history.pushState('','',newUrl + '?mode=' + currentMode + '&report_type=' + currentType);//前两个参数可省略
         }
 
         function queryForecastCompare(mode, type, filterParams) {
@@ -234,7 +232,7 @@
 
             jQuery("#grid").jqGrid({
                 url: (location.href.indexOf("#") != -1 ? location.href.substr(0, location.href.indexOf("#")) : location.href)
-                    + (location.search.length > 0 ? "&format=json" : "?format=json") + "&mode=" + mode + "&report_type=" + type + "&" + filterParams,
+                    + (location.search.length > 0 ? "&format=json" : "?format=json") + "&mode=" + mode + "&report_type=" + type,
                 datatype: "json",
                 jsonReader: {
                     repeatitems: false
@@ -257,7 +255,8 @@
                 onSortCol: grid.saveColumnConfiguration,
                 onPaging: grid.saveColumnConfiguration,
                 autowidth: true,
-                postData: {filters: JSON.stringify(filterParams)},
+//                postData: {filters: JSON.stringify(filterParams)},
+                postData: {filters: filterParams},
                 search:true,
                 searching: {
                     multipleSearch: true,
@@ -341,70 +340,6 @@
                 .setGridWidth($('#content-main').width())
                 .setGridHeight($(window).height() - $("#grid").offset().top);
         });
-
-      //设置URL参数的方法
-      function setParmsValue(parms, parmsValue) {
-          var urlstrings = document.URL;
-          var args = GetUrlParms();
-          var values = args[parms];
-          //如果参数不存在，则添加参数
-          if (values == undefined) {
-              var query = location.search.substring(1); //获取查询串
-              //如果Url中已经有参数，则附加参数
-              if (query) {
-                  urlstrings += ("&" + parms + "=" + parmsValue);
-              }
-              else {
-                  urlstrings += ("?" + parms + "=" + parmsValue);  //向Url中添加第一个参数
-              }
-              window.location = urlstrings;
-          }
-          else {
-              window.location = updateParms(parms, parmsValue);  //修改参数
-          }
-      }
-
-      //修改URL参数，parms：参数名，parmsValue：参数值，return：修改后的URL
-      function updateParms(parms, parmsValue) {
-          var newUrlParms = "";
-          var newUrlBase = location.href.substring(0, location.href.indexOf("?") + 1); //截取查询字符串前面的url
-          var query = location.search.substring(1); //获取查询串
-          var pairs = query.split("&"); //在逗号处断开
-          for (var i = 0; i < pairs.length; i++) {
-              var pos = pairs[i].indexOf('='); //查找name=value
-              if (pos == -1) continue; //如果没有找到就跳过
-              var argname = pairs[i].substring(0, pos); //提取name
-              var value = pairs[i].substring(pos + 1); //提取value
-              //如果找到了要修改的参数
-              if (findText(argname, parms)) {
-                  newUrlParms = newUrlParms + (argname + "=" + parmsValue + "&");
-              }
-              else {
-                  newUrlParms += (argname + "=" + value + "&");
-              }
-          }
-          return newUrlBase + newUrlParms.substring(0, newUrlParms.length - 1);
-      }
-
-      //辅助方法
-      function findText(urlString, keyWord) {
-          return urlString.toLowerCase().indexOf(keyWord.toLowerCase()) != -1 ? true : false;
-      }
-
-      //得到查询字符串参数集合
-      function GetUrlParms() {
-          var args = new Object();
-          var query = location.search.substring(1); //获取查询串
-          var pairs = query.split("&"); //在逗号处断开
-          for (var i = 0; i < pairs.length; i++) {
-              var pos = pairs[i].indexOf('='); //查找name=value
-              if (pos == -1) continue; //如果没有找到就跳过
-              var argname = pairs[i].substring(0, pos); //提取name
-              var value = pairs[i].substring(pos + 1); //提取value
-              args[argname] = unescape(value); //存为属性
-          }
-          return args;
-      }
 
     </script>
 {% endblock %}

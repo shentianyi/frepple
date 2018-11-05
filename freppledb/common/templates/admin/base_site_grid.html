@@ -293,7 +293,7 @@ $(function() {
     <!--删除按钮-->
     {% if hasdeleteperm and not is_popup %}
     <button class="btn btn-xs btn-default btn-table-icon" id="delete_selected" data-toggle="tooltip" data-placement="top"
-            data-original-title="{% trans 'Delete selected objects'|escape %}" onclick="showDeleteDialog()">
+            data-original-title="{% trans 'Delete selected objects'|escape %}" onclick="grid.showDelete()">
         <!--<span class="fa fa-minus"></span>-->
         <img src="{{STATIC_URL}}img/table/delete.png" alt="{% trans 'Delete selected objects'|escape %}">
     </button>

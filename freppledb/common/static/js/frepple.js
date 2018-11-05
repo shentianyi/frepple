@@ -1205,12 +1205,13 @@ var grid = {
 
         if ($('#delete_selected').hasClass("disabled")) return;
         var sel = jQuery("#grid").jqGrid('getGridParam', 'selarrrow');
-        if (sel.length >= 1) {
-            // Redirect to a page for deleting a single entity
-            location.href = location.pathname + encodeURI(sel[0]) + '/delete/';
-            // $("#deleteDialog").modal('show');
-        }
-        else if (sel.length > 0) {
+        // if (sel.length >= 1) {
+        //     // Redirect to a page for deleting a single entity
+        //     location.href = location.pathname + encodeURI(sel[0]) + '/delete/';
+        //     // $("#deleteDialog").modal('show');
+        // }
+        // else
+            if (sel.length > 0) {
             $('#timebuckets').modal('hide');
             $.jgrid.hideModal("#searchmodfbox_grid");
             $('#popup').html('<div class="modal-dialog">' +
