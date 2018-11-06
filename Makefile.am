@@ -7,7 +7,9 @@ pkgsysconf_DATA = djangosettings.py
 
 SUBDIRS = src include test contrib bin doc
 
-EXTRA_DIST = freppledb AUTHORS COPYING CONTRIBUTING.md README.md Makefile.am Makefile.dist freppledb frepplectl.py setup.py djangosettings.py requirements.txt package.json Gruntfile.js
+#EXTRA_DIST = freppledb AUTHORS COPYING CONTRIBUTING.md README.md Makefile.am Makefile.dist freppledb frepplectl.py setup.py djangosettings.py requirements.txt package.json Gruntfile.js
+EXTRA_DIST = freppledb AUTHORS COPYING CONTRIBUTING.md README.md Makefile.am Makefile.dist freppledb frepplectl.py setup.py djangosettings.py requirements.txt package.json
+
 
 AUTOMAKE_OPTIONS = foreign
 
