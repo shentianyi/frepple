@@ -41,7 +41,7 @@ $(function() {
 	  </div>
 
 		<div id="nav-menu" class="collapse navbar-collapse">
-			<ul class="nav navbar-nav">
+			<ul class="nav navbar-nav navbar-nav-menu">
 			  {% for group in menu %}
                 {% if group.2 %}
                   <li class="dropdown">
@@ -83,7 +83,7 @@ $(function() {
             </ul>
           {% endif %}
 
-            <ul class="nav navbar-nav navbar-right">
+            <ul class="nav navbar-nav navbar-right" style="margin-top: 12px">
                 <li class="dropdown">
                     <a href="#" onclick="window.open('https://frepple.com/docs/{% version_short %}/{{reportclass.help_url}}');" class="dropdown-toggle" style="padding-right: 20px;" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
                         <span class="fa fa-question-circle" style="font-size: 20px;"></span>
@@ -92,7 +92,7 @@ $(function() {
             </ul>
 
 		{% comment %}Translators: Translation included with Django{% endcomment %}
-		<form class="navbar-form navbar-right" role="search">
+		<form class="navbar-form navbar-right" role="search" style="margin-top: 20px">
 			<div class="form-group">
 			  <input id="search" style="border-radius: 20px; border: none;" class="form-control typeahead" type="text" placeholder="{% trans 'Search' %}" />
 			</div>

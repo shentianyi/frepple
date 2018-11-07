@@ -241,7 +241,14 @@
                 colModel: tableColModel,
                 pager: '#gridpager',
                 emptyrecords: "无数据显示",
+//                recordtext: " 显示第 {0} - {1} 项纪录，  共 {2} 项",
+                loadtext: "卖力加载中...",
+//                pgtext : " {0}页 ，共 {1} 页",
+
                 rownumbers: true,
+//                multiselect: true,
+                shrinkToFit:false,
+                autoScroll: true,
                 rowNum: {{ request.pagesize }},
                 viewrecords: true,
                 sortorder: "asc",
@@ -270,6 +277,16 @@
                 },
                 loadComplete: function() {
 
+                    $("#gird").closest(".ui-jqgrid-bdiv").css({ 'overflow-y' : 'auto'});
+//		            $("#grid").setGridHeight('150');
+
+                    jQuery("#grid").jqGrid('navGrid','#pagernav2',
+                      {add:false}, //options
+                      {height:300,reloadAfterSubmit:false}, // edit options
+                      {}, // add options
+                      {reloadAfterSubmit:false}, // del options
+                      {} // search options
+                      );
                     if(currentMode === 'graph'){
                         var ret = jQuery("#grid").jqGrid('getRowData');
                         console.log(ret);
@@ -341,6 +358,23 @@
                 .setGridWidth($('#content-main').width())
                 .setGridHeight($(window).height() - $("#grid").offset().top);
         });
+
+
+//        $("tr").bind("mouseover",function(){
+//            $(this).css("background-color","#eeeeee");
+//        })
+//        $("tr").bind("mouseout",function(){
+//            $(this).css("background-color","#ffffff");
+//        })
+
+//        $("#grid").delegate("tr","mouseover",function(){
+//            $(this).addClass("tr-mouseover")
+//            $(this).css("background-color","#F4F6FF");
+//        });
+//        $("#grid").delegate("tr","mouseout",function(){
+//            $(this).removeClass("tr-mouseover");
+//            $(this).css("background-color","#F4F6FF");
+//        });
 
     </script>
 {% endblock %}
