@@ -1,0 +1,16 @@
+[
+  {
+    "id":1,
+    "name":"abc",
+    "country":"abc",
+    "city":"abc",
+    "address":"abc",
+    "phone":"122222222",
+    "tel":"012-1111",
+    "email":"2221111",
+    "contact":"1111111"
+    "cost":12.11,
+    "cost_unit":11.12,
+    "supplier_item_nr":"abc"
+  }
+]
