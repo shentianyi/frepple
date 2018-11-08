@@ -237,12 +237,11 @@ $(function() {
 
 function download(){
     var sel = $("#grid").jqGrid('getGridParam', 'selarrrow');
-    if(sel.length === 1) {
+    if(sel.length <= 1) {
         var rowid = jQuery("#grid").jqGrid("getGridParam", "selrow");
         var rowData = jQuery("#grid").jqGrid('getRowData',rowid);
-        Forecast.downloadForecastVersion (rowData.nr)
+        Forecast.downloadForecastVersion (rowData.nr ? rowData.nr : '')
     }
-
 }
 
 </script>

@@ -116,9 +116,9 @@ Forecast.downloadForecastVersion = function (querys) {
     $("#downloadDialog").modal('show');
 
     $("#downloadDialogSubmit").unbind('click').bind('click', function () {
-        debugger
         var format = $("[name=downloadType]:checked").val();
         var url = '/data/input/forecastversion/?format=' + format + "&nr=" + querys;
+        console.log(url);
         window.location.href = url;
     });
 };
