@@ -17,13 +17,53 @@
 </head>
 <!--head中的内容,如js-->
 <script src="{{STATIC_URL}}js/forecast.js" type="application/javascript"></script>
+<style>
+    :host {
+        display: block;
+    }
+
+    h3 {
+        font-size: 14px;
+        font-weight: 600;
+        color: #222222;
+    }
+
+    div {
+        margin-top:  5px;
+    }
+
+    #plan div {
+        margin-top: 20px;
+    }
+
+    #simulation div {
+        margin-top: 20px;
+    }
+
+    label {
+        font-size: 14px;
+        color: #222222;
+    }
+
+    #main input {
+        width: 47%;
+    }
+
+    #plan input {
+        width: 112px;
+    }
+
+    #simulation input {
+        width: 112px;
+    }
+</style>
 {% endblock %}
 
 {% block content %}
 <!--主页面内容-->
 <div id="item-detail" class="row" style="margin: 30px 0 0 0">
     <form class="col-md-12" style="background-color: #FFFFFF">
-        <div class="col-md-12" style="margin-top: 20px">
+        <div class="col-md-12">
             <div class="col-md-3">
                 <label>产品描述：</label>
                 <input id="description_item" type="text" name="description">
@@ -41,7 +81,7 @@
                 <input id="type_item" type="text" name="type">
             </div>
         </div>
-        <div class="col-md-12" style="margin-top: 20px">
+        <div class="col-md-12">
             <div class="col-md-3">
                 <label>物料编码：</label>
                 <input id="code_item" type="text" name="description">
@@ -59,7 +99,7 @@
                 <input id="deadline_item" type="text" name="type">
             </div>
         </div>
-        <div class="col-md-12" style="margin-top: 20px">
+        <div class="col-md-12">
             <div class="col-md-3">
                 <label>计划策略：</label>
                 <input id="plan_strategy" type="text" name="description">
@@ -87,7 +127,7 @@
         </div>
     </form>
 
-    <div id="tabs" class="col-md-12" style="background-color: #FFFFFF; margin-top: 20px">
+    <div id="tabs" class="col-md-12" style="background-color: transparent">
         <ul>
             <li><a href="#main">主数据</a></li>
             <li><a href="#supplier">供应商</a></li>
@@ -95,38 +135,370 @@
             <li><a href="#simulation">模拟</a></li>
             <li><a href="#forecast">预测</a></li>
         </ul>
-        <div id="main" class="col-md-12">
-            <form>
-                <h3>供应商</h3>
+        <div id="main" class="col-md-12" style="padding-top: 0; background-color: #FFFFFF;">
+            <form class="row" style="border-bottom: 2px solid rgba(0, 0, 0, .1)">
+                <h3>前置期</h3>
+                <div class="col-md-12" style="margin-top: 20px">
+                    <div class="col-md-3">
+                        <label>生产周期：</label>
+                        <input id="product_cycle" type="text" name="product">
+                    </div>
+                    <div class="col-md-3">
+                        <label>发货周期：</label>
+                        <input id="delivery_cycle" type="text" name="delivery">
+                    </div>
+                    <div class="col-md-3">
+                        <label>运输周期：</label>
+                        <input id="transportation_cycle" type="text" name="transportation">
+                    </div>
+                    <div class="col-md-3">
+                        <label>收货周期：</label>
+                        <input id="receive_cycle" type="text" name="receive">
+                    </div>
+                </div>
+                <div class="col-md-12" style="margin-top: 20px; margin-bottom: 20px">
+                    <div class="col-md-3">
+                        <label>计划供应日期：</label>
+                        <input id="supply_date" type="text" name="supplydate">
+                    </div>
+                    <div class="col-md-3">
+                        <label>计划出货日期：</label>
+                        <input id="delivery_date" type="text" name="deliverydate">
+                    </div>
+                    <div class="col-md-3">
+                        <label>计划收货日期：</label>
+                        <input id="receive_date" type="text" name="receivedate">
+                    </div>
+                    <div class="col-md-3">
+                        <label>总前置期：</label>
+                        <input id="pre_date" type="text" name="predate">
+                    </div>
+                </div>
+            </form>
+            <form class="row" style="border-bottom: 2px solid rgba(0, 0, 0, .1)">
+                <h3>供应商信息</h3>
+                <div class="col-md-12" style="margin-top: 20px">
+                    <div class="col-md-3">
+                        <label>主供应商：</label>
+                        <input id="supplier_main" type="text" name="supplier_main">
+                    </div>
+                    <div class="col-md-3">
+                        <label>采购价格：</label>
+                        <input id="cost_purchase" type="text" name="cost_purchase">
+                    </div>
+                    <div class="col-md-3">
+                        <label>最早下单日：</label>
+                        <input id="earliest_date" type="text" name="earliest_date">
+                    </div>
+                    <div class="col-md-3">
+                        <label>上市计划：</label>
+                        <input id="listing_plan" type="text" name="listing_plan">
+                    </div>
+                </div>
                 <div class="col-md-12" style="margin-top: 20px">
                     <div class="col-md-3">
                         <label>供应商代码：</label>
-                        <input id="code_supplier" type="text" name="description">
+                        <input id="nr_supplier" type="text" name="nr_supplier">
                     </div>
                     <div class="col-md-3">
-                        <label>手机/电话：</label>
-                        <input id="phone_supplier" type="text" name="stock">
+                        <label>计价单位：</label>
+                        <input id="sales_unit" type="text" name="sales_unit">
                     </div>
                     <div class="col-md-3">
-                        <label>物料锁定类型：</label>
-                        <input id="type_item" type="text" name="type">
+                        <label>物料到期日：</label>
+                        <input id="deadline_date" type="text" name="deadline_date">
+                    </div>
+                    <div class="col-md-3">
+                        <label>下市计划：</label>
+                        <input id="market_plan" type="text" name="market_plan">
+                    </div>
+                </div>
+                <div class="col-md-12" style="margin-top: 20px; margin-bottom: 20px">
+                    <div class="col-md-3 pull-right">
+                        <label>项目号：</label>
+                        <input id="nr_project" type="text" name="nr_project">
+                    </div>
+                </div>
+            </form>
+            <form class="row" style="border-bottom: 2px solid rgba(0, 0, 0, .1)">
+                <h3>峰值计算</h3>
+                <div class="col-md-12" style="margin-top: 20px">
+                    <div class="col-md-3">
+                        <label>分析起始日期：</label>
+                        <input id="start_date" type="text" name="start_date">
+                    </div>
+                    <div class="col-md-3">
+                        <label>第一次消耗日期：</label>
+                        <input id="first_use_date" type="text" name="first_use_date">
+                    </div>
+                    <div class="col-md-3">
+                        <label>最后一次消耗日期：</label>
+                        <input id="last_use_date" type="text" name="last_use_date">
+                    </div>
+                    <div class="col-md-3">
+                        <label>峰值日期：</label>
+                        <input id="peak_date" type="text" name="peak_date">
+                    </div>
+                </div>
+                <div class="col-md-12" style="margin-top: 20px; margin-bottom: 20px">
+                    <div class="col-md-3">
+                        <label>前置期内平均消耗量：</label>
+                        <input id="average_amount" type="text" name="average_amount">
+                    </div>
+                    <div class="col-md-3">
+                        <label>前置期内峰值消耗量：</label>
+                        <input id="peak_amount" type="text" name="peak_amount">
+                    </div>
+                    <div class="col-md-3">
+                        <label>峰值比平均消耗：</label>
+                        <input id="peak_average_ratio" type="text" name="peak_average_ratio">
+                    </div>
+                </div>
+            </form>
+            <form class="row">
+                <h3>包装</h3>
+                <div class="col-md-12">
+                    <div class="col-md-8" style="padding: 0">
+                        <div class="col-md-12" style="margin-top: 20px; padding: 0">
+                            <div class="col-md-4">
+                                <label>最小起订量：</label>
+                                <input id="min_order_qty" type="text" name="min_order_qty">
+                            </div>
+                            <div class="col-md-4">
+                                <label>箱内最小包装量：</label>
+                                <input id="min_package_qty" type="text" name="min_package_qty">
+                            </div>
+                            <div class="col-md-4">
+                                <label>托盘数量：</label>
+                                <input id="tray_qty" type="text" name="tray_qty">
+                            </div>
+                        </div>
+                        <div class="col-md-12" style="margin-top: 20px; padding: 0">
+                            <div class="col-md-4">
+                                <label>手工：</label>
+                                <input id="manual" type="text" name="manual">
+                            </div>
+                            <div class="col-md-4">
+                                <label>外箱数量：</label>
+                                <input id="outer_qty" type="text" name="outer_qty">
+                            </div>
+                            <div class="col-md-4">
+                                <label>最大订单数量：</label>
+                                <input id="max_order_qty" type="text" name="max_order_qty">
+                            </div>
+                        </div>
+                        <div class="col-md-12" style="margin-top: 20px; margin-bottom: 20px; padding: 0">
+                            <div class="col-md-4">
+                                <label>单位订货量：</label>
+                                <input id="unit_order_qty" type="text" name="unit_order_qty">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4" style="margin-top: 20px">
+                        <label class="col-md-2" style="padding: 0">备注：</label>
+                        <textarea style="padding: 0" rows="5" cols="35" id="remark" name="remark" placeholder="请填写信息，字数不超过100"></textarea>
                     </div>
                 </div>
             </form>
         </div>
-        <div id="supplier" class="col-md-12">
-
+        <div id="supplier" class="col-md-12" style="padding-top: 0; padding-bottom: 0">
+            <form class="row" style="background-color: #FFFFFF">
+                <h3>供应商</h3>
+                <div class="col-md-12" style="margin-top: 20px">
+                    <div class="col-md-6">
+                        <label>供应商代码：</label>
+                        <input id="code_supplier" type="text" name="code">
+                    </div>
+                    <div class="col-md-6">
+                        <label>手机/电话：</label>
+                        <input id="phone_supplier" type="text" name="phone">
+                        <span>/</span>
+                        <input id="tel_supplier" type="text" name="tel">
+                    </div>
+                </div>
+                <div class="col-md-12" style="margin-top: 20px">
+                    <div class="col-md-6">
+                        <label>供应商名称：</label>
+                        <input id="name_supplier" type="text" name="name">
+                    </div>
+                    <div class="col-md-6">
+                        <label>邮箱：</label>
+                        <input id="mail_supplier" type="text" name="mail">
+                    </div>
+                </div>
+                <div class="col-md-12" style="margin-top: 20px">
+                    <div class="col-md-6">
+                        <label>国家：</label>
+                        <input id="country_supplier" type="text" name="country">
+                    </div>
+                    <div class="col-md-6">
+                        <label>联系人：</label>
+                        <input id="contact_supplier" type="text" name="contact">
+                    </div>
+                </div>
+                <div class="col-md-12" style="margin-top: 20px; margin-bottom: 20px">
+                    <div class="col-md-6">
+                        <label>城市：</label>
+                        <input id="city_supplier" type="text" name="city">
+                    </div>
+                </div>
+            </form>
+            <form class="row" style="background-color: #FFFFFF; margin-top: 20px">
+                <h3>供应商物料数据</h3>
+                <div class="col-md-12" style="margin-top: 20px">
+                    <div class="col-md-6">
+                        <label>采购价格：</label>
+                        <input id="price_purchase" type="text" name="price">
+                    </div>
+                    <div class="col-md-6">
+                        <label>供应商料号：</label>
+                        <input id="number_material" type="text" name="number">
+                    </div>
+                </div>
+                <div class="col-md-12" style="margin-top: 20px; margin-bottom: 20px">
+                    <div class="col-md-6">
+                        <label>计价单位：</label>
+                        <input id="unit_sale" type="text" name="unit">
+                    </div>
+                </div>
+            </form>
         </div>
-        <
-        <div id="plan" class="col-md-12">
+        <div id="plan" class="col-md-12" style="padding: 0; margin-top: 0">
+            <div class="col-md-12" style="background-color: #FFFFFF; margin-top: 0">
+                <div class="col-md-6" style="padding: 0; margin-top: 0">
+                    <div class="col-md-12" style="margin-top: 0; border-bottom: 2px solid rgba(0, 0, 0, .1)">
+                        <form class="col-md-6">
+                            <h3>计划</h3>
+                            <div class="col-md-12">
+                                <label>安全库存：</label>
+                                <input id="safe_stock" type="text" name="safe_stock">
+                            </div>
+                            <div class="col-md-12">
+                                <label>手工MOQ：</label>
+                                <input id="manual_moq" type="text" name="manual_moq">
+                            </div>
+                            <div class="col-md-12">
+                                <label>内箱最小包装量：</label>
+                                <input id="inner_min_qty" type="text" name="inner_min_qty">
+                            </div>
+                            <div class="col-md-12">
+                                <label>外箱数量：</label>
+                                <input id="outer_amount" type="text" name="outer_amount">
+                            </div>
+                            <div class="col-md-12">
+                                <label>托盘数量：</label>
+                                <input id="tray_amount" type="text" name="tray_amount">
+                            </div>
+                            <div class="col-md-12">
+                                <label>前置期：</label>
+                                <input id="pre_stage" type="text" name="pre_stage">
+                            </div>
+                            <div class="col-md-12" style="margin-bottom: 20px">
+                                <label>月均销量：</label>
+                                <input id="average_sales" type="text" name="average_sales">
+                            </div>
+                        </form>
+                        <form class="col-md-6">
+                            <h3>发货</h3>
+                            <div class="col-md-12">
+                                <label>过去12个月：</label>
+                                <input id="past_year" type="text" name="past_year">
+                            </div>
+                            <div class="col-md-12">
+                                <label>上月销量：</label>
+                                <input id="last_sales" type="text" name="last_sales">
+                            </div>
+                            <div class="col-md-12">
+                                <label>当月销量：</label>
+                                <input id="currency_sales" type="text" name="currency_sales">
+                            </div>
+                            <div class="col-md-12">
+                                <label>当前库存周转期：</label>
+                                <input id="stock_turnover_period" type="text" name="stock_turnover_period">
+                            </div>
+                            <div class="col-md-12">
+                                <label>当前订货点：</label>
+                                <input id="currency_order_point" type="text" name="currency_order_point">
+                            </div>
+                            <div class="col-md-12" style="margin-bottom: 20px ">
+                                <label>供应商：</label>
+                                <input id="supplier_code" type="text" name="supplier_code" placeholder="供应商代码">
+                                <input style="margin-top: 20px; margin-left: 60px" id="supplier_name" type="text" name="supplier_name" placeholder="供应商名称">
+                            </div>
+                        </form>
+                    </div>
+                    <form class="col-md-12" style="padding-top: 20px; margin-bottom: 20px">
+                        <h3 class="col-md-3">下次订单时间</h3>
+                        <div class="col-md-3" style="padding-left: 0">
+                            <label>日期：</label>
+                            <input style="width: 80px" id="next_date" type="text" name="next_date">
+                        </div>
+                        <div class="col-md-3" style="padding-left: 0">
+                            <label>数量：</label>
+                            <input style="width: 80px" id="next_qty" type="text" name="next_qty">
+                        </div>
+                        <div class="col-md-2 pull-right">
+                            <button id="freedButton" type="reset" style="width: 100%;">释放</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="col-md-6" style="padding: 0">
 
+                </div>
+            </div>
         </div>
-        <div id="simulation" class="col-md-12">
+        <div id="simulation" class="col-md-12" style="padding: 0; margin-top: 0">
+            <div class="col-md-12" style="background-color: #FFFFFF; margin-top: 0">
+                <div class="col-md-6" style="padding: 0; margin-top: 0">
+                    <div class="col-md-12" style="margin-top: 0; margin-bottom: 20px">
+                        <form class="col-md-6">
+                            <h3>计划</h3>
+                            <div class="col-md-12">
+                                <label>目前订货点：</label>
+                                <input id="currency_order_point_simulation" type="text" name="currency_order_point_simulation">
+                            </div>
+                            <div class="col-md-12">
+                                <label>手工MOQ：</label>
+                                <input id="manual_moq_simulation" type="text" name="manual_moq_simulation">
+                            </div>
+                            <div class="col-md-12">
+                                <label>最大订单量：</label>
+                                <input id="max_order_qty_simulation" type="text" name="max_order_qty_simulation">
+                            </div>
+                        </form>
+                        <form class="col-md-6">
+                            <h3>模拟</h3>
+                            <div class="col-md-12">
+                                <input style="width: 50px" id="show_optimal" type="checkbox" name="show_optimal">
+                                <label>显示优化</label>
+                            </div>
+                            <div class="col-md-12">
+                                <input style="width: 50px" id="show_forecast" type="checkbox" name="show_forecast">
+                                <label>显示预测</label>
+                            </div>
+                            <div class="col-md-12" style="margin-bottom: 20px ">
+                                <label>供应商：</label>
+                                <input id="supplier_code_simulation" type="text" name="supplier_code_simulation" placeholder="供应商代码">
+                                <input style="margin-top: 20px; margin-left: 60px" id="supplier_name_simulation" type="text" name="supplier_name_simulation" placeholder="供应商名称">
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="col-md-6" style="padding: 0">
 
+                </div>
+            </div>
         </div>
         <div id="forecast" class="col-md-12">
 
         </div>
+    </div>
+
+    <div class="col-md-12" style="margin: 20px 0">
+        <button id="closeButton" class="pull-right" type="button" style="width: 80px; height: 26px; margin-left: 10px">关闭</button>
+        <button id="saveButton" class="pull-right" type="submit" style="width: 80px; height: 26px; margin-left: 10px">保存</button>
+        <button id="showCalendarButton" class="pull-right" type="button" style="width: 80px; height: 26px; margin-left: 10px">日历</button>
+        <button id="showItemButton" class="pull-right" type="button" style="width: 80px; height: 26px">物料表</button>
     </div>
 </div>
 <!--{{template_name}}-->
