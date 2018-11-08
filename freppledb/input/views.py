@@ -1372,16 +1372,39 @@ class ItemMainData(View):
     def get(self, request, id, *args, **kwargs):
         item = Item.objects.get(id=id)
         successor_nr = ItemSuccessor.objects.filter(item=item).order_by('priority').first().item_successor.nr
-        type = item.types
-        lock_types = {"current":item.lock_type,"values":[{"value":item.lock_types[0][1]}]}
-
+        lock_types = {"current": item.type, "values": [{"value": item.lock_types[0][0], "text": _('locked')},
+                                                       {"value": item.lock_types[1][0], "text": _('unlocked')}]}
+        if item.type == 'FG':
+            status = ["S0", "S1", "S2", "S3", "S4"]
+            item_statuses = {"current": item.status, "values": [{"value": status[0], "text": _('S0')},
+                                                          {"value": status[1], "text": _('S1')},
+                                                          {"value": status[2], "text": _('S2')},
+                                                          {"value": status[3], "text": _('S3')},
+                                                          {"value": status[4], "text": _('S4')},
+                                                          {"value": status[5], "text": _('S5')}]}
+        elif item.type == 'RM':
+            status = ["A0", "A1", "A2", "A3"]
+            item_statuses = {"current": item.status, "values": [{"value": status[0], "text": _('A0')},
+                                                          {"value": status[1], "text": _('A1')},
+                                                          {"value": status[2], "text": _('A2')},
+                                                          {"value": status[3], "text": _('A3')},
+                                                          {"value": status[4], "text": _('A4')}]}
+        elif item.type == 'WIP':
+            item_statuses = []
+        else:
+            item_statuses = []
+        plan_strategies = {"current": item.plan_strategy, "values": [{"value": item.strategies[0][0], "text": _('MTS')},
+                                                                     {"value": item.strategies[1][0], "text": _('MTO')},
+                                                                     {"value": item.strategies[2][0], "text": _('ETO')}]}
         data = {
-            "id": id,
+            "id": item.id,
             "nr": item.nr,
             "successor_nr": successor_nr,
             "description": item.description,
-            # "lock_types":lock_types,
+            "lock_types": str(lock_types),
             "lock_expire_at": item.lock_expire_at,
+            "plan_strategies": str(plan_strategies),
+            "statuses": str(item_statuses),
             "price_abc": item.price_abc,
             "qty_abc": item.qty_abc
         }
