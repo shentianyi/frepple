@@ -149,24 +149,8 @@ $(function() {
    	        var ret = jQuery("#grid").jqGrid('getRowData');
             console.log(ret);
             for(var i = 0; i< ret.length; i++){
-//                console.log(ret[i]);
-                var key = ret[i].id;
-//                console.log('key', key);
-                var j = i+1
-                $("#"+j).find("[aria-describedby=grid_nr]").attr('title', '物料编码').css('cursor', 'pointer').html("<a href='/data/input/item_detail/1/'><img src='{{STATIC_URL}}img/table/detail.png' alt='物料详情'></a>")
-//                $("#"+j).find("[aria-describedby=grid_nr]").attr('title', '物料编码').css('cursor', 'pointer').html("<img onclick='Forecast.showItemDetail' src='{{STATIC_URL}}img/table/detail.png' alt='物料详情'>")
-
-//                $("#"+ret[i].nr).find("[aria-describedby=grid_nr]").css('color', '#2C84FF');1
-
-//                if(ret[i].status == 'release'){
-//                    $("#"+ret[i].nr).find("[aria-describedby=grid_status]").html("<img src='{{STATIC_URL}}img/table/release.png' alt='备注' />")
-//                }else if(ret[i].status == 'nok'){
-//                    $("#"+ret[i].nr).find("[aria-describedby=grid_status]").css('color', '#FF3E7F')
-//                }else {
-//                    $("#"+ret[i].nr).find("[aria-describedby=grid_status]").css('color', '#333333')
-//                }
+                $("#"+ ret[i].id).find("[aria-describedby=grid_nr]").attr('title', '物料编码').css('cursor', 'pointer').html("<span>"+ ret[i].nr +"<a href='/data/input/item_detail/"+ ret[i].id +"/' class='pull-right'><img src='{{STATIC_URL}}img/table/detail.png' alt='物料详情'></a></span>")
             }
-
         }
 
       $(".invStatus").each( function(value) {

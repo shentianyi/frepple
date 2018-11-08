@@ -111,6 +111,18 @@ Forecast.download = function (querys) {
     });
 };
 
+Forecast.downloadForecastVersion = function (querys) {
+
+    $("#downloadDialog").modal('show');
+
+    $("#downloadDialogSubmit").unbind('click').bind('click', function () {
+        debugger
+        var format = $("[name=downloadType]:checked").val();
+        var url = '/data/input/forecastversion/?format=' + format + "&nr=" + querys;
+        window.location.href = url;
+    });
+};
+
 Forecast.showItemDetail = function (key) {
     console.log(key);
     var url = '/data/input/item_detail/' + key +'/';
