@@ -41,28 +41,12 @@ SECRET_KEY = '%@mzit!i8b*$zc&6oev96=RANDOMSTRING'
 # Create additional entries in this dictionary to define scenario schemas.
 
 DATABASES = {
-    # 'default': {
-    #     'ENGINE': 'django.db.backends.postgresql',
-    #     'NAME': 'frepple_dev',
-    #     'USER': 'postgres',
-    #     'PASSWORD': 'postgres',
-    #     'HOST': '127.0.0.1',
-    #     'PORT': '5432',
-    #     # Specify the port number when using a TCP socket.
-    #     'OPTIONS': {},  # Backend specific configuration parameters.
-    #     'TEST': {
-    #         'NAME': 'test_frepple'  # Database name used when running the test suite.
-    #     },
-    #     'FILEUPLOADFOLDER': os.path.normpath(os.path.join(FREPPLE_LOGDIR, 'data', 'default')),
-    #     'SECRET_WEBTOKEN_KEY': SECRET_KEY,
-    # },
-    #
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'frepple_dev',
         'USER': 'postgres',
-        'PASSWORD': '123456@',
-        'HOST': '121.199.48.53',
+        'PASSWORD': 'postgres',
+        'HOST': '127.0.0.1',
         'PORT': '5432',
         # Specify the port number when using a TCP socket.
         'OPTIONS': {},  # Backend specific configuration parameters.
@@ -71,8 +55,24 @@ DATABASES = {
         },
         'FILEUPLOADFOLDER': os.path.normpath(os.path.join(FREPPLE_LOGDIR, 'data', 'default')),
         'SECRET_WEBTOKEN_KEY': SECRET_KEY,
-
     },
+
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.postgresql',
+    #     'NAME': 'frepple_dev',
+    #     'USER': 'postgres',
+    #     'PASSWORD': '123456@',
+    #     'HOST': '121.199.48.53',
+    #     'PORT': '5432',
+    #     # Specify the port number when using a TCP socket.
+    #     'OPTIONS': {},  # Backend specific configuration parameters.
+    #     'TEST': {
+    #         'NAME': 'test_frepple'  # Database name used when running the test suite.
+    #     },
+    #     'FILEUPLOADFOLDER': os.path.normpath(os.path.join(FREPPLE_LOGDIR, 'data', 'default')),
+    #     'SECRET_WEBTOKEN_KEY': SECRET_KEY,
+    #
+    # },
 
     # 'default': {
     #     'ENGINE': 'django.db.backends.postgresql',
@@ -422,7 +422,7 @@ MAXTOTALLOGFILESIZE = 200
 # If the list contains only a single value, the preferences screen will not
 # display users an option to choose the theme.
 THEMES = [
-  'earth', 'grass', 'lemon', 'odoo', 'openbravo', 'orange', 'snow', 'strawberry', 'water', 'laura'
+    'laura', 'earth', 'grass', 'lemon', 'odoo', 'openbravo', 'orange', 'snow', 'strawberry', 'water'
   ]
 
 # A default user-group to which new users are automatically added
