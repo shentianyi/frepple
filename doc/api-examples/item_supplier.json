@@ -1,17 +1,29 @@
 [
   {
     "id":1,
+    // 供应商名称
     "name":"abc",
+    // 供应商代码
     "nr":"abc",
+    // 国家
     "country":"abc",
+    // 城市
     "city":"abc",
+    // 地址
     "address":"abc",
+    // 手机
     "phone":"122222222",
+    // 电话
     "tel":"012-1111",
+    // 邮箱
     "email":"2221111",
+    // 联系人
     "contact":"1111111"
+    // 采购价格
     "cost":12.11,
+    // 计价单位
     "cost_unit":11.12,
+    // 供应商料号
     "supplier_item_nr":"abc"
   }
 ]
