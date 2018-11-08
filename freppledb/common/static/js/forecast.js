@@ -86,7 +86,11 @@ Forecast.showDetail = function (id, type) {
     })
 };
 
-Forecast.download = function () {
+/**
+ * 下载
+ * @param querys 附带的查询条件, 是个String，开头用&连接
+ */
+Forecast.download = function (querys) {
     // $("#aggre").find('img').attr('src', '{{STATIC_URL}}img/forecast/aggre.png');
     // $("#detail").find('img').attr('src', '{{STATIC_URL}}img/forecast/detail.png');
     // $("#filter").find('img').attr('src', '{{STATIC_URL}}img/forecast/search.png');
@@ -102,11 +106,13 @@ Forecast.download = function () {
 
         var url = '/data/output/forecast/compare/?format=' + format + '&mode=' + currentMode + '&report_type=' + currentType;
         url += "&" + jQuery.param(postdata);
-
+        url += querys;
         window.location.href = url;
     });
 };
 
-// Forecast.showDeleteDialog = function () {
-//     $("#deleteDialog").modal('show');
-// };
+Forecast.showItemDetail = function (key) {
+    console.log(key);
+    var url = '/data/input/item_detail/' + key +'/';
+    window.location.href = url;
+};

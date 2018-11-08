@@ -1105,7 +1105,7 @@ var grid = {
                 .modal('show');
         $('#exportbutton').on('click', function () {
             // Fetch the report data
-            var url = (location.href.indexOf("#") != -1 ? location.href.substr(0, location.href.indexOf("#")) : location.href);
+            var url = (location.href.indexOf("#") != -1 ? location.href.substr(0, location.href.indexOf("#")) : location.href) ;
             if (location.search.length > 0)
             // URL already has arguments
                 url += "&format=" + $('#csvformat input:radio:checked').val();

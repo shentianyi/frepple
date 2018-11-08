@@ -31,6 +31,7 @@ $(function() {
 	  jsonReader : {repeatitems:false},
     colModel:[{{colmodel|safe}}, {name: 'Actions', label: '备注详情', index: 'Actions', title:'备注', align: 'center'}],
     rownumbers: true,
+    emptyrecords: "无数据显示",
    	rowNum: {{request.pagesize}},
    	autoencode: false, {% if is_popup %}
     onSelectRow: grid.setSelectedRow, {% elif reportclass.editable and haschangeperm %}

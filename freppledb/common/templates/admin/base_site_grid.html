@@ -2,6 +2,9 @@
 {% load i18n %}
 
 {% block extrahead %}{{block.super}}
+<!--head中的内容,如js-->
+<script src="{{STATIC_URL}}js/forecast.js" type="application/javascript"></script>
+
 <script type="text/javascript">
 
 var reportkey = '{{reportkey|safe}}';
@@ -139,6 +142,33 @@ $(function() {
         return true;
     },{% endif %}
     loadComplete: function() {
+
+   	    console.log(window.location.pathname === '/data/input/item/');
+
+   	    if (window.location.pathname === '/data/input/item/') {
+   	        var ret = jQuery("#grid").jqGrid('getRowData');
+            console.log(ret);
+            for(var i = 0; i< ret.length; i++){
+//                console.log(ret[i]);
+                var key = ret[i].id;
+//                console.log('key', key);
+                var j = i+1
+                $("#"+j).find("[aria-describedby=grid_nr]").attr('title', '物料编码').css('cursor', 'pointer').html("<a href='/data/input/item_detail/1/'><img src='{{STATIC_URL}}img/table/detail.png' alt='物料详情'></a>")
+//                $("#"+j).find("[aria-describedby=grid_nr]").attr('title', '物料编码').css('cursor', 'pointer').html("<img onclick='Forecast.showItemDetail' src='{{STATIC_URL}}img/table/detail.png' alt='物料详情'>")
+
+//                $("#"+ret[i].nr).find("[aria-describedby=grid_nr]").css('color', '#2C84FF');1
+
+//                if(ret[i].status == 'release'){
+//                    $("#"+ret[i].nr).find("[aria-describedby=grid_status]").html("<img src='{{STATIC_URL}}img/table/release.png' alt='备注' />")
+//                }else if(ret[i].status == 'nok'){
+//                    $("#"+ret[i].nr).find("[aria-describedby=grid_status]").css('color', '#FF3E7F')
+//                }else {
+//                    $("#"+ret[i].nr).find("[aria-describedby=grid_status]").css('color', '#333333')
+//                }
+            }
+
+        }
+
       $(".invStatus").each( function(value) {
         $(this).parent().css('background',$(this).css('background-color'));
       });
@@ -349,7 +379,8 @@ $(function() {
 </div>
 
 {% block after_table %}
-<script type="text/javascript"></script>
+<script type="text/javascript">
+</script>
 {% endblock %}
 
 {% if reportclass.hasTimeBuckets %}
