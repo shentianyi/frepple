@@ -1802,9 +1802,9 @@ class ForecastVersionView(GridReport):
         wb.add_named_style(headerstyle)
         nr = request.GET.get('nr', None)
         if nr:
-            download_forecast = Forecast.objects.filter(version_id=nr).order_by('-version_id', 'year', 'date_number')
+            download_forecast = Forecast.objects.select_related('item', 'location', 'customer').filter(version_id=nr).order_by('-version_id', 'year', 'date_number')
         else:
-            download_forecast = Forecast.objects.all().order_by('-version_id', 'year', 'date_number')
+            download_forecast = Forecast.objects.select_related('item', 'location', 'customer').all().order_by('-version_id', 'year', 'date_number')
         if not download_forecast:
             return HttpResponse('没有下载数据')
         else:
@@ -1821,7 +1821,7 @@ class ForecastVersionView(GridReport):
                 header.append(cell)
             ws.append(header)
             for f in download_forecast:
-                body = [f.id, f.item.nr, f.location.nr, f.customer.nr, f.year, f.date_number, f.date_type, f.ratio,
+                body = [f.id, f.item.nr, f.location.nr, f.customer.nr if f.customer else None, f.year, f.date_number, f.date_type, f.ratio,
                         f.normal_qty, f.new_product_plan_qty, f.promotion_qty, f.status, f.create_user.username,
                         f.version.nr, f.created_at, f.updated_at]
                 ws.append(body)
