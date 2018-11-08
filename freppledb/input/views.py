@@ -1371,12 +1371,16 @@ class ItemDetail(View):
 class ItemMainData(View):
     def get(self, request, id, *args, **kwargs):
         item = Item.objects.get(id=id)
-        successor_nr = ItemSuccessor.objects.filter(item=item).order_by('priority').first().item_successor
+        successor_nr = ItemSuccessor.objects.filter(item=item).order_by('priority').first().item_successor.nr
+        type = item.types
+        lock_types = {"current":item.lock_type,"values":[{"value":item.lock_types[0][1]}]}
+
         data = {
-            "id": item.id,
+            "id": id,
             "nr": item.nr,
             "successor_nr": successor_nr,
             "description": item.description,
+            # "lock_types":lock_types,
             "lock_expire_at": item.lock_expire_at,
             "price_abc": item.price_abc,
             "qty_abc": item.qty_abc
