@@ -9,14 +9,51 @@
   <script src="//apps.bdimg.com/libs/jquery/1.10.2/jquery.min.js"></script>
   <script src="//apps.bdimg.com/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
   <link rel="stylesheet" href="http://www.runoob.com/try/demo_source/jqueryui/style.css">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>jQuery UI Datepicker - Default functionality</title>
+  <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+  <link rel="stylesheet" href="/resources/demos/style.css">
+  <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
   <script>
   $(function() {
     $( "#tabs" ).tabs();
+  });
+  $(function() {
+    $( "#deadline_item" ).datepicker();
+  });
+  $(function() {
+    $( "#supply_date" ).datepicker();
+  });
+  $(function() {
+    $( "#delivery_date" ).datepicker();
+  });
+  $(function() {
+    $( "#receive_date" ).datepicker();
+  });
+  $(function() {
+    $( "#earliest_date" ).datepicker();
+  });
+  $(function() {
+    $( "#listing_plan" ).datepicker();
+  });
+  $(function() {
+    $( "#deadline_date" ).datepicker();
+  });
+  $(function() {
+    $( "#market_plan" ).datepicker();
+  });
+  $(function() {
+    $( "#start_date" ).datepicker();
   });
   </script>
 </head>
 <!--head中的内容,如js-->
 <script src="{{STATIC_URL}}js/forecast.js" type="application/javascript"></script>
+<script>
+
+</script>
 <style>
     :host {
         display: block;
@@ -63,7 +100,7 @@
 <!--主页面内容-->
 <div id="item-detail" class="row" style="margin: 30px 0 0 0">
     <form class="col-md-12" style="background-color: #FFFFFF">
-        <div class="col-md-12">
+        <div class="col-md-12" style="margin-top: 20px">
             <div class="col-md-3">
                 <label>产品描述：</label>
                 <input id="description_item" type="text" name="description">
@@ -96,7 +133,7 @@
             </div>
             <div class="col-md-3">
                 <label>到期：</label>
-                <input id="deadline_item" type="text" name="type">
+                <input id="deadline_item" type="text" name="type" placeholder="日期">
             </div>
         </div>
         <div class="col-md-12">
@@ -159,15 +196,15 @@
                 <div class="col-md-12" style="margin-top: 20px; margin-bottom: 20px">
                     <div class="col-md-3">
                         <label>计划供应日期：</label>
-                        <input id="supply_date" type="text" name="supplydate">
+                        <input id="supply_date" type="text" name="supplydate" placeholder="日期">
                     </div>
                     <div class="col-md-3">
                         <label>计划出货日期：</label>
-                        <input id="delivery_date" type="text" name="deliverydate">
+                        <input id="delivery_date" type="text" name="deliverydate" placeholder="日期">
                     </div>
                     <div class="col-md-3">
                         <label>计划收货日期：</label>
-                        <input id="receive_date" type="text" name="receivedate">
+                        <input id="receive_date" type="text" name="receivedate" placeholder="日期">
                     </div>
                     <div class="col-md-3">
                         <label>总前置期：</label>
@@ -188,11 +225,11 @@
                     </div>
                     <div class="col-md-3">
                         <label>最早下单日：</label>
-                        <input id="earliest_date" type="text" name="earliest_date">
+                        <input id="earliest_date" type="text" name="earliest_date" placeholder="日期">
                     </div>
                     <div class="col-md-3">
                         <label>上市计划：</label>
-                        <input id="listing_plan" type="text" name="listing_plan">
+                        <input id="listing_plan" type="text" name="listing_plan" placeholder="日期">
                     </div>
                 </div>
                 <div class="col-md-12" style="margin-top: 20px">
@@ -206,11 +243,11 @@
                     </div>
                     <div class="col-md-3">
                         <label>物料到期日：</label>
-                        <input id="deadline_date" type="text" name="deadline_date">
+                        <input id="deadline_date" type="text" name="deadline_date" placeholder="日期">
                     </div>
                     <div class="col-md-3">
                         <label>下市计划：</label>
-                        <input id="market_plan" type="text" name="market_plan">
+                        <input id="market_plan" type="text" name="market_plan" placeholder="日期">
                     </div>
                 </div>
                 <div class="col-md-12" style="margin-top: 20px; margin-bottom: 20px">
@@ -225,7 +262,7 @@
                 <div class="col-md-12" style="margin-top: 20px">
                     <div class="col-md-3">
                         <label>分析起始日期：</label>
-                        <input id="start_date" type="text" name="start_date">
+                        <input id="start_date" type="text" name="start_date" placeholder="日期">
                     </div>
                     <div class="col-md-3">
                         <label>第一次消耗日期：</label>
