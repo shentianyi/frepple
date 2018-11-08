@@ -240,7 +240,7 @@ function download(){
     if(sel.length === 1) {
         var rowid = jQuery("#grid").jqGrid("getGridParam", "selrow");
         var rowData = jQuery("#grid").jqGrid('getRowData',rowid);
-        Forecast.download (rowData.nr)
+        Forecast.downloadForecastVersion (rowData.nr)
     }
 
 }
