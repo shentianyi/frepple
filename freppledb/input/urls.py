@@ -34,7 +34,12 @@ urlpatterns = [
   url(r'^data/input/item/$', freppledb.input.views.ItemList.as_view(), name="input_item_changelist"),
   # TODO CMARK 物料详细页面
   url(r'^data/input/item_detail/(?P<id>(.+))/$', freppledb.input.views.ItemDetail.as_view(),name="input_item_detail"),
+  # 单个物料头部公共数据
   url(r'^data/input/item/maindata/(?P<id>(.+))/$', freppledb.input.views.ItemMainData.as_view(),name="input_item_detail_maindata"),
+  # 单个物料供应商界面主数据
+  url(r'^data/input/item/supplierdata/(?P<id>(.+))/$', freppledb.input.views.ItemSupplierData.as_view(),name="input_item_detail_supplierdata"),
+  # 单个物料主数据界面前置期+供应商+包装部分数据
+  url(r'^data/input/item/mainsupplierdata/(?P<id>(.+))/$', freppledb.input.views.MainSupplierData.as_view(),name="input_item_detail_mainsupplierdata"),
 
   url(r'^data/input/itemcustomer/$', freppledb.input.views.ItemCustomerList.as_view(), name="input_itemcustomer_changelist"),
   url(r'^data/input/itemsuccessor/$', freppledb.input.views.ItemSuccessorList.as_view(), name="input_itemsuccessor_changelist"),
