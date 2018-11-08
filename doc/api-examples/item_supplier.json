@@ -2,6 +2,7 @@
   {
     "id":1,
     "name":"abc",
+    "nr":"abc",
     "country":"abc",
     "city":"abc",
     "address":"abc",

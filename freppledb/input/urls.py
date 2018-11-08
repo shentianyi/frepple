@@ -34,6 +34,7 @@ urlpatterns = [
   url(r'^data/input/item/$', freppledb.input.views.ItemList.as_view(), name="input_item_changelist"),
   # TODO CMARK 物料详细页面
   url(r'^data/input/item_detail/(?P<id>(.+))/$', freppledb.input.views.ItemDetail.as_view(),name="input_item_detail"),
+  url(r'^data/input/item/maindata/(?P<id>(.+))/$', freppledb.input.views.ItemMainData.as_view(),name="input_item_detail_maindata"),
 
   url(r'^data/input/itemcustomer/$', freppledb.input.views.ItemCustomerList.as_view(), name="input_itemcustomer_changelist"),
   url(r'^data/input/itemsuccessor/$', freppledb.input.views.ItemSuccessorList.as_view(), name="input_itemsuccessor_changelist"),

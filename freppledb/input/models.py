@@ -257,6 +257,22 @@ class Item(AuditModel, HierarchyModel):
         ('WIP', _('WIP')),
         ('RM', _('RM')),
     )
+    strategies = (
+        ('MTS', _('MTS')),
+        ('MTO', _('MTO')),
+        ('ETO', _('ETO')),
+    )
+
+    lock_types = (
+        ('locked', _('locked')),
+        ('unlocked', _('unlocked')),
+    )
+    abc_types = (
+        ('A', _('A')),
+        ('B', _('B')),
+        ('C', _('C')),
+        ('D', _('D')),
+    )
 
     type_status = {'FG': fg_status, 'RM': rm_status, 'WIP': None}
 
@@ -270,7 +286,13 @@ class Item(AuditModel, HierarchyModel):
     name = models.CharField(_('name'), max_length=300, primary_key=False, db_index=True)
     barcode = models.CharField(_('barcode'), max_length=300, db_index=True, null=True, blank=True)
     status = models.CharField(_('status'), max_length=20, null=True, blank=True, choices=fg_status)
+    plan_strategy = models.CharField(_('plan strategy'), max_length=20, null=True, blank=True, choices=strategies)
     type = models.CharField(_('type'), max_length=20, null=True, blank=True, choices=types)
+    lock_type = models.CharField(_('lock type'), max_length=20, null=True, blank=True, choices=lock_types)
+    lock_expire_at = models.DateField(_('lock expire at'), null=True, blank=True)
+    price_abc = models.CharField(_('price abc'), max_length=20, null=True, blank=True, choices=abc_types)
+    qty_abc = models.CharField(_('qty abc'), max_length=20, null=True, blank=True, choices=abc_types)
+
     cost = models.DecimalField(
         _('cost'), null=True, blank=True,
         max_digits=20, decimal_places=8,
@@ -342,6 +364,8 @@ class ItemCustomer(AuditModel):
         null=False, blank=False, on_delete=models.CASCADE)
     customer_item_nr = models.CharField(_('customer item nr'), max_length=300, null=True, blank=True, db_index=True)
     status = models.CharField(_('status'), max_length=20, null=True, blank=True, choices=Item.fg_status)
+    lock_type = models.CharField(_('lock type'), max_length=20, null=True, blank=True, choices=Item.lock_types)
+    lock_expire_at = models.DateField(_('lock expire at'), null=True, blank=True)
     plan_list_date = models.DateField(_('plan list date'), db_index=True, null=True, blank=True)
     plan_delist_date = models.DateField(_('plan delist date'), db_index=True, null=True, blank=True)
     effective_start = models.DateTimeField(
@@ -1130,6 +1154,11 @@ class Supplier(AuditModel, HierarchyModel):
     area = models.CharField(_('area'), max_length=300, db_index=True, null=True, blank=True)
     address = models.CharField(_('address'), max_length=300, db_index=True, null=True, blank=True)
     ship_address = models.CharField(_('ship address'), max_length=300, db_index=True, null=True, blank=True)
+    country = models.CharField(_('country'), max_length=300, db_index=True, null=True, blank=True)
+    city = models.CharField(_('city'), max_length=300, db_index=True, null=True, blank=True)
+    phone = models.CharField(_('phone'), max_length=300, db_index=True, null=True, blank=True)
+    telephone = models.CharField(_('telephone'), max_length=300, db_index=True, null=True, blank=True)
+    contact = models.CharField(_('contact'), max_length=300, db_index=True, null=True, blank=True)
     available = models.ForeignKey(
         Calendar, verbose_name=_('available'),
         null=True, blank=True, on_delete=models.CASCADE,
@@ -1186,6 +1215,8 @@ class ItemSupplier(AuditModel):
     priority = models.IntegerField(_('priority'), default=0, help_text=_('Priority among all alternates'))
     ratio = models.DecimalField(_('ratio'), max_digits=20, decimal_places=8, default=100, null=True, blank=True)
     moq = models.DecimalField(_('MOQ'), max_digits=20, decimal_places=8)
+    order_unit_qty = models.DecimalField(_('order unit qty'), max_digits=20, decimal_places=8,default=0)
+    order_max_qty = models.DecimalField(_('order max qty'), max_digits=20, decimal_places=8,default=0)
     product_time = models.DecimalField(_('product time'), max_digits=20, decimal_places=8, default=0.00, null=True,
                                        blank=True)
     load_time = models.DecimalField(_('load time'), null=True, max_digits=20, decimal_places=8, default=0.00,
@@ -1196,6 +1227,9 @@ class ItemSupplier(AuditModel):
                                        blank=True)
     mpq = models.DecimalField(_('mpq'), max_digits=20, decimal_places=8, null=True, blank=True)
     earliest_order_date = models.DateField(_('earliest order date'), null=True, blank=True)
+    plan_supplier_date = models.DateField(_('plan supplier date'), null=True, blank=True)
+    plan_load_date = models.DateField(_('plan load date'), null=True, blank=True)
+    plan_receive_date = models.DateField(_('plan receive date'), null=True, blank=True)
     outer_package_num = models.IntegerField(_('outer package num'), null=True, blank=True)
     pallet_num = models.IntegerField(_('pallet num'), null=True, blank=True)
     outer_package_gross_weight = models.DecimalField(_('outer package gross weight'), max_digits=20, decimal_places=8,
@@ -1207,7 +1241,7 @@ class ItemSupplier(AuditModel):
     pallet_volume = models.DateField(_('pallet volume'), null=True, blank=True)
     plan_list_date = models.DateField(_('plan list date'), null=True, blank=True)
     plan_delist_date = models.DateField(_('plan delist date'), null=True, blank=True)
-    origin_country = models.CharField(_('origin country'), max_length=20, null=True, blank=True)
+    origin_country = models.CharField(_('origin country'), max_length=300, null=True, blank=True)
     effective_start = models.DateTimeField(
         _('effective start'), null=True, blank=True,
         help_text=_('Validity start date')
@@ -1216,6 +1250,7 @@ class ItemSupplier(AuditModel):
         _('effective end'), null=True, blank=True,
         help_text=_('Validity end date')
     )
+    description = models.CharField(_('descriptiony'), max_length=500, null=True, blank=True)
 
     # location = models.ForeignKey(
     #     Location, verbose_name=_('location'), null=True, blank=True,
@@ -1251,7 +1286,7 @@ class ItemSupplier(AuditModel):
     # )
     # resource_qty = models.DecimalField(
     #     _('resource quantity'), null=True, blank=True,
-    #     max_digits=20, decimal_places=8, default='1.0',
+    #     max_ddigits=20, decimal_places=8, default='1.0',
     #     help_text=_("Resource capacity consumed per purchased unit")
     # )
     # fence = models.DurationField(
@@ -1418,7 +1453,8 @@ class ForecastYear(AuditModel):
     date_type = models.CharField(
         _('date_type'), max_length=20, choices=date_types, default='W', null=True, blank=True)
 
-    ratio = models.DecimalField(_('forecast ratio'), max_digits=20, decimal_places=8, default=100, null=False, blank=True)
+    ratio = models.DecimalField(_('forecast ratio'), max_digits=20, decimal_places=8, default=100, null=False,
+                                blank=True)
     normal_qty = models.DecimalField(_('normal qty'), max_digits=20, decimal_places=8, null=False, default=0)
     new_product_plan_qty = models.DecimalField(_('new product plan qty'), max_digits=20, decimal_places=8, null=False,
                                                blank=True, default=0)
@@ -1446,14 +1482,13 @@ class ForecastYear(AuditModel):
 
     objects = Manager()
 
-
     # def __str__(self):
     #     return '%s - %s - %s' % (
     #         self.item.nr, self.location.nr, self.customer.nr)
 
     class Meta(AuditModel.Meta):
         db_table = 'forecast_year'
-        unique_together = (('item', 'location', 'customer', 'year','date_type','date_number'),)
+        unique_together = (('item', 'location', 'customer', 'year', 'date_type', 'date_number'),)
         verbose_name = _('forecast_year')
         verbose_name_plural = _('forecast_years')
 
@@ -1462,6 +1497,7 @@ class ForecastYear(AuditModel):
         # Call the real save() method
         self.set_parsed_date()
         super(ForecastYear, self).save(*args, **kwargs)
+
 
 class ForecastCommentOperation:
     statuses = (
@@ -1479,7 +1515,7 @@ class ForecastCommentOperation:
     can_release_status = ('ok')
 
     # 报表状态
-    compare_report_status =('init', 'nok', 'ok','release','confirm',)
+    compare_report_status = ('init', 'nok', 'ok', 'release', 'confirm',)
 
     def can_ok(self):
         return self.status in self.can_ok_status
@@ -1542,12 +1578,13 @@ class Forecast(AuditModel, ForecastCommentOperation):
     date_type = models.CharField(
         _('date_type'), max_length=20, choices=ForecastYear.date_types, default='W', null=True, blank=True)
 
-    ratio = models.DecimalField(_('forecast ratio'), max_digits=20, decimal_places=8, default=100, null=False, blank=True)
-    normal_qty = models.DecimalField(_('normal qty'), max_digits=20, decimal_places=8,null=False,default=0)
+    ratio = models.DecimalField(_('forecast ratio'), max_digits=20, decimal_places=8, default=100, null=False,
+                                blank=True)
+    normal_qty = models.DecimalField(_('normal qty'), max_digits=20, decimal_places=8, null=False, default=0)
     new_product_plan_qty = models.DecimalField(_('new product plan qty'), max_digits=20, decimal_places=8, null=False,
                                                blank=True, default=0)
     promotion_qty = models.DecimalField(_('promotion qty'), max_digits=20, decimal_places=8, null=False,
-                                               blank=True, default=0)
+                                        blank=True, default=0)
     status = models.CharField(_('status'), max_length=20, choices=ForecastCommentOperation.statuses, default='init')
     create_user = models.ForeignKey(
         User, verbose_name=_('create_user'),
@@ -1574,7 +1611,6 @@ class Forecast(AuditModel, ForecastCommentOperation):
         else:
             raise Exception('Error datetype in forecast')
 
-
     class Manager(MultiDBManager):
         # def get_by_natural_key(self, item, location, customer,year,date_type,date_number,version_id):
         #     return self.get(item=item, location=location, customer=customer,year=year,date_type=date_type,date_number=date_number,version_id=version_id)
@@ -1583,14 +1619,13 @@ class Forecast(AuditModel, ForecastCommentOperation):
         def bulk_create(self, objs, batch_size=None):
             for o in objs:
                 o.set_parsed_date()
-            super(Forecast.Manager, self).bulk_create(objs,batch_size)
-
+            super(Forecast.Manager, self).bulk_create(objs, batch_size)
 
     # def natural_key(self):
     #     return (self.item, self.location, self.customer,self.year,self.date_type,self.date_number,self.version_id)
 
     def set_parsed_date(self):
-        self.parsed_date = Forecast.parse_date(self.date_type, self.year,   self.date_number)
+        self.parsed_date = Forecast.parse_date(self.date_type, self.year, self.date_number)
 
     objects = Manager()
 
@@ -1609,6 +1644,7 @@ class Forecast(AuditModel, ForecastCommentOperation):
         # Call the real save() method
         self.set_parsed_date()
         super(Forecast, self).save(*args, **kwargs)
+
 
 class Demand(AuditModel, HierarchyModel):
     # Status

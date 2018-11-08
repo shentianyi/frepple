@@ -56,7 +56,7 @@ DATABASES = {
     #     'FILEUPLOADFOLDER': os.path.normpath(os.path.join(FREPPLE_LOGDIR, 'data', 'default')),
     #     'SECRET_WEBTOKEN_KEY': SECRET_KEY,
     # },
-    #
+
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'frepple_dev',
