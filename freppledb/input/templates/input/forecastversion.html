@@ -26,6 +26,7 @@ $(function() {
   {% if reportclass.hasTimeBuckets and not bucketnames %}
   $('#curfilter').html("{% trans 'Error: Missing time buckets or bucket dates' %}");
 {% else %}
+
   jQuery("#grid").jqGrid({
    	url: (location.href.indexOf("#") != -1 ? location.href.substr(0,location.href.indexOf("#")) : location.href)
    	  + (location.search.length > 0 ? "&format=json" : "?format=json"),
@@ -33,6 +34,9 @@ $(function() {
 	  jsonReader : {repeatitems:false},
     colModel:[{{colmodel|safe}}, {name: 'Actions', label: '备注详情', index: 'Actions', title:'Actions', align: 'center'}],
     rownumbers: true,
+    shrinkToFit:false,
+    autoScroll: true,
+    emptyrecords: "无数据显示",
    	rowNum: {{request.pagesize}},
    	autoencode: false, {% if is_popup %}
     onSelectRow: grid.setSelectedRow, {% elif reportclass.editable and haschangeperm %}
@@ -143,6 +147,7 @@ $(function() {
         return true;
     },{% endif %}
     loadComplete: function() {
+//   	    console.log($("#grid").jqGrid('getGridParam', 'postData'))
         var ret = jQuery("#grid").jqGrid('getRowData');
 
         for(var i = 0; i< ret.length; i++){
@@ -229,6 +234,15 @@ $(function() {
   });
 
 });
+
+function download(){
+    var sel = $("#grid").jqGrid('getGridParam', 'selarrrow');
+    if(sel.length <= 1) {
+        var rowid = jQuery("#grid").jqGrid("getGridParam", "selrow");
+        var rowData = jQuery("#grid").jqGrid('getRowData',rowid);
+        Forecast.downloadForecastVersion (rowData.nr ? rowData.nr : '')
+    }
+}
 
 </script>
 {% endblock %}
@@ -419,7 +433,7 @@ $(function() {
     {% endif %}
 
     <!--导出按钮-->
-    <button class="btn btn-xs btn-default btn-table-icon" onclick="grid.showExport(true)" data-toggle="tooltip"
+    <button class="btn btn-xs btn-default btn-table-icon" onclick="download()" data-toggle="tooltip"
             data-placement="top"
             data-original-title="{% trans 'export as CSV or Excel file'|capfirst|force_escape %}">
         <!--<span class="fa fa-arrow-down"></span>-->

@@ -2,10 +2,132 @@
 {% load i18n %}
 
 {% block extrahead %}{{block.super}}
-<!--头内容-->
+<head>
+  <meta charset="utf-8">
+  <title>jQuery UI 标签页（Tabs） - 默认功能</title>
+  <link rel="stylesheet" href="//apps.bdimg.com/libs/jqueryui/1.10.4/css/jquery-ui.min.css">
+  <script src="//apps.bdimg.com/libs/jquery/1.10.2/jquery.min.js"></script>
+  <script src="//apps.bdimg.com/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
+  <link rel="stylesheet" href="http://www.runoob.com/try/demo_source/jqueryui/style.css">
+  <script>
+  $(function() {
+    $( "#tabs" ).tabs();
+  });
+  </script>
+</head>
+<!--head中的内容,如js-->
+<script src="{{STATIC_URL}}js/forecast.js" type="application/javascript"></script>
 {% endblock %}
 
 {% block content %}
 <!--主页面内容-->
-{{template_name}}
+<div id="item-detail" class="row" style="margin: 30px 0 0 0">
+    <form class="col-md-12" style="background-color: #FFFFFF">
+        <div class="col-md-12" style="margin-top: 20px">
+            <div class="col-md-3">
+                <label>产品描述：</label>
+                <input id="description_item" type="text" name="description">
+            </div>
+            <div class="col-md-3">
+                <label>仓库代码：</label>
+                <input id="code_warehouse" type="text" name="code">
+            </div>
+            <div class="col-md-3">
+                <label>库存数量：</label>
+                <input id="stock_item" type="text" name="stock">
+            </div>
+            <div class="col-md-3">
+                <label>物料锁定类型：</label>
+                <input id="type_item" type="text" name="type">
+            </div>
+        </div>
+        <div class="col-md-12" style="margin-top: 20px">
+            <div class="col-md-3">
+                <label>物料编码：</label>
+                <input id="code_item" type="text" name="description">
+            </div>
+            <div class="col-md-3">
+                <label>替代料号：</label>
+                <input id="alternative_item" type="text" name="code">
+            </div>
+            <div class="col-md-3">
+                <label>可用库存：</label>
+                <input id="stock_avai" type="text" name="stock">
+            </div>
+            <div class="col-md-3">
+                <label>到期：</label>
+                <input id="deadline_item" type="text" name="type">
+            </div>
+        </div>
+        <div class="col-md-12" style="margin-top: 20px">
+            <div class="col-md-3">
+                <label>计划策略：</label>
+                <input id="plan_strategy" type="text" name="description">
+            </div>
+            <div class="col-md-3">
+                <label>物料状态：</label>
+                <input id="status_item" type="text" name="code">
+            </div>
+            <div class="col-md-3">
+                <label>库存金额：</label>
+                <input id="stock_amount" type="text" name="stock">
+            </div>
+            <div class="col-md-3">
+                <label>物料ABC货值：</label>
+                <input id="value_item" type="text" name="type">
+            </div>
+        </div>
+        <div class="col-md-12" style="margin: 20px 0">
+            <button type="button" class="col-md-1" style="margin-left: 15px">订货点ROP</button>
+            <button type="button" class="col-md-1" style="margin-left: 15px">ROP计算</button>
+            <div class="col-md-3 pull-right">
+                <label>物料ABC数量：</label>
+                <input id="amount_item" type="text" name="type">
+            </div>
+        </div>
+    </form>
+
+    <div id="tabs" class="col-md-12" style="background-color: #FFFFFF; margin-top: 20px">
+        <ul>
+            <li><a href="#main">主数据</a></li>
+            <li><a href="#supplier">供应商</a></li>
+            <li><a href="#plan">计划</a></li>
+            <li><a href="#simulation">模拟</a></li>
+            <li><a href="#forecast">预测</a></li>
+        </ul>
+        <div id="main" class="col-md-12">
+            <form>
+                <h3>供应商</h3>
+                <div class="col-md-12" style="margin-top: 20px">
+                    <div class="col-md-3">
+                        <label>供应商代码：</label>
+                        <input id="code_supplier" type="text" name="description">
+                    </div>
+                    <div class="col-md-3">
+                        <label>手机/电话：</label>
+                        <input id="phone_supplier" type="text" name="stock">
+                    </div>
+                    <div class="col-md-3">
+                        <label>物料锁定类型：</label>
+                        <input id="type_item" type="text" name="type">
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div id="supplier" class="col-md-12">
+
+        </div>
+        <
+        <div id="plan" class="col-md-12">
+
+        </div>
+        <div id="simulation" class="col-md-12">
+
+        </div>
+        <div id="forecast" class="col-md-12">
+
+        </div>
+    </div>
+</div>
+<!--{{template_name}}-->
 {% endblock %}

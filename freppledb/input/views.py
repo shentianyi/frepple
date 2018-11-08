@@ -14,10 +14,11 @@
 # You should have received a copy of the GNU Affero General Public
 # License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
+import csv
 import sys
 import traceback
 from datetime import datetime
-from io import BytesIO
+from io import BytesIO, StringIO
 
 from django.conf import settings
 from django.contrib.admin.views.decorators import staff_member_required
@@ -32,6 +33,7 @@ from django.http.response import StreamingHttpResponse, HttpResponseServerError,
 from django.shortcuts import render
 from django.template import loader
 from django.utils.decorators import method_decorator
+from django.utils.formats import get_format
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import ungettext
 from django.utils.translation import string_concat
@@ -39,6 +41,9 @@ from django.utils.encoding import force_text
 from django.utils.text import format_lazy
 from django.views.generic import View
 from django.views.decorators.csrf import csrf_exempt
+from openpyxl import Workbook
+from openpyxl.cell import WriteOnlyCell
+from openpyxl.styles import NamedStyle, PatternFill
 
 from freppledb.boot import getAttributeFields
 from freppledb.common.message.responsemessage import ResponseMessage
@@ -979,6 +984,11 @@ class SupplierList(GridReport):
         GridFieldText('area', title=_('area'), editable=False),
         GridFieldText('address', title=_('address'), editable=False),
         GridFieldText('ship_address', title=_('ship address'), editable=False),
+        GridFieldText('country', title=_('country'), editable=False),
+        GridFieldText('city', title=_('city'), editable=False),
+        GridFieldText('phone', title=_('phone'), editable=False),
+        GridFieldText('telephone', title=_('telephone'), editable=False),
+        GridFieldText('contact', title=_('contact'), editable=False),
         GridFieldText('source', title=_('source'), editable=False),
         GridFieldText('available', title=_('available'), field_name='available__name', editable=False),
         GridFieldText('owner_display', title=_('owner_display'), field_name='owner__nr', editable=False),
@@ -1028,12 +1038,17 @@ class ItemSupplierList(GridReport):
                         extra='"formatoptions":{"suffix":" %","defaultValue":"100.00"}', editable=False),
 
         GridFieldNumber('moq', title=_('MOQ'), editable=False),
+        GridFieldNumber('order_unit_qty', title=_('order unit qty'), editable=False),
+        GridFieldNumber('order_max_qty', title=_('order max qty'), editable=False),
         GridFieldNumber('product_time', title=_('product time'), editable=False),
         GridFieldNumber('load_time', title=_('load time'), editable=False),
         GridFieldNumber('transit_time', title=_('transit time'), editable=False),
         GridFieldNumber('receive_time', title=_('receive time'), editable=False),
         GridFieldInteger('mpq', title=_('mpq'), editable=False),
         GridFieldDate('earliest_order_date', title=_('earliest order date'), editable=False, initially_hidden=True),
+        GridFieldDate('plan_supplier_date', title=_('plan supplier date'), editable=False, initially_hidden=True),
+        GridFieldDate('plan_load_date', title=_('plan load date'), editable=False, initially_hidden=True),
+        GridFieldDate('plan_receive_date', title=_('plan_receive_date'), editable=False, initially_hidden=True),
         GridFieldInteger('outer_package_num', title=_('outer package num'), editable=False, initially_hidden=True),
         GridFieldInteger('pallet_num', title=_('pallet num'), editable=False, initially_hidden=True),
         GridFieldNumber('outer_package_gross_weight', title=_('outer package gross weight'), editable=False,
@@ -1046,6 +1061,7 @@ class ItemSupplierList(GridReport):
         GridFieldText('origin_country', title=_('origin country'), editable=False),
         GridFieldDateTime('effective_start', title=_('effective start'), editable=False),
         GridFieldDateTime('effective_end', title=_('effective end'), editable=False),
+        GridFieldText('description', title=_('description'), editable=False),
         GridFieldCreateOrUpdateDate('created_at', title=_('created_at'), editable=False),
         GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at'), editable=False),
 
@@ -1298,7 +1314,12 @@ class ItemList(GridReport):
         GridFieldText('name', title=_('name'), editable=False),
         GridFieldText('barcode', title=_('barcode'), editable=False),
         GridFieldText('status', field_name='status', title=_('status'), editable=False),
+        GridFieldChoice('plan_strategy', title=_('plan strategy'), choices=Item.strategies, editable=False),
         GridFieldChoice('type', title=_('type'), choices=Item.types, editable=False),
+        GridFieldChoice('lock_type', title=_('lock type'), choices=Item.lock_types, editable=False),
+        GridFieldDate('lock_expire_at', title=_('lock expire at'), editable=False),
+        GridFieldChoice('price_abc', title=_('price abc'), choices=Item.abc_types, editable=False),
+        GridFieldChoice('qty_abc', title=_('qty abc'), choices=Item.abc_types, editable=False),
         GridFieldCurrency('cost', title=_('cost'), editable=False),
         GridFieldText('source', title=_('source'), editable=False, initially_hidden=True),
         # 新建一个显示列
@@ -1345,6 +1366,52 @@ class ItemDetail(View):
         item = Item.objects.all().get(id=id)
         return render(request, template_name, {'template_name': template_name})
 
+
+# 代号：GET_ITEM_MAIN_DATA_API
+class ItemMainData(View):
+    def get(self, request, id, *args, **kwargs):
+        item = Item.objects.get(id=id)
+        successor_nr = ItemSuccessor.objects.filter(item=item).order_by('priority').first().item_successor.nr
+        lock_types = {"current": item.type, "values": [{"value": item.lock_types[0][0], "text": _('locked')},
+                                                       {"value": item.lock_types[1][0], "text": _('unlocked')}]}
+        if item.type == 'FG':
+            status = ["S0", "S1", "S2", "S3", "S4"]
+            item_statuses = {"current": item.status, "values": [{"value": status[0], "text": _('S0')},
+                                                          {"value": status[1], "text": _('S1')},
+                                                          {"value": status[2], "text": _('S2')},
+                                                          {"value": status[3], "text": _('S3')},
+                                                          {"value": status[4], "text": _('S4')},
+                                                          {"value": status[5], "text": _('S5')}]}
+        elif item.type == 'RM':
+            status = ["A0", "A1", "A2", "A3"]
+            item_statuses = {"current": item.status, "values": [{"value": status[0], "text": _('A0')},
+                                                          {"value": status[1], "text": _('A1')},
+                                                          {"value": status[2], "text": _('A2')},
+                                                          {"value": status[3], "text": _('A3')},
+                                                          {"value": status[4], "text": _('A4')}]}
+        elif item.type == 'WIP':
+            item_statuses = []
+        else:
+            item_statuses = []
+        plan_strategies = {"current": item.plan_strategy, "values": [{"value": item.strategies[0][0], "text": _('MTS')},
+                                                                     {"value": item.strategies[1][0], "text": _('MTO')},
+                                                                     {"value": item.strategies[2][0], "text": _('ETO')}]}
+        data = {
+            "id": item.id,
+            "nr": item.nr,
+            "successor_nr": successor_nr,
+            "description": item.description,
+            "lock_types": str(lock_types),
+            "lock_expire_at": item.lock_expire_at,
+            "plan_strategies": str(plan_strategies),
+            "statuses": str(item_statuses),
+            "price_abc": item.price_abc,
+            "qty_abc": item.qty_abc
+        }
+
+        return HttpResponse(json.dumps(data, ensure_ascii=False), content_type="application/json")
+
+
 class ItemCustomerList(GridReport):
     '''
     A list report to show items.
@@ -1373,6 +1440,8 @@ class ItemCustomerList(GridReport):
         GridFieldInteger('location', title=_('location_id'), field_name='location_id', editable=False, hidden=True),
         GridFieldText('customer_item_nr', title=_('customer item nr'), editable=False),
         GridFieldText('status', title=_('status'), editable=False),
+        GridFieldChoice('lock_type', title=_('lock type'), choices=Item.lock_types, editable=False),
+        GridFieldDate('lock_expire_at', title=_('lock expire at'), editable=False),
         GridFieldDate('plan_list_date', title=_('plan list date'), editable=False, initially_hidden=True),
         GridFieldDate('plan_delist_date', title=_('plan delist date'), editable=False, initially_hidden=True),
         GridFieldDateTime('effective_start', title=_('effective start'), editable=False),
@@ -1656,7 +1725,8 @@ class ForecastYearList(GridReport):
         GridFieldText('year', title=_('year'), editable=False),
         GridFieldInteger('date_number', title=_('date_number'), editable=False),
         GridFieldText('date_type', title=_('date_type'), editable=False),
-        GridFieldNumber('ratio', title=_('forecast ratio'),extra='"formatoptions":{"suffix":" %","defaultValue":"100.00"}', editable=False),
+        GridFieldNumber('ratio', title=_('forecast ratio'),
+                        extra='"formatoptions":{"suffix":" %","defaultValue":"100.00"}', editable=False),
         GridFieldNumber('normal_qty', title=_('normal qty'), editable=False),
         GridFieldNumber('new_product_plan_qty', title=_('new product plan qty'), editable=False),
         GridFieldNumber('promotion_qty', title=_('promotion qty'), editable=False),
@@ -1712,18 +1782,83 @@ class ForecastVersionView(GridReport):
                 return HttpResponse(json.dumps(message.__dict__, ensure_ascii=False), content_type='application/json')
             else:
                 return HttpResponse(
-                    json.dumps(ForecastUploader.upload_excel(request, Forecast).__dict__, ensure_ascii=False), content_type='application/json')
+                    json.dumps(ForecastUploader.upload_excel(request, Forecast).__dict__, ensure_ascii=False),
+                    content_type='application/json')
         # 上传文件
         else:
             message = ResponseMessage(message='no excel file or file size>1')
             return HttpResponse(json.dumps(message.__dict__, ensure_ascii=False), content_type='application/json')
 
-    # def get(self, request, *args, **kwargs):
-    #     output = BytesIO()
-    #     return HttpResponse(
-    #         json.dumps(ForecastDownloader.download_excel(request, Forecast, output).__dict__, ensure_ascii=False),
-    #         content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    #
+    @classmethod
+    def _generate_spreadsheet_data(reportclass, request, output, *args, **kwargs):
+        # 下载excel
+        wb = Workbook()
+        # 第一个sheet是ws,不然会自动生成一个sheet表
+        ws = wb.worksheets[0]
+        title = force_text(Forecast._meta.verbose_name or Forecast.title)
+        ws.title = title
+        headerstyle = NamedStyle(name="headerstyle")
+        headerstyle.fill = PatternFill(fill_type="solid", fgColor='70c4f4')
+        wb.add_named_style(headerstyle)
+        nr = request.GET.get('nr', None)
+        if nr:
+            download_forecast = Forecast.objects.filter(version_id=nr).order_by('-version_id', 'year', 'date_number')
+        else:
+            download_forecast = Forecast.objects.all().order_by('-version_id', 'year', 'date_number')
+        if not download_forecast:
+            return HttpResponse('没有下载数据')
+        else:
+            report_headers = (
+                _('id'), _('item'), _('location'), _('customer'), _('year'), _('date_number'), _('date_type'),
+                _('forecast ratio'),
+                _('normal qty'), _('new product plan qty'), _('promotion qty'), _('status'), _('create user'),
+                _('version'), _('created_at'), _('updated_at'))
+            # 写入表头数据
+            header = []
+            for field in report_headers:
+                cell = WriteOnlyCell(ws, value=force_text(field).title())
+                cell.style = 'headerstyle'
+                header.append(cell)
+            ws.append(header)
+            for f in download_forecast:
+                body = [f.id, f.item.nr, f.location.nr, f.customer.nr, f.year, f.date_number, f.date_type, f.ratio,
+                        f.normal_qty, f.new_product_plan_qty, f.promotion_qty, f.status, f.create_user.username,
+                        f.version.nr, f.created_at, f.updated_at]
+                ws.append(body)
+
+            wb.save(output)
+
+    @classmethod
+    def _generate_csv_data(reportclass, request, *args, **kwargs):
+
+        # 下载 csv
+        sf = StringIO()
+        nr = request.GET.get('nr', None)
+        if nr:
+            download_forecast = Forecast.objects.filter(version_id=nr).order_by('-version_id', 'year', 'date_number')
+        else:
+            download_forecast = Forecast.objects.all().order_by('-version_id', 'year', 'date_number')
+
+        decimal_separator = get_format('DECIMAL_SEPARATOR', request.LANGUAGE_CODE, True)
+        if decimal_separator == ",":
+            writer = csv.writer(sf, quoting=csv.QUOTE_NONNUMERIC, delimiter=';')
+        else:
+            writer = csv.writer(sf, quoting=csv.QUOTE_NONNUMERIC, delimiter=',')
+
+        reprot_headers = (
+            _('id'), _('item'), _('location'), _('customer'), _('year'), _('date_number'), _('date_type'),
+            _('forecast ratio'),
+            _('normal qty'), _('new product plan qty'), _('promotion qty'), _('status'), _('create user'),
+            _('version'), _('created_at'), _('updated_at'))
+
+        writer.writerow(reprot_headers)
+
+        for f in download_forecast:
+            body = [f.id, f.item.nr, f.location.nr, f.customer.nr, f.year, f.date_number, f.date_type, f.ratio,
+                    f.normal_qty, f.new_product_plan_qty, f.promotion_qty, f.status, f.create_user.username,
+                    f.version.nr, f.created_at, f.updated_at]
+            writer.writerow(body)
+        return sf.getvalue()
 
 
 class ForecastList(GridReport):
@@ -2212,7 +2347,8 @@ class SubOperationList(GridReport):
         GridFieldText('parent_operation', title=_('parent_operation_id'), field_name='parent_operation_id', hidden=True,
                       editable=False),
 
-        GridFieldText('suboperation_display', title=_('suboperation_display'), field_name='suboperation__nr', editable=False),
+        GridFieldText('suboperation_display', title=_('suboperation_display'), field_name='suboperation__nr',
+                      editable=False),
         GridFieldText('suboperation', title=_('suboperation_id'), field_name='suboperation_id', hidden=True,
                       editable=False),
 
@@ -3527,4 +3663,3 @@ class OperationPlanDetail(View):
                 # Swallow the exception and move on
                 logger.error("Error updating operationplan: %s" % e)
         return HttpResponse(content="OK")
-
