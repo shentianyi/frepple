@@ -1,4 +1,5 @@
 import logging
+import traceback
 from datetime import datetime
 
 from django.db import transaction
@@ -84,18 +85,18 @@ class ForecastUploader:
 
                             if field_name == 'location':
                                 if value not in locations:
-                                   locations[value] = Location.objects.using(request.database).get(nr=value)
-                                forecast.location = locations.get(value, None)
+                                   locations[value] = Location.objects.using(request.database).values('id').get(nr=value)['id']
+                                forecast.location_id = locations.get(value, None)
                             elif field_name == 'item':
                                 if value not in items:
-                                    items[value] = Item.objects.using(request.database).get(nr=value)
-                                forecast.item = items[value]
+                                    items[value] = Item.objects.using(request.database).values('id').get(nr=value)['id']
+                                forecast.item_id = items[value]
 
                             elif field_name == 'customer':
                                 try:
                                     if value not in customers:
-                                        customers[value] = Customer.objects.using(request.database).get(nr=value)
-                                    forecast.customer = customers[value]
+                                        customers[value] = Customer.objects.using(request.database).values('id').get(nr=value)['id']
+                                    forecast.customer_id = customers[value]
                                 except Customer.DoesNotExist as e:
                                     print(e)
                                     # forecast.customer = None
@@ -151,15 +152,17 @@ class ForecastUploader:
                                 # 可以被更新的字段
                                 update_fields = ['date_type', 'ratio', 'normal_qty', 'normal_qty',
                                                  'new_product_plan_qty', 'promotion_qty']
+                                starttime = datetime.now()
+
                                 for f in forecasts:
                                     # 更新
                                     try:
                                         update_forecast = Forecast.objects.using(request.database).filter(
                                             # version=forecast_version,
                                             version=forecast_version,
-                                            location=f.location,
-                                            item=f.item,
-                                            customer=f.customer,
+                                            location_id=f.location_id,
+                                            item_id=f.item_id,
+                                            customer_id=f.customer_id,
                                             year=f.year,
                                             date_type=f.date_type,
                                             date_number=f.date_number).latest('id')
@@ -174,9 +177,15 @@ class ForecastUploader:
                                         f.version = forecast_version
                                         f.save()
 
+                                endtime =datetime.now()
+                                print("start time vs end time: %s vs %s, %s" % (
+                                starttime, endtime, (endtime - starttime).microseconds))
+
                         message.result = True
                         message.message = '上传成功'
         except Exception as e:
+            print(e)
+            traceback.print_exc()
             message.result = False
             message.message = str(e)
         return message
