@@ -3152,11 +3152,11 @@ msgstr "冻结围栏为了创建新采购"
 
 #: input/models.py:873
 msgid "item supplier"
-msgstr "产品供应商"
+msgstr "物料供应商"
 
 #: input/models.py:874 input/views.py:806
 msgid "item suppliers"
-msgstr "产品供应商"
+msgstr "物料供应商"
 
 # "origin" translation must be different from "source" translation
 #: input/models.py:891 input/models.py:1122 input/views.py:846

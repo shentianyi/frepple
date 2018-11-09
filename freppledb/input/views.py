@@ -63,7 +63,7 @@ from freppledb.common.report import GridFieldDateTime, GridFieldTime, GridFieldT
 from freppledb.common.report import GridFieldNumber, GridFieldInteger, GridFieldCurrency
 from freppledb.common.report import GridFieldChoice, GridFieldDuration
 from freppledb.admin import data_site
-
+from django.utils import timezone
 import json
 from django.core.serializers.json import DjangoJSONEncoder
 
@@ -989,6 +989,7 @@ class SupplierList(GridReport):
         GridFieldText('phone', title=_('phone'), editable=False),
         GridFieldText('telephone', title=_('telephone'), editable=False),
         GridFieldText('contact', title=_('contact'), editable=False),
+        GridFieldText('email', title=_('email'), editable=False),
         GridFieldText('source', title=_('source'), editable=False),
         GridFieldText('available', title=_('available'), field_name='available__name', editable=False),
         GridFieldText('owner_display', title=_('owner_display'), field_name='owner__nr', editable=False),
@@ -1016,7 +1017,6 @@ class ItemSupplierList(GridReport):
     help_url = 'user-guide/modeling-wizard/purchasing/item-suppliers.html'
 
     rows = (
-        # GridFieldInteger('id', title=_('identifier'), key=True, formatter='detail', extra='"role":"input/itemsupplier"'),
         GridFieldInteger('id', title=_('id'), key=True, formatter='detail', extra='"role":"input/itemsupplier"',
                          editable=False),
         # 新建一个显示列
@@ -1368,6 +1368,7 @@ class ItemDetail(View):
 
 
 # 代号：GET_ITEM_MAIN_DATA_API
+# 单个物料头部公共数据
 class ItemMainData(View):
     def get(self, request, id, *args, **kwargs):
         item = Item.objects.get(id=id)
@@ -1377,39 +1378,148 @@ class ItemMainData(View):
         if item.type == 'FG':
             status = ["S0", "S1", "S2", "S3", "S4"]
             item_statuses = {"current": item.status, "values": [{"value": status[0], "text": _('S0')},
-                                                          {"value": status[1], "text": _('S1')},
-                                                          {"value": status[2], "text": _('S2')},
-                                                          {"value": status[3], "text": _('S3')},
-                                                          {"value": status[4], "text": _('S4')},
-                                                          {"value": status[5], "text": _('S5')}]}
+                                                                {"value": status[1], "text": _('S1')},
+                                                                {"value": status[2], "text": _('S2')},
+                                                                {"value": status[3], "text": _('S3')},
+                                                                {"value": status[4], "text": _('S4')}]}
         elif item.type == 'RM':
             status = ["A0", "A1", "A2", "A3"]
             item_statuses = {"current": item.status, "values": [{"value": status[0], "text": _('A0')},
-                                                          {"value": status[1], "text": _('A1')},
-                                                          {"value": status[2], "text": _('A2')},
-                                                          {"value": status[3], "text": _('A3')},
-                                                          {"value": status[4], "text": _('A4')}]}
+                                                                {"value": status[1], "text": _('A1')},
+                                                                {"value": status[2], "text": _('A2')},
+                                                                {"value": status[3], "text": _('A3')}]}
         elif item.type == 'WIP':
             item_statuses = []
         else:
             item_statuses = []
         plan_strategies = {"current": item.plan_strategy, "values": [{"value": item.strategies[0][0], "text": _('MTS')},
                                                                      {"value": item.strategies[1][0], "text": _('MTO')},
-                                                                     {"value": item.strategies[2][0], "text": _('ETO')}]}
+                                                                     {"value": item.strategies[2][0],"text": _('ETO')}]}
+
+        locations = Location.objects.select_related().all().order_by('id')
+        location = []
+        for f in locations:
+            locationdict = {
+                "id": f.id,
+                "nr": f.nr,
+                # TODO 暂时无数据
+                "buffer": {
+                    "total_qty": 0,
+                    "available_qty": 0,
+                    "buffer_price": 0
+                }
+            }
+        location.append(locationdict)
         data = {
             "id": item.id,
             "nr": item.nr,
             "successor_nr": successor_nr,
             "description": item.description,
-            "lock_types": str(lock_types),
+            "location": location,
+            "lock_types": lock_types,
             "lock_expire_at": item.lock_expire_at,
-            "plan_strategies": str(plan_strategies),
-            "statuses": str(item_statuses),
+            "plan_strategies": plan_strategies,
+            "statuses": item_statuses,
             "price_abc": item.price_abc,
             "qty_abc": item.qty_abc
         }
 
-        return HttpResponse(json.dumps(data, ensure_ascii=False), content_type="application/json")
+        return HttpResponse(json.dumps(data, cls=DjangoJSONEncoder,ensure_ascii=False), content_type="application/json")
+
+
+# 代号　GET_ITEM_SUPPLIERS_DATA_API
+# 获取单个物料供应商界面主数据
+class ItemSupplierData(View):
+    def get(self, request, id, *args, **kwargs):
+        supplier = ItemSupplier.objects.select_related().filter(item=id)
+        data = []
+        for f in supplier:
+            supplier_dict = {
+                "id": f.supplier.id,
+                "name": f.supplier.name,
+                "country": f.supplier.country,
+                "city": f.supplier.city,
+                "address": f.supplier.address,
+                "phone": f.supplier.phone,
+                "tel": f.supplier.telephone,
+                "email": f.supplier.email,
+                "contact": f.supplier.contact,
+                "cost": f.cost,
+                "cost_unit": f.cost_unit,
+                "supplier_item_nr": f.supplier_item_nr
+            }
+            data.append(supplier_dict)
+
+        return HttpResponse(json.dumps(data, cls=DjangoJSONEncoder, ensure_ascii=False), content_type="application/json")
+
+
+# 代号：GET_ITEM_MAIN_SUPPLIER_DATA_API
+# 获取单个物料主数据页，前置期+供应商+包装部分
+class MainSupplierData(View):
+    def get(self, request, id, *args, **kwargs):
+        current_time = timezone.now()
+        item = Item.objects.get(id=id)
+        # TODO 如果生效时间和开始时间为空情况或者条件不满足时？（条件不满足时会报错）
+        try:
+            supplier = ItemSupplier.objects.filter(item=id, effective_start__lte=current_time,
+                           effective_end__gte=current_time ).order_by('-priority', '-ratio', 'id').first()
+        except Exception as e:
+            return HttpResponse(e)
+
+        receive_time = supplier.receive_time
+        load_time = supplier.load_time
+        transit_time = supplier.transit_time
+        product_time = supplier.product_time
+
+        if receive_time is None:
+            receive_time = 0
+        if load_time is None:
+            load_time = 0
+        if transit_time is None:
+            transit_time = 0
+        if product_time is None:
+            product_time = 0
+
+        # totall_lead_time　日历日的计算
+        totall_time = product_time + load_time + transit_time + receive_time
+        cd = int(totall_time / 5)
+        day = cd * 5
+        totall_lead_time = cd * 7 + totall_time - day
+
+        receive_time = supplier.receive_time
+        load_time = supplier.load_time
+        transit_time = supplier.transit_time
+        product_time = supplier.product_time
+
+        data = {
+            "supplier": supplier.supplier.name,
+            "nr": supplier.supplier.nr,
+            "product_time": product_time if product_time else None,
+            "load_time": load_time if load_time else None,
+            "transit_time": transit_time if transit_time else None,
+            "receive_time": receive_time if receive_time else None,
+            "plan_supplier_date": supplier.plan_supplier_date,
+            "plan_load_date": supplier.plan_load_date,
+            "plan_receive_date": supplier.plan_receive_date,
+            "totall_lead_time": totall_lead_time,
+            "cost": supplier.cost,
+            "cost_unit": supplier.cost_unit,
+            "earliest_order_date": supplier.earliest_order_date,
+            "lock_expire_at": item.lock_expire_at,
+            "plan_list_date": supplier.plan_list_date,
+            "plan_delist_date": supplier.plan_delist_date,
+            "moq": supplier.moq,
+            "mpq": supplier.mpq if supplier.mpq else None,
+            "pallet_num": supplier.pallet_num if supplier.pallet_num else None,
+            # TODO 手工MOQ暂时无数据
+            "MOQ": 0,
+            "order_unit_qty": supplier.order_unit_qty if supplier.order_unit_qty else None,
+            "outer_package_num": supplier.outer_package_num if supplier.outer_package_num else None,
+            "order_max_qty": supplier.order_max_qty if supplier.order_max_qty else None,
+            "description": supplier.description
+        }
+        print(type(data))
+        return HttpResponse(json.dumps(data, cls=DjangoJSONEncoder, ensure_ascii=False), content_type="application/json")
 
 
 class ItemCustomerList(GridReport):
@@ -1805,6 +1915,7 @@ class ForecastVersionView(GridReport):
             download_forecast = Forecast.objects.select_related('item', 'location', 'customer').filter(version_id=nr).order_by('-version_id', 'year', 'date_number')
         else:
             download_forecast = Forecast.objects.select_related('item', 'location', 'customer').all().order_by('-version_id', 'year', 'date_number')
+
         if not download_forecast:
             return HttpResponse('没有下载数据')
         else:
@@ -1837,7 +1948,7 @@ class ForecastVersionView(GridReport):
         if nr:
             download_forecast = Forecast.objects.filter(version_id=nr).order_by('-version_id', 'year', 'date_number')
         else:
-            download_forecast = Forecast.objects.all().order_by('-version_id', 'year', 'date_number')
+            download_forecast = Forecast.objects.select_related().all().order_by('-version_id', 'year', 'date_number')
 
         decimal_separator = get_format('DECIMAL_SEPARATOR', request.LANGUAGE_CODE, True)
         if decimal_separator == ",":

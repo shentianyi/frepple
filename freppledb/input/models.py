@@ -1159,6 +1159,7 @@ class Supplier(AuditModel, HierarchyModel):
     phone = models.CharField(_('phone'), max_length=300, db_index=True, null=True, blank=True)
     telephone = models.CharField(_('telephone'), max_length=300, db_index=True, null=True, blank=True)
     contact = models.CharField(_('contact'), max_length=300, db_index=True, null=True, blank=True)
+    email = models.CharField(_('email'), max_length=300, db_index=True, null=True, blank=True)
     available = models.ForeignKey(
         Calendar, verbose_name=_('available'),
         null=True, blank=True, on_delete=models.CASCADE,
@@ -1238,7 +1239,7 @@ class ItemSupplier(AuditModel):
                                               null=True, blank=True)
     outer_package_volume = models.DecimalField(_('outer package volume'), max_digits=20, decimal_places=8,
                                                null=True, blank=True)
-    pallet_volume = models.DateField(_('pallet volume'), null=True, blank=True)
+    pallet_volume = models.DecimalField(_('pallet volume'), max_digits=20, decimal_places=8, null=True, blank=True)
     plan_list_date = models.DateField(_('plan list date'), null=True, blank=True)
     plan_delist_date = models.DateField(_('plan delist date'), null=True, blank=True)
     origin_country = models.CharField(_('origin country'), max_length=300, null=True, blank=True)
