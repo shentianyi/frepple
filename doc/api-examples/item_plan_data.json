@@ -1,0 +1,41 @@
+{
+  "result": true,
+  "code": 200,
+  "message": null,
+  "content": {
+    "current_time": "2018-1-1",
+    "lead_time": "2018-1-12",
+    "serials": [
+      {
+        "serial": "采购库存",
+        "points": [
+          {
+            "x_value":"2018-1-1 00:00:00",
+            "x_text": "Jan",
+            "y": 100
+          },
+          {
+            "x_time":"2018-2-1 00:00:00",
+            "x_text": "Feb",
+            "y": 100
+          }
+        ]
+      },
+      {
+        "serial": "安全库存",
+        "points": [
+          {
+            "x_value":"2018-1-1 00:00:00",
+            "x_text": "Jan",
+            "y": -100
+          },
+          {
+            "x_value":"2018-2-1 00:00:00",
+            "x_text": "Feb",
+            "y": 0
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -243,15 +243,14 @@ class Item(AuditModel, HierarchyModel):
     fg_status = (
         ('S0', _('S0')),
         ('S1', _('S1')),
-        ('S2', _('S1')),
-        ('S3', _('S2')),
-        ('S4', _('S3')),
-        ('S5', _('S4')),)
+        ('S2', _('S2')),
+        ('S3', _('S3')),
+        ('S4', _('S4')))
     rm_status = (
         ('A0', _('A0')),
         ('A1', _('A1')),
-        ('A2', _('A1')),
-        ('A3', _('A2')),)
+        ('A2', _('A2')),
+        ('A3', _('A3')))
     types = (
         ('FG', _('FG')),
         ('WIP', _('WIP')),
@@ -285,9 +284,9 @@ class Item(AuditModel, HierarchyModel):
     nr = models.CharField(_('item nr'), max_length=300, db_index=True, unique=True)
     name = models.CharField(_('name'), max_length=300, primary_key=False, db_index=True)
     barcode = models.CharField(_('barcode'), max_length=300, db_index=True, null=True, blank=True)
+    type = models.CharField(_('type'), max_length=20, choices=types)
     status = models.CharField(_('status'), max_length=20, null=True, blank=True, choices=fg_status)
     plan_strategy = models.CharField(_('plan strategy'), max_length=20, null=True, blank=True, choices=strategies)
-    type = models.CharField(_('type'), max_length=20, null=True, blank=True, choices=types)
     lock_type = models.CharField(_('lock type'), max_length=20, null=True, blank=True, choices=lock_types)
     lock_expire_at = models.DateField(_('lock expire at'), null=True, blank=True)
     price_abc = models.CharField(_('price abc'), max_length=20, null=True, blank=True, choices=abc_types)
