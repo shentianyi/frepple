@@ -1289,7 +1289,8 @@ class EnumView(View):
             value = kwargs['value']
             if type == 'item_status_by_type':
                 t = Item.type_status[value]
-                dic = dict(t) if t != None else None
+                dic= [{"value":k , "text":v} for k,v in  dict(t).items()] if t != None else None
+
                 return HttpResponse(json.dumps(dic, cls=DjangoJSONEncoder),
                                     content_type='application/json')
         else:
@@ -1372,26 +1373,29 @@ class ItemDetail(View):
 class ItemMainData(View):
     def get(self, request, id, *args, **kwargs):
         item = Item.objects.get(id=id)
-        successor_nr = ItemSuccessor.objects.filter(item=item).order_by('priority').first().item_successor.nr
-        lock_types = {"current": item.type, "values": [{"value": item.lock_types[0][0], "text": _('locked')},
-                                                       {"value": item.lock_types[1][0], "text": _('unlocked')}]}
-        if item.type == 'FG':
-            status = ["S0", "S1", "S2", "S3", "S4"]
-            item_statuses = {"current": item.status, "values": [{"value": status[0], "text": _('S0')},
-                                                                {"value": status[1], "text": _('S1')},
-                                                                {"value": status[2], "text": _('S2')},
-                                                                {"value": status[3], "text": _('S3')},
-                                                                {"value": status[4], "text": _('S4')}]}
-        elif item.type == 'RM':
-            status = ["A0", "A1", "A2", "A3"]
-            item_statuses = {"current": item.status, "values": [{"value": status[0], "text": _('A0')},
-                                                                {"value": status[1], "text": _('A1')},
-                                                                {"value": status[2], "text": _('A2')},
-                                                                {"value": status[3], "text": _('A3')}]}
-        elif item.type == 'WIP':
-            item_statuses = []
-        else:
-            item_statuses = []
+        successor_nr ='TODO' # ItemSuccessor.objects.filter(item=item).order_by('priority').first().item_successor.nr
+        lock_types = {"current": item.type,
+                      "values": [{"value": k, "text": v} for k, v in dict(Item.lock_types).items()]}
+        # if item.type == 'FG':
+        #     status = ["S0", "S1", "S2", "S3", "S4"]
+        #     item_statuses = {"current": item.status, "values": [{"value": status[0], "text": _('S0')},
+        #                                                         {"value": status[1], "text": _('S1')},
+        #                                                         {"value": status[2], "text": _('S2')},
+        #                                                         {"value": status[3], "text": _('S3')},
+        #                                                         {"value": status[4], "text": _('S4')}]}
+        # elif item.type == 'RM':
+        #     status = ["A0", "A1", "A2", "A3"]
+        #     item_statuses = {"current": item.status, "values": [{"value": status[0], "text": _('A0')},
+        #                                                         {"value": status[1], "text": _('A1')},
+        #                                                         {"value": status[2], "text": _('A2')},
+        #                                                         {"value": status[3], "text": _('A3')}]}
+        # elif item.type == 'WIP':
+        #     item_statuses = []
+        # else:
+        #     item_statuses = []
+
+        item_statuses ={"current": item.status, "values": [{"value": k, "text": v} for k, v in dict(Item.type_status[item.type]).items()]}
+
         plan_strategies = {"current": item.plan_strategy, "values": [{"value": item.strategies[0][0], "text": _('MTS')},
                                                                      {"value": item.strategies[1][0], "text": _('MTO')},
                                                                      {"value": item.strategies[2][0],"text": _('ETO')}]}
