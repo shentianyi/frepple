@@ -6,15 +6,20 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('input', '0008_supplier_email'),
     ]
 
     operations = [
-        migrations.AlterField(
+        migrations.RemoveField(
             model_name='itemsupplier',
             name='pallet_volume',
-            field=models.DecimalField(blank=True, decimal_places=8, max_digits=20, null=True, verbose_name='pallet volume'),
         ),
+        migrations.AddField(
+            model_name='itemsupplier',
+            name='pallet_volume',
+            field=models.DecimalField(blank=True, decimal_places=8, max_digits=20, null=True,
+                                      verbose_name='pallet volume'),
+
+        )
     ]
