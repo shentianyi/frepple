@@ -1462,7 +1462,7 @@ class MainSupplierData(View):
         # TODO 如果生效时间和开始时间为空情况或者条件不满足时？（条件不满足时会报错）
         try:
             supplier = ItemSupplier.objects.filter(item=id, effective_start__lte=current_time,
-                           effective_end__gte=current_time ).order_by('-priority', '-ratio', 'id').first()
+                           effective_end__gte=current_time ).order_by('priority', '-ratio', 'id').first()
         except Exception as e:
             return HttpResponse(e)
 

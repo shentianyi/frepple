@@ -121,8 +121,6 @@ class ForecastCompare(View):
                 sf = StringIO()
                 json = self._get_json_data(request, in_page=False)
                 title = '对比报表-%s' % ('详细' if report_type == 'detail' else '汇总')
-                encoding = settings.CSV_CHARSET
-
                 decimal_separator = get_format('DECIMAL_SEPARATOR', request.LANGUAGE_CODE, True)
                 if decimal_separator == ",":
                     writer = csv.writer(sf, quoting=csv.QUOTE_NONNUMERIC, delimiter=';')
