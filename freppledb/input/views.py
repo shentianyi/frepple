@@ -1468,7 +1468,8 @@ class MainSupplierData(View):
             supplier = ItemSupplier.objects.filter(item=id, effective_start__lte=current_time,
                            effective_end__gte=current_time ).order_by('-priority', '-ratio', 'id').first()
         except Exception as e:
-            return HttpResponse(e)
+            return JsonResponse({"result": False, "code": 200, "message": "供应商不存在"}, safe=False,
+                                json_dumps_params={'ensure_ascii': False})
 
         receive_time = supplier.receive_time
         load_time = supplier.load_time
@@ -1496,31 +1497,36 @@ class MainSupplierData(View):
         product_time = supplier.product_time
 
         data = {
-            "supplier": supplier.supplier.name,
-            "nr": supplier.supplier.nr,
-            "product_time": product_time if product_time else None,
-            "load_time": load_time if load_time else None,
-            "transit_time": transit_time if transit_time else None,
-            "receive_time": receive_time if receive_time else None,
-            "plan_supplier_date": supplier.plan_supplier_date,
-            "plan_load_date": supplier.plan_load_date,
-            "plan_receive_date": supplier.plan_receive_date,
-            "totall_lead_time": totall_lead_time,
-            "cost": supplier.cost,
-            "cost_unit": supplier.cost_unit,
-            "earliest_order_date": supplier.earliest_order_date,
-            "lock_expire_at": item.lock_expire_at,
-            "plan_list_date": supplier.plan_list_date,
-            "plan_delist_date": supplier.plan_delist_date,
-            "moq": supplier.moq,
-            "mpq": supplier.mpq if supplier.mpq else None,
-            "pallet_num": supplier.pallet_num if supplier.pallet_num else None,
-            # TODO 手工MOQ暂时无数据
-            "MOQ": 0,
-            "order_unit_qty": supplier.order_unit_qty if supplier.order_unit_qty else None,
-            "outer_package_num": supplier.outer_package_num if supplier.outer_package_num else None,
-            "order_max_qty": supplier.order_max_qty if supplier.order_max_qty else None,
-            "description": supplier.description
+            "result": True,
+            "code": 200,
+            "message": "相应数据查询成功",
+            "content": {
+                "supplier": supplier.supplier.name,
+                "nr": supplier.supplier.nr,
+                "product_time": product_time if product_time else None,
+                "load_time": load_time if load_time else None,
+                "transit_time": transit_time if transit_time else None,
+                "receive_time": receive_time if receive_time else None,
+                "plan_supplier_date": supplier.plan_supplier_date,
+                "plan_load_date": supplier.plan_load_date,
+                "plan_receive_date": supplier.plan_receive_date,
+                "totall_lead_time": totall_lead_time,
+                "cost": supplier.cost,
+                "cost_unit": supplier.cost_unit,
+                "earliest_order_date": supplier.earliest_order_date,
+                "lock_expire_at": item.lock_expire_at,
+                "plan_list_date": supplier.plan_list_date,
+                "plan_delist_date": supplier.plan_delist_date,
+                "moq": supplier.moq,
+                "mpq": supplier.mpq if supplier.mpq else None,
+                "pallet_num": supplier.pallet_num if supplier.pallet_num else None,
+                # TODO 手工MOQ暂时无数据
+                "MOQ": 0,
+                "order_unit_qty": supplier.order_unit_qty if supplier.order_unit_qty else None,
+                "outer_package_num": supplier.outer_package_num if supplier.outer_package_num else None,
+                "order_max_qty": supplier.order_max_qty if supplier.order_max_qty else None,
+                "description": supplier.description
+            }
         }
         print(type(data))
         return HttpResponse(json.dumps(data, cls=DjangoJSONEncoder, ensure_ascii=False), content_type="application/json")
