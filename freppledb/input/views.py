@@ -69,7 +69,7 @@ from django.core.serializers.json import DjangoJSONEncoder
 
 import logging
 
-from freppledb.input.uploader import ForecastUploader, ForecastDownloader
+from freppledb.input.uploader import ForecastUploader
 
 logger = logging.getLogger(__name__)
 
