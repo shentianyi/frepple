@@ -274,7 +274,7 @@ class Item(AuditModel, HierarchyModel):
         ('D', _('D')),
     )
 
-    type_status = {'FG': fg_status, 'RM': rm_status, 'WIP': None}
+    type_status = {'FG': fg_status, 'RM': rm_status, 'WIP': ()}
 
     # Database fields
     # 设置外键显示的值

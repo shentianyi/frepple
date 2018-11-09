@@ -1,3 +1,7 @@
+import logging
+import traceback
+from datetime import datetime
+
 from django.db import transaction
 from django.utils import timezone
 from django.utils.encoding import force_text
@@ -10,6 +14,8 @@ from freppledb.common.dataload import parseExcelWorksheet
 from freppledb.common.message.responsemessage import ResponseMessage
 from freppledb.input.models import Forecast, Location, Item, Customer, ForecastVersion, ForecastCommentOperation
 from openpyxl.cell import cell
+
+logger = logging.getLogger(__name__)
 
 
 class ForecastUploader:
@@ -32,6 +38,12 @@ class ForecastUploader:
                 headers_field_name = {}
                 # 所有excel中的forecast
                 forecasts = []
+
+                starttime = datetime.now()
+
+                locations = {}
+                items = {}
+                customers = {}
 
                 for row in sheet.iter_rows():
                     row_count += 1
@@ -64,18 +76,27 @@ class ForecastUploader:
                             continue
 
                         forecast = Forecast()
-                        forecast.date_type = request.POST['date_type']
+                        forecast.date_type = request.POST.get('date_type', 'W')
+
+
                         for k, v in headers_index.items():
                             value = values[v]
                             field_name = headers_field_name[k]
 
                             if field_name == 'location':
-                                forecast.location = Location.objects.using(request.database).get(nr=value)
+                                if value not in locations:
+                                   locations[value] = Location.objects.using(request.database).values('id').get(nr=value)['id']
+                                forecast.location_id = locations.get(value, None)
                             elif field_name == 'item':
-                                forecast.item = Item.objects.using(request.database).get(nr=value)
+                                if value not in items:
+                                    items[value] = Item.objects.using(request.database).values('id').get(nr=value)['id']
+                                forecast.item_id = items[value]
+
                             elif field_name == 'customer':
                                 try:
-                                    forecast.customer = Customer.objects.using(request.database).get(nr=value)
+                                    if value not in customers:
+                                        customers[value] = Customer.objects.using(request.database).values('id').get(nr=value)['id']
+                                    forecast.customer_id = customers[value]
                                 except Customer.DoesNotExist as e:
                                     print(e)
                                     # forecast.customer = None
@@ -95,6 +116,12 @@ class ForecastUploader:
                         forecast.create_user = request.user
                         forecasts.append(forecast)
 
+                endtime = datetime.now()
+
+                logger.debug(
+                    "start time vs end time: %s vs %s, %s" % (starttime, endtime, (endtime - starttime).microseconds))
+                print("start time vs end time: %s vs %s, %s" % (starttime, endtime, (endtime - starttime).microseconds))
+
                 if row_count < 2:
                     message.result = False
                     message.message = '文件没有数据'
@@ -111,7 +138,7 @@ class ForecastUploader:
                             for f in forecasts:
                                 f.version = forecast_version
                             # 创建forecast
-                            Forecast.objects.bulk_create(forecasts)
+                            Forecast.objects.bulk_create(forecasts, batch_size= 100)
                         elif request.POST['action'] == 'update':
                             # 查找最新的version
                             forecast_version = ForecastVersion.objects.using(request.database).latest('created_at')
@@ -125,15 +152,17 @@ class ForecastUploader:
                                 # 可以被更新的字段
                                 update_fields = ['date_type', 'ratio', 'normal_qty', 'normal_qty',
                                                  'new_product_plan_qty', 'promotion_qty']
+                                starttime = datetime.now()
+
                                 for f in forecasts:
                                     # 更新
                                     try:
                                         update_forecast = Forecast.objects.using(request.database).filter(
                                             # version=forecast_version,
                                             version=forecast_version,
-                                            location=f.location,
-                                            item=f.item,
-                                            customer=f.customer,
+                                            location_id=f.location_id,
+                                            item_id=f.item_id,
+                                            customer_id=f.customer_id,
                                             year=f.year,
                                             date_type=f.date_type,
                                             date_number=f.date_number).latest('id')
@@ -148,9 +177,15 @@ class ForecastUploader:
                                         f.version = forecast_version
                                         f.save()
 
+                                endtime =datetime.now()
+                                print("start time vs end time: %s vs %s, %s" % (
+                                starttime, endtime, (endtime - starttime).microseconds))
+
                         message.result = True
                         message.message = '上传成功'
         except Exception as e:
+            print(e)
+            traceback.print_exc()
             message.result = False
             message.message = str(e)
         return message

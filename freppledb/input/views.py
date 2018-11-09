@@ -1289,7 +1289,8 @@ class EnumView(View):
             value = kwargs['value']
             if type == 'item_status_by_type':
                 t = Item.type_status[value]
-                dic = dict(t) if t != None else None
+                dic= [{"value":k , "text":v} for k,v in  dict(t).items()] if t != None else None
+
                 return HttpResponse(json.dumps(dic, cls=DjangoJSONEncoder),
                                     content_type='application/json')
         else:
@@ -1372,26 +1373,29 @@ class ItemDetail(View):
 class ItemMainData(View):
     def get(self, request, id, *args, **kwargs):
         item = Item.objects.get(id=id)
-        successor_nr = ItemSuccessor.objects.filter(item=item).order_by('priority').first().item_successor.nr
-        lock_types = {"current": item.type, "values": [{"value": item.lock_types[0][0], "text": _('locked')},
-                                                       {"value": item.lock_types[1][0], "text": _('unlocked')}]}
-        if item.type == 'FG':
-            status = ["S0", "S1", "S2", "S3", "S4"]
-            item_statuses = {"current": item.status, "values": [{"value": status[0], "text": _('S0')},
-                                                                {"value": status[1], "text": _('S1')},
-                                                                {"value": status[2], "text": _('S2')},
-                                                                {"value": status[3], "text": _('S3')},
-                                                                {"value": status[4], "text": _('S4')}]}
-        elif item.type == 'RM':
-            status = ["A0", "A1", "A2", "A3"]
-            item_statuses = {"current": item.status, "values": [{"value": status[0], "text": _('A0')},
-                                                                {"value": status[1], "text": _('A1')},
-                                                                {"value": status[2], "text": _('A2')},
-                                                                {"value": status[3], "text": _('A3')}]}
-        elif item.type == 'WIP':
-            item_statuses = []
-        else:
-            item_statuses = []
+        successor_nr ='TODO' # ItemSuccessor.objects.filter(item=item).order_by('priority').first().item_successor.nr
+        lock_types = {"current": item.type,
+                      "values": [{"value": k, "text": v} for k, v in dict(Item.lock_types).items()]}
+        # if item.type == 'FG':
+        #     status = ["S0", "S1", "S2", "S3", "S4"]
+        #     item_statuses = {"current": item.status, "values": [{"value": status[0], "text": _('S0')},
+        #                                                         {"value": status[1], "text": _('S1')},
+        #                                                         {"value": status[2], "text": _('S2')},
+        #                                                         {"value": status[3], "text": _('S3')},
+        #                                                         {"value": status[4], "text": _('S4')}]}
+        # elif item.type == 'RM':
+        #     status = ["A0", "A1", "A2", "A3"]
+        #     item_statuses = {"current": item.status, "values": [{"value": status[0], "text": _('A0')},
+        #                                                         {"value": status[1], "text": _('A1')},
+        #                                                         {"value": status[2], "text": _('A2')},
+        #                                                         {"value": status[3], "text": _('A3')}]}
+        # elif item.type == 'WIP':
+        #     item_statuses = []
+        # else:
+        #     item_statuses = []
+
+        item_statuses ={"current": item.status, "values": [{"value": k, "text": v} for k, v in dict(Item.type_status[item.type]).items()]}
+
         plan_strategies = {"current": item.plan_strategy, "values": [{"value": item.strategies[0][0], "text": _('MTS')},
                                                                      {"value": item.strategies[1][0], "text": _('MTO')},
                                                                      {"value": item.strategies[2][0],"text": _('ETO')}]}
@@ -1464,7 +1468,8 @@ class MainSupplierData(View):
             supplier = ItemSupplier.objects.filter(item=id, effective_start__lte=current_time,
                            effective_end__gte=current_time ).order_by('priority', '-ratio', 'id').first()
         except Exception as e:
-            return HttpResponse(e)
+            return JsonResponse({"result": False, "code": 200, "message": "供应商不存在"}, safe=False,
+                                json_dumps_params={'ensure_ascii': False})
 
         receive_time = supplier.receive_time
         load_time = supplier.load_time
@@ -1492,31 +1497,36 @@ class MainSupplierData(View):
         product_time = supplier.product_time
 
         data = {
-            "supplier": supplier.supplier.name,
-            "nr": supplier.supplier.nr,
-            "product_time": product_time if product_time else None,
-            "load_time": load_time if load_time else None,
-            "transit_time": transit_time if transit_time else None,
-            "receive_time": receive_time if receive_time else None,
-            "plan_supplier_date": supplier.plan_supplier_date,
-            "plan_load_date": supplier.plan_load_date,
-            "plan_receive_date": supplier.plan_receive_date,
-            "totall_lead_time": totall_lead_time,
-            "cost": supplier.cost,
-            "cost_unit": supplier.cost_unit,
-            "earliest_order_date": supplier.earliest_order_date,
-            "lock_expire_at": item.lock_expire_at,
-            "plan_list_date": supplier.plan_list_date,
-            "plan_delist_date": supplier.plan_delist_date,
-            "moq": supplier.moq,
-            "mpq": supplier.mpq if supplier.mpq else None,
-            "pallet_num": supplier.pallet_num if supplier.pallet_num else None,
-            # TODO 手工MOQ暂时无数据
-            "MOQ": 0,
-            "order_unit_qty": supplier.order_unit_qty if supplier.order_unit_qty else None,
-            "outer_package_num": supplier.outer_package_num if supplier.outer_package_num else None,
-            "order_max_qty": supplier.order_max_qty if supplier.order_max_qty else None,
-            "description": supplier.description
+            "result": True,
+            "code": 200,
+            "message": "相应数据查询成功",
+            "content": {
+                "supplier": supplier.supplier.name,
+                "nr": supplier.supplier.nr,
+                "product_time": product_time if product_time else None,
+                "load_time": load_time if load_time else None,
+                "transit_time": transit_time if transit_time else None,
+                "receive_time": receive_time if receive_time else None,
+                "plan_supplier_date": supplier.plan_supplier_date,
+                "plan_load_date": supplier.plan_load_date,
+                "plan_receive_date": supplier.plan_receive_date,
+                "totall_lead_time": totall_lead_time,
+                "cost": supplier.cost,
+                "cost_unit": supplier.cost_unit,
+                "earliest_order_date": supplier.earliest_order_date,
+                "lock_expire_at": item.lock_expire_at,
+                "plan_list_date": supplier.plan_list_date,
+                "plan_delist_date": supplier.plan_delist_date,
+                "moq": supplier.moq,
+                "mpq": supplier.mpq if supplier.mpq else None,
+                "pallet_num": supplier.pallet_num if supplier.pallet_num else None,
+                # TODO 手工MOQ暂时无数据
+                "MOQ": 0,
+                "order_unit_qty": supplier.order_unit_qty if supplier.order_unit_qty else None,
+                "outer_package_num": supplier.outer_package_num if supplier.outer_package_num else None,
+                "order_max_qty": supplier.order_max_qty if supplier.order_max_qty else None,
+                "description": supplier.description
+            }
         }
         print(type(data))
         return HttpResponse(json.dumps(data, cls=DjangoJSONEncoder, ensure_ascii=False), content_type="application/json")
