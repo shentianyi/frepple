@@ -279,19 +279,19 @@ class ForecastCompare(View):
             .annotate(month=TruncMonth('parsed_date')) \
             .values(*forecast_query_values) \
             .filter(functools.reduce(operator.iand, forecast_year_filters)) \
-            .annotate(qty=Sum((F('normal_qty') + F('new_product_plan_qty') + F('promotion_qty')) * F('ratio') / 100))
+            .annotate(qty=Sum((F('normal_qty') * F('ratio') / 100 + F('new_product_plan_qty') + F('promotion_qty'))))
 
         foreactyear_total_query = ForecastYear.objects \
             .values(*forecast_query_total_values) \
             .filter(functools.reduce(operator.iand, forecast_year_filters)) \
-            .annotate(qty=Sum((F('normal_qty') + F('new_product_plan_qty') + F('promotion_qty')) * F('ratio') / 100))
+            .annotate(qty=Sum((F('normal_qty') * F('ratio') / 100 + F('new_product_plan_qty') + F('promotion_qty'))))
 
         # 预测查询
         cursor = connections[request.database].cursor()
         if report_type == 'detail':
             forecast_query = '''
             select a.item_id,a.location_id,a.customer_id,a.year,DATE_TRUNC('month',a.parsed_date) as month,
-            SUM(((((a.normal_qty + a.new_product_plan_qty) + a.promotion_qty) * a.ratio) / 100)) AS qty from
+            SUM(((a.normal_qty*a.ratio/100 + a.new_product_plan_qty) + a.promotion_qty)) AS qty from
             forecast as a inner join (select c.item_id,c.location_id,c.customer_id,c.parsed_date,max(c.version_id) as version_id 
             from forecast as c
             where c.status in %s and c.parsed_date between %s and %s and c.item_id in %s and c.location_id in %s and c.customer_id in %s
@@ -310,7 +310,7 @@ class ForecastCompare(View):
         else:
             forecast_query = '''
                         select a.item_id,a.location_id,a.customer_id,a.year,DATE_TRUNC('month',a.parsed_date) as month,
-                        SUM(((((a.normal_qty + a.new_product_plan_qty) + a.promotion_qty) * a.ratio) / 100)) AS qty from
+                        SUM(((a.normal_qty*a.ratio/100 + a.new_product_plan_qty) + a.promotion_qty)) AS qty from
                         forecast as a inner join (select c.item_id,c.location_id,c.customer_id,c.parsed_date,max(c.version_id) as version_id 
                         from forecast as c
                         where c.status in %s and c.parsed_date between %s and %s and c.item_id in %s and c.location_id in %s
