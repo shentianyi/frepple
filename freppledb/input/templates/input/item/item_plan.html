@@ -1,0 +1,130 @@
+<div class="row">
+    <div class="col-md-6">
+        <div class="col-md-12 form-split">
+            <form class="col-md-6">
+                <h3>计划</h3>
+                <div class="row">
+                    <div class="input-group">
+                        <span class="input-group-addon">安全库存：</span>
+                        <input class="form-control" id="safe_stock" type="text"
+                               name="safe_stock">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="input-group">
+                        <span class="input-group-addon">手工MOQ：</span>
+                        <input class="form-control" id="manual_moq" type="text"
+                               name="manual_moq">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="input-group">
+                        <span class="input-group-addon">内箱最小包装量：</span>
+                        <input class="form-control" id="inner_min_qty" type="text"
+                               name="inner_min_qty">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="input-group">
+                        <span class="input-group-addon">外箱数量：</span>
+                        <input class="form-control" id="outer_amount" type="text"
+                               name="outer_amount">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="input-group">
+                        <span class="input-group-addon">托盘数量：</span>
+                        <input class="form-control" id="tray_amount" type="text"
+                               name="tray_amount">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="input-group">
+                        <span class="input-group-addon">前置期：</span>
+                        <input class="form-control" id="pre_stage" type="text"
+                               name="pre_stage">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="input-group">
+                        <span class="input-group-addon">月均销量：</span>
+                        <input class="form-control" id="average_sales" type="text"
+                               name="average_sales">
+                    </div>
+                </div>
+            </form>
+            <form class="col-md-6">
+                <h3>发货</h3>
+                <div class="row">
+                    <div class="input-group">
+                        <span class="input-group-addon">过去12个月：</span>
+                        <input class="form-control" id="past_year" type="text"
+                               name="past_year">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="input-group">
+                        <span class="input-group-addon">上月销量：</span>
+                        <input class="form-control" id="last_sales" type="text"
+                               name="last_sales">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="input-group">
+                        <span class="input-group-addon">当月销量：</span>
+                        <input class="form-control" id="currency_sales" type="text"
+                               name="currency_sales">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="input-group">
+                        <span class="input-group-addon">当前库存周转期：</span>
+                        <input class="form-control" id="stock_turnover_period" type="text"
+                               name="stock_turnover_period">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="input-group">
+                        <span class="input-group-addon">当前订货点：</span>
+                        <input class="form-control" id="currency_order_point" type="text"
+                               name="currency_order_point">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="input-group">
+                        <span class="input-group-addon">供应商：</span>
+                        <input class="form-control" id="supplier_code" type="text"
+                               name="supplier_code" placeholder="供应商代码">
+                        <input class="form-control" id="supplier_name" type="text"
+                               name="supplier_name" placeholder="供应商名称" style="margin-top: 10px">
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <form class="col-md-12 form-split">
+            <h3>下次订单时间</h3>
+            <div class="col-md-5">
+                <div class="input-group">
+                    <span class="input-group-addon">日期：</span>
+                    <input class="form-control vDateField" id="next_date" type="text"
+                           name="next_date" placeholder="日期">
+                </div>
+            </div>
+            <div class="col-md-5">
+                <div class="input-group">
+                    <span class="input-group-addon">数量：</span>
+                    <input class="form-control" id="next_qty" type="text"
+                           name="next_qty">
+                </div>
+            </div>
+            <div class="col-md-2 pull-right">
+                <button class="btn btn-primary default btn-aps btn-aps-save" id="freedButton" type="reset"
+                        style="width: 100%;">
+                    释放
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+

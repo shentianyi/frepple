@@ -1,0 +1,250 @@
+<form class="form-split">
+    <h3>前置期</h3>
+    <div class="row">
+        <div class="col-md-3">
+            <div class="input-group">
+                <span class="input-group-addon">生产周期：</span>
+                <input class="form-control" id="product_cycle" type="text" name="product">
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="input-group">
+                <span class="input-group-addon">发货周期：</span>
+                <input class="form-control" id="delivery_cycle" type="text" name="delivery">
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="input-group">
+                <span class="input-group-addon">运输周期：</span>
+                <input class="form-control" id="transportation_cycle" type="text" name="transportation">
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="input-group">
+                <span class="input-group-addon">收货周期：</span>
+                <input class="form-control" id="receive_cycle" type="text" name="receive">
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-3">
+            <div class="input-group">
+                <span class="input-group-addon">计划供应日期：</span>
+                <input class="form-control vDateField" id="supply_date" type="text" name="supplydate"
+                       placeholder="日期">
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="input-group">
+                <span class="input-group-addon">计划出货日期：</span>
+                <input class="form-control vDateField" id="delivery_date" type="text"
+                       name="deliverydate"
+                       placeholder="日期">
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="input-group">
+                <span class="input-group-addon">计划收货日期：</span>
+                <input class="form-control vDateField" id="receive_date" type="text" name="receivedate"
+                       placeholder="日期">
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="input-group">
+                <span class="input-group-addon">总前置期：</span>
+                <input class="form-control" id="pre_date" type="text" name="predate">
+            </div>
+        </div>
+    </div>
+</form>
+
+<form class="form-split">
+    <h3>供应商信息</h3>
+    <div class="row">
+        <div class="col-md-3">
+            <div class="input-group">
+                <span class="input-group-addon">主供应商：</span>
+                <input class="form-control" id="supplier_main" type="text" name="supplier_main">
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="input-group">
+                <span class="input-group-addon">采购价格：</span>
+                <input class="form-control" id="cost_purchase" type="text" name="cost_purchase">
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="input-group">
+                <span class="input-group-addon">最早下单日：</span>
+                <input class="form-control vDateField" id="earliest_date" type="text" name="earliest_date"
+                       placeholder="日期">
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="input-group">
+                <span class="input-group-addon">上市计划：</span>
+                <input class="form-control vDateField" id="listing_plan" type="text" name="listing_plan"
+                       placeholder="日期">
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-3">
+            <div class="input-group">
+                <span class="input-group-addon">供应商代码：</span>
+                <input class="form-control" id="nr_supplier" type="text" name="nr_supplier">
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="input-group">
+                <span class="input-group-addon">计价单位：</span>
+                <input class="form-control" id="sales_unit" type="text" name="sales_unit">
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="input-group">
+                <span class="input-group-addon">物料到期日：</span>
+                <input class="form-control vDateField" id="deadline_date" type="text" name="deadline_date"
+                       placeholder="日期">
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="input-group">
+                <span class="input-group-addon">下市计划：</span>
+                <input class="form-control vDateField" id="market_plan" type="text" name="market_plan"
+                       placeholder="日期">
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-3 pull-right">
+            <div class="input-group">
+                <span class="input-group-addon">项目号：</span>
+                <input class="form-control" id="nr_project" type="text" name="nr_project">
+            </div>
+        </div>
+    </div>
+</form>
+
+<form class="form-split">
+    <h3>峰值计算</h3>
+    <div class="row">
+        <div class="col-md-3">
+            <div class="input-group">
+                <span class="input-group-addon">分析起始日期：</span>
+                <input class="form-control vDateField" id="start_date" type="text" name="start_date"
+                       placeholder="日期">
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="input-group">
+                <span class="input-group-addon">第一次消耗日期：</span>
+                <input class="form-control" id="first_use_date" type="text" name="first_use_date">
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="input-group">
+                <span class="input-group-addon">最后一次消耗日期：</span>
+                <input class="form-control" id="last_use_date" type="text" name="last_use_date">
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="input-group">
+                <span class="input-group-addon">峰值日期：</span>
+                <input class="form-control" id="peak_date" type="text" name="peak_date">
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3">
+            <div class="input-group">
+                <span class="input-group-addon">前置期内平均消耗量：</span>
+                <input class="form-control" id="average_amount" type="text" name="average_amount">
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="input-group">
+                <span class="input-group-addon">前置期内峰值消耗量：</span>
+                <input class="form-control" id="peak_amount" type="text" name="peak_amount">
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="input-group">
+                <span class="input-group-addon">峰值比平均消耗：</span>
+                <input class="form-control" id="peak_average_ratio" type="text"
+                       name="peak_average_ratio">
+            </div>
+        </div>
+    </div>
+</form>
+
+<form class="form-split">
+    <h3>包装</h3>
+    <div class="row">
+        <div class="col-md-10">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <span class="input-group-addon">最小起订量：</span>
+                        <input class="form-control" id="min_order_qty" type="text" name="min_order_qty">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <span class="input-group-addon">箱内最小包装量：</span>
+                        <input class="form-control" id="min_package_qty" type="text"
+                               name="min_package_qty">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <span class="input-group-addon">托盘数量：</span>
+                        <input class="form-control" id="tray_qty" type="text" name="tray_qty">
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <span class="input-group-addon">手工：</span>
+                        <input class="form-control" id="manual" type="text" name="manual">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <span class="input-group-addon">外箱数量：</span>
+                        <input class="form-control" id="outer_qty" type="text" name="outer_qty">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <span class="input-group-addon">最大订单数量：</span>
+                        <input class="form-control" id="max_order_qty" type="text" name="max_order_qty">
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <span class="input-group-addon">单位订货量：</span>
+                        <input class="form-control" id="unit_order_qty" type="text"
+                               name="unit_order_qty">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-2">
+            <div class="input-group">
+                <span class="input-group-addon" style="width: auto;">备注：</span>
+                <textarea rows="4" id="remark"
+                          name="remark" class="form-control"
+                          placeholder="请填写信息，字数不超过100"></textarea>
+            </div>
+        </div>
+    </div>
+</form>
