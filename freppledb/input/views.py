@@ -1048,7 +1048,7 @@ class ItemSupplierList(GridReport):
         GridFieldDate('earliest_order_date', title=_('earliest order date'), editable=False, initially_hidden=True),
         GridFieldDate('plan_supplier_date', title=_('plan supplier date'), editable=False, initially_hidden=True),
         GridFieldDate('plan_load_date', title=_('plan load date'), editable=False, initially_hidden=True),
-        GridFieldDate('plan_receive_date', title=_('plan_receive_date'), editable=False, initially_hidden=True),
+        GridFieldDate('plan_receive_date', title=_('plan receive date'), editable=False, initially_hidden=True),
         GridFieldInteger('outer_package_num', title=_('outer package num'), editable=False, initially_hidden=True),
         GridFieldInteger('pallet_num', title=_('pallet num'), editable=False, initially_hidden=True),
         GridFieldNumber('outer_package_gross_weight', title=_('outer package gross weight'), editable=False,
@@ -1372,7 +1372,16 @@ class ItemDetail(View):
 # 单个物料头部公共数据
 class ItemMainData(View):
     def get(self, request, id, *args, **kwargs):
-        item = Item.objects.get(id=id)
+        message = ResponseMessage()
+        try:
+            item = Item.objects.get(id=id)
+        except:
+            message.result = False
+            message.code = 404
+            message.message = "没有对应的物料"
+            return HttpResponse(json.dumps(message.__dict__, cls=DjangoJSONEncoder, ensure_ascii=False),
+                                content_type='application/json')
+
         try:
             successor_nr = ItemSuccessor.objects.filter(item=item).order_by('priority').first().item_successor.nr
         except:
@@ -1414,12 +1423,12 @@ class ItemMainData(View):
             "price_abc": item.price_abc,
             "qty_abc": item.qty_abc
         }
-        message = ResponseMessage()
         message.result = True
         message.code = 200
         message.message = "相应数据查询成功"
         message.content = data
-        return HttpResponse(json.dumps(message.__dict__, cls=DjangoJSONEncoder,ensure_ascii=False), content_type='application/json')
+        return HttpResponse(json.dumps(message.__dict__, cls=DjangoJSONEncoder, ensure_ascii=False),
+                            content_type='application/json')
 
 
 # 代号　GET_ITEM_SUPPLIERS_DATA_API
@@ -1449,8 +1458,8 @@ class ItemSupplierData(View):
         message.code = 200
         message.message = "相应数据查询成功"
         message.content = data
-        return HttpResponse(json.dumps(message.__dict__, cls=DjangoJSONEncoder,ensure_ascii=False), content_type='application/json')
-
+        return HttpResponse(json.dumps(message.__dict__, cls=DjangoJSONEncoder, ensure_ascii=False),
+                            content_type='application/json')
 
 
 # 代号：GET_ITEM_MAIN_SUPPLIER_DATA_API
@@ -1459,7 +1468,14 @@ class MainSupplierData(View):
     def get(self, request, id, *args, **kwargs):
         message = ResponseMessage()
         current_time = timezone.now()
-        item = Item.objects.get(id=id)
+        try:
+            item = Item.objects.get(id=id)
+        except:
+            message.result = False
+            message.code = 404
+            message.message = "没有对应的物料"
+            return HttpResponse(json.dumps(message.__dict__, cls=DjangoJSONEncoder, ensure_ascii=False),
+                                content_type='application/json')
         try:
             supplier = ItemSupplier.objects.filter(item=id, effective_start__lte=current_time,
                                                    effective_end__gte=current_time).order_by('priority', '-ratio',
@@ -1496,40 +1512,82 @@ class MainSupplierData(View):
         product_time = supplier.product_time
 
         data = {
-                "id": supplier.supplier.id,
-                "supplier": supplier.supplier.name,
-                "nr": supplier.supplier.nr,
-                "product_time": product_time if product_time else None,
-                "load_time": load_time if load_time else None,
-                "transit_time": transit_time if transit_time else None,
-                "receive_time": receive_time if receive_time else None,
-                "plan_supplier_date": supplier.plan_supplier_date,
-                "plan_load_date": supplier.plan_load_date,
-                "plan_receive_date": supplier.plan_receive_date,
-                "totall_lead_time": totall_lead_time,
-                "cost": supplier.cost,
-                "cost_unit": supplier.cost_unit,
-                "earliest_order_date": supplier.earliest_order_date,
-                "lock_expire_at": item.lock_expire_at,
-                "plan_list_date": supplier.plan_list_date,
-                "plan_delist_date": supplier.plan_delist_date,
-                "moq": supplier.moq,
-                "mpq": supplier.mpq if supplier.mpq else None,
-                "pallet_num": supplier.pallet_num if supplier.pallet_num else None,
-                # TODO 手工MOQ暂时无数据
-                "MOQ": 0,
-                "order_unit_qty": supplier.order_unit_qty if supplier.order_unit_qty else None,
-                "outer_package_num": supplier.outer_package_num if supplier.outer_package_num else None,
-                "order_max_qty": supplier.order_max_qty if supplier.order_max_qty else None,
-                "description": supplier.description
-            }
+            "id": supplier.supplier.id,
+            "supplier": supplier.supplier.name,
+            "nr": supplier.supplier.nr,
+            "product_time": product_time if product_time else None,
+            "load_time": load_time if load_time else None,
+            "transit_time": transit_time if transit_time else None,
+            "receive_time": receive_time if receive_time else None,
+            "plan_supplier_date": supplier.plan_supplier_date,
+            "plan_load_date": supplier.plan_load_date,
+            "plan_receive_date": supplier.plan_receive_date,
+            "totall_lead_time": totall_lead_time,
+            "cost": supplier.cost,
+            "cost_unit": supplier.cost_unit,
+            "earliest_order_date": supplier.earliest_order_date,
+            "lock_expire_at": item.lock_expire_at,
+            "plan_list_date": supplier.plan_list_date,
+            "plan_delist_date": supplier.plan_delist_date,
+            "moq": supplier.moq,
+            "mpq": supplier.mpq if supplier.mpq else None,
+            "pallet_num": supplier.pallet_num if supplier.pallet_num else None,
+            # TODO 手工MOQ暂时无数据
+            "MOQ": 0,
+            "order_unit_qty": supplier.order_unit_qty if supplier.order_unit_qty else None,
+            "outer_package_num": supplier.outer_package_num if supplier.outer_package_num else None,
+            "order_max_qty": supplier.order_max_qty if supplier.order_max_qty else None,
+            "description": supplier.description
+        }
 
         message = ResponseMessage()
         message.result = True
         message.code = 200
         message.message = "相应数据查询成功"
         message.content = data
-        return HttpResponse(json.dumps(message.__dict__, cls=DjangoJSONEncoder,ensure_ascii=False), content_type='application/json')
+        return HttpResponse(json.dumps(message.__dict__, cls=DjangoJSONEncoder, ensure_ascii=False),
+                            content_type='application/json')
+
+
+# 代号：GET_ITEM_SIMULATION_DATA_API
+# 获取单个物料模拟主数据列表
+class ItemSimulation(View):
+    def get(self, request, id, *args, **kwargs):
+        message = ResponseMessage()
+        current_time = timezone.now()
+        try:
+            supplier = ItemSupplier.objects.filter(item=id, effective_start__lte=current_time,
+                                                   effective_end__gte=current_time).order_by('priority', '-ratio',
+                                                                                             'id').first()
+        except Exception as e:
+            message.result = False
+            message.code = 404
+            message.message = "合法的主供应商不存在"
+            return HttpResponse(json.dumps(message.__dict__, cls=DjangoJSONEncoder, ensure_ascii=False),
+                                content_type='application/json')
+
+        data = {
+            # TODO 目前订货点没有数据
+            "now_order_point": 0,
+            "MOQ": supplier.moq,
+            "order_max_qty": supplier.order_max_qty,
+            "nr": supplier.supplier.nr,
+            "name": supplier.supplier.name
+        }
+        message = ResponseMessage()
+        message.result = True
+        message.code = 200
+        message.message = "相应数据查询成功"
+        message.content = data
+        return HttpResponse(json.dumps(message.__dict__, cls=DjangoJSONEncoder, ensure_ascii=False),
+                            content_type='application/json')
+
+
+# 代号：GET_ITEM_PLAN_GRAPH_API
+# 单个物料计划图表
+class ItemGraph(View):
+    def get(self, request, id, *args, **kwargs):
+        pass
 
 
 class ItemCustomerList(GridReport):
