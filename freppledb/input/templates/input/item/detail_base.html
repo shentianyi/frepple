@@ -89,7 +89,7 @@
                 <div class="input-group">
                     <span class="input-group-addon">仓库代码：</span>
                     <!--<input class="form-control" id="item_detail_location_nr" type="text" name="item_detail_location_nr">-->
-                    <select class="form-control" name="item_detail_location" id="item_detail_location">
+                    <select class="form-control" name="item_detail_location" id="item_detail_location" onchange="ItemDetail.locationChange()">
                     </select>
                 </div>
             </div>
@@ -97,8 +97,8 @@
             <div class="col-md-3">
                 <div class="input-group">
                     <span class="input-group-addon">库存数量：</span>
-                    <input class="form-control" id="item_detail_location_nr_buffer_total_qty" type="text"
-                           name="item_detail_location_nr_buffer_total_qty">
+                    <input class="form-control" id="item_detail_total_qty" type="text"
+                           name="item_detail_total_qty">
                 </div>
             </div>
 
@@ -132,8 +132,8 @@
                 <div class="input-group">
                     <span class="input-group-addon">可用库存：</span>
 
-                    <input class="form-control" id="item_detail_location_nr_buffer_available_qty" type="text"
-                           name="item_detail_location_nr_buffer_available_qty">
+                    <input class="form-control" id="item_detail_available_qty" type="text"
+                           name="item_detail_available_qty">
                 </div>
             </div>
             <div class="col-md-3">
@@ -167,7 +167,7 @@
                 <div class="input-group">
                     <span class="input-group-addon">库存金额：</span>
 
-                    <input class="form-control" id="stock_amount" type="text" name="stock_amount">
+                    <input class="form-control" id="item_detail_buffer_price" type="text" name="item_detail_buffer_price">
                 </div>
             </div>
             <div class="col-md-3">

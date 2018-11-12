@@ -1,6 +1,7 @@
 var ItemDetail = {}
 var itemId = parseInt(window.location.pathname.split('/item_detail/')[1]);
 
+var locationArray = []
 
 ItemDetail.getMainData = function () {
     $.ajax({
@@ -18,8 +19,15 @@ ItemDetail.getMainData = function () {
                 // 下拉框： 需要匹配current， 默认选中
 
                 // 复选框： 直接checked 或者 不是
-                FillData(data.content)
+                FillData(data.content);
 
+                locationArray = data.content.location;
+
+                if (locationArray.length > 0) {
+                    const buffer = locationArray[0].buffer;
+
+                    FillData(buffer);
+                }
             } else {
                 alert(data.message)
             }
@@ -28,6 +36,14 @@ ItemDetail.getMainData = function () {
             alert(err);
         }
     })
+};
+
+ItemDetail.locationChange = function () {
+    var selectedValue = $("#item_detail_location").val();
+//
+
+// locationArray
+
 };
 
 /**
