@@ -54,8 +54,9 @@ $(function() {
     {% endif %}
     $('[data-toggle="tooltip"],#database').tooltip({delay: { "show": 500, "hide": 100 }});
 
-    if($('.datetime').html() !== undefined){
-        $('.datetime').html($('.datetime').html().replace("Date:", "").replace("Time:", ""));
+    for (var i = 0; i < $('.datetime').length; i++) {
+        var _this = $($('.datetime')[i])
+        _this.html(_this.html().replace("Date:", "").replace("Time:", ""));
     }
 
     // 时间选择器

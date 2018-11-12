@@ -44,6 +44,8 @@ $(function() {
     singleSelectClickMode: "toggle",
     multiselect: false, {% endif %}
     pager: '#gridpager',
+    shrinkToFit:false,
+    autoScroll: true,
     iconSet: "fontAwesome",
     guiStyle: "bootstrapPrimary",
     viewrecords: true,
@@ -55,7 +57,7 @@ $(function() {
     page: {{page}},
     hidegrid: false,
     resizeStop: grid.saveColumnConfiguration,
-    scrollRows: true,
+//    scrollRows: true,
     onSortCol: grid.saveColumnConfiguration,
     onPaging: grid.saveColumnConfiguration,
     //scroll: 1,      // Enables scrolling over all records, instead of paging. But not compatible with frozen columns.
@@ -227,7 +229,6 @@ $(function() {
 {% endblock %}
 {% block content %}
 {% block before_table %}{% endblock %}
-
 <div class="row" style="padding: 15px 0 5px 0;">
     <div class="col-xs-8">
         <div style="display: flex;">
@@ -237,7 +238,8 @@ $(function() {
                     {{title|capfirst|force_escape}}{% if post_title %}: {{post_title|capfirst}}{% endif %}
                     <small>&nbsp;&nbsp;<span id="curfilter"></span> </small>
                 </div>
-            {% block tools %}{% endblock %}{% endif %}
+                {% block tools %}{% endblock %}
+            {% endif %}
             {% endblock %}
 
         <div id="save_undo" style="margin-top: 5px; display: none;" class="form-inline" >

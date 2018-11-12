@@ -147,13 +147,21 @@
                                         data: {
                                         },
                                         success: function (data) {
+                                            debugger
+
                                             $("#id_status").empty();
 
                                             var html = '<option selected>------</option>';
 
-                                            if(data != undefined && data != null){
-                                               Object.keys(data).map(d => {
-                                                    html += '<option value="'+ d +'">' + data[d] + '</option>';
+//                                            if(data != undefined && data != null){
+//                                               Object.keys(data).map(d => {
+//                                                    html += '<option value="'+ d +'">' + data[d] + '</option>';
+//                                                });
+//                                            }
+
+                                            if(data.length > 0) {
+                                                data.map(d => {
+                                                    html += '<option value="'+ d.value +'">' + d.text + '</option>';
                                                 });
                                             }
 

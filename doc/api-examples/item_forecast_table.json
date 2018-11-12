@@ -1,0 +1,27 @@
+{
+  "result": true,
+  "code": 200,
+  "message": null,
+  "content": {
+    "location": {
+      "id": 1,
+      "nr": "abc",
+      "name": "abc"
+    },
+    "data": [
+      {
+        "x": "2018-1",
+        "y": {
+          "total": 1,
+          "last_sale_qty": 1,
+          "last_actual_sale_qty": 1,
+          "system_forecast_qty": 1,
+          "ratio": 1,
+          "normal_qty": 1,
+          "new_product_plan_qty": 1,
+          "promotion_qty": 1
+        }
+      }
+    ]
+  }
+}
