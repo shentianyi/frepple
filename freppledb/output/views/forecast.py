@@ -29,6 +29,7 @@ from freppledb.common import report
 from openpyxl import Workbook
 from openpyxl.cell import WriteOnlyCell
 
+from freppledb.common.utils import la_time
 from freppledb.input.models import Forecast, ForecastYear, Item, Location, Customer, ForecastCommentOperation
 
 
@@ -183,21 +184,21 @@ class ForecastCompare(View):
         current_year = int(self._get_query_filter(filters, 'year', current_date.year)['data'])  # current_date.year
         current_month = int(self._get_query_filter(filters, 'month', current_date.month)['data'])
 
-        search_start_time = datetime(current_year - 1, 1, 1) if current_month == 1 else datetime(current_year,
-                                                                                                 current_month - 1, 1)
+        last_datetime = la_time.last_month_time(current_date)
+        next_datetime = la_time.next_month_time(current_date)
 
-        search_end_time = datetime(current_year + 1, 1, 31, 23, 59, 59, 9999) if current_month == 12 else datetime(
-            current_year, current_month + 1, calendar.monthrange(current_year, current_month + 1)[1], 23, 59, 59, 999)
+        search_start_time = la_time.month_search_starttime(last_datetime)
+        search_end_time = la_time.month_search_endtime(next_datetime)
 
-        last_year = current_year - 1 if current_month == 1 else current_year
-        last_month = 12 if current_month == 1 else current_month - 1
+        last_year = last_datetime.year
+        last_month = last_datetime.month
 
-        next_year = current_year + 1 if current_month == 12 else current_year
-        next_month = 1 if current_month == 12 else current_month + 1
+        next_year = next_datetime.year
+        next_month = next_datetime.month
 
         filter_fields = ('item__nr', 'location__nr', 'customer__nr')
-        q_filters = []
-        q_filters.append(Q(**{'parsed_date__range': (search_start_time, search_end_time)}))
+        q_filters = [Q(**{'parsed_date__range': (search_start_time, search_end_time)})]
+
         for rule in self._get_query_filters(filters, filter_fields):
             op, field, data = rule['op'], rule['field'], rule['data']
             filter_fmt, exclude = freppledb.common.report.GridReport._filter_map_jqgrid_django[op]
