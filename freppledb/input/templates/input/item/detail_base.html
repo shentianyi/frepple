@@ -69,12 +69,16 @@
         margin-top:  5px;
     }
 
-    #plan div {
-        margin-top: 20px;
-    }
+    /*#plan div {*/
+        /*margin-top: 20px;*/
+    /*}*/
 
-    #simulation div {
-        margin-top: 20px;
+    /*#simulation div {*/
+        /*margin-top: 20px;*/
+    /*}*/
+
+    .control-label {
+        text-align: right;
     }
 
     label {
@@ -101,65 +105,119 @@
 <div id="item-detail" class="row" style="margin: 30px 0 0 0">
     <form class="col-md-12" style="background-color: #FFFFFF">
         <div class="col-md-12" style="margin-top: 20px">
-            <div class="col-md-3">
-                <label for="description_item">产品描述：</label>
-                <input id="description_item" type="text" name="description">
+            <div class="col-md-3 input-field form-group">
+                <div class="col-md-4 control-label input-field-label">
+                    <label for="description_item">产品描述：</label>
+                </div>
+                <div class="controls col-md-8 input-field-input">
+                    <input id="description_item" class="form-control" type="text" name="description">
+                </div>
             </div>
-            <div class="col-md-3">
-                <label for="code_warehouse">仓库代码：</label>
-                <input id="code_warehouse" type="text" name="code">
+            <div class="col-md-3 input-field form-group">
+                <div class="col-md-4 control-label input-field-label">
+                    <label for="code_warehouse">仓库代码：</label>
+                </div>
+                <div class="controls col-md-8 input-field-input">
+                    <input id="code_warehouse" class="form-control" type="text" name="code">
+                </div>
             </div>
-            <div class="col-md-3">
-                <label for="stock_item">库存数量：</label>
-                <input id="stock_item" type="text" name="stock">
+            <div class="col-md-3 input-field form-group">
+                <div class="col-md-4 control-label input-field-label">
+                    <label for="stock_item">库存数量：</label>
+                </div>
+                <div class="controls col-md-8 input-field-input">
+                    <input id="stock_item" class="form-control" type="text" name="stock">
+                </div>
             </div>
-            <div class="col-md-3">
-                <label for="type_item">物料锁定类型：</label>
-                <input id="type_item" type="text" name="type">
-            </div>
-        </div>
-        <div class="col-md-12">
-            <div class="col-md-3">
-                <label for="code_item">物料编码：</label>
-                <input id="code_item" type="text" name="description">
-            </div>
-            <div class="col-md-3">
-                <label for="alternative_item">替代料号：</label>
-                <input id="alternative_item" type="text" name="code">
-            </div>
-            <div class="col-md-3">
-                <label for="stock_avai">可用库存：</label>
-                <input id="stock_avai" type="text" name="stock">
-            </div>
-            <div class="col-md-3">
-                <label for="deadline_item">到期：</label>
-                <input id="deadline_item" type="text" name="type" placeholder="日期">
+            <div class="col-md-3 input-field form-group">
+                <div class="col-md-4 control-label input-field-label">
+                    <label for="type_item">物料锁定类型：</label>
+                </div>
+                <div class="controls col-md-8 input-field-input">
+                    <input id="type_item" class="form-control" type="text" name="type">
+                </div>
             </div>
         </div>
         <div class="col-md-12">
-            <div class="col-md-3">
-                <label for="plan_strategy">计划策略：</label>
-                <input id="plan_strategy" type="text" name="description">
+            <div class="col-md-3 input-field form-group">
+                <div class="col-md-4 control-label input-field-label">
+                    <label for="code_item">物料编码：</label>
+                </div>
+                <div class="controls col-md-8 input-field-input">
+                    <input id="code_item" class="form-control" type="text" name="code_item">
+                </div>
             </div>
-            <div class="col-md-3">
-                <label for="status_item">物料状态：</label>
-                <input id="status_item" type="text" name="code">
+            <div class="col-md-3 input-field form-group">
+                <div class="col-md-4 control-label input-field-label">
+                    <label for="alternative_item">替代料号：</label>
+                </div>
+                <div class="controls col-md-8 input-field-input">
+                    <input id="alternative_item" class="form-control" type="text" name="alternative_item">
+                </div>
             </div>
-            <div class="col-md-3">
-                <label for="stock_amount">库存金额：</label>
-                <input id="stock_amount" type="text" name="stock">
+            <div class="col-md-3 input-field form-group">
+                <div class="col-md-4 control-label input-field-label">
+                    <label for="stock_avai">可用库存：</label>
+                </div>
+                <div class="controls col-md-8 input-field-input">
+                    <input id="stock_avai" class="form-control" type="text" name="stock_avai">
+                </div>
             </div>
-            <div class="col-md-3">
-                <label for="value_item">物料ABC货值：</label>
-                <input id="value_item" type="text" name="type">
+            <div class="col-md-3 input-field form-group">
+                <div class="col-md-4 control-label input-field-label">
+                    <label for="deadline_item">到期：</label>
+                </div>
+                <div class="controls col-md-8 input-field-input">
+                    <input id="deadline_item" class="form-control" type="text" name="deadline_item" placeholder="日期">
+                </div>
+            </div>
+        </div>
+        <div class="col-md-12">
+            <div class="col-md-3 input-field form-group">
+                <div class="col-md-4 control-label input-field-label">
+                    <label for="plan_strategy">计划策略：</label>
+                </div>
+                <div class="controls col-md-8 input-field-input">
+                    <input id="plan_strategy" class="form-control" type="text" name="plan_strategy">
+                </div>
+            </div>
+            <div class="col-md-3 input-field form-group">
+                <div class="col-md-4 control-label input-field-label">
+                    <label for="status_item">物料状态：</label>
+                </div>
+                <div class="controls col-md-8 input-field-input">
+                    <input id="status_item" class="form-control" type="text" name="status_item">
+                </div>
+            </div>
+            <div class="col-md-3 input-field form-group">
+                <div class="col-md-4 control-label input-field-label">
+                    <label for="stock_amount">库存金额：</label>
+                </div>
+                <div class="controls col-md-8 input-field-input">
+                    <input id="stock_amount" class="form-control" type="text" name="stock_amount">
+                </div>
+            </div>
+            <div class="col-md-3 input-field form-group">
+                <div class="col-md-4 control-label input-field-label">
+                    <label for="value_item">物料ABC货值：</label>
+                </div>
+                <div class="controls col-md-8 input-field-input">
+                    <input id="value_item" class="form-control" type="text" name="value_item">
+                </div>
             </div>
         </div>
         <div class="col-md-12" style="margin: 20px 0">
-            <button type="button" class="col-md-1" style="margin-left: 15px">订货点ROP</button>
-            <button type="button" class="col-md-1" style="margin-left: 15px">ROP计算</button>
-            <div class="col-md-3 pull-right">
-                <label for="amount_item">物料ABC数量：</label>
-                <input id="amount_item" type="text" name="type">
+            <div class="col-md-6 input-field form-group">
+                <button type="button" class="col-md-2 btn btn-primary default btn-aps btn-aps-save" style="margin-left: 15px">订货点ROP</button>
+                <button type="button" class="col-md-2 btn btn-primary default btn-aps btn-aps-save" style="margin-left: 15px">ROP计算</button>
+            </div>
+            <div class="col-md-3 input-field form-group pull-right">
+                <div class="col-md-4 control-label input-field-label">
+                    <label for="amount_item">物料ABC数量：</label>
+                </div>
+                <div class="controls col-md-8 input-field-input">
+                    <input id="amount_item" class="form-control" type="text" name="amount_item">
+                </div>
             </div>
         </div>
     </form>
