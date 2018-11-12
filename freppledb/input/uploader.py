@@ -84,13 +84,23 @@ class ForecastUploader:
                             field_name = headers_field_name[k]
 
                             if field_name == 'location':
-                                if value not in locations:
-                                   locations[value] = Location.objects.using(request.database).values('id').get(nr=value)['id']
-                                forecast.location_id = locations.get(value, None)
+                                try:
+                                    if value not in locations:
+                                       locations[value] = Location.objects.using(request.database).values('id').get(nr=value)['id']
+                                    forecast.location_id = locations.get(value, None)
+                                except Location.DoesNotExist as e:
+                                    message.result = False
+                                    message.message = "地点数据不存在"
+                                    return message
                             elif field_name == 'item':
-                                if value not in items:
-                                    items[value] = Item.objects.using(request.database).values('id').get(nr=value)['id']
-                                forecast.item_id = items[value]
+                                try:
+                                    if value not in items:
+                                        items[value] = Item.objects.using(request.database).values('id').get(nr=value)['id']
+                                    forecast.item_id = items[value]
+                                except Item.DoesNotExist as e:
+                                    message.result = False
+                                    message.message = "物料数据不存在"
+                                    return message
 
                             elif field_name == 'customer':
                                 try:
@@ -98,8 +108,9 @@ class ForecastUploader:
                                         customers[value] = Customer.objects.using(request.database).values('id').get(nr=value)['id']
                                     forecast.customer_id = customers[value]
                                 except Customer.DoesNotExist as e:
-                                    print(e)
-                                    # forecast.customer = None
+                                    message.result = False
+                                    message.message = "客户数据不存在"
+                                    return message
                             elif field_name == 'year':
                                 forecast.year = value
                             elif field_name == 'date_number':

@@ -1,63 +1,52 @@
 {
-  "id": 1,
-  // 物料编码
-  "nr": "abc",
-  // 替代物料号
-  "successor_nr": "adc",
-  "description": "this is item",
-  // 仓库代码
-  "locations": [
-    {
-      // 地点id
-      "id": 1,
-      // 地点代码
-      "nr": "abc",
-      "name": "abc",
-      // 地点名称
-      "buffer": {
-        //库存数量
-        "total_qty": 100,
-        // 可用库存
-        "available_qty": 200,
-        // 库存金额
-        "buffer_price": 100
-      }
+    "result": true,
+    "code": 200,
+    "message": "相应数据查询成功",
+    "content": {
+        "id": 1,
+        "nr": "A",
+        "successor_nr": "B",
+        "description": null,
+        "location": [
+            {
+                "id": 3,
+                "nr": "LB",
+                "buffer": {
+                    "total_qty": 0,
+                    "available_qty": 0,
+                    "buffer_price": 0
+                }
+            }
+        ],
+        "lock_types": {
+            "current": "FG",
+            "values": [
+                {
+                    "value": "locked",
+                    "text": "locked"
+                }
+            ]
+        },
+        "lock_expire_at": null,
+        "plan_strategies": {
+            "current": null,
+            "values": [
+                {
+                    "value": "MTS",
+                    "text": "MTS"
+                }
+            ]
+        },
+        "statuses": {
+            "current": "S2",
+            "values": [
+                {
+                    "value": "S0",
+                    "text": "S0"
+                }
+            ]
+        },
+        "price_abc": null,
+        "qty_abc": null
     }
-  ],
-  // 物料锁定类型
-  "lock_types": {
-    "current": "locked",
-    "values": [
-      {
-        "value": "unlocked",
-        "text": "未锁定"
-      }
-    ]
-  },
-  // 到期时间
-  "lock_expire_at": "2019-1-1",
-  //计划策略
-  "plan_strategies": {
-    "current": "MTO",
-    "values": [
-      {
-        "value": "MTO",
-        "text": "MTO"
-      }
-    ]
-  },
-  // 物料状态
-  "statuses": {
-    "current": "S0",
-    "values": [
-      {
-        "value": "S0",
-        "text": "S0"
-      }
-    ]
-  },
-  // 物料ABC货值
-  "price_abc": "A",
-  // 物料ABC数量
-  "qty_abc": "A"
 }

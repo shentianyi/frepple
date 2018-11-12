@@ -1289,7 +1289,7 @@ class EnumView(View):
             value = kwargs['value']
             if type == 'item_status_by_type':
                 t = Item.type_status[value]
-                dic= [{"value":k , "text":v} for k,v in  dict(t).items()] if t != None else None
+                dic = [{"value": k, "text": v} for k, v in dict(t).items()] if t != None else None
 
                 return HttpResponse(json.dumps(dic, cls=DjangoJSONEncoder),
                                     content_type='application/json')
@@ -1314,9 +1314,9 @@ class ItemList(GridReport):
         GridFieldText('nr', title=_('item nr'), editable=False),
         GridFieldText('name', title=_('name'), editable=False),
         GridFieldText('barcode', title=_('barcode'), editable=False),
+        GridFieldChoice('type', title=_('type'), choices=Item.types, editable=False),
         GridFieldText('status', field_name='status', title=_('status'), editable=False),
         GridFieldChoice('plan_strategy', title=_('plan strategy'), choices=Item.strategies, editable=False),
-        GridFieldChoice('type', title=_('type'), choices=Item.types, editable=False),
         GridFieldChoice('lock_type', title=_('lock type'), choices=Item.lock_types, editable=False),
         GridFieldDate('lock_expire_at', title=_('lock expire at'), editable=False),
         GridFieldChoice('price_abc', title=_('price abc'), choices=Item.abc_types, editable=False),
@@ -1373,32 +1373,19 @@ class ItemDetail(View):
 class ItemMainData(View):
     def get(self, request, id, *args, **kwargs):
         item = Item.objects.get(id=id)
-        successor_nr ='TODO' # ItemSuccessor.objects.filter(item=item).order_by('priority').first().item_successor.nr
+        try:
+            successor_nr = ItemSuccessor.objects.filter(item=item).order_by('priority').first().item_successor.nr
+        except:
+            successor_nr = None
+
         lock_types = {"current": item.type,
                       "values": [{"value": k, "text": v} for k, v in dict(Item.lock_types).items()]}
-        # if item.type == 'FG':
-        #     status = ["S0", "S1", "S2", "S3", "S4"]
-        #     item_statuses = {"current": item.status, "values": [{"value": status[0], "text": _('S0')},
-        #                                                         {"value": status[1], "text": _('S1')},
-        #                                                         {"value": status[2], "text": _('S2')},
-        #                                                         {"value": status[3], "text": _('S3')},
-        #                                                         {"value": status[4], "text": _('S4')}]}
-        # elif item.type == 'RM':
-        #     status = ["A0", "A1", "A2", "A3"]
-        #     item_statuses = {"current": item.status, "values": [{"value": status[0], "text": _('A0')},
-        #                                                         {"value": status[1], "text": _('A1')},
-        #                                                         {"value": status[2], "text": _('A2')},
-        #                                                         {"value": status[3], "text": _('A3')}]}
-        # elif item.type == 'WIP':
-        #     item_statuses = []
-        # else:
-        #     item_statuses = []
 
-        item_statuses ={"current": item.status, "values": [{"value": k, "text": v} for k, v in dict(Item.type_status[item.type]).items()]}
+        item_statuses = {"current": item.status,
+                         "values": [{"value": k, "text": v} for k, v in dict(Item.type_status[item.type]).items()]}
 
-        plan_strategies = {"current": item.plan_strategy, "values": [{"value": item.strategies[0][0], "text": _('MTS')},
-                                                                     {"value": item.strategies[1][0], "text": _('MTO')},
-                                                                     {"value": item.strategies[2][0],"text": _('ETO')}]}
+        plan_strategies = {"current": item.plan_strategy,
+                           "values": [{"value": k, "text": v} for k, v in dict(Item.strategies).items()]}
 
         locations = Location.objects.select_related().all().order_by('id')
         location = []
@@ -1427,15 +1414,20 @@ class ItemMainData(View):
             "price_abc": item.price_abc,
             "qty_abc": item.qty_abc
         }
-
-        return HttpResponse(json.dumps(data, cls=DjangoJSONEncoder,ensure_ascii=False), content_type="application/json")
+        message = ResponseMessage()
+        message.result = True
+        message.code = 200
+        message.message = "相应数据查询成功"
+        message.content = data
+        return HttpResponse(json.dumps(message.__dict__, cls=DjangoJSONEncoder,ensure_ascii=False), content_type='application/json')
 
 
 # 代号　GET_ITEM_SUPPLIERS_DATA_API
 # 获取单个物料供应商界面主数据
 class ItemSupplierData(View):
     def get(self, request, id, *args, **kwargs):
-        supplier = ItemSupplier.objects.select_related().filter(item=id)
+        message = ResponseMessage()
+        supplier = ItemSupplier.objects.all().filter(item=id)
         data = []
         for f in supplier:
             supplier_dict = {
@@ -1453,24 +1445,31 @@ class ItemSupplierData(View):
                 "supplier_item_nr": f.supplier_item_nr
             }
             data.append(supplier_dict)
+        message.result = True
+        message.code = 200
+        message.message = "相应数据查询成功"
+        message.content = data
+        return HttpResponse(json.dumps(message.__dict__, cls=DjangoJSONEncoder,ensure_ascii=False), content_type='application/json')
 
-        return HttpResponse(json.dumps(data, cls=DjangoJSONEncoder, ensure_ascii=False), content_type="application/json")
 
 
 # 代号：GET_ITEM_MAIN_SUPPLIER_DATA_API
 # 获取单个物料主数据页，前置期+供应商+包装部分
 class MainSupplierData(View):
     def get(self, request, id, *args, **kwargs):
+        message = ResponseMessage()
         current_time = timezone.now()
         item = Item.objects.get(id=id)
-        # TODO 如果生效时间和开始时间为空情况或者条件不满足时？（条件不满足时会报错）
         try:
             supplier = ItemSupplier.objects.filter(item=id, effective_start__lte=current_time,
-                           effective_end__gte=current_time ).order_by('priority', '-ratio', 'id').first()
+                                                   effective_end__gte=current_time).order_by('priority', '-ratio',
+                                                                                             'id').first()
         except Exception as e:
-            return JsonResponse({"result": False, "code": 200, "message": "供应商不存在"}, safe=False,
-                                json_dumps_params={'ensure_ascii': False})
-
+            message.result = False
+            message.code = 404
+            message.message = "合法的主供应商不存在"
+            return HttpResponse(json.dumps(message.__dict__, cls=DjangoJSONEncoder, ensure_ascii=False),
+                                content_type='application/json')
         receive_time = supplier.receive_time
         load_time = supplier.load_time
         transit_time = supplier.transit_time
@@ -1497,10 +1496,7 @@ class MainSupplierData(View):
         product_time = supplier.product_time
 
         data = {
-            "result": True,
-            "code": 200,
-            "message": "相应数据查询成功",
-            "content": {
+                "id": supplier.supplier.id,
                 "supplier": supplier.supplier.name,
                 "nr": supplier.supplier.nr,
                 "product_time": product_time if product_time else None,
@@ -1527,9 +1523,13 @@ class MainSupplierData(View):
                 "order_max_qty": supplier.order_max_qty if supplier.order_max_qty else None,
                 "description": supplier.description
             }
-        }
-        print(type(data))
-        return HttpResponse(json.dumps(data, cls=DjangoJSONEncoder, ensure_ascii=False), content_type="application/json")
+
+        message = ResponseMessage()
+        message.result = True
+        message.code = 200
+        message.message = "相应数据查询成功"
+        message.content = data
+        return HttpResponse(json.dumps(message.__dict__, cls=DjangoJSONEncoder,ensure_ascii=False), content_type='application/json')
 
 
 class ItemCustomerList(GridReport):
@@ -1922,9 +1922,11 @@ class ForecastVersionView(GridReport):
         wb.add_named_style(headerstyle)
         nr = request.GET.get('nr', None)
         if nr:
-            download_forecast = Forecast.objects.select_related('item', 'location', 'customer').filter(version_id=nr).order_by('-version_id', 'year', 'date_number')
+            download_forecast = Forecast.objects.select_related('item', 'location', 'customer').filter(
+                version_id=nr).order_by('-version_id', 'year', 'date_number')
         else:
-            download_forecast = Forecast.objects.select_related('item', 'location', 'customer').all().order_by('-version_id', 'year', 'date_number')
+            download_forecast = Forecast.objects.select_related('item', 'location', 'customer').all().order_by(
+                '-version_id', 'year', 'date_number')
 
         if not download_forecast:
             return HttpResponse('没有下载数据')
@@ -1942,7 +1944,8 @@ class ForecastVersionView(GridReport):
                 header.append(cell)
             ws.append(header)
             for f in download_forecast:
-                body = [f.id, f.item.nr, f.location.nr, f.customer.nr if f.customer else None, f.year, f.date_number, f.date_type, f.ratio,
+                body = [f.id, f.item.nr, f.location.nr, f.customer.nr if f.customer else None, f.year, f.date_number,
+                        f.date_type, f.ratio,
                         f.normal_qty, f.new_product_plan_qty, f.promotion_qty, f.status, f.create_user.username,
                         f.version.nr, f.created_at, f.updated_at]
                 ws.append(body)
