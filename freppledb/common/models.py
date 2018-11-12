@@ -17,6 +17,7 @@
 from datetime import datetime
 import logging
 
+from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib.admin.utils import quote
 from django.contrib.auth.models import AbstractUser, Group
@@ -33,6 +34,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils.text import capfirst
 
 from freppledb.common.fields import JSONBField
+from freppledb.common.utils import la_time
 
 logger = logging.getLogger(__name__)
 
@@ -621,6 +623,107 @@ class Bucket(AuditModel):
         verbose_name = _('bucket')
         verbose_name_plural = _('buckets')
         db_table = 'common_bucket'
+
+    @classmethod
+    def get_extra_trunc_by_shortcut(cls,date_type_short_cut):
+        """
+        根据时间的简写,获取数据库trunc的值, 默认返回week
+        y: year
+        m: month
+        w: week
+        d: day
+        :param date_type_short_cut:
+        :return:
+        """
+        if date_type_short_cut.lower()=='w':
+            return 'week'
+        elif date_type_short_cut.lower()=='m':
+            return 'month'
+        else:
+            return 'week'
+
+    @classmethod
+    def get_x_time_name(cls,dt,date_type_short_cut):
+        """
+        根据时间和时间类型, 返回x轴时间名称
+        例如: 2018-52周
+              2018-Feb
+             2018-11-13 13:11:02
+        :param datetime:
+        :param date_type_short_cut:
+        :return:
+        """
+        if date_type_short_cut.lower() == 'w':
+            return "%s-%s%s" %(dt.year, dt.strftime('%W'),_('week'))
+        elif date_type_short_cut.lower() == 'm':
+            return "%s-%s" %(dt.year, _(dt.strftime('%b')))
+        else:
+            return la_time.dt2string(dt)
+
+    @classmethod
+    def get_datetime_by_type(cls,dt, date_type_short_cut):
+        """
+        根据时间和时间类型, 返回bucket时间
+        :param datetime:
+        :param date_type_short_cut:
+        :return:
+        """
+        if date_type_short_cut.lower() == 'w':
+            return la_time.dt2weekdt(dt)
+        elif date_type_short_cut.lower() == 'm':
+            return la_time.dt2monthdt(dt)
+        else:
+            return dt
+
+
+    @classmethod
+    def get_nex_time_by_date_type(cls, t1, date_type_short_cut, step=1):
+        """
+        根据时间类型获取下一个时间, 默认按周
+        :param t1:
+        :param date_type_short_cut:
+        :param step:
+        :return:
+        """
+        if date_type_short_cut.lower()=='w':
+            return t1+relativedelta(weeks=step)
+        elif date_type_short_cut.lower()=='m':
+            return t1+relativedelta(months=step)
+        return t1+relativedelta(weeks=step)
+
+    @classmethod
+    def get_search_starttime_by_date_type(cls, dt, date_type_short_cut):
+        """
+        根据时间类型, 获取改时间对应的查询开始时间,
+        如 当前时间是2018-1-2 号, 按月的查询开始时间是 2018-1-1 00:00:00
+        如 当前时间是2018-11-13(43周,第一天是12号), 按周的查询开始时间是2018-11-12 00:00:00
+        :param dt:
+        :param date_type_short_cut:
+        :return:
+        """
+        if date_type_short_cut.lower()=='w':
+            return la_time.week_search_starttime(dt)
+        elif date_type_short_cut.lower()=='m':
+            return la_time.month_search_starttime(dt)
+        return dt
+
+
+    @classmethod
+    def get_search_endtime_by_date_type(cls, dt, date_type_short_cut):
+        """
+        根据时间类型, 获取改时间对应的查询开始时间,
+        如 当前时间是2018-1-2 号, 按月的查询开始时间是 2018-1-1 00:00:00
+        如 当前时间是2018-11-13(43周,第一天是12号), 按周的查询开始时间是2018-11-12 00:00:00
+        :param dt:
+        :param date_type_short_cut:
+        :return:
+        """
+        if date_type_short_cut.lower()=='w':
+            return la_time.week_search_endtime(dt)
+        elif date_type_short_cut.lower()=='m':
+            return la_time.month_search_endtime(dt)
+        return dt
+
 
 
 class BucketDetail(AuditModel):

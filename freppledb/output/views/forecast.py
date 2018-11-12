@@ -8,6 +8,7 @@ from io import BytesIO, StringIO
 
 from django.conf import settings
 from django.contrib.admin.views.decorators import staff_member_required
+from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models import Sum, Q, Max
 from django.db import connections
 from django.db.models.functions import TruncMonth, TruncYear
@@ -29,6 +30,7 @@ from freppledb.common import report
 from openpyxl import Workbook
 from openpyxl.cell import WriteOnlyCell
 
+from freppledb.common.models import Bucket
 from freppledb.common.utils import la_time
 from freppledb.input.models import Forecast, ForecastYear, Item, Location, Customer, ForecastCommentOperation
 
@@ -45,118 +47,114 @@ class ForecastCompare(View):
     @method_decorator(staff_member_required)
     def get(self, request, *args, **kwargs):
         reportkey = ForecastCompare.getKey()
-        if request.method == 'GET':
-            fmt = request.GET.get('format', None)
-            report_type = request.GET.get('report_type', 'detail')
+        fmt = request.GET.get('format', None)
+        report_type = request.GET.get('report_type', 'detail')
 
-            # 详细表头
-            reprot_detail_headers = ('物料编号', '地点', '客户代码', '全年计划量', '年初计划量',
-                                     '上月预测', '当月预测', '下月预测', '当月VS年初', '当月VS上月', '当月VS下月')
-            # 汇总表头
-            reprot_aggre_headers = ('物料编号', '地点', '全年计划量', '年初计划量',
-                                    '上月预测', '当月预测', '下月预测', '当月VS年初', '当月VS上月', '当月VS下月')
-            if fmt is None:
-                # TODO LA 预测对比
-                # template = loader.get_template('output/forecast_compare.html')
-                template = 'output/forecast_compare.html'
+        # 详细表头
+        reprot_detail_headers = ('物料编号', '地点', '客户代码', '全年计划量', '年初计划量',
+                                 '上月预测', '当月预测', '下月预测', '当月VS年初', '当月VS上月', '当月VS下月')
+        # 汇总表头
+        reprot_aggre_headers = ('物料编号', '地点', '全年计划量', '年初计划量',
+                                '上月预测', '当月预测', '下月预测', '当月VS年初', '当月VS上月', '当月VS下月')
+        if fmt is None:
+            # TODO LA 预测对比
+            # template = loader.get_template('output/forecast_compare.html')
+            template = 'output/forecast_compare.html'
 
-                context = {
-                    'title': self.title,
-                    'reportkey': reportkey,
-                    'mode': request.GET.get('mode', 'table'),
-                    'actions': None,
-                    'filters': request.GET.get('filters'),
-                    'report_type': request.GET.get('report_type', 'detail')
-                }
+            context = {
+                'title': self.title,
+                'reportkey': reportkey,
+                'mode': request.GET.get('mode', 'table'),
+                'actions': None,
+                'filters': request.GET.get('filters'),
+                'report_type': request.GET.get('report_type', 'detail')
+            }
 
-                return render(request, template, context)
-            elif fmt == 'json':
-                # 返回JSON数据
-                return JsonResponse(self._get_json_data(request), safe=False)
-            elif fmt in ('spreadsheetlist', 'spreadsheettable', 'spreadsheet'):
-                # 下载 excel
-                json = self._get_json_data(request, in_page=False)
-                wb = Workbook(write_only=True)
-                title = '对比报表-%s' % ('详细' if report_type == 'detail' else '汇总')
-                ws = wb.create_sheet(title)
+            return render(request, template, context)
+        elif fmt == 'json':
+            # 返回JSON数据
+            return JsonResponse(self._get_json_data(request), safe=False)
+        elif fmt in ('spreadsheetlist', 'spreadsheettable', 'spreadsheet'):
+            # 下载 excel
+            json = self._get_json_data(request, in_page=False)
+            wb = Workbook(write_only=True)
+            title = '对比报表-%s' % ('详细' if report_type == 'detail' else '汇总')
+            ws = wb.create_sheet(title)
 
-                # 写入excel头
-                file_headers = reprot_detail_headers if report_type == 'detail' else reprot_aggre_headers
-                headers = []
-                for h in file_headers:
-                    cell = WriteOnlyCell(ws, value=h)
-                    headers.append(cell)
-                ws.append(headers)
+            # 写入excel头
+            file_headers = reprot_detail_headers if report_type == 'detail' else reprot_aggre_headers
+            headers = []
+            for h in file_headers:
+                cell = WriteOnlyCell(ws, value=h)
+                headers.append(cell)
+            ws.append(headers)
 
-                # 写入表体, 顺序和
-                reprot_detail_fields = (
-                    'item__nr', 'location__nr', 'customer__nr', 'total_year_qty', 'year_qty', 'last_qty', 'current_qty',
-                    'next_qty', 'current_year_qty', 'current_last_qty', 'current_next_qty')
-                reprot_aggre_fields = (
-                    'item__nr', 'location__nr', 'total_year_qty', 'year_qty', 'last_qty', 'current_qty',
-                    'next_qty', 'current_year_qty', 'current_last_qty', 'current_next_qty')
+            # 写入表体, 顺序和
+            reprot_detail_fields = (
+                'item__nr', 'location__nr', 'customer__nr', 'total_year_qty', 'year_qty', 'last_qty', 'current_qty',
+                'next_qty', 'current_year_qty', 'current_last_qty', 'current_next_qty')
+            reprot_aggre_fields = (
+                'item__nr', 'location__nr', 'total_year_qty', 'year_qty', 'last_qty', 'current_qty',
+                'next_qty', 'current_year_qty', 'current_last_qty', 'current_next_qty')
 
-                body_fields = reprot_detail_fields if report_type == 'detail' else reprot_aggre_fields
-                for data in json['rows']:
-                    body = []
-                    for field in body_fields:
-                        if field in data:
-                            cell = WriteOnlyCell(ws, value=data[field])
-                            body.append(cell)
+            body_fields = reprot_detail_fields if report_type == 'detail' else reprot_aggre_fields
+            for data in json['rows']:
+                body = []
+                for field in body_fields:
+                    if field in data:
+                        cell = WriteOnlyCell(ws, value=data[field])
+                        body.append(cell)
 
-                    ws.append(body)
+                ws.append(body)
 
-                output = BytesIO()
-                wb.save(output)
-                response = HttpResponse(
-                    content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                    content=output.getvalue()
-                )
-                response['Content-Disposition'] = "attachment; filename*=utf-8''%s.xlsx" % urllib.parse.quote(
-                    force_str(title))
-                response['Cache-Control'] = "no-cache, no-store"
-                return response
+            output = BytesIO()
+            wb.save(output)
+            response = HttpResponse(
+                content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                content=output.getvalue()
+            )
+            response['Content-Disposition'] = "attachment; filename*=utf-8''%s.xlsx" % urllib.parse.quote(
+                force_str(title))
+            response['Cache-Control'] = "no-cache, no-store"
+            return response
 
-            elif fmt in ('csvlist', 'csvtable', 'csv'):
-                # 下载 csv
-                sf = StringIO()
-                json = self._get_json_data(request, in_page=False)
-                title = '对比报表-%s' % ('详细' if report_type == 'detail' else '汇总')
-                decimal_separator = get_format('DECIMAL_SEPARATOR', request.LANGUAGE_CODE, True)
-                if decimal_separator == ",":
-                    writer = csv.writer(sf, quoting=csv.QUOTE_NONNUMERIC, delimiter=';')
-                else:
-                    writer = csv.writer(sf, quoting=csv.QUOTE_NONNUMERIC, delimiter=',')
-                file_headers = reprot_detail_headers if report_type == 'detail' else reprot_aggre_headers
-                writer.writerow(file_headers)
+        elif fmt in ('csvlist', 'csvtable', 'csv'):
+            # 下载 csv
+            sf = StringIO()
+            json = self._get_json_data(request, in_page=False)
+            title = '对比报表-%s' % ('详细' if report_type == 'detail' else '汇总')
+            decimal_separator = get_format('DECIMAL_SEPARATOR', request.LANGUAGE_CODE, True)
+            if decimal_separator == ",":
+                writer = csv.writer(sf, quoting=csv.QUOTE_NONNUMERIC, delimiter=';')
+            else:
+                writer = csv.writer(sf, quoting=csv.QUOTE_NONNUMERIC, delimiter=',')
+            file_headers = reprot_detail_headers if report_type == 'detail' else reprot_aggre_headers
+            writer.writerow(file_headers)
 
-                reprot_detail_fields = (
-                    'item__nr', 'location__nr', 'customer__nr', 'total_year_qty', 'year_qty', 'last_qty', 'current_qty',
-                    'next_qty', 'current_year_qty', 'current_last_qty', 'current_next_qty')
-                reprot_aggre_fields = (
-                    'item__nr', 'location__nr', 'total_year_qty', 'year_qty', 'last_qty', 'current_qty',
-                    'next_qty', 'current_year_qty', 'current_last_qty', 'current_next_qty')
+            reprot_detail_fields = (
+                'item__nr', 'location__nr', 'customer__nr', 'total_year_qty', 'year_qty', 'last_qty', 'current_qty',
+                'next_qty', 'current_year_qty', 'current_last_qty', 'current_next_qty')
+            reprot_aggre_fields = (
+                'item__nr', 'location__nr', 'total_year_qty', 'year_qty', 'last_qty', 'current_qty',
+                'next_qty', 'current_year_qty', 'current_last_qty', 'current_next_qty')
 
-                body_fields = reprot_detail_fields if report_type == 'detail' else reprot_aggre_fields
-                for data in json['rows']:
-                    body = []
-                    for field in body_fields:
-                        if field in data:
-                            body.append(data[field])
-                    writer.writerow(body)
+            body_fields = reprot_detail_fields if report_type == 'detail' else reprot_aggre_fields
+            for data in json['rows']:
+                body = []
+                for field in body_fields:
+                    if field in data:
+                        body.append(data[field])
+                writer.writerow(body)
 
-                response = HttpResponse(
-                    content_type='text/csv; charset=%s' % settings.CSV_CHARSET,
-                    content=sf.getvalue()
-                )
-                # Filename parameter is encoded as specified in rfc5987
-                response['Content-Disposition'] = "attachment; filename*=utf-8''%s.csv" % urllib.parse.quote(
-                    force_str(title))
-                response['Cache-Control'] = "no-cache, no-store"
-                return response
-
-        else:
-            raise Http404('PAGE NOT FOUND')
+            response = HttpResponse(
+                content_type='text/csv; charset=%s' % settings.CSV_CHARSET,
+                content=sf.getvalue()
+            )
+            # Filename parameter is encoded as specified in rfc5987
+            response['Content-Disposition'] = "attachment; filename*=utf-8''%s.csv" % urllib.parse.quote(
+                force_str(title))
+            response['Cache-Control'] = "no-cache, no-store"
+            return response
 
     # TODO 如果预测同时存在 W/M等多个时间度量的情况,不处理?
     # 详细: 根据 item+location+customer分页
@@ -263,7 +261,7 @@ class ForecastCompare(View):
         #     # .order_by('-version_id')
 
         # 年初查询主查询
-        forecast_query_values = ['item_id', 'location_id', 'year', 'month']
+        forecast_query_values = ['item_id', 'location_id', 'year', 'month_num']
         forecast_query_total_values = ['item_id', 'location_id']
 
         forecast_year_filters = []
@@ -277,7 +275,7 @@ class ForecastCompare(View):
             forecast_year_filters.append(Q(**{'customer_id__in': customer_ids}))
 
         forecastyear_query = ForecastYear.objects \
-            .annotate(month=TruncMonth('parsed_date')) \
+            .annotate(month_num=TruncMonth('parsed_date')) \
             .values(*forecast_query_values) \
             .filter(functools.reduce(operator.iand, forecast_year_filters)) \
             .annotate(qty=Sum((F('normal_qty') * F('ratio') / 100 + F('new_product_plan_qty') + F('promotion_qty'))))
@@ -291,16 +289,16 @@ class ForecastCompare(View):
         cursor = connections[request.database].cursor()
         if report_type == 'detail':
             forecast_query = '''
-            select a.item_id,a.location_id,a.customer_id,a.year,DATE_TRUNC('month',a.parsed_date) as month,
-            SUM(((a.normal_qty*a.ratio/100 + a.new_product_plan_qty) + a.promotion_qty)) AS qty from
-            forecast as a inner join (select c.item_id,c.location_id,c.customer_id,c.parsed_date,max(c.version_id) as version_id 
-            from forecast as c
-            where c.status in %s and c.parsed_date between %s and %s and c.item_id in %s and c.location_id in %s and c.customer_id in %s
-            group by c.item_id,c.location_id,c.customer_id,c.parsed_date) as b
-            on a.item_id=b.item_id and a.location_id=b.location_id and a.customer_id=b.customer_id and a.parsed_date=b.parsed_date and a.version_id=b.version_id
-            where a.status in %s and a.parsed_date between %s and %s and a.item_id in %s and a.location_id in %s  and a.customer_id in %s
-            group by a.item_id,a.location_id,a.customer_id,a.year,DATE_TRUNC('month', a.parsed_date)
-            '''
+                select a.item_id,a.location_id,a.customer_id,a.year,DATE_TRUNC('month',a.parsed_date) as month_num,
+                SUM(((a.normal_qty*a.ratio/100 + a.new_product_plan_qty) + a.promotion_qty)) AS qty from
+                forecast as a inner join (select c.item_id,c.location_id,c.customer_id,c.parsed_date,max(c.version_id) as version_id 
+                from forecast as c
+                where c.status in %s and c.parsed_date between %s and %s and c.item_id in %s and c.location_id in %s and c.customer_id in %s
+                group by c.item_id,c.location_id,c.customer_id,c.parsed_date) as b
+                on a.item_id=b.item_id and a.location_id=b.location_id and a.customer_id=b.customer_id and a.parsed_date=b.parsed_date and a.version_id=b.version_id
+                where a.status in %s and a.parsed_date between %s and %s and a.item_id in %s and a.location_id in %s  and a.customer_id in %s
+                group by a.item_id,a.location_id,a.customer_id,a.year,month_num
+                '''
 
             cursor.execute(forecast_query,
                            [ForecastCommentOperation.compare_report_status, search_start_time, search_end_time,
@@ -310,16 +308,16 @@ class ForecastCompare(View):
                             item_ids, location_ids, customer_ids])
         else:
             forecast_query = '''
-                        select a.item_id,a.location_id,a.customer_id,a.year,DATE_TRUNC('month',a.parsed_date) as month,
-                        SUM(((a.normal_qty*a.ratio/100 + a.new_product_plan_qty) + a.promotion_qty)) AS qty from
-                        forecast as a inner join (select c.item_id,c.location_id,c.customer_id,c.parsed_date,max(c.version_id) as version_id 
-                        from forecast as c
-                        where c.status in %s and c.parsed_date between %s and %s and c.item_id in %s and c.location_id in %s
-                        group by c.item_id,c.location_id,c.customer_id,c.parsed_date) as b
-                        on a.item_id=b.item_id and a.location_id=b.location_id and a.customer_id=b.customer_id and a.parsed_date=b.parsed_date and a.version_id=b.version_id
-                        where a.status in %s and a.parsed_date between %s and %s and a.item_id in %s and a.location_id in %s
-                        group by a.item_id,a.location_id,a.customer_id,a.year,DATE_TRUNC('month', a.parsed_date)
-                        '''
+                            select a.item_id,a.location_id,a.customer_id,a.year,DATE_TRUNC('month',a.parsed_date) as month_num,
+                            SUM(((a.normal_qty*a.ratio/100 + a.new_product_plan_qty) + a.promotion_qty)) AS qty from
+                            forecast as a inner join (select c.item_id,c.location_id,c.customer_id,c.parsed_date,max(c.version_id) as version_id 
+                            from forecast as c
+                            where c.status in %s and c.parsed_date between %s and %s and c.item_id in %s and c.location_id in %s
+                            group by c.item_id,c.location_id,c.customer_id,c.parsed_date) as b
+                            on a.item_id=b.item_id and a.location_id=b.location_id and a.customer_id=b.customer_id and a.parsed_date=b.parsed_date and a.version_id=b.version_id
+                            where a.status in %s and a.parsed_date between %s and %s and a.item_id in %s and a.location_id in %s
+                            group by a.item_id,a.location_id,a.customer_id,a.year,month_num
+                            '''
             cursor.execute(forecast_query,
                            [ForecastCommentOperation.compare_report_status, search_start_time, search_end_time,
                             item_ids,
@@ -378,10 +376,10 @@ class ForecastCompare(View):
                 if (report_type == 'detail' and i['item_id'] == c['item_id'] \
                     and i['location_id'] == c['location_id'] \
                     and i['customer_id'] == c['customer_id'] \
-                    and i['year'] == current_year and i['month'].month == current_month) \
+                    and i['year'] == current_year and i['month_num'].month == current_month) \
                         or (report_type == 'aggre' and i['item_id'] == c['item_id'] \
                             and i['location_id'] == c['location_id'] \
-                            and i['year'] == current_year and i['month'].month == current_month):
+                            and i['year'] == current_year and i['month_num'].month == current_month):
                     data['year_qty'] = round(i['qty'], 2)
                     break
 
@@ -393,7 +391,7 @@ class ForecastCompare(View):
                     'location_id': row[1],
                     'customer_id': row[2],
                     'year': row[3],
-                    'month': row[4],
+                    'month_num': row[4],
                     'qty': row[5]
                 }
                 if (report_type == 'detail' and i['item_id'] == c['item_id'] \
@@ -402,17 +400,17 @@ class ForecastCompare(View):
                         or (report_type == 'aggre' and i['item_id'] == c['item_id'] \
                             and i['location_id'] == c['location_id']):
 
-                    if i['year'] == last_year and i['month'].month == last_month:
+                    if i['year'] == last_year and i['month_num'].month == last_month:
                         if data['last_qty'] is None:
                             data['last_qty'] = 0
                         data['last_qty'] += round(i['qty'], 2)
 
-                    if i['year'] == current_year and i['month'].month == current_month:
+                    if i['year'] == current_year and i['month_num'].month == current_month:
                         if data['current_qty'] is None:
                             data['current_qty'] = 0
                         data['current_qty'] += round(i['qty'], 2)
 
-                    if i['year'] == next_year and i['month'].month == next_month:
+                    if i['year'] == next_year and i['month_num'].month == next_month:
                         if data['next_qty'] is None:
                             data['next_qty'] = 0
                         data['next_qty'] += round(i['qty'], 2)
@@ -456,3 +454,113 @@ class ForecastCompare(View):
                     if k == 'field' and v == key:
                         fs.append(f)
         return fs
+
+
+# TODO
+# 1. 配额系数的平均计算, 先查出来的sum(ration) S和count(ratio) C个数. 再计算sum(S)/sum(C). 取两位小数
+class ForecastItem(View):
+    permissions = (('view_forecast_item', 'Can view forecast item'),)
+
+    title = _('forecast item')
+
+    @method_decorator(staff_member_required())
+    def get(self, request, *args, **kwargs):
+        item = Item.objects.filter(id=request.GET.get('id', None)).first()
+        location = Location.objects.filter(id=request.GET.get('location_id', None)).first()
+
+        if item is None or location is None:
+            return JsonResponse({"result": False, "code": 200, "message": "参数错误,数据未找到"}, safe=False)
+
+        # 初始化时间类型, 默认周
+        date_type = request.GET.get('date_type', 'W')
+        date_type_full = Bucket.get_extra_trunc_by_shortcut(date_type)
+
+        # 初始化查询时间
+        search_start_time = request.GET.get('start_time', None)
+        search_start_time = la_time.string2dt(
+            search_start_time) if search_start_time else Bucket.get_search_starttime_by_date_type(
+            la_time.last_n_year_time(datetime.now(), 2), date_type)
+
+        search_end_time = request.GET.get('end_time', None)
+        search_end_time = la_time.string2dt(
+            search_end_time) if search_end_time else Bucket.get_search_endtime_by_date_type(
+            la_time.next_n_year_time(datetime.now(), 2), date_type)
+
+        # 查詢
+        cursor = connections[request.database].cursor()
+
+        forecast_query = '''select a.customer_id,a.year,DATE_TRUNC(%s,a.parsed_date) as trunc_parsed_date,
+                               a.normal_qty, a.new_product_plan_qty , a.promotion_qty,a.ratio from
+                               forecast as a inner join (select c.customer_id,c.parsed_date,max(c.version_id) as version_id 
+                               from forecast as c
+                               where c.status in %s and c.parsed_date between %s and %s and c.item_id = %s and c.location_id = %s
+                               group by c.customer_id, c.parsed_date) as b
+                               on a.customer_id=b.customer_id and a.parsed_date=b.parsed_date and a.version_id=b.version_id
+                               where a.status in %s and a.parsed_date between %s and %s and a.item_id = %s and a.location_id = %s
+                               '''
+        cursor.execute(forecast_query,
+                       [date_type_full, ForecastCommentOperation.compare_report_status, search_start_time,
+                        search_end_time,
+                        item.id,
+                        location.id, ForecastCommentOperation.compare_report_status, search_start_time,
+                        search_end_time,
+                        item.id, location.id])
+
+        # 返回值
+        message = {
+            "result": True,
+            "code": 200,
+            "message": None,
+            "content": {
+                "location": {
+                    "id": location.id,
+                    "nr": location.nr,
+                    "name": location.name
+                },
+                "data": []
+            },
+
+        }
+
+        # 获取查询所有数据
+        rows = cursor.fetchall()
+        # 根据查询的开始时间,查询的结束时间, 计算出时间(列名称)
+        start_time = Bucket.get_datetime_by_type(search_start_time, date_type)
+        end_time = Bucket.get_datetime_by_type(search_end_time, date_type)
+
+        while start_time <= end_time:
+            data = {
+                "x": Bucket.get_x_time_name(start_time, date_type),
+                "_x": start_time,
+                "y": {
+                    "total": 0,
+                    "last_sale_qty": 0,
+                    "last_actual_sale_qty": 0,  # TODO forecast sale qty, CMARK
+                    "system_forecast_qty": 0,  # TODO forecast sale qt, CMARK
+                    "ratio": 0,
+                    "normal_qty": 0,
+                    "new_product_plan_qty": 0,
+                    "promotion_qty": 0,
+                    "_row_count": 0
+                }
+            }
+
+            # 赋值
+            for row in rows:
+                if start_time == row[2]:
+                    data['y']['normal_qty'] += row[3]
+                    data['y']['new_product_plan_qty'] += row[4]
+                    data['y']['promotion_qty'] += row[5]
+                    data['y']['ratio'] += row[6]
+                    data['y']['_row_count'] += 1
+                    data['y']['total'] += round(row[3] * row[6] / 100, 2) + row[4] + row[5]
+
+            # 计算配比
+            if data['y']['_row_count'] > 0:
+                data['y']['ratio'] = data['y']['ratio'] / data['y']['_row_count']
+
+            message['content']['data'].append(data)
+            # 下一个值
+            start_time = Bucket.get_nex_time_by_date_type(start_time, date_type)
+
+        return JsonResponse(message, encoder=DjangoJSONEncoder, safe=False)
