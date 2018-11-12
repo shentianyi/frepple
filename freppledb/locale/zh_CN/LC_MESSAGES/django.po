@@ -140,6 +140,24 @@ msgstr "供应商代码"
 msgid "customer nr"
 msgstr "客户代码"
 
+msgid "country"
+msgstr "国家"
+
+msgid "city"
+msgstr "城市"
+
+msgid "phone"
+msgstr "手机"
+
+msgid "telephone"
+msgstr "电话"
+
+msgid "contact"
+msgstr "联系人"
+
+msgid "email"
+msgstr "邮箱"
+
 #: common/admin.py:39
 msgid "Important dates"
 msgstr "重要日期"
@@ -427,7 +445,37 @@ msgid "owner_id"
 msgstr "拥有者id"
 
 msgid "ship address"
-msgstr "目的地"
+msgstr "始发地"
+
+msgid "plan strategy"
+msgstr "计划策略"
+
+msgid "lock type"
+msgstr "锁定类型"
+
+msgid "lock expire at"
+msgstr "到期"
+
+msgid "price abc"
+msgstr "物料ABC货值"
+
+msgid "qty abc"
+msgstr "物料ABC数量"
+
+msgid "order unit qty"
+msgstr "单位订货量"
+
+msgid "order max qty"
+msgstr "最大订单数量"
+
+msgid "plan supplier date"
+msgstr "计划供应日期"
+
+msgid "plan load date"
+msgstr "计划出货日期"
+
+msgid "plan receive date"
+msgstr "计划收货日期"
 
 msgid "address"
 msgstr "地址"
