@@ -1576,15 +1576,12 @@ class Forecast(AuditModel, ForecastCommentOperation):
     date_number = models.IntegerField(_('date_number'), db_index=True)
 
     date_type = models.CharField(
-        _('date_type'), max_length=20, choices=ForecastYear.date_types, default='W', null=True, blank=True)
+        _('date_type'), max_length=20, choices=ForecastYear.date_types, default='W')
 
-    ratio = models.DecimalField(_('forecast ratio'), max_digits=20, decimal_places=8, default=100, null=False,
-                                blank=True)
-    normal_qty = models.DecimalField(_('normal qty'), max_digits=20, decimal_places=8, null=False, default=0)
-    new_product_plan_qty = models.DecimalField(_('new product plan qty'), max_digits=20, decimal_places=8, null=False,
-                                               blank=True, default=0)
-    promotion_qty = models.DecimalField(_('promotion qty'), max_digits=20, decimal_places=8, null=False,
-                                        blank=True, default=0)
+    ratio = models.DecimalField(_('forecast ratio'), max_digits=20, decimal_places=8, default=100)
+    normal_qty = models.DecimalField(_('normal qty'), max_digits=20, decimal_places=8, default=0)
+    new_product_plan_qty = models.DecimalField(_('new product plan qty'), max_digits=20, decimal_places=8,default=0)
+    promotion_qty = models.DecimalField(_('promotion qty'), max_digits=20, decimal_places=8,default=0)
     status = models.CharField(_('status'), max_length=20, choices=ForecastCommentOperation.statuses, default='init')
     create_user = models.ForeignKey(
         User, verbose_name=_('create_user'),
