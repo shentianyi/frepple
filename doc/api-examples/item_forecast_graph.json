@@ -1,0 +1,49 @@
+{
+  "result": true,
+  "code": 200,
+  "message": null,
+  "content": {
+   "current_time_point":
+   {
+    	"x_value": "2018-2-1", // 当前时间的类型初始时间
+        "x_text": "2018-Feb",
+        "y": null // 没有值
+    },
+    "serials": [
+      {
+        "serial": "Dispatches(Forecast basis)",
+        "serial_type":"FORECAST BASIS",
+        "points": [
+           // 第一个月使用年
+          {
+            "x_value":"2018-1-1 00:00:00",
+            "x_text": "2018",
+            "y": 100
+          },
+          // 剩余月使用: 年-月名称
+          {
+            "x_value":"2018-2-1 00:00:00",
+            "x_text": "2018-Feb",
+            "y": 100
+          }
+        ]
+      },
+      {
+        "serial": "Demand forecast",
+        "serial_type":"DEMAND FORECAST",
+        "points": [
+          {
+            "x_value":"2019-1-1 00:00:00",
+            "x_text": "2019",
+            "y": -100
+          },
+          {
+            "x_value":"2019-2-1 00:00:00",
+            "x_text": "Feb",
+            "y": 0
+          }
+        ]
+      }
+    ]
+  }
+}

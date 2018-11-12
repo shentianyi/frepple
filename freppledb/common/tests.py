@@ -17,6 +17,7 @@
 
 import os
 import os.path
+from datetime import datetime
 
 from django.core import management
 from django.http.response import StreamingHttpResponse
@@ -27,6 +28,8 @@ import freppledb.common as common
 import freppledb.input as input
 
 from rest_framework.test import APIClient, APITestCase, APIRequestFactory
+
+from freppledb.common.utils import la_time
 
 
 class DataLoadTest(TestCase):
@@ -558,3 +561,8 @@ class freppleREST(APITestCase):
     response = self.client.delete('/api/input/customer/?source=TEST DELETE', format='json')
     self.assertEqual(response.status_code, 204)
     self.assertEqual(input.models.Customer.objects.filter(source='TEST DELETE').count(), 0)
+
+class LaTimeTest(TestCase):
+    def test_next_n_year_dt(self):
+        i = la_time.last_n_year_time(datetime.now,1)
+        print(i)
