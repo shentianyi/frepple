@@ -1,7 +1,8 @@
 var ItemDetail = {}
 var itemId = parseInt(window.location.pathname.split('/item_detail/')[1]);
 
-var locationArray = []
+var locationArray = [];
+var supplierArray = [];
 
 ItemDetail.getMainData = function () {
     $.ajax({
@@ -19,15 +20,70 @@ ItemDetail.getMainData = function () {
                 // 下拉框： 需要匹配current， 默认选中
 
                 // 复选框： 直接checked 或者 不是
-                FillData(data.content);
+                FillData('item_detail', data.content);
 
                 locationArray = data.content.location;
-
+                console.log(data.content)
                 if (locationArray.length > 0) {
                     const buffer = locationArray[0].buffer;
-
-                    FillData(buffer);
+                    FillData('item_detail', buffer);
                 }
+            } else {
+                alert(data.message)
+            }
+        },
+        error: function (err) {
+            alert(err);
+        }
+    })
+};
+
+ItemDetail.getMainSuppliersData = function () {
+    $.ajax({
+        url: '/data/input/item/mainsuppliersdata/' + itemId + "/",
+        type: 'application/json',
+        method: 'get',
+        success: function (data) {
+            // 填充数据
+            if (data.result) {
+                console.log('data', data.content);
+                FillData('item_detail_main', data.content);
+            } else {
+                // alert(data.message)
+            }
+        },
+        error: function (err) {
+            alert(err);
+        }
+    })
+};
+
+ItemDetail.getSuppliers = function () {
+    $.ajax({
+        url: '/data/input/item/suppliers/' + itemId + "/",
+        type: 'application/json',
+        method: 'get',
+        success: function (data) {
+            // 填充数据
+            if (data.result) {
+                console.log('supplierdata', data);
+
+                FillData('item_detail_supplier', data.content[0]);
+
+                // FillData({supplier: data.content});
+
+                supplierArray = data.content;
+                var html = '';
+                if (supplierArray.length > 0) {
+                    for (var i = 0; i < supplierArray.length; i++) {
+                        html += "<option value=" + supplierArray[i].id + ">" + supplierArray[i].id + "</option>"
+                    }
+                    $("#item_detail_supplier_id" ).append(html);
+                }
+                // if (supplierArray.length > 0) {
+                //     const buffer = locationArray;
+                //     FillData(buffer);
+                // }
             } else {
                 alert(data.message)
             }
@@ -40,10 +96,15 @@ ItemDetail.getMainData = function () {
 
 ItemDetail.locationChange = function () {
     var selectedValue = $("#item_detail_location").val();
-//
 
-// locationArray
-
+    if (locationArray.length > 0) {
+        for (var i = 0; i < locationArray.length; i++) {
+            if (selectedValue == locationArray[i].id) {
+                FillData(locationArray[i].buffer);
+                return;
+            }
+        }
+    }
 };
 
 /**
@@ -54,7 +115,7 @@ ItemDetail.locationChange = function () {
  * @param data 界面值
  * @constructor
  */
-function FillData(data) {
+function FillData(prefix, data) {
     Object.keys(data).map(function (t) {
         var key = t;
         var value = data[t];
@@ -64,13 +125,13 @@ function FillData(data) {
         }
 
         var valueType = typeof (value);
-
+        // console.log('valueType', valueType)
         switch (valueType) {
             case "string":
-                $("#item_detail_" + key).val(value);
+                $("#" + prefix + "_" + key).val(value);
                 break;
             case "number":
-                $("#item_detail_" + key).val(value);
+                $("#" + prefix + "_" + key).val(value);
                 break;
             case "object":
                 var html = '';
@@ -79,25 +140,29 @@ function FillData(data) {
                 if (Array.isArray(value)) {
                     // 仓库代码
 
-                    for (var i = 0; i < value.length; i++) {
-                        html += "<option value=" + value[i].id + ">" + value[i].nr + "</option>"
-                    }
+                    if (value.length > 0) {
+                        for (var i = 0; i < value.length; i++) {
+                            html += "<option value=" + value[i].id + ">" + value[i].nr + "</option>"
+                        }
 
-                    $("#item_detail_" + key).append(html);
+                        $("#" + prefix + "_" + key).append(html);
+                    }
                 } else {
 
                     var currentValue = value.current;
                     var valueArray = value.values;
 
-                    for (var i = 0; i < valueArray.length; i++) {
-                        if (valueArray[i].text == currentValue) {
-                            html += "<option selected value=" + valueArray[i].value + ">" + valueArray[i].text + "</option>"
-                        } else {
-                            html += "<option value=" + valueArray[i].value + ">" + valueArray[i].text + "</option>"
+                    if (valueArray.length > 0) {
+                        for (var i = 0; i < valueArray.length; i++) {
+                            if (valueArray[i].text == currentValue) {
+                                html += "<option selected value=" + valueArray[i].value + ">" + valueArray[i].text + "</option>"
+                            } else {
+                                html += "<option value=" + valueArray[i].value + ">" + valueArray[i].text + "</option>"
+                            }
                         }
-                    }
 
-                    $("#item_detail_" + key).append(html);
+                        $("#" + prefix + "_" + key).append(html);
+                    }
                 }
 
                 break;
@@ -106,5 +171,7 @@ function FillData(data) {
         }
     });
 }
+
+// ItemDetail.getMainSuppliersData()
 
 

@@ -116,7 +116,6 @@
             <div class="col-md-3">
                 <div class="input-group">
                     <span class="input-group-addon">物料编码：</span>
-
                     <input class="form-control" id="item_detail_nr" type="text" name="item_detail_nr">
                 </div>
             </div>
@@ -238,6 +237,8 @@
 
 <script type="application/javascript">
     ItemDetail.getMainData();
+    ItemDetail.getMainSuppliersData();
+    ItemDetail.getSuppliers();
 </script>
 
 {% endblock %}
