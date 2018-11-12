@@ -2,9 +2,6 @@
 {% load i18n %}
 
 {% block extrahead %}{{block.super}}
-<head>
-</head>
-<!--head中的内容,如js-->
 
 <script src="{{STATIC_URL}}js/item_detail.js" type="application/javascript"></script>
 
@@ -67,6 +64,10 @@
         padding: 10px 20px;
     }
 
+    .input-group {
+        width: 100%;
+    }
+
 </style>
 
 {% endblock %}
@@ -74,34 +75,39 @@
 {% block content %}
 <!--主页面内容-->
 <div id="item-detail" class="row" style="margin: 30px 0 0 0">
-    <form class="form-cls">
+    <form class="form-cls" id="main_form">
         <div class="row">
             <div class="col-md-3">
                 <div class="input-group">
                     <span class="input-group-addon">产品描述：</span>
-                    <input class="form-control" id="description_item" type="text"
-                           name="description">
+                    <input class="form-control" id="item_detail_description" type="text"
+                           name="item_detail_description">
                 </div>
             </div>
 
             <div class="col-md-3">
                 <div class="input-group">
                     <span class="input-group-addon">仓库代码：</span>
-                    <input class="form-control" id="code_warehouse" type="text" name="code">
+                    <!--<input class="form-control" id="item_detail_location_nr" type="text" name="item_detail_location_nr">-->
+                    <select class="form-control" name="item_detail_location" id="item_detail_location" onchange="ItemDetail.locationChange()">
+                    </select>
                 </div>
             </div>
 
             <div class="col-md-3">
                 <div class="input-group">
                     <span class="input-group-addon">库存数量：</span>
-                    <input class="form-control" id="stock_item" type="text" name="stock">
+                    <input class="form-control" id="item_detail_total_qty" type="text"
+                           name="item_detail_total_qty">
                 </div>
             </div>
 
             <div class="col-md-3">
                 <div class="input-group">
                     <span class="input-group-addon">物料锁定类型：</span>
-                    <input class="form-control" id="type_item" type="text" name="type">
+                    <!--<input class="form-control" id="item_detail_lock_types" type="text" name="item_detail_lock_types">-->
+                    <select class="form-control" name="item_detail_lock_types" id="item_detail_lock_types">
+                    </select>
                 </div>
             </div>
         </div>
@@ -111,30 +117,31 @@
                 <div class="input-group">
                     <span class="input-group-addon">物料编码：</span>
 
-                    <input class="form-control" id="code_item" type="text" name="code_item">
+                    <input class="form-control" id="item_detail_nr" type="text" name="item_detail_nr">
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="input-group">
                     <span class="input-group-addon">替代料号：</span>
 
-                    <input class="form-control" id="alternative_item" type="text"
-                           name="alternative_item">
+                    <input class="form-control" id="item_detail_successor_nr" type="text"
+                           name="item_detail_successor_nr">
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="input-group">
                     <span class="input-group-addon">可用库存：</span>
 
-                    <input class="form-control" id="stock_avai" type="text" name="stock_avai">
+                    <input class="form-control" id="item_detail_available_qty" type="text"
+                           name="item_detail_available_qty">
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="input-group">
                     <span class="input-group-addon">到期：</span>
 
-                    <input class="form-control vDateField" id="deadline_item" type="text"
-                           name="deadline_item"
+                    <input class="form-control vDateField" id="item_detail_lock_expire_at" type="text"
+                           name="item_detail_lock_expire_at"
                            placeholder="日期">
                 </div>
             </div>
@@ -144,39 +151,40 @@
                 <div class="input-group">
                     <span class="input-group-addon">计划策略：</span>
 
-                    <input class="form-control" id="plan_strategy" class="form-control" type="text"
+                    <input class="form-control" id="item_detail_plan_strategies_current" type="text"
                            name="plan_strategy">
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="input-group">
                     <span class="input-group-addon">物料状态：</span>
-
-                    <input class="form-control" id="status_item" class="form-control" type="text" name="status_item">
+                    <!--<input class="form-control" id="status_item" type="text" name="status_item">-->
+                    <select class="form-control" name="item_detail_statuses" id="item_detail_statuses">
+                    </select>
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="input-group">
                     <span class="input-group-addon">库存金额：</span>
 
-                    <input class="form-control" id="stock_amount" class="form-control" type="text" name="stock_amount">
+                    <input class="form-control" id="item_detail_buffer_price" type="text" name="item_detail_buffer_price">
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="input-group">
                     <span class="input-group-addon">物料ABC货值：</span>
 
-                    <input class="form-control" id="value_item" class="form-control" type="text" name="value_item">
+                    <input class="form-control" id="item_detail_price_abc" type="text" name="item_detail_price_abc">
                 </div>
             </div>
         </div>
 
         <div class="row">
             <div class="col-md-6">
-                <button type="button" class="col-md-2 btn btn-primary default btn-aps btn-aps-save"
+                <button type="button" disabled class="col-md-2 btn btn-primary default btn-aps btn-aps-save"
                         style="margin-left: 15px">订货点ROP
                 </button>
-                <button type="button" class="col-md-2 btn btn-primary default btn-aps btn-aps-save"
+                <button type="button" disabled class="col-md-2 btn btn-primary default btn-aps btn-aps-save"
                         style="margin-left: 15px">ROP计算
                 </button>
             </div>
@@ -184,7 +192,7 @@
             <div class="col-md-3  pull-right">
                 <div class="input-group">
                     <span class="input-group-addon">物料ABC数量：</span>
-                    <input class="form-control" id="amount_item" class="form-control" type="text" name="amount_item">
+                    <input class="form-control" id="item_detail_qty_abc" type="text" name="item_detail_qty_abc">
                 </div>
             </div>
         </div>
@@ -228,4 +236,10 @@
     </div>
 </div>
 
+<script type="application/javascript">
+    ItemDetail.getMainData();
+</script>
+
 {% endblock %}
+
+
