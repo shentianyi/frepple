@@ -1602,9 +1602,9 @@ class Forecast(AuditModel, ForecastCommentOperation):
     @classmethod
     def parse_date(cls, date_type, year, date_number):
         if date_type == 'W':
-            return la_time.weeknum2datetime(year, date_number)
+            return la_time.weeknum2dt(year, date_number)
         elif date_type == 'M':
-            return la_time.monthnum2datetime(year, date_number)
+            return la_time.monthnum2dt(year, date_number)
         else:
             raise Exception('Error datetype in forecast')
 

@@ -1387,7 +1387,7 @@ class ItemMainData(View):
         except:
             successor_nr = None
 
-        lock_types = {"current": item.type,
+        lock_types = {"current": item.lock_type,
                       "values": [{"value": k, "text": v} for k, v in dict(Item.lock_types).items()]}
 
         item_statuses = {"current": item.status,
@@ -1415,6 +1415,7 @@ class ItemMainData(View):
             "nr": item.nr,
             "successor_nr": successor_nr,
             "description": item.description,
+            "project_nr":item.project_nr,
             "location": location,
             "lock_types": lock_types,
             "lock_expire_at": item.lock_expire_at,
@@ -1442,7 +1443,7 @@ class ItemSupplierData(View):
             supplier_dict = {
                 "id": f.supplier.id,
                 "name": f.supplier.name,
-                "nr": f.supplier.nr,
+                "nr":f.supplier.nr,
                 "country": f.supplier.country,
                 "city": f.supplier.city,
                 "address": f.supplier.address,
@@ -1523,7 +1524,7 @@ class MainSupplierData(View):
             "plan_supplier_date": supplier.plan_supplier_date,
             "plan_load_date": supplier.plan_load_date,
             "plan_receive_date": supplier.plan_receive_date,
-            "totall_lead_time": totall_lead_time,
+            "totall_lead_time": float(totall_lead_time),
             "cost": supplier.cost,
             "cost_unit": supplier.cost_unit,
             "earliest_order_date": supplier.earliest_order_date,

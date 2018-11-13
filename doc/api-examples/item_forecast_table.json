@@ -3,6 +3,7 @@
   "code": 200,
   "message": null,
   "content": {
+    // 仓名
     "location": {
       "id": 1,
       "nr": "abc",
@@ -12,13 +13,21 @@
       {
         "x": "2018-1",
         "y": {
+          // 合计
           "total": 1,
+          //　去年销量
           "last_sale_qty": 1,
+          // 实际销量
           "last_actual_sale_qty": 1,
+          // 系统统计预测
           "system_forecast_qty": 1,
+          // 配额系数
           "ratio": 1,
+          // 手工预测
           "normal_qty": 1,
+          // 新品上市计划量
           "new_product_plan_qty": 1,
+          // 促销量
           "promotion_qty": 1
         }
       }
