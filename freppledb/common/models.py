@@ -672,7 +672,7 @@ class Bucket(AuditModel):
         :return:
         """
         if date_type_short_cut.lower() == 'w':
-            return "%s-%s%s" %(dt.year, dt.strftime('%W'),_('week'))
+            return "%s-%s%s" %(dt.year, la_time.ios_weeknumberstr(dt),_('week'))
         elif date_type_short_cut.lower() == 'm':
             if dt.month == 1:
                 return dt.year

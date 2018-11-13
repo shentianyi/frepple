@@ -1415,7 +1415,7 @@ class ItemMainData(View):
             "nr": item.nr,
             "successor_nr": successor_nr,
             "description": item.description,
-            "project_nr":item.project_nr,
+            "project_nr": item.project_nr,
             "location": location,
             "lock_types": lock_types,
             "lock_expire_at": item.lock_expire_at,
@@ -1443,7 +1443,7 @@ class ItemSupplierData(View):
             supplier_dict = {
                 "id": f.supplier.id,
                 "name": f.supplier.name,
-                "nr":f.supplier.nr,
+                "nr": f.supplier.nr,
                 "country": f.supplier.country,
                 "city": f.supplier.city,
                 "address": f.supplier.address,
@@ -1514,8 +1514,8 @@ class MainSupplierData(View):
         product_time = supplier.product_time
 
         data = {
-            "id": supplier.supplier.id,
-            "supplier": supplier.supplier.name,
+            "supplier_id": supplier.supplier.id,
+            "name": supplier.supplier.name,
             "nr": supplier.supplier.nr,
             "product_time": product_time if product_time else None,
             "load_time": load_time if load_time else None,
@@ -1569,12 +1569,13 @@ class ItemSimulation(View):
                                 content_type='application/json')
 
         data = {
+            "supplier_id": supplier.supplier.id,
+            "nr": supplier.supplier.nr,
+            "name": supplier.supplier.name,
             # TODO 目前订货点没有数据
             "now_order_point": 0,
             "MOQ": supplier.moq,
-            "order_max_qty": supplier.order_max_qty,
-            "nr": supplier.supplier.nr,
-            "name": supplier.supplier.name
+            "order_max_qty": supplier.order_max_qty
         }
         message = ResponseMessage()
         message.result = True
@@ -1585,11 +1586,66 @@ class ItemSimulation(View):
                             content_type='application/json')
 
 
-# 代号：GET_ITEM_PLAN_GRAPH_API
-# 单个物料计划图表
-class ItemGraph(View):
+# 代号：GET_ITEM_PLAN_DATA_API
+# 获取单个物料计划主数据
+class ItemPlan(View):
     def get(self, request, id, *args, **kwargs):
-        pass
+        message = ResponseMessage()
+        current_time = timezone.now()
+        try:
+            supplier = ItemSupplier.objects.filter(item=id, effective_start__lte=current_time,
+                                                   effective_end__gte=current_time).order_by('priority', '-ratio',
+                                                                                             'id').first()
+        except Exception as e:
+            message.result = False
+            message.code = 404
+            message.message = "合法的主供应商不存在"
+            return HttpResponse(json.dumps(message.__dict__, cls=DjangoJSONEncoder, ensure_ascii=False),
+                                content_type='application/json')
+        receive_time = supplier.receive_time
+        load_time = supplier.load_time
+        transit_time = supplier.transit_time
+        product_time = supplier.product_time
+
+        if receive_time is None:
+            receive_time = 0
+        if load_time is None:
+            load_time = 0
+        if transit_time is None:
+            transit_time = 0
+        if product_time is None:
+            product_time = 0
+        # totall_lead_time　日历日的计算
+        totall_time = product_time + load_time + transit_time + receive_time
+        cd = int(totall_time / 5)
+        day = cd * 5
+        lead_time = cd * 7 + totall_time - day
+
+        data = {
+            "supplier_id": supplier.supplier.id,
+            "nr": supplier.supplier.nr,
+            "name": supplier.supplier.name,
+            "safe_buffer": 0,
+            "moq": supplier.moq,
+            "mpq": supplier.mpq,
+            "outer_package_num": supplier.outer_package_num,
+            "pallet_num": supplier.pallet_num,
+            "lead_time": float(lead_time),
+            "per_month_sale": 0,
+            "last_year_sale": 0,
+            "last_month_sale": 0,
+            "now_month_sale": 0,
+            "now_buffer_time": 0,
+            "now_order_point": 0
+        }
+
+        message = ResponseMessage()
+        message.result = True
+        message.code = 200
+        message.message = "相应数据查询成功"
+        message.content = data
+        return HttpResponse(json.dumps(message.__dict__, cls=DjangoJSONEncoder, ensure_ascii=False),
+                            content_type='application/json')
 
 
 class ItemCustomerList(GridReport):

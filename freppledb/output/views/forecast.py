@@ -650,7 +650,7 @@ class ForecastItemGraph(View):
         }
         message['content']['current_time_point'] = current
 
-        while start_time <= current_time:
+        while start_time < current_time:
             dispatches_points = {
                 "x_value": start_time,
                 "x_text": Bucket.get_x_text_name(start_time, date_type),
@@ -684,4 +684,30 @@ class ForecastItemGraph(View):
             # 下一个值
             current_time = Bucket.get_nex_time_by_date_type(current_time, date_type)
 
+        return JsonResponse(message, encoder=DjangoJSONEncoder, safe=False)
+
+
+# 单个物料模拟列表
+class ItemBufferOperateRecords(View):
+    permissions = (('view_buffer_operate_records', 'Can view buffer operate records'),)
+
+    title = _('buffer operate records')
+
+    @method_decorator(staff_member_required())
+    def get(self, request, *args, **kwargs):
+        item = Item.objects.filter(id=request.GET.get('id', None)).first()
+        page = request.GET.get('page', 1)
+        page_size = request.GET.get('page_size', 100)
+
+        message = {
+            "page": page,
+            "records": 0,
+            "total": 0,
+            "rows": []
+        }
+        data = {
+            "date_number": 0,
+            "qty": 0
+        }
+        message["rows"].append(data)
         return JsonResponse(message, encoder=DjangoJSONEncoder, safe=False)
