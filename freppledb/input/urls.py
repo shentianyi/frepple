@@ -41,7 +41,7 @@ urlpatterns = [
   # 单个物料主数据界面前置期+供应商+包装部分数据
   url(r'^data/input/item/mainsupplierdata/(?P<id>(.+))/$', freppledb.input.views.MainSupplierData.as_view(),name="input_item_detail_mainsupplierdata"),
   # 获取单个物料模拟主数据列表
-  url(r'^data/input/item/simulationsdata/(?P<id>(.+))/$', freppledb.input.views.ItemSimulation.as_view(),name="input_item_detail_simulationdata"),
+  url(r'^data/input/item/simulationdata/(?P<id>(.+))/$', freppledb.input.views.ItemSimulation.as_view(),name="input_item_detail_simulationdata"),
 
   url(r'^data/input/itemcustomer/$', freppledb.input.views.ItemCustomerList.as_view(), name="input_itemcustomer_changelist"),
   url(r'^data/input/itemsuccessor/$', freppledb.input.views.ItemSuccessorList.as_view(), name="input_itemsuccessor_changelist"),
