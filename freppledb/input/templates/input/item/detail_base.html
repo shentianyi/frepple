@@ -68,6 +68,17 @@
         width: 100%;
     }
 
+    #operation-button button {
+        width: 80px;
+        height: 26px;
+        margin-left: 10px;
+    }
+
+    #operation-button button:last-child {
+        width: 80px;
+        height: 26px;
+    }
+
 </style>
 
 {% endblock %}
@@ -89,7 +100,8 @@
                 <div class="input-group">
                     <span class="input-group-addon">仓库代码：</span>
                     <!--<input class="form-control" id="item_detail_location_nr" type="text" name="item_detail_location_nr">-->
-                    <select class="form-control" name="item_detail_location" id="item_detail_location" onchange="ItemDetail.locationChange()">
+                    <select class="form-control" name="item_detail_location" id="item_detail_location"
+                            onchange="ItemDetail.locationChange()">
                     </select>
                 </div>
             </div>
@@ -166,7 +178,8 @@
                 <div class="input-group">
                     <span class="input-group-addon">库存金额：</span>
 
-                    <input class="form-control" id="item_detail_buffer_price" type="text" name="item_detail_buffer_price">
+                    <input class="form-control" id="item_detail_buffer_price" type="text"
+                           name="item_detail_buffer_price">
                 </div>
             </div>
             <div class="col-md-3">
@@ -179,7 +192,7 @@
         </div>
 
         <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-6" style="padding-left: 77px">
                 <button type="button" disabled class="col-md-2 btn btn-primary default btn-aps btn-aps-save"
                         style="margin-left: 15px">订货点ROP
                 </button>
@@ -232,6 +245,13 @@
                 {% include "input/item/item_forecast.html" %}
             </div>
         </div>
+    </div>
+
+    <div id="operation-button" class="col-md-12" style="margin: 20px 0">
+        <button id="closeButton" class="btn btn-primary default btn-aps btn-aps-save pull-right" type="button">关闭</button>
+        <button id="saveButton" class="btn btn-primary default btn-aps btn-aps-save pull-right" type="submit">保存</button>
+        <button id="showCalendarButton" class="btn btn-primary default btn-aps btn-aps-save pull-right" type="button">日历</button>
+        <button id="showItemButton" class="btn btn-primary default btn-aps btn-aps-save pull-right" type="button">物料表</button>
     </div>
 </div>
 

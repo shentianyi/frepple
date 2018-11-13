@@ -100,7 +100,20 @@ ItemDetail.locationChange = function () {
     if (locationArray.length > 0) {
         for (var i = 0; i < locationArray.length; i++) {
             if (selectedValue == locationArray[i].id) {
-                FillData(locationArray[i].buffer);
+                FillData('item_detail', locationArray[i].buffer);
+                return;
+            }
+        }
+    }
+};
+
+ItemDetail.supplierChange = function () {
+    var selectedValue = $("#item_detail_supplier_id").val();
+
+    if (supplierArray.length > 0) {
+        for (var i = 0; i < supplierArray.length; i++) {
+            if (selectedValue == supplierArray[i].id) {
+                FillData('item_detail_supplier', supplierArray[i]);
                 return;
             }
         }
