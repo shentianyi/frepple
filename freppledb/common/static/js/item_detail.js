@@ -4,6 +4,7 @@ var itemId = parseInt(window.location.pathname.split('/item_detail/')[1]);
 var locationArray = [];
 var supplierArray = [];
 
+//获取公共数据
 ItemDetail.getMainData = function () {
     $.ajax({
         url: '/data/input/item/maindata/' + itemId + "/",
@@ -23,13 +24,13 @@ ItemDetail.getMainData = function () {
                 FillData('item_detail', data.content);
 
                 locationArray = data.content.location;
-                console.log(data.content)
+
                 if (locationArray.length > 0) {
                     const buffer = locationArray[0].buffer;
                     FillData('item_detail', buffer);
                 }
             } else {
-                alert(data.message)
+                // alert(data.message)
             }
         },
         error: function (err) {
@@ -38,15 +39,15 @@ ItemDetail.getMainData = function () {
     })
 };
 
+//获取主数据
 ItemDetail.getMainSuppliersData = function () {
     $.ajax({
-        url: '/data/input/item/mainsuppliersdata/' + itemId + "/",
+        url: '/data/input/item/mainsupplierdata/' + itemId + "/",
         type: 'application/json',
         method: 'get',
         success: function (data) {
             // 填充数据
             if (data.result) {
-                console.log('data', data.content);
                 FillData('item_detail_main', data.content);
             } else {
                 // alert(data.message)
@@ -58,7 +59,8 @@ ItemDetail.getMainSuppliersData = function () {
     })
 };
 
-ItemDetail.getSuppliers = function () {
+//获取供应商数据
+ItemDetail.getSuppliersData = function () {
     $.ajax({
         url: '/data/input/item/suppliers/' + itemId + "/",
         type: 'application/json',
@@ -66,26 +68,19 @@ ItemDetail.getSuppliers = function () {
         success: function (data) {
             // 填充数据
             if (data.result) {
-                console.log('supplierdata', data);
 
                 FillData('item_detail_supplier', data.content[0]);
-
-                // FillData({supplier: data.content});
 
                 supplierArray = data.content;
                 var html = '';
                 if (supplierArray.length > 0) {
                     for (var i = 0; i < supplierArray.length; i++) {
-                        html += "<option value=" + supplierArray[i].id + ">" + supplierArray[i].id + "</option>"
+                        html += "<option value=" + supplierArray[i].nr + ">" + supplierArray[i].nr + "</option>"
                     }
-                    $("#item_detail_supplier_id" ).append(html);
+                    $("#item_detail_supplier_nr").append(html);
                 }
-                // if (supplierArray.length > 0) {
-                //     const buffer = locationArray;
-                //     FillData(buffer);
-                // }
             } else {
-                alert(data.message)
+                // alert(data.message)
             }
         },
         error: function (err) {
@@ -94,6 +89,142 @@ ItemDetail.getSuppliers = function () {
     })
 };
 
+//获取计划数据
+ItemDetail.getPlansData = function () {
+    $.ajax({
+        url: '/data/input/item/plansdata/' + itemId + "/",
+        type: 'application/json',
+        method: 'get',
+        success: function (data) {
+            // 填充数据
+            if (data.result) {
+
+                FillData('item_detail_plan', data.content);
+
+            } else {
+                // alert(data.message)
+            }
+        },
+        error: function (err) {
+            alert(err);
+        }
+    })
+};
+
+//获取预测界面grid数据
+ItemDetail.getForecastGridData = function (date_type, report_type) {
+
+    var locationId = $("#item_detail_location").val();
+    var tableColModel = [
+        {
+            name: 'x',
+            label: '',
+        },
+    ];
+
+    $("#content-main").append('<table id="grid" class="table table-striped pivotgrid"></table>');
+
+    jQuery("#grid").jqGrid({
+        url: "/data/output/forecast/item/?id=" + itemId + "&location_id=" + locationId + "&date_type=" + (date_type ? date_type : '') + "&report_type=" + (report_type ? report_type : ''),
+        datatype: "json",
+        jsonReader: {
+            repeatitems: false
+        },
+        colModel: tableColModel,
+        pager: '#gridpager',
+        emptyrecords: "无数据显示",
+        loadtext: "卖力加载中...",
+        // rownumbers: true,
+        shrinkToFit: false,
+        autoScroll: true,
+        // rowNum: {{ request.pagesize }},
+        viewrecords: true,
+        // sortorder: "asc",
+        iconSet: "fontAwesome",
+        guiStyle: "bootstrapPrimary",
+        hidegrid: false,
+        resizeStop: grid.saveColumnConfiguration,
+        scrollRows: true,
+        autowidth: true,
+        // multiSort: true,
+        // maxSortColumns: 3,
+        // viewSort: true,
+        // onSortCol: grid.saveColumnConfiguration,
+        // onPaging: grid.saveColumnConfiguration,
+//                postData: {filters: JSON.stringify(filterParams)},
+//                 postData: {filters: filterParams},
+//                 search:true,
+//                 searching: {
+//                     multipleSearch: true,
+//                     multipleGroup: false, // 不可以组搜索
+//                     closeOnEscape: true,
+//                     searchOnEnter: true,
+//                     searchOperators: true,
+//                     zIndex: 5000,
+//                     width: 550
+//                 },
+        loadComplete: function () {
+            $("#gird").closest(".ui-jqgrid-bdiv").css({'overflow-y': 'auto'});
+        }
+    })
+};
+
+//获取预测界面chart数据
+ItemDetail.getForecastChartData = function (date_type, report_type) {
+
+    var locationId = $("#item_detail_location").val();
+    // var forecastChart = echarts.init($("#item_detail_forecast_chart"));
+
+    $.ajax({
+        url: "/data/output/forecast/item_report/id=" + itemId + "&location_id=" + locationId + "&date_type=" + (date_type ? date_type : '') + "&report_type=" + (report_type ? report_type : ''),
+        type: 'application/json',
+        method: 'get',
+        success: function (data) {
+            if (data.result) {
+
+                console.log('data-----------------', data)
+                var option = {
+                    title: {
+                        show: false
+                    },
+                    tooltip: {
+                        position: [0, 0]
+                    },
+                    legend: {
+                        show: false
+                    },
+                    xAxis: {
+                        // data: ["上月预测", "当月预测", "下月预测"]
+                    },
+                    yAxis: {
+                        show: false,
+                    },
+                    series: [{
+                        // name: '年初计划值',
+                        // type: 'line',
+                        // data: [ret[i].year_qty, ret[i].year_qty, ret[i].year_qty]
+                    },
+                        {
+                            // name: '预测值',
+                            // type: 'bar',
+                            // barWidth: 30,
+                            // data: [ret[i].last_qty, ret[i].current_qty, ret[i].next_qty]
+                        }
+                    ]
+                };
+                // forecastChart.setOption(option);
+
+            } else {
+                // alert(data.message)
+            }
+        },
+        error: function (err) {
+            alert(err);
+        }
+    })
+};
+
+//切换仓库代码时相应数据一起变化
 ItemDetail.locationChange = function () {
     var selectedValue = $("#item_detail_location").val();
 
@@ -107,12 +238,13 @@ ItemDetail.locationChange = function () {
     }
 };
 
+//切换供应商代码时相应数据一起变化
 ItemDetail.supplierChange = function () {
-    var selectedValue = $("#item_detail_supplier_id").val();
+    var selectedValue = $("#item_detail_supplier_nr").val();
 
     if (supplierArray.length > 0) {
         for (var i = 0; i < supplierArray.length; i++) {
-            if (selectedValue == supplierArray[i].id) {
+            if (selectedValue == supplierArray[i].nr) {
                 FillData('item_detail_supplier', supplierArray[i]);
                 return;
             }
@@ -138,7 +270,6 @@ function FillData(prefix, data) {
         }
 
         var valueType = typeof (value);
-        // console.log('valueType', valueType)
         switch (valueType) {
             case "string":
                 $("#" + prefix + "_" + key).val(value);

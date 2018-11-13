@@ -1442,11 +1442,12 @@ class ItemSupplierData(View):
             supplier_dict = {
                 "id": f.supplier.id,
                 "name": f.supplier.name,
+                "nr": f.supplier.nr,
                 "country": f.supplier.country,
                 "city": f.supplier.city,
                 "address": f.supplier.address,
                 "phone": f.supplier.phone,
-                "tel": f.supplier.telephone,
+                "telephone": f.supplier.telephone,
                 "email": f.supplier.email,
                 "contact": f.supplier.contact,
                 "cost": f.cost,
