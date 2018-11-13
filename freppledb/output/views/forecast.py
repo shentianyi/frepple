@@ -650,7 +650,7 @@ class ForecastItemGraph(View):
         }
         message['content']['current_time_point'] = current
 
-        while start_time <= current_time:
+        while start_time < current_time:
             dispatches_points = {
                 "x_value": start_time,
                 "x_text": Bucket.get_x_text_name(start_time, date_type),

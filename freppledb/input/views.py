@@ -1515,7 +1515,7 @@ class MainSupplierData(View):
 
         data = {
             "id": supplier.supplier.id,
-            "supplier": supplier.supplier.name,
+            "name": supplier.supplier.name,
             "nr": supplier.supplier.nr,
             "product_time": product_time if product_time else None,
             "load_time": load_time if load_time else None,

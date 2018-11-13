@@ -176,13 +176,61 @@ ItemDetail.getForecastChartData = function (date_type, report_type) {
     // var forecastChart = echarts.init($("#item_detail_forecast_chart"));
 
     $.ajax({
-        url: "/data/output/forecast/item_report/id=" + itemId + "&location_id=" + locationId + "&date_type=" + (date_type ? date_type : '') + "&report_type=" + (report_type ? report_type : ''),
+        url: "/data/output/forecast/item_report/?id=" + itemId + "&location_id=" + locationId + "&date_type=" + (date_type ? date_type : '') + "&report_type=" + (report_type ? report_type : ''),
         type: 'application/json',
         method: 'get',
         success: function (data) {
             if (data.result) {
+                const series = data.content.serials
+                console.log('data-----------------', data);
 
-                console.log('data-----------------', data)
+                var legendData = [];
+                var xAxis = [];
+                var yFAxis = [];
+                var yDAxis = [];
+                var currentValue = data.content.current_time_point.x_text;
+                console.log('currentValue-----------------', currentValue);
+                // var allSeries = [];
+
+                for (var i = 0; i < series.length; i++) {
+                    legendData.push(series[i].serial);
+                    for (var j = 0; j < series[i].points.length; j++) {
+                        xAxis.push(series[i].points[j].x_text)
+                    }
+                    if (series[i].serial_type === 'FORECAST BASIS') {
+                        for (var k = 0; k < series[i].points.length; k++) {
+                            yFAxis.push(series[i].points[k].y);
+                            yDAxis.push(100);
+                        }
+                    } else if (series[i].serial_type === 'DEMAND FORECAST') {
+                        for (var k = 0; k < series[i].points.length; k++) {
+                            yDAxis.push(series[i].points[k].y)
+                            yFAxis.push(100);
+                        }
+                    }
+                }
+                // console.log('---------legendData--------', legendData);
+                // console.log('---------xAxis--------', xAxis);
+                // console.log('---------yFAxis--------', yFAxis);
+                // console.log('---------yDAxis--------', yDAxis);
+
+                var forecastChart = echarts.init(document.getElementById('item_detail_forecast_chart'));
+                // console.log(forecastChart)
+
+                // for (var i = 0; i < legendData.length; i++) {
+                //     switch (legendData[i]) {
+                //         case 'Dispatches(Forecast basis)':
+                //             var series = {
+                //                 name: legendData[i],
+                //                 type: 'bar',
+                //                 data: yFAxis,
+                //             };
+                //             allSeries.push(series);
+                //         case 'Demand forecast':
+                //
+                //     }
+                // }
+
                 var option = {
                     title: {
                         show: false
@@ -191,29 +239,65 @@ ItemDetail.getForecastChartData = function (date_type, report_type) {
                         position: [0, 0]
                     },
                     legend: {
-                        show: false
+                        data: legendData
                     },
                     xAxis: {
-                        // data: ["上月预测", "当月预测", "下月预测"]
+                        data: xAxis
                     },
                     yAxis: {
                         show: false,
                     },
+                    dataZoom: [
+                        {
+                            show: true,
+                            start: 94,
+                            end: 100,
+                            orient: "horizontal"
+                        },
+                        {
+                            type: 'inside',
+                            start: 94,
+                            end: 100
+                        },
+                        {
+                            show: true,
+                            yAxisIndex: 0,
+                            filterMode: 'empty',
+                            width: 30,
+                            height: '80%',
+                            showDataShadow: false,
+                            left: '93%'
+                        }
+                    ],
                     series: [{
-                        // name: '年初计划值',
-                        // type: 'line',
-                        // data: [ret[i].year_qty, ret[i].year_qty, ret[i].year_qty]
+                        name: 'Dispatches(Forecast basis)',
+                        type: 'bar',
+                        data: yFAxis,
+                        markLine: {
+                            symbol:"none",
+                            lineStyle: {
+                                type: 'solid',
+                                color: 'black',
+                                width: '2px',
+
+                                // normal: {
+                                //     type: 'solid',
+                                // }
+                            },
+                            data: [
+                                // {type: 'average', name: '当前值'},
+                                {xAxis: currentValue}
+                            ]
+                        }
                     },
                         {
-                            // name: '预测值',
-                            // type: 'bar',
-                            // barWidth: 30,
-                            // data: [ret[i].last_qty, ret[i].current_qty, ret[i].next_qty]
-                        }
-                    ]
+                            name: 'Demand forecast',
+                            type: 'bar',
+                            data: yDAxis,
+                        },
+                    ],
                 };
-                // forecastChart.setOption(option);
-
+                forecastChart.setOption(option);
             } else {
                 // alert(data.message)
             }
