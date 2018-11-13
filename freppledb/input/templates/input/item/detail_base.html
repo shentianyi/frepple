@@ -32,19 +32,31 @@
         border-bottom: 0;
     }
 
+    .form-span {
+        padding: 10px 20px;
+        margin-bottom: 20px;
+        background-color: #FFFFFF;
+        box-shadow: 0px 2px 6px 0px rgba(216, 216, 216, 1);
+    }
+
+    .form-span .row {
+        margin-top: 20px;
+    }
+
     #item-detail .row {
         margin-bottom: 10px;
     }
 
     #tabs {
         margin-top: 20px;
-        background: #fff;
+        /*background: #fff;*/
         margin-bottom: 20px;
         box-shadow: 0px 2px 6px 0px rgba(216, 216, 216, 1);
     }
 
     #tabs ul {
         float: none;
+        background-color: #FFFFFF;
     }
 
     #tabs ul li a {
@@ -59,10 +71,15 @@
         color: #1f5aff;
     }
 
-    #main, #supplier, #plan, #simulation, #forecast {
+    #main, #plan, #simulation {
         background: #fff;
         padding: 10px 20px;
     }
+
+    /*#supplier {*/
+    /*padding: 10px 20px;*/
+    /*background-color: transparent;*/
+    /*}*/
 
     .input-group {
         width: 100%;
@@ -216,15 +233,15 @@
                 <a href="#main" aria-controls="main" role="tab"
                    data-toggle="tab">主数据</a></li>
             <li role="presentation">
-                <a href="#supplier" aria-controls="supplier" role="tab" data-toggle="tab">供应商</a>
+                <a href="#supplier" aria-controls="supplier" role="tab" data-toggle="tab" onclick="ItemDetail.getSuppliersData()">供应商</a>
             </li>
             <li role="presentation">
-                <a href="#plan" aria-controls="plan" role="tab" data-toggle="tab">计划</a></li>
+                <a href="#plan" aria-controls="plan" role="tab" data-toggle="tab" onclick="ItemDetail.getPlansData()">计划</a></li>
             <li role="presentation">
                 <a href="#simulation" aria-controls="simulation" role="tab" data-toggle="tab">模拟</a>
             </li>
             <li role="presentation">
-                <a href="#forecast" aria-controls="forecast" role="tab" data-toggle="tab">预测</a>
+                <a href="#forecast" aria-controls="forecast" role="tab" data-toggle="tab" onclick="ItemDetail.getForecastGridData(), ItemDetail.getForecastChartData()">预测</a>
             </li>
         </ul>
 
@@ -248,17 +265,21 @@
     </div>
 
     <div id="operation-button" class="col-md-12" style="margin: 20px 0">
-        <button id="closeButton" class="btn btn-primary default btn-aps btn-aps-save pull-right" type="button">关闭</button>
-        <button id="saveButton" class="btn btn-primary default btn-aps btn-aps-save pull-right" type="submit">保存</button>
-        <button id="showCalendarButton" class="btn btn-primary default btn-aps btn-aps-save pull-right" type="button">日历</button>
-        <button id="showItemButton" class="btn btn-primary default btn-aps btn-aps-save pull-right" type="button">物料表</button>
+        <button id="closeButton" class="btn btn-primary default btn-aps btn-aps-save pull-right" type="button">关闭
+        </button>
+        <button id="saveButton" class="btn btn-primary default btn-aps btn-aps-save pull-right" type="submit">保存
+        </button>
+        <button id="showCalendarButton" class="btn btn-primary default btn-aps btn-aps-save pull-right" type="button">
+            日历
+        </button>
+        <button id="showItemButton" class="btn btn-primary default btn-aps btn-aps-save pull-right" type="button">物料表
+        </button>
     </div>
 </div>
 
 <script type="application/javascript">
     ItemDetail.getMainData();
     ItemDetail.getMainSuppliersData();
-    ItemDetail.getSuppliers();
 </script>
 
 {% endblock %}

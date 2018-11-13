@@ -1,10 +1,40 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+<form class="form-span">
+    <div class="row" style="margin-left: 0; margin-right: 0">
+        <button id="grid_chooseMonthButton" class="btn btn-primary default btn-aps btn-aps-save pull-left" type="button">月
+            <img src="{{STATIC_URL}}img/item/month.png">
+        </button>
+        <button id="grid_chooseDayButton" class="btn btn-primary default btn-aps btn-aps-save pull-left" type="button"
+                style="margin-left: 10px">今天
+        </button>
+        <button id="forecastApplyButton" class="btn btn-primary default btn-aps btn-aps-save pull-right" type="button">
+            应用
+        </button>
+        <button id="forecastSaveButton" class="btn btn-primary default btn-aps btn-aps-save pull-right" type="button"
+                style="margin-right: 10px">保存
+        </button>
+    </div>
 
-</body>
-</html>
+    <div class="row">
+        <!--表格 内容-->
+        <div id="content-main" class="col-md-12" style="min-height: 150px; margin-top: 0.7em">
+        </div>
+
+        <div id="gridpager" class="col-md-12"></div>
+    </div>
+</form>
+
+<form class="form-span">
+    <div class="row" style="margin-left: 0; margin-right: 0;">
+        <p class="pull-left">时标：</p>
+        <button id="chart_chooseMonthButton" class="btn btn-primary default btn-aps btn-aps-save pull-left" type="button">月
+            <img src="{{STATIC_URL}}img/item/month.png">
+        </button>
+        <button id="chart_chooseDayButton" class="btn btn-primary default btn-aps btn-aps-save pull-left" type="button"
+                style="margin-left: 10px">今天
+        </button>
+    </div>
+
+    <div class="row">
+        <div id="item_detail_forecast_chart" style="height: 300px; width: 100%;"></div>
+    </div>
+</form>
