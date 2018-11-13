@@ -157,6 +157,7 @@ class ForecastCompare(View):
             return response
 
     # TODO 如果预测同时存在 W/M等多个时间度量的情况,不处理?
+    #      同时大粒度的时间向小粒度的时间现在不能做很好支持(比如1M转换到4W平均等)
     # 详细: 根据 item+location+customer分页
     # 汇总: 根据 item+location分页
     # 分页是否准确?

@@ -4,6 +4,16 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
 
+def ios_weeknumberstr(dt):
+    """
+    返回周数字符串,如01..53,使用%V,
+    2019-1-1 使用%W是0周,使用%V是1周,
+    :param dt:
+    :return:
+    """
+    return dt.strftime('%V')
+
+
 # 周是1-53周, 但是程序中从0开始
 def weeknum2dt(year, week_number, first_day=1):
     """
@@ -13,9 +23,11 @@ def weeknum2dt(year, week_number, first_day=1):
     :param first_day: 默认 1, 星期一
     :return:
     """
-    return datetime.strptime(("%s %s %s" % (year, week_number, first_day)),
-                             '%Y %W %w')
+    # return datetime.strptime(("%s %s %s" % (year, week_number, first_day)),
+    #                          '%Y %W %w')
 
+    return datetime.strptime(("%s %s %s" % (year, week_number, first_day)),
+                             '%G %V %w')
 
 def dt2weekdt(dt, first_day=1):
     """
@@ -24,7 +36,7 @@ def dt2weekdt(dt, first_day=1):
     :param first_day:
     :return:
     """
-    return weeknum2dt(dt.year, dt.strftime('%W'), first_day)
+    return weeknum2dt(dt.year, dt.strftime('%V'), first_day)
 
 
 def dt2lastweekdt(dt, first_day=1):
