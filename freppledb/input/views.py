@@ -1387,7 +1387,7 @@ class ItemMainData(View):
         except:
             successor_nr = None
 
-        lock_types = {"current": item.type,
+        lock_types = {"current": item.lock_type,
                       "values": [{"value": k, "text": v} for k, v in dict(Item.lock_types).items()]}
 
         item_statuses = {"current": item.status,
@@ -1415,6 +1415,7 @@ class ItemMainData(View):
             "nr": item.nr,
             "successor_nr": successor_nr,
             "description": item.description,
+            "project_nr":item.project_nr,
             "location": location,
             "lock_types": lock_types,
             "lock_expire_at": item.lock_expire_at,
