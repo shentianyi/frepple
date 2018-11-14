@@ -661,30 +661,6 @@ class Bucket(AuditModel):
             return la_time.dt2string(dt)
 
     @classmethod
-    def get_x_text_name(cls,dt,date_type_short_cut):
-        """
-        根据时间和时间类型, 返回x轴时间名称
-        例如: 2018-52周
-              2018-Feb
-             2018-11-13 13:11:02
-        :param datetime:
-        :param date_type_short_cut:
-        :return:
-        """
-        if date_type_short_cut.lower() == 'w':
-            return "%s-%s%s" %(dt.year, la_time.ios_weeknumberstr(dt),_('week'))
-        elif date_type_short_cut.lower() == 'm':
-            if dt.month == 1:
-                return dt.year
-            else:
-                return "%s-%s" %(dt.year, _(dt.strftime('%b')))
-        else:
-            return la_time.dt2string(dt)
-
-
-
-
-    @classmethod
     def get_datetime_by_type(cls,dt, date_type_short_cut):
         """
         根据时间和时间类型, 返回bucket时间

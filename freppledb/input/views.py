@@ -15,6 +15,7 @@
 # License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 import csv
+import math
 import sys
 import traceback
 from datetime import datetime
@@ -1506,7 +1507,7 @@ class MainSupplierData(View):
         totall_time = product_time + load_time + transit_time + receive_time
         cd = int(totall_time / 5)
         day = cd * 5
-        totall_lead_time = cd * 7 + totall_time - day
+        totall_lead_time = math.ceil(cd * 7 + totall_time - day)
 
         receive_time = supplier.receive_time
         load_time = supplier.load_time
@@ -1617,7 +1618,7 @@ class ItemPlan(View):
         totall_time = product_time + load_time + transit_time + receive_time
         cd = int(totall_time / 5)
         day = cd * 5
-        lead_time = cd * 7 + totall_time - day
+        lead_time = math.ceil(cd * 7 + totall_time - day)
 
         data = {
             "supplier_id": supplier.supplier.id,
