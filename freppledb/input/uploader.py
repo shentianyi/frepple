@@ -78,7 +78,6 @@ class ForecastUploader:
                         forecast = Forecast()
                         forecast.date_type = request.POST.get('date_type', 'W')
 
-
                         for k, v in headers_index.items():
                             value = values[v]
                             field_name = headers_field_name[k]
@@ -86,7 +85,8 @@ class ForecastUploader:
                             if field_name == 'location':
                                 try:
                                     if value not in locations:
-                                       locations[value] = Location.objects.using(request.database).values('id').get(nr=value)['id']
+                                        locations[value] = \
+                                        Location.objects.using(request.database).values('id').get(nr=value)['id']
                                     forecast.location_id = locations.get(value, None)
                                 except Location.DoesNotExist as e:
                                     message.result = False
@@ -95,7 +95,8 @@ class ForecastUploader:
                             elif field_name == 'item':
                                 try:
                                     if value not in items:
-                                        items[value] = Item.objects.using(request.database).values('id').get(nr=value)['id']
+                                        items[value] = Item.objects.using(request.database).values('id').get(nr=value)[
+                                            'id']
                                     forecast.item_id = items[value]
                                 except Item.DoesNotExist as e:
                                     message.result = False
@@ -105,7 +106,8 @@ class ForecastUploader:
                             elif field_name == 'customer':
                                 try:
                                     if value not in customers:
-                                        customers[value] = Customer.objects.using(request.database).values('id').get(nr=value)['id']
+                                        customers[value] = \
+                                        Customer.objects.using(request.database).values('id').get(nr=value)['id']
                                     forecast.customer_id = customers[value]
                                 except Customer.DoesNotExist as e:
                                     message.result = False
@@ -149,7 +151,7 @@ class ForecastUploader:
                             for f in forecasts:
                                 f.version = forecast_version
                             # 创建forecast
-                            Forecast.objects.bulk_create(forecasts, batch_size= 100)
+                            Forecast.objects.bulk_create(forecasts, batch_size=100)
                         elif request.POST['action'] == 'update':
                             # 查找最新的version
                             forecast_version = ForecastVersion.objects.using(request.database).latest('created_at')
@@ -188,9 +190,9 @@ class ForecastUploader:
                                         f.version = forecast_version
                                         f.save()
 
-                                endtime =datetime.now()
+                                endtime = datetime.now()
                                 print("start time vs end time: %s vs %s, %s" % (
-                                starttime, endtime, (endtime - starttime).microseconds))
+                                    starttime, endtime, (endtime - starttime).microseconds))
 
                         message.result = True
                         message.message = '上传成功'

@@ -656,6 +656,12 @@ class ForecastItemGraph(View):
                 "x_text": Bucket.get_x_text_name(start_time, date_type),
                 "y": 0
             }
+            forecast_points = {
+                "x_value": start_time,
+                "x_text": Bucket.get_x_text_name(start_time, date_type),
+                "y": 0
+            }
+
             total = 0
             # 赋值
             for row in rows:
@@ -664,10 +670,17 @@ class ForecastItemGraph(View):
 
             dispatches_points["y"] = total
             message["content"]["serials"][0]["points"].append(dispatches_points)
+            message["content"]["serials"][1]["points"].append(forecast_points)
+
             # 下一个值
             start_time = Bucket.get_nex_time_by_date_type(start_time, date_type)
 
         while current_time <= end_time:
+            dispatches_points = {
+                "x_value": current_time,
+                "x_text": Bucket.get_x_text_name(current_time, date_type),
+                "y": 0
+            }
             forecast_points = {
                 "x_value": current_time,
                 "x_text": Bucket.get_x_text_name(current_time, date_type),
@@ -680,11 +693,27 @@ class ForecastItemGraph(View):
                     total += round(row[3] * row[6] / 100, 2) + row[4] + row[5]
 
             forecast_points["y"] = total
+            message["content"]["serials"][0]["points"].append(dispatches_points)
             message["content"]["serials"][1]["points"].append(forecast_points)
             # 下一个值
             current_time = Bucket.get_nex_time_by_date_type(current_time, date_type)
 
         return JsonResponse(message, encoder=DjangoJSONEncoder, safe=False)
+
+
+class PlanItemGraph(View):
+    permissions = (('view_plan_item_graph', 'Can view plan item graph'),)
+
+    title = _('plan item graph')
+
+    @method_decorator(staff_member_required())
+    def get(self, request, *args, **kwargs):
+        pass
+
+
+
+
+
 
 
 # 单个物料模拟列表
@@ -711,3 +740,4 @@ class ItemBufferOperateRecords(View):
         }
         message["rows"].append(data)
         return JsonResponse(message, encoder=DjangoJSONEncoder, safe=False)
+
