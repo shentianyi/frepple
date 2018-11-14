@@ -48,7 +48,7 @@ from openpyxl.styles import NamedStyle, PatternFill
 
 from freppledb.boot import getAttributeFields
 from freppledb.common.message.responsemessage import ResponseMessage
-from freppledb.common.models import Parameter, Comment
+from freppledb.common.models import Parameter, Comment, Bucket
 from freppledb.input.forms import ForecastUploadForm
 from freppledb.input.models import Resource, Operation, Location, SetupMatrix, SetupRule, ItemSuccessor, ItemCustomer, \
     ForecastYear, ForecastVersion, Forecast, ForecastCommentOperation
@@ -1357,6 +1357,7 @@ class ItemList(GridReport):
 # TODO 物料详情
 class ItemDetail(View):
     def get(self, request, *args, **kwargs):
+
         # 默认为main
         # main:         主数据
         # supplier:     供应商
@@ -1365,8 +1366,7 @@ class ItemDetail(View):
         # forecast:     预测
         template_name = "input/item/detail_base.html"
         id = kwargs['id']
-        item = Item.objects.all().get(id=id)
-        return render(request, template_name, {'template_name': template_name})
+        return render(request, template_name, {'template_name': template_name,"date_types": Bucket.chioce_date_type()})
 
 
 # 代号：GET_ITEM_MAIN_DATA_API
@@ -1452,8 +1452,8 @@ class ItemSupplierData(View):
                 "telephone": f.supplier.telephone,
                 "email": f.supplier.email,
                 "contact": f.supplier.contact,
-                "cost": f.cost,
-                "cost_unit": f.cost_unit,
+                "cost": float(f.cost) if f.cost else None,
+                "cost_unit": float(f.cost_unit) if f.cost_unit else None,
                 "supplier_item_nr": f.supplier_item_nr
             }
             data.append(supplier_dict)
@@ -1518,28 +1518,28 @@ class MainSupplierData(View):
             "supplier_id": supplier.supplier.id,
             "name": supplier.supplier.name,
             "nr": supplier.supplier.nr,
-            "product_time": product_time if product_time else None,
-            "load_time": load_time if load_time else None,
-            "transit_time": transit_time if transit_time else None,
-            "receive_time": receive_time if receive_time else None,
+            "product_time": float(product_time) if product_time else None,
+            "load_time": float(load_time) if load_time else None,
+            "transit_time": float(transit_time) if transit_time else None,
+            "receive_time": float(receive_time) if receive_time else None,
             "plan_supplier_date": supplier.plan_supplier_date,
             "plan_load_date": supplier.plan_load_date,
             "plan_receive_date": supplier.plan_receive_date,
             "totall_lead_time": float(totall_lead_time),
-            "cost": supplier.cost,
-            "cost_unit": supplier.cost_unit,
+            "cost": float(supplier.cost) if supplier.cost else supplier.cost,
+            "cost_unit": float(supplier.cost_unit) if supplier.cost_unit else None,
             "earliest_order_date": supplier.earliest_order_date,
             "lock_expire_at": item.lock_expire_at,
             "plan_list_date": supplier.plan_list_date,
             "plan_delist_date": supplier.plan_delist_date,
-            "moq": supplier.moq,
-            "mpq": supplier.mpq if supplier.mpq else None,
-            "pallet_num": supplier.pallet_num if supplier.pallet_num else None,
+            "moq": float(supplier.moq) if supplier.moq else None,
+            "mpq": float(supplier.mpq) if supplier.mpq else None,
+            "pallet_num": float(supplier.pallet_num) if supplier.pallet_num else None,
             # TODO 手工MOQ暂时无数据
             "MOQ": 0,
-            "order_unit_qty": supplier.order_unit_qty if supplier.order_unit_qty else None,
-            "outer_package_num": supplier.outer_package_num if supplier.outer_package_num else None,
-            "order_max_qty": supplier.order_max_qty if supplier.order_max_qty else None,
+            "order_unit_qty": float(supplier.order_unit_qty) if supplier.order_unit_qty else None,
+            "outer_package_num": float(supplier.outer_package_num) if supplier.outer_package_num else None,
+            "order_max_qty": float(supplier.order_max_qty) if supplier.order_max_qty else None,
             "description": supplier.description
         }
 
@@ -1574,8 +1574,8 @@ class ItemSimulation(View):
             "name": supplier.supplier.name,
             # TODO 目前订货点没有数据
             "now_order_point": 0,
-            "MOQ": supplier.moq,
-            "order_max_qty": supplier.order_max_qty
+            "moq": float(supplier.moq) if supplier.moq else None,
+            "order_max_qty": float(supplier.order_max_qty) if supplier.order_max_qty else None
         }
         message.result = True
         message.code = 200
@@ -1625,10 +1625,10 @@ class ItemPlan(View):
             "nr": supplier.supplier.nr,
             "name": supplier.supplier.name,
             "safe_buffer": 0,
-            "moq": supplier.moq,
-            "mpq": supplier.mpq,
-            "outer_package_num": supplier.outer_package_num,
-            "pallet_num": supplier.pallet_num,
+            "moq": float(supplier.moq) if supplier.moq else None,
+            "mpq": float(supplier.mpq) if supplier.mpq else None,
+            "outer_package_num": float(supplier.outer_package_num) if supplier.outer_package_num else None,
+            "pallet_num": float(supplier.pallet_num) if supplier.pallet_num else None,
             "lead_time": float(lead_time),
             "per_month_sale": 0,
             "last_year_sale": 0,
