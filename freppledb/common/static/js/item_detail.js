@@ -149,6 +149,9 @@ ItemDetail.getPlanGridData = function () {
 
     $("#content-main").append('<table id="grid" class="table table-striped pivotgrid"></table>');
     $("#content-main").append('<div id="gridpager" class="col-md-12"></div>');
+    $('#grid_LEGNBR').css("width", "77"); //     你需要调整的列名：LEGNBR  的控件宽度
+    $('#grid').css("width", "82");//滚动条长度大约5px宽度 //jqgrid 控件宽度
+    $('#grid tr:first td:first').css("width", "77");       //数据列的宽度
 
     jQuery("#grid").jqGrid({
         url: '/data/output/item/buffer_operate_records/?id=' + itemId + '&page=1&page_size=100',
@@ -160,6 +163,9 @@ ItemDetail.getPlanGridData = function () {
         pager: '#gridpager',
         emptyrecords: "无数据显示",
         loadtext: "读取中...",
+        width: "100%",
+        height: "100%",
+        rowNum: 5,//一页显示多少条
 
         rownumbers: true,
         shrinkToFit: false,
@@ -176,7 +182,13 @@ ItemDetail.getPlanGridData = function () {
         loadComplete: function () {
 
             $("#gird").closest(".ui-jqgrid-bdiv").css({'overflow-y': 'auto'});
-
+            $("#gird").closest(".ui-jqgrid-bdiv").css({'overflow-x': 'scroll'});
+            $(function () {
+                $(window).resize(function () {
+                    $("#gird").setGridWidth($('#content-main').width());
+                    // $("#gird").jqGrid("setGridHeight", 200);
+                });
+            });
         }
     });
 }
