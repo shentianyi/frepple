@@ -476,6 +476,8 @@ class ForecastItem(View):
 
         # 初始化时间类型, 默认周
         date_type = request.GET.get('date_type', 'W')
+        if request.GET.get('date_type', 'W').isspace:
+            date_type = "W"
         date_type_full = Bucket.get_extra_trunc_by_shortcut(date_type)
 
         # 初始化查询时间
@@ -584,6 +586,8 @@ class ForecastItemGraph(View):
 
         # 初始化时间类型, 默认周
         date_type = request.GET.get('date_type', 'W')
+        if request.GET.get('date_type', 'W').isspace:
+            date_type = "W"
         date_type_full = Bucket.get_extra_trunc_by_shortcut(date_type)
 
         # 初始化查询时间
@@ -720,6 +724,8 @@ class PlanItemGraph(View):
 
         # 初始化时间类型, 默认周
         date_type = request.GET.get('date_type', 'W')
+        if request.GET.get('date_type', 'W').isspace:
+            date_type = "W"
         date_type_full = Bucket.get_extra_trunc_by_shortcut(date_type)
 
         # 初始化查询时间
