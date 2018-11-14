@@ -618,14 +618,18 @@ var grid = {
 
         var row0 = "" +
             '<div class="row">' +
-            '<div class="col-xs-6">' +
+            '<div class="col-xs-5">' +
             '<div class="panel panel-default custom-header-panel"><div class="panel-heading">' + gettext("Selected options") + '</div>' +
             '<div class="panel-body">' +
             '<ul class="list-group" id="Rows">placeholder0</ul>' +
             '</div>' +
             '</div>' +
             '</div>' +
-            '<div class="col-xs-6">' +
+            // '<div class="col-xs-2"> ' +
+            // '<span>向右移除</span>' +
+            // '<span>向左添加</span>' +
+            // '</div>' +
+            '<div class="col-xs-5">' +
             '<div class="panel panel-default custom-header-panel" ><div class="panel-heading">' + gettext("Available options") + '</div>' +
             '<div class="panel-body">' +
             '<ul class="list-group" id="DroppointRows">placeholder1</ul>' +

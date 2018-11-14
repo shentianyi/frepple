@@ -96,6 +96,11 @@
         height: 26px;
     }
 
+    .checkbox {
+        padding-left: 90px;
+        margin-bottom: 5px;
+    }
+
 </style>
 
 {% endblock %}
@@ -239,9 +244,9 @@
             </li>
             <li role="presentation">
                 <a href="#plan" aria-controls="plan" role="tab" data-toggle="tab"
-                   onclick="ItemDetail.getPlansData()">计划</a></li>
+                   onclick="ItemDetail.getPlanData()">计划</a></li>
             <li role="presentation">
-                <a href="#simulation" aria-controls="simulation" role="tab" data-toggle="tab">模拟</a>
+                <a href="#simulation" aria-controls="simulation" role="tab" data-toggle="tab" onclick="ItemDetail.getSimulationData()">模拟</a>
             </li>
             <li role="presentation">
                 <a href="#forecast" aria-controls="forecast" role="tab" data-toggle="tab"

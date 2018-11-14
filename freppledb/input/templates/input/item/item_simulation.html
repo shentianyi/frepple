@@ -1,10 +1,69 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+<div class="row">
+    <div class="col-md-6">
+        <form class="col-md-6">
+            <h3>计划</h3>
+            <div class="row">
+                <div class="input-group">
+                    <span class="input-group-addon">目前订货点：</span>
+                    <input class="form-control" id="item_detail_simulation_now_order_point" type="text"
+                           name="item_detail_simulation_now_order_point">
+                </div>
+            </div>
+            <div class="row">
+                <div class="input-group">
+                    <span class="input-group-addon">手工MOQ：</span>
+                    <input class="form-control" id="item_detail_simulation_moq" type="text"
+                           name="item_detail_simulation_moq">
+                </div>
+            </div>
+            <div class="row">
+                <div class="input-group">
+                    <span class="input-group-addon">最大订单量：</span>
+                    <input class="form-control" id="item_detail_simulation_order_max_qty" type="text"
+                           name="item_detail_simulation_order_max_qty">
+                </div>
+            </div>
+        </form>
+        <form class="col-md-6">
+            <h3>模拟</h3>
+            <!--<div class="row">-->
+            <!--<div class="input-group">-->
+            <!--<span class="input-group-addon">过去12个月：</span>-->
+            <!--<input class="form-control" id="item_detail_plan_last_year" type="text"-->
+            <!--name="item_detail_plan_last_year">-->
+            <!--</div>-->
+            <!--</div>-->
+            <!--<div class="row">-->
+            <!--<div class="input-group">-->
+            <!--<span class="input-group-addon">上月销量：</span>-->
+            <!--<input class="form-control" id="item_detail_plan_last_month" type="text"-->
+            <!--name="item_detail_plan_last_month">-->
+            <!--</div>-->
+            <!--</div>-->
+            <div class="row">
+                <div class="checkbox input-group">
+                    <label>
+                        <input type="checkbox"> 显示优化
+                    </label>
+                </div>
+            </div>
+            <div class="row">
+                <div class="checkbox input-group">
+                    <label>
+                        <input type="checkbox"> 显示预测
+                    </label>
+                </div>
+            </div>
+            <div class="row">
+                <div class="input-group">
+                    <span class="input-group-addon">供应商：</span>
+                    <input class="form-control" id="item_detail_simulation_nr" type="text"
+                           name="item_detail_simulation_nr" placeholder="供应商代码">
+                    <input class="form-control" id="item_detail_simulation_name" type="text"
+                           name="item_detail_simulation_name" placeholder="供应商名称" style="margin-top: 10px">
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
 
-</body>
-</html>

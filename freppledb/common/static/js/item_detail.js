@@ -90,9 +90,9 @@ ItemDetail.getSuppliersData = function () {
 };
 
 //获取计划数据
-ItemDetail.getPlansData = function () {
+ItemDetail.getPlanData = function () {
     $.ajax({
-        url: '/data/input/item/plansdata/' + itemId + "/",
+        url: '/data/input/item/plandata/' + itemId + "/",
         type: 'application/json',
         method: 'get',
         success: function (data) {
@@ -100,6 +100,98 @@ ItemDetail.getPlansData = function () {
             if (data.result) {
 
                 FillData('item_detail_plan', data.content);
+
+            } else {
+                // alert(data.message)
+            }
+        },
+        error: function (err) {
+            alert(err);
+        }
+    })
+
+    ItemDetail.getPlanGridData();
+};
+
+//获取计划界面grid数据
+ItemDetail.getPlanGridData = function () {
+    var tableColModel = [
+        {
+            name: 'date_number',
+            label: '日月/周数',
+        },
+        {
+
+            name: 'qty',
+            label: '数量',
+        },
+        {
+            name: 'move_types',
+            label: '移动类型',
+        },
+        {
+            name: 'name',
+            label: '供应商/客户',
+        },
+        {
+            name: 'order_num',
+            label: '单号',
+        },
+        {
+            name: 'order_line_num',
+            label: '订单行号',
+        },
+        {
+            name: 'buffer',
+            label: '库存',
+        },
+    ];
+
+    $("#content-main").append('<table id="grid" class="table table-striped pivotgrid"></table>');
+    $("#content-main").append('<div id="gridpager" class="col-md-12"></div>');
+
+    jQuery("#grid").jqGrid({
+        url: '/data/output/item/buffer_operate_records/?id=' + itemId + '&page=1&page_size=100',
+        datatype: "json",
+        jsonReader: {
+            repeatitems: false
+        },
+        colModel: tableColModel,
+        pager: '#gridpager',
+        emptyrecords: "无数据显示",
+        loadtext: "读取中...",
+
+        rownumbers: true,
+        shrinkToFit: false,
+        autoScroll: true,
+        viewrecords: true,
+        iconSet: "fontAwesome",
+        guiStyle: "bootstrapPrimary",
+        hidegrid: false,
+        resizeStop: grid.saveColumnConfiguration,
+        scrollRows: true,
+        onPaging: grid.saveColumnConfiguration,
+        autowidth: true,
+
+        loadComplete: function () {
+
+            $("#gird").closest(".ui-jqgrid-bdiv").css({'overflow-y': 'auto'});
+
+        }
+    });
+}
+
+//获取模拟数据
+ItemDetail.getSimulationData = function () {
+    $.ajax({
+        url: '/data/input/item/simulationdata/' + itemId + "/",
+        type: 'application/json',
+        method: 'get',
+        success: function (data) {
+            // 填充数据
+            if (data.result) {
+
+                FillData('item_detail_simulation', data.content);
 
             } else {
                 // alert(data.message)
@@ -238,32 +330,6 @@ ItemDetail.getForecastGridData = function (date_type, report_type) {
         }
     })
 };
-
-//公共调用方法
-ItemDetail.Merger = function (gridName, CellName) {
-    //得到显示到界面的id集合
-    var mya = $("#" + gridName + "").getDataIDs();
-    //当前显示多少条
-    var length = mya.length;
-    for (var i = 0; i < length; i++) {
-        //从上到下获取一条信息
-        var before = $("#" + gridName + "").jqGrid('getRowData', mya[i]);
-        //定义合并行数
-        var rowSpanTaxCount = 1;
-        for (j = i + 1; j <= length; j++) {
-            //和上边的信息对比 如果值一样就合并行数+1 然后设置rowspan 让当前单元格隐藏
-            var end = $("#" + gridName + "").jqGrid('getRowData', mya[j]);
-            if (before[CellName] == end[CellName]) {
-                rowSpanTaxCount++;
-                $("#" + gridName + "").setCell(mya[j], CellName, '', {display: 'none'});
-            } else {
-                rowSpanTaxCount = 1;
-                break;
-            }
-            $("#" + CellName + "" + mya[i] + "").attr("rowspan", rowSpanTaxCount);
-        }
-    }
-}
 
 //获取预测界面chart数据
 ItemDetail.getForecastChartData = function (date_type, report_type) {
@@ -515,6 +581,32 @@ function FillData(prefix, data) {
                 break;
         }
     });
+};
+
+//公共调用方法
+ItemDetail.Merger = function (gridName, CellName) {
+    //得到显示到界面的id集合
+    var mya = $("#" + gridName + "").getDataIDs();
+    //当前显示多少条
+    var length = mya.length;
+    for (var i = 0; i < length; i++) {
+        //从上到下获取一条信息
+        var before = $("#" + gridName + "").jqGrid('getRowData', mya[i]);
+        //定义合并行数
+        var rowSpanTaxCount = 1;
+        for (j = i + 1; j <= length; j++) {
+            //和上边的信息对比 如果值一样就合并行数+1 然后设置rowspan 让当前单元格隐藏
+            var end = $("#" + gridName + "").jqGrid('getRowData', mya[j]);
+            if (before[CellName] == end[CellName]) {
+                rowSpanTaxCount++;
+                $("#" + gridName + "").setCell(mya[j], CellName, '', {display: 'none'});
+            } else {
+                rowSpanTaxCount = 1;
+                break;
+            }
+            $("#" + CellName + "" + mya[i] + "").attr("rowspan", rowSpanTaxCount);
+        }
+    }
 }
 
 ItemDetail.FillOption = function (id) {

@@ -101,30 +101,47 @@
                 </div>
             </form>
         </div>
-
-        <form class="col-md-12 form-split">
-            <h3>下次订单时间</h3>
-            <div class="col-md-5">
-                <div class="input-group">
-                    <span class="input-group-addon">日期：</span>
-                    <input class="form-control vDateField" id="next_date" type="text"
-                           name="next_date" placeholder="日期">
+        <form class="col-md-12 form-split" style="padding: 28px 28px 0 28px;">
+            <div class="row">
+                <span class="col-md-2" style="padding-right: 0; margin-top: 6px;">下次订单时间</span>
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <span class="input-group-addon" style="width: 40px">日期：</span>
+                        <input class="form-control vDateField" id="next_date" type="text"
+                               name="next_date" placeholder="日期">
+                    </div>
                 </div>
-            </div>
-            <div class="col-md-5">
-                <div class="input-group">
-                    <span class="input-group-addon">数量：</span>
-                    <input class="form-control" id="next_qty" type="text"
-                           name="next_qty">
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <span class="input-group-addon" style="width: 40px">数量：</span>
+                        <input class="form-control" id="next_qty" type="text"
+                               name="next_qty">
+                    </div>
                 </div>
-            </div>
-            <div class="col-md-2 pull-right">
-                <button class="btn btn-primary default btn-aps btn-aps-save" id="freedButton" type="reset"
-                        style="width: 100%;">
-                    释放
-                </button>
+                <div class="col-md-2 pull-right" style="padding-right: 0">
+                    <button class="btn btn-primary default btn-aps btn-aps-save" id="freedButton" type="reset"
+                            style="width: 100%;">
+                        释放
+                    </button>
+                </div>
             </div>
         </form>
+    </div>
+    <div class="col-md-6">
+        <!--<div class="row">-->
+        <!--<div class="input-group">-->
+        <!--<span class="input-group-addon">查询条件：</span>-->
+        <!--<input class="form-control" id="item_detail_plan_safe_buffer" type="text"-->
+        <!--name="item_detail_plan_safe_buffer">-->
+        <!--</div>-->
+        <!--</div>-->
+        <div class="row">
+            <!--表格 内容-->
+            <div id="content-main" class="col-md-12" style="min-height: 150px; margin-top: 0.7em">
+            </div>
+
+            <div id="gridpager" class="col-md-12"></div>
+        </div>
     </div>
 </div>
 
