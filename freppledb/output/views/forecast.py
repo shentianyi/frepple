@@ -536,7 +536,7 @@ class ForecastItem(View):
                 "y": {
                     "total": 0,
                     "last_sale_qty": 0,
-                    "last_actual_sale_qty": 0,  # TODO forecast sale qty, CMARK
+                    "actual_sale_qty": 0,  # TODO forecast sale qty, CMARK
                     "system_forecast_qty": 0,  # TODO forecast sale qt, CMARK
                     "ratio": 0,
                     "normal_qty": 0,
