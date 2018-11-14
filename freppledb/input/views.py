@@ -1542,7 +1542,6 @@ class MainSupplierData(View):
             "description": supplier.description
         }
 
-        message = ResponseMessage()
         message.result = True
         message.code = 200
         message.message = "相应数据查询成功"
@@ -1577,7 +1576,6 @@ class ItemSimulation(View):
             "MOQ": supplier.moq,
             "order_max_qty": supplier.order_max_qty
         }
-        message = ResponseMessage()
         message.result = True
         message.code = 200
         message.message = "相应数据查询成功"
@@ -1639,7 +1637,6 @@ class ItemPlan(View):
             "now_order_point": 0
         }
 
-        message = ResponseMessage()
         message.result = True
         message.code = 200
         message.message = "相应数据查询成功"
