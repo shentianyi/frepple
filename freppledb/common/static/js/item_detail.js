@@ -200,19 +200,19 @@ ItemDetail.getForecastChartData = function (date_type, report_type) {
                     if (series[i].serial_type === 'FORECAST BASIS') {
                         for (var k = 0; k < series[i].points.length; k++) {
                             yFAxis.push(series[i].points[k].y);
-                            yDAxis.push(100);
+                            // yDAxis.push(100);
                         }
                     } else if (series[i].serial_type === 'DEMAND FORECAST') {
                         for (var k = 0; k < series[i].points.length; k++) {
                             yDAxis.push(series[i].points[k].y)
-                            yFAxis.push(100);
+                            // yFAxis.push(100);
                         }
                     }
                 }
-                // console.log('---------legendData--------', legendData);
-                // console.log('---------xAxis--------', xAxis);
-                // console.log('---------yFAxis--------', yFAxis);
-                // console.log('---------yDAxis--------', yDAxis);
+                console.log('---------legendData--------', legendData);
+                console.log('---------xAxis--------', xAxis);
+                console.log('---------yFAxis--------', yFAxis);
+                console.log('---------yDAxis--------', yDAxis);
 
                 var forecastChart = echarts.init(document.getElementById('item_detail_forecast_chart'));
                 // console.log(forecastChart)
@@ -245,8 +245,8 @@ ItemDetail.getForecastChartData = function (date_type, report_type) {
                         data: xAxis
                     },
                     yAxis: {
-                        show: false,
-                    },
+                            show: false,
+                        },
                     dataZoom: [
                         {
                             show: true,
@@ -274,7 +274,7 @@ ItemDetail.getForecastChartData = function (date_type, report_type) {
                         type: 'bar',
                         data: yFAxis,
                         markLine: {
-                            symbol:"none",
+                            symbol: "none",
                             lineStyle: {
                                 type: 'solid',
                                 color: 'black',
@@ -285,8 +285,14 @@ ItemDetail.getForecastChartData = function (date_type, report_type) {
                                 // }
                             },
                             data: [
-                                // {type: 'average', name: '当前值'},
-                                {xAxis: currentValue}
+                                // [
+                                //     {coord: [currentValue, 0]},
+                                //     {coord: [currentValue, 400]}
+                                // ]
+                                {
+                                    name: '当前值',
+                                    xAxis: currentValue
+                                },
                             ]
                         }
                     },
