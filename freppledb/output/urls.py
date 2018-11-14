@@ -45,7 +45,7 @@ urlpatterns = [
   # 单个物料计划图表
   url(r'^data/output/plan/item_report/$', freppledb.output.views.forecast.PlanItemGraph.as_view(), name="plan_item_report"),
   # 单个物料模拟列表
-  url(r'^/data/output/item/buffer_operate_records/$', freppledb.output.views.forecast.ItemBufferOperateRecords.as_view(), name="buffer_operate_records"),
+  url(r'^data/output/item/buffer_operate_records/$', freppledb.output.views.forecast.ItemBufferOperateRecords.as_view(), name="buffer_operate_records"),
   url(r'^demand/$', freppledb.output.views.demand.OverviewReport.as_view(), name="output_demand_plan"),
   url(r'^resource/(.+)/$', freppledb.output.views.resource.OverviewReport.as_view(), name="output_resource_plandetail"),
   url(r'^resource/$', freppledb.output.views.resource.OverviewReport.as_view(), name="output_resource_plan"),

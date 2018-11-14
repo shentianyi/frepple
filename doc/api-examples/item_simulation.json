@@ -3,15 +3,17 @@
     "code": 200,
     "message": "相应数据查询成功",
     "content": {
-        // 目前订货点
-        "now_order_point": 0,
-        // 手工MOQ
-        "MOQ": "12.00000000",
-        // 最大订货量
-        "order_max_qty": "12.00000000",
-        // 供应商代码
-        "nr": "supplier_code",
+        // 供应商id
+        "supplier_id": 1,
+         // 供应商代码
+        "nr": "supplier_code",　　
         // 供应商名称
-        "name": "supplier"
+         "name": "supplier",
+        // 目前订货点
+         "now_order_point": 0,
+       // 手工MOQ
+        "moq": 12,
+         // 最大订货量
+        "order_max_qty": 12
     }
 }

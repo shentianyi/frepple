@@ -1,7 +1,7 @@
 {
   "result": true,
   "code": 200,
-  "message": null,
+  "message": "相应数据查询成功",
   "content": {
     // 仓名
     "location": {
@@ -11,14 +11,15 @@
     },
     "data": [
       {
-        "x": "2018-1",
+       "x_value": "2016-11-01T00:00:00",
+        "x_text": "2016-Nov",
         "y": {
           // 合计
           "total": 1,
           //　去年销量
           "last_sale_qty": 1,
           // 实际销量
-          "last_actual_sale_qty": 1,
+          "actual_sale_qty": 1,
           // 系统统计预测
           "system_forecast_qty": 1,
           // 配额系数

@@ -7,6 +7,9 @@
         <!--</button>-->
         <select id="grid_chooseMonth" class="form-control btn btn-primary default btn-aps btn-aps-save pull-left"
                 name="grid_chooseMonth" style="width: 34px; padding:0 12px" onchange="ItemDetail.DateTypeChange(true)">
+         {%for k,v in date_types%}
+            <option value="{{k}}">{{v}}</option>
+            {%endfor%}
         </select>
         <button id="grid_chooseDayButton" class="btn btn-primary default btn-aps btn-aps-save pull-left" type="button"
                 style="margin-left: 10px">今天
@@ -36,7 +39,11 @@
         <!--</button>-->
         <select id="chart_chooseMonth" class="form-control btn btn-primary default btn-aps btn-aps-save pull-left"
                 name="chart_chooseMonth" style="width: 34px; padding:0 12px" onchange="ItemDetail.DateTypeChange()">
+            {%for k,v in date_types%}
+            <option value="{{k}}">{{v}}</option>
+            {%endfor%}
         </select>
+
         <button id="chart_chooseDayButton" class="btn btn-primary default btn-aps btn-aps-save pull-left" type="button"
                 style="margin-left: 10px">今天
         </button>
@@ -47,7 +54,7 @@
     </div>
 </form>
 
-<script>
-    ItemDetail.FillOption('grid_chooseMonth');
-    ItemDetail.FillOption('chart_chooseMonth');
-</script>
+<!--<script>-->
+    <!--ItemDetail.FillOption('grid_chooseMonth');-->
+    <!--ItemDetail.FillOption('chart_chooseMonth');-->
+<!--</script>-->

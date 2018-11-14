@@ -3,6 +3,7 @@ import csv
 import functools
 import math
 import operator
+import random
 import urllib
 from io import BytesIO, StringIO
 
@@ -476,7 +477,7 @@ class ForecastItem(View):
 
         # 初始化时间类型, 默认周
         date_type = request.GET.get('date_type', 'W')
-        if request.GET.get('date_type', 'W').isspace:
+        if date_type.isspace():
             date_type = "W"
         date_type_full = Bucket.get_extra_trunc_by_shortcut(date_type)
 
@@ -553,16 +554,16 @@ class ForecastItem(View):
             # 赋值
             for row in rows:
                 if start_time == row[2]:
-                    data['y']['normal_qty'] += row[3]
-                    data['y']['new_product_plan_qty'] += row[4]
-                    data['y']['promotion_qty'] += row[5]
-                    data['y']['ratio'] += row[6]
+                    data['y']['normal_qty'] += float(row[3])
+                    data['y']['new_product_plan_qty'] += float(row[4])
+                    data['y']['promotion_qty'] += float(row[5])
+                    data['y']['ratio'] += float(row[6])
                     data['y']['_row_count'] += 1
-                    data['y']['total'] += round(row[3] * row[6] / 100, 2) + row[4] + row[5]
+                    data['y']['total'] += float(round(row[3] * row[6] / 100, 2) + row[4] + row[5])
 
             # 计算配比
             if data['y']['_row_count'] > 0:
-                data['y']['ratio'] = data['y']['ratio'] / data['y']['_row_count']
+                data['y']['ratio'] = float(data['y']['ratio'] / data['y']['_row_count'])
 
             message['content']['data'].append(data)
             # 下一个值
@@ -586,7 +587,7 @@ class ForecastItemGraph(View):
 
         # 初始化时间类型, 默认周
         date_type = request.GET.get('date_type', 'W')
-        if request.GET.get('date_type', 'W').isspace:
+        if date_type.isspace():
             date_type = "W"
         date_type_full = Bucket.get_extra_trunc_by_shortcut(date_type)
 
@@ -624,7 +625,7 @@ class ForecastItemGraph(View):
         message = {
             "result": True,
             "code": 200,
-            "message": None,
+            "message": "相应数据查询成功",
             "content": {
                 "current_time_point": {},
                 "serials": [
@@ -674,7 +675,7 @@ class ForecastItemGraph(View):
                 if start_time == row[2]:
                     total += round(row[3] * row[6] / 100, 2) + row[4] + row[5]
 
-            dispatches_points["y"] = total
+            dispatches_points["y"] = float(total)
             message["content"]["serials"][0]["points"].append(dispatches_points)
             message["content"]["serials"][1]["points"].append(forecast_points)
 
@@ -698,7 +699,7 @@ class ForecastItemGraph(View):
                 if current_time == row[2]:
                     total += round(row[3] * row[6] / 100, 2) + row[4] + row[5]
 
-            forecast_points["y"] = total
+            forecast_points["y"] = float(total)
             message["content"]["serials"][0]["points"].append(dispatches_points)
             message["content"]["serials"][1]["points"].append(forecast_points)
             # 下一个值
@@ -717,14 +718,16 @@ class PlanItemGraph(View):
         item = Item.objects.filter(id=request.GET.get('id', None)).first()
         supplier = ItemSupplier.objects.filter(item=request.GET.get('id', None), effective_start__lte=datetime.now(),
                                                effective_end__gte=datetime.now()).order_by('priority', '-ratio',
-                                                                                         'id').first()
+                                                                                           'id').first()
 
-        if item is None:
-            return JsonResponse({"result": False, "code": 200, "message": "参数错误,数据未找到"}, safe=False)
+        location = Location.objects.filter(id=request.GET.get('location_id', None)).first()
+
+        if item is None or location is None:
+            return JsonResponse({"result": False, "code": 404, "message": "参数错误,数据未找到"}, safe=False)
 
         # 初始化时间类型, 默认周
         date_type = request.GET.get('date_type', 'W')
-        if request.GET.get('date_type', 'W').isspace:
+        if date_type.isspace():
             date_type = "W"
         date_type_full = Bucket.get_extra_trunc_by_shortcut(date_type)
 
@@ -784,10 +787,10 @@ class PlanItemGraph(View):
         message = {
             "result": True,
             "code": 200,
-            "message": None,
+            "message": "相应数据查询成功",
             "content": {
                 "current_time_point": current,
-                "lead_time_point":lead_time_point,
+                "lead_time_point": lead_time_point,
                 "serials": [
                     {
                         "serial": "预测",
@@ -805,18 +808,18 @@ class PlanItemGraph(View):
                                a.normal_qty, a.new_product_plan_qty , a.promotion_qty,a.ratio from
                                forecast as a inner join (select c.customer_id,c.parsed_date,max(c.version_id) as version_id 
                                from forecast as c
-                               where c.status in %s and c.parsed_date between %s and %s and c.item_id = %s 
+                               where c.status in %s and c.parsed_date between %s and %s and c.item_id = %s and c.location_id = %s
                                group by c.customer_id, c.parsed_date) as b
                                on a.customer_id=b.customer_id and a.parsed_date=b.parsed_date and a.version_id=b.version_id
-                               where a.status in %s and a.parsed_date between %s and %s and a.item_id = %s
+                               where a.status in %s and a.parsed_date between %s and %s and a.item_id = %s and a.location_id = %s
                                '''
         cursor.execute(forecast_query,
                        [date_type_full, ForecastCommentOperation.compare_report_status, search_start_time,
                         search_end_time,
                         item.id,
-                         ForecastCommentOperation.compare_report_status, search_start_time,
+                        location.id, ForecastCommentOperation.compare_report_status, search_start_time,
                         search_end_time,
-                        item.id])
+                        item.id, location.id])
 
         rows = cursor.fetchall()
         while start_time < current_time:
@@ -840,9 +843,9 @@ class PlanItemGraph(View):
             # 赋值
             for row in rows:
                 if current_time == row[2]:
-                    total += round(row[3] * row[6] / 100, 2) + row[4] + row[5]
+                    total += float(round(row[3] * row[6] / 100, 2) + row[4] + row[5])
 
-            forecast_points["y"] = total
+            forecast_points["y"] = -total
             message["content"]["serials"][0]["points"].append(forecast_points)
             # 下一个值
             current_time = Bucket.get_nex_time_by_date_type(current_time, date_type)
@@ -870,8 +873,24 @@ class ItemBufferOperateRecords(View):
         }
         data = {
             "date_number": 0,
-            "qty": 0
+            "qty": 0,
+            "move_types": 0,
+            "name": 0,
+            "order_num": 0,
+            "order_line_num": 0,
+            "buffer": 0
         }
-        message["rows"].append(data)
-        return JsonResponse(message, encoder=DjangoJSONEncoder, safe=False)
 
+        for i in range(0, 50):
+            data = {
+                "date_number": random.randint(1, 100),
+                "qty": random.randint(1, 100),
+                "move_types": random.randint(1, 100),
+                "name": random.randint(1, 100),
+                "order_num": random.randint(1, 100),
+                "order_line_num": random.randint(1, 100),
+                "buffer": random.randint(1, 100)
+            }
+            i += 1
+            message["rows"].append(data)
+        return JsonResponse(message, encoder=DjangoJSONEncoder, safe=False)

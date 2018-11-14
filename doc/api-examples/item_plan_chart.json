@@ -6,14 +6,14 @@
    "current_time_point":
    {
     	"x_value": "2018-2-1",
-        "x_text": "2018-Feb"
-        "y": null, // 没有值
+        "x_text": "2018-Feb",
+        "y": null // 没有值
     },
     "lead_time_point":
     {
     	"x_value": "2018-2-7",
-        "x_text": "2018-Jan"
-        "y": null, // 没有值
+        "x_text": "2018-Jan",
+        "y": null // 没有值
     },
     "serials": [
       {
