@@ -1,8 +1,13 @@
+<script src="{{STATIC_URL}}js/item_detail.js" type="application/javascript"></script>
+
 <form class="form-span">
     <div class="row" style="margin-left: 0; margin-right: 0">
-        <button id="grid_chooseMonthButton" class="btn btn-primary default btn-aps btn-aps-save pull-left" type="button">月
-            <img src="{{STATIC_URL}}img/item/month.png">
-        </button>
+        <!--<button id="grid_chooseMonthButton" class="btn btn-primary default btn-aps btn-aps-save pull-left" type="button">月-->
+        <!--<img src="{{STATIC_URL}}img/item/month.png">-->
+        <!--</button>-->
+        <select id="grid_chooseMonth" class="form-control btn btn-primary default btn-aps btn-aps-save pull-left"
+                name="grid_chooseMonth" style="width: 34px; padding:0 12px" onchange="ItemDetail.DateTypeChange(true)">
+        </select>
         <button id="grid_chooseDayButton" class="btn btn-primary default btn-aps btn-aps-save pull-left" type="button"
                 style="margin-left: 10px">今天
         </button>
@@ -26,15 +31,23 @@
 <form class="form-span">
     <div class="row" style="margin-left: 0; margin-right: 0;">
         <p class="pull-left">时标：</p>
-        <button id="chart_chooseMonthButton" class="btn btn-primary default btn-aps btn-aps-save pull-left" type="button">月
-            <img src="{{STATIC_URL}}img/item/month.png">
-        </button>
+        <!--<button id="chart_chooseMonthButton" class="btn btn-primary default btn-aps btn-aps-save pull-left" type="button">月-->
+        <!--<img src="{{STATIC_URL}}img/item/month.png">-->
+        <!--</button>-->
+        <select id="chart_chooseMonth" class="form-control btn btn-primary default btn-aps btn-aps-save pull-left"
+                name="chart_chooseMonth" style="width: 34px; padding:0 12px" onchange="ItemDetail.DateTypeChange()">
+        </select>
         <button id="chart_chooseDayButton" class="btn btn-primary default btn-aps btn-aps-save pull-left" type="button"
                 style="margin-left: 10px">今天
         </button>
     </div>
 
-    <div class="row">
+    <div id="main-chart" class="row">
         <div id="item_detail_forecast_chart" style="height: 300px; width: 100%;"></div>
     </div>
 </form>
+
+<script>
+    ItemDetail.FillOption('grid_chooseMonth');
+    ItemDetail.FillOption('chart_chooseMonth');
+</script>

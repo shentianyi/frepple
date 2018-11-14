@@ -114,10 +114,11 @@ ItemDetail.getPlansData = function () {
 //获取预测界面grid数据
 ItemDetail.getForecastGridData = function (date_type, report_type) {
 
+    var DateTypeValue = $("#grid_chooseMonth").val();
     var locationId = $("#item_detail_location").val();
 
     $.ajax({
-        url: '/data/output/forecast/item/?id=' + itemId + '&location_id=' + locationId + '&date_type=' + (date_type ? date_type : '') + '&report_type=' + (report_type ? report_type : ''),
+        url: '/data/output/forecast/item/?id=' + itemId + '&location_id=' + locationId + '&date_type=' + (date_type ? date_type : DateTypeValue) + '&report_type=' + (report_type ? report_type : ''),
         type: 'application/json',
         method: 'get',
         success: function (data) {
@@ -172,18 +173,18 @@ ItemDetail.getForecastGridData = function (date_type, report_type) {
 
 
                     for (var i = 0; i < forecastGridData.length; i++) {
-                        var everyCol = {name: forecastGridData[i].x, index: forecastGridData[i].x};
-                        tableColName.push(forecastGridData[i].x);
+                        var everyCol = {name: forecastGridData[i].x_text, index: forecastGridData[i].x_text};
+                        tableColName.push(forecastGridData[i].x_text);
                         tableColModel.push(everyCol);
                         // eachRowData[forecastGridData[i].x] = forecastGridData[i].y.total;
-                        totalRowData[forecastGridData[i].x] = forecastGridData[i].y.total;
-                        lastRowData[forecastGridData[i].x] = forecastGridData[i].y.last_sale_qty;
-                        actualRowData[forecastGridData[i].x] = forecastGridData[i].y.actual_sale_qty;
-                        systemRowData[forecastGridData[i].x] = forecastGridData[i].y.system_forecast_qty;
-                        ratioRowData[forecastGridData[i].x] = forecastGridData[i].y.ratio;
-                        normalRowData[forecastGridData[i].x] = forecastGridData[i].y.normal_qty;
-                        newRowData[forecastGridData[i].x] = forecastGridData[i].y.new_product_plan_qty;
-                        promotionRowData[forecastGridData[i].x] = forecastGridData[i].y.promotion_qty;
+                        totalRowData[forecastGridData[i].x_text] = forecastGridData[i].y.total;
+                        lastRowData[forecastGridData[i].x_text] = forecastGridData[i].y.last_sale_qty;
+                        actualRowData[forecastGridData[i].x_text] = forecastGridData[i].y.actual_sale_qty;
+                        systemRowData[forecastGridData[i].x_text] = forecastGridData[i].y.system_forecast_qty;
+                        ratioRowData[forecastGridData[i].x_text] = forecastGridData[i].y.ratio;
+                        normalRowData[forecastGridData[i].x_text] = forecastGridData[i].y.normal_qty;
+                        newRowData[forecastGridData[i].x_text] = forecastGridData[i].y.new_product_plan_qty;
+                        promotionRowData[forecastGridData[i].x_text] = forecastGridData[i].y.promotion_qty;
                     }
 
                     rowData.push(totalRowData);
@@ -267,11 +268,11 @@ ItemDetail.Merger = function (gridName, CellName) {
 //获取预测界面chart数据
 ItemDetail.getForecastChartData = function (date_type, report_type) {
 
+    var DateTypeValue = $("#chart_chooseMonth").val();
     var locationId = $("#item_detail_location").val();
-    // var forecastChart = echarts.init($("#item_detail_forecast_chart"));
 
     $.ajax({
-        url: "/data/output/forecast/item_report/?id=" + itemId + "&location_id=" + locationId + "&date_type=" + (date_type ? date_type : '') + "&report_type=" + (report_type ? report_type : ''),
+        url: "/data/output/forecast/item_report/?id=" + itemId + "&location_id=" + locationId + "&date_type=" + (date_type ? date_type : DateTypeValue) + "&report_type=" + (report_type ? report_type : ''),
         type: 'application/json',
         method: 'get',
         success: function (data) {
@@ -372,11 +373,13 @@ ItemDetail.getForecastChartData = function (date_type, report_type) {
                         markLine: {
                             symbol: "none",
                             lineStyle: {
-                                color: 'black',
-                                width: '2px',
-
+                                // type: 'solid',
+                                // color: 'black',
+                                // width: '5px',
                                 normal: {
                                     type: 'solid',
+                                    color: '#333',
+                                    width: '10',
                                 }
                             },
                             data: [
@@ -432,6 +435,23 @@ ItemDetail.supplierChange = function () {
         }
     }
 };
+
+//切换查询时间类型获取数据
+ItemDetail.DateTypeChange = function (ifGrid) {
+    var currentGridValue = $("#grid_chooseMonth").val();
+    var currentChartValue = $("#chart_chooseMonth").val();
+
+    if (ifGrid) {
+        $("#grid").GridDestroy();
+        $("#content-main").append('<table id="grid" class="table table-striped pivotgrid"></table>');
+        $("#content-main").append('<div id="gridpager" class="col-md-12"></div>');
+        ItemDetail.getForecastGridData(currentGridValue);
+    } else {
+        $("#main-item_detail_forecast_chart").remove();
+        $("#main-chart").append('<div id="item_detail_forecast_chart"></div>');
+        ItemDetail.getForecastChartData(currentChartValue);
+    }
+}
 
 /**
  * 界面填充数据
@@ -497,6 +517,11 @@ function FillData(prefix, data) {
     });
 }
 
-// ItemDetail.getMainSuppliersData()
+ItemDetail.FillOption = function (id) {
+    var html = '';
+    html += "<option value= W> 周 </option>";
+    html += "<option value= M> 月 </option>";
+    $("#" + id).append(html);
+}
 
 

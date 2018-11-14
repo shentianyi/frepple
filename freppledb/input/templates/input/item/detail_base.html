@@ -178,9 +178,10 @@
             <div class="col-md-3">
                 <div class="input-group">
                     <span class="input-group-addon">计划策略：</span>
-
-                    <input class="form-control" id="item_detail_plan_strategies_current" type="text"
-                           name="plan_strategy">
+                    <!--<input class="form-control" id="item_detail_plan_strategies_current" type="text"-->
+                    <!--name="plan_strategy">-->
+                    <select class="form-control" name="item_detail_plan_strategies" id="item_detail_plan_strategies">
+                    </select>
                 </div>
             </div>
             <div class="col-md-3">
@@ -233,15 +234,18 @@
                 <a href="#main" aria-controls="main" role="tab"
                    data-toggle="tab">主数据</a></li>
             <li role="presentation">
-                <a href="#supplier" aria-controls="supplier" role="tab" data-toggle="tab" onclick="ItemDetail.getSuppliersData()">供应商</a>
+                <a href="#supplier" aria-controls="supplier" role="tab" data-toggle="tab"
+                   onclick="ItemDetail.getSuppliersData()">供应商</a>
             </li>
             <li role="presentation">
-                <a href="#plan" aria-controls="plan" role="tab" data-toggle="tab" onclick="ItemDetail.getPlansData()">计划</a></li>
+                <a href="#plan" aria-controls="plan" role="tab" data-toggle="tab"
+                   onclick="ItemDetail.getPlansData()">计划</a></li>
             <li role="presentation">
                 <a href="#simulation" aria-controls="simulation" role="tab" data-toggle="tab">模拟</a>
             </li>
             <li role="presentation">
-                <a href="#forecast" aria-controls="forecast" role="tab" data-toggle="tab" onclick="ItemDetail.getForecastGridData(), ItemDetail.getForecastChartData()">预测</a>
+                <a href="#forecast" aria-controls="forecast" role="tab" data-toggle="tab"
+                   onclick="ItemDetail.getForecastGridData(), ItemDetail.getForecastChartData()">预测</a>
             </li>
         </ul>
 

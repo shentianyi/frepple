@@ -1410,7 +1410,7 @@ class ItemMainData(View):
                     "buffer_price": 0
                 }
             }
-        location.append(locationdict)
+            location.append(locationdict)
         data = {
             "id": item.id,
             "nr": item.nr,
