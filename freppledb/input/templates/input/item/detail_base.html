@@ -71,7 +71,7 @@
         color: #1f5aff;
     }
 
-    #main, #plan, #simulation {
+    #main {
         background: #fff;
         padding: 10px 20px;
     }
@@ -99,6 +99,11 @@
     .checkbox {
         padding-left: 90px;
         margin-bottom: 5px;
+    }
+
+    .unit {
+        text-align: left !important;
+        width: 50px !important;
     }
 
 </style>
@@ -133,6 +138,7 @@
                     <span class="input-group-addon">库存数量：</span>
                     <input class="form-control" id="item_detail_total_qty" type="text"
                            name="item_detail_total_qty">
+                    <span class="input-group-addon unit">PCE</span>
                 </div>
             </div>
 
@@ -167,6 +173,7 @@
 
                     <input class="form-control" id="item_detail_available_qty" type="text"
                            name="item_detail_available_qty">
+                    <span class="input-group-addon unit">PCE</span>
                 </div>
             </div>
             <div class="col-md-3">
@@ -203,6 +210,7 @@
 
                     <input class="form-control" id="item_detail_buffer_price" type="text"
                            name="item_detail_buffer_price">
+                    <span class="input-group-addon unit">CNY</span>
                 </div>
             </div>
             <div class="col-md-3">
