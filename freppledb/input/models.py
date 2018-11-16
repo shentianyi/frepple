@@ -17,6 +17,7 @@
 
 from datetime import datetime, time
 
+from dateutil.relativedelta import relativedelta
 from django.contrib.contenttypes.fields import GenericRelation
 from django.utils import timezone
 
@@ -26,7 +27,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from freppledb.common.fields import JSONBField, AliasDateTimeField
 from freppledb.common.models import HierarchyModel, AuditModel, MultiDBManager, User, Comment
-from freppledb.common.utils import la_time
+from freppledb.common.utils import la_time, la_enum
 
 searchmode = (
     ('PRIORITY', _('priority')),
@@ -60,8 +61,9 @@ class Calendar(AuditModel):
     )
 
     max_cd_cal_steps = 999
+
     @classmethod
-    def cd(cls,calendar,start_date,work_days):
+    def cd(cls, calendar, start_date, work_days):
         """
         计算 calendar day
         :param calendar: 日历对象,
@@ -69,17 +71,32 @@ class Calendar(AuditModel):
         :param work_days: 工作日天数
         :return:
         """
+        day = int((start_date + relativedelta(days=1)).strftime("%w"))
+        buckets = calendar.buckets.order_by('priority').all()
+
+        adict = {0: 'sunday', 1: 'monday', 2: 'tuesday', 3: 'wednesday', 4: 'thursday', 5: 'friday', 6: 'saturday'}
         if calendar:
             cd_days = 0
 
             work_days_find = 0
 
-            while work_days_find<work_days and cd_days<cls.max_cd_cal_steps:
-                return 0
+            while work_days_find < work_days and cd_days < cls.max_cd_cal_steps:
+                bucket = None
+                for b in buckets:
+                    if b.startdate <= start_date and b.enddate >= start_date:
+                        bucket = b
+                        break
 
+                if bucket:
+                    if getattr(bucket, adict[day], False):
+                        work_days_find += 1
 
+                start_date = start_date + relativedelta(days=1)
+                cd_days += 1
+
+            return cd_days
         else:
-            return 7
+            return la_enum.normal_calendar(start_date, work_days)
 
     def __str__(self):
         return self.name
@@ -310,7 +327,8 @@ class Item(AuditModel, HierarchyModel):
     type = models.CharField(_('type'), max_length=20, choices=types, null=False, blank=False)
     status = models.CharField(_('status'), max_length=20, null=True, blank=True, choices=fg_status)
     plan_strategy = models.CharField(_('plan strategy'), max_length=20, null=True, blank=True, choices=strategies)
-    lock_type = models.CharField(_('lock type'), max_length=20, null=True, blank=True, choices=lock_types,default="unlocked")
+    lock_type = models.CharField(_('lock type'), max_length=20, null=True, blank=True, choices=lock_types,
+                                 default="unlocked")
     lock_expire_at = models.DateField(_('lock expire at'), null=True, blank=True)
     price_abc = models.CharField(_('price abc'), max_length=20, null=True, blank=True, choices=abc_types)
     qty_abc = models.CharField(_('qty abc'), max_length=20, null=True, blank=True, choices=abc_types)
@@ -1243,8 +1261,8 @@ class ItemSupplier(AuditModel):
     priority = models.IntegerField(_('priority'), default=0, help_text=_('Priority among all alternates'))
     ratio = models.DecimalField(_('ratio'), max_digits=20, decimal_places=8, default=100, null=True, blank=True)
     moq = models.DecimalField(_('MOQ'), max_digits=20, decimal_places=8)
-    order_unit_qty = models.DecimalField(_('order unit qty'), max_digits=20, decimal_places=8,default=0)
-    order_max_qty = models.DecimalField(_('order max qty'), max_digits=20, decimal_places=8,default=0)
+    order_unit_qty = models.DecimalField(_('order unit qty'), max_digits=20, decimal_places=8, default=0)
+    order_max_qty = models.DecimalField(_('order max qty'), max_digits=20, decimal_places=8, default=0)
     product_time = models.DecimalField(_('product time'), max_digits=20, decimal_places=8, default=0, null=True,
                                        blank=True)
     load_time = models.DecimalField(_('load time'), null=True, max_digits=20, decimal_places=8, default=0,
@@ -1608,8 +1626,8 @@ class Forecast(AuditModel, ForecastCommentOperation):
 
     ratio = models.DecimalField(_('forecast ratio'), max_digits=20, decimal_places=8, default=100)
     normal_qty = models.DecimalField(_('normal qty'), max_digits=20, decimal_places=8, default=0)
-    new_product_plan_qty = models.DecimalField(_('new product plan qty'), max_digits=20, decimal_places=8,default=0)
-    promotion_qty = models.DecimalField(_('promotion qty'), max_digits=20, decimal_places=8,default=0)
+    new_product_plan_qty = models.DecimalField(_('new product plan qty'), max_digits=20, decimal_places=8, default=0)
+    promotion_qty = models.DecimalField(_('promotion qty'), max_digits=20, decimal_places=8, default=0)
     status = models.CharField(_('status'), max_length=20, choices=ForecastCommentOperation.statuses, default='init')
     create_user = models.ForeignKey(
         User, verbose_name=_('create_user'),
