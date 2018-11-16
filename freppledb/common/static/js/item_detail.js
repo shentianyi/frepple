@@ -111,6 +111,7 @@ ItemDetail.getPlanData = function () {
     })
 
     ItemDetail.getPlanGridData();
+    ItemDetail.getPlanChartData();
 };
 
 //获取计划界面grid数据
@@ -147,50 +148,118 @@ ItemDetail.getPlanGridData = function () {
         },
     ];
 
-    $("#content-main").append('<table id="grid" class="table table-striped pivotgrid"></table>');
-    $("#content-main").append('<div id="gridpager" class="col-md-12"></div>');
-    $('#grid_LEGNBR').css("width", "77"); //     你需要调整的列名：LEGNBR  的控件宽度
-    $('#grid').css("width", "82");//滚动条长度大约5px宽度 //jqgrid 控件宽度
-    $('#grid tr:first td:first').css("width", "77");       //数据列的宽度
+    $("#content-main-plan").append('<table id="planGrid" class="table table-striped pivotgrid"></table>');
+    // $("#content-main-plan").append('<div id="plangridpager" class="col-md-12"></div>');
+    // $("#planGrid").setGridWidth($('#content-main-plan').width());
 
-    jQuery("#grid").jqGrid({
-        url: '/data/output/item/buffer_operate_records/?id=' + itemId + '&page=1&page_size=100',
+
+    jQuery("#planGrid").jqGrid({
+        url: '/data/output/item/buffer_operate_records/?id=' + itemId,
         datatype: "json",
         jsonReader: {
             repeatitems: false
         },
         colModel: tableColModel,
-        pager: '#gridpager',
+        pager: '#plangridpager',
         emptyrecords: "无数据显示",
         loadtext: "读取中...",
-        width: "100%",
-        height: "100%",
-        rowNum: 5,//一页显示多少条
-
-        rownumbers: true,
+        rowNum: 20,//一页显示多少条
+        prmNames: {
+            "rows": "page_size",
+            "page": "page",
+        },
+        // rownumbers: true,
+        // rownumWidth: 20,
         shrinkToFit: false,
         autoScroll: true,
         viewrecords: true,
         iconSet: "fontAwesome",
         guiStyle: "bootstrapPrimary",
         hidegrid: false,
-        resizeStop: grid.saveColumnConfiguration,
+        resizeStop: planGrid.saveColumnConfiguration,
         scrollRows: true,
-        onPaging: grid.saveColumnConfiguration,
+        onPaging: planGrid.saveColumnConfiguration,
         autowidth: true,
 
         loadComplete: function () {
 
-            $("#gird").closest(".ui-jqgrid-bdiv").css({'overflow-y': 'auto'});
-            $("#gird").closest(".ui-jqgrid-bdiv").css({'overflow-x': 'scroll'});
+            $("#planGrid").closest(".ui-jqgrid-bdiv").css({'overflow-y': 'scroll'});
+            $("#planGrid").closest(".ui-jqgrid-bdiv").css({'overflow-x': 'scroll'});
+            $("#planGrid").setGridWidth($('#content-main-plan').width()).setGridHeight('350');
+
             $(function () {
                 $(window).resize(function () {
-                    $("#gird").setGridWidth($('#content-main').width());
-                    // $("#gird").jqGrid("setGridHeight", 200);
+                    $("#planGrid").setGridWidth($('#content-main-plan').width());
                 });
             });
         }
     });
+}
+
+//获取计划界面chart数据
+ItemDetail.getPlanChartData = function (date_type, report_type) {
+    var DateTypeValue = $("#plan_chart_chooseMonth").val();
+    var locationId = $("#item_detail_location").val();
+
+    $.ajax({
+        url: "/data/output/plan/item_report/?id=" + itemId + "&location_id=" + locationId + "&date_type=" + (date_type ? date_type : DateTypeValue) + "&report_type=" + (report_type ? report_type : ''),
+        type: 'application/json',
+        method: 'get',
+        success: function (data) {
+            // console.log('-------------data', data);
+            if (data.result) {
+                const series = data.content.serials
+                var legendData = [];
+                var xAxis = [];
+                var seriesPlan = [];
+
+
+                for (var i = 0; i < series.length; i++) {
+                    var yAxis = [];
+                    legendData.push(series[i].serial);
+                    for (var j = 0; j < series[i].points.length; j++) {
+                        yAxis.push(series[i].points[j].y);
+                    }
+                    // var chartType = series[i].serial_type !== '';
+                    var chartType = 'bar';
+                    seriesPlan[i] = {name: series[i].serial, type: chartType, data: yAxis};
+                }
+                for (var i = 0; i < series[0].points.length; i++) {
+                    xAxis.push(series[0].points[i].x_text)
+                }
+
+                // console.log('-------legendData------', legendData);
+                // console.log('-------xAxis------', xAxis);
+                // console.log('-------seriesPlan------', seriesPlan);
+                var planChart = echarts.init(document.getElementById('item_detail_plan_chart'));
+                var simulationChart = echarts.init(document.getElementById('item_detail_simulation_chart'));
+
+                var option = {
+                    title: {
+                        show: false
+                    },
+                    tooltip: {
+                        position: [0, 0]
+                    },
+                    legend: {
+                        data: legendData
+                    },
+                    xAxis: {
+                        data: xAxis
+                    },
+                    yAxis: {
+                        show: false,
+                    },
+                    series: seriesPlan
+                };
+                planChart.setOption(option);
+                simulationChart.setOption(option);
+            }
+        },
+        error: function (err) {
+            alert(err);
+        }
+    })
 }
 
 //获取模拟数据
@@ -212,13 +281,94 @@ ItemDetail.getSimulationData = function () {
         error: function (err) {
             alert(err);
         }
-    })
+    });
+
+    ItemDetail.getSimulationGridData();
+    ItemDetail.getPlanChartData($("#simulation_chart_chooseMonth").val());
 };
+
+//获取模拟界面grid数据
+ItemDetail.getSimulationGridData = function () {
+    var tableColModel = [
+        {
+            name: 'date_number',
+            label: '日月/周数',
+        },
+        {
+
+            name: 'qty',
+            label: '数量',
+        },
+        {
+            name: 'move_types',
+            label: '移动类型',
+        },
+        {
+            name: 'name',
+            label: '供应商/客户',
+        },
+        {
+            name: 'order_num',
+            label: '单号',
+        },
+        {
+            name: 'order_line_num',
+            label: '订单行号',
+        },
+        {
+            name: 'buffer',
+            label: '库存',
+        },
+    ];
+
+    $("#content-main-simulation").append('<table id="simulationGrid" class="table table-striped pivotgrid"></table>');
+    // $("#content-main-simulation").append('<div id="simulationgridpager" class="col-md-12"></div>');
+    // $("#simulationGrid").setGridWidth($('#content-main-simulation').width());
+
+    jQuery("#simulationGrid").jqGrid({
+        url: '/data/output/item/buffer_operate_records/?id=' + itemId + '&page=1&page_size=100',
+        datatype: "json",
+        jsonReader: {
+            repeatitems: false
+        },
+        colModel: tableColModel,
+        pager: '#simulationgridpager',
+        emptyrecords: "无数据显示",
+        loadtext: "读取中...",
+        rowNum: 20,//一页显示多少条
+        prmNames: {
+            "rows": "page_size",
+            "page": "page",
+        },
+        shrinkToFit: false,
+        autoScroll: true,
+        viewrecords: true,
+        iconSet: "fontAwesome",
+        guiStyle: "bootstrapPrimary",
+        hidegrid: false,
+        resizeStop: simulationGrid.saveColumnConfiguration,
+        scrollRows: true,
+        onPaging: simulationGrid.saveColumnConfiguration,
+        autowidth: true,
+
+        loadComplete: function () {
+
+            $("#simulationGrid").closest(".ui-jqgrid-bdiv").css({'overflow-y': 'scroll'});
+            $("#simulationGrid").closest(".ui-jqgrid-bdiv").css({'overflow-x': 'scroll'});
+            $("#simulationGrid").setGridWidth($('#content-main-simulation').width()).setGridHeight('300');
+            $(function () {
+                $(window).resize(function () {
+                    $("#simulationGrid").setGridWidth($('#content-main-simulation').width());
+                });
+            });
+        }
+    });
+}
 
 //获取预测界面grid数据
 ItemDetail.getForecastGridData = function (date_type, report_type) {
 
-    var DateTypeValue = $("#grid_chooseMonth").val();
+    var DateTypeValue = $("#forecast_grid_chooseMonth").val();
     var locationId = $("#item_detail_location").val();
 
     $.ajax({
@@ -228,7 +378,8 @@ ItemDetail.getForecastGridData = function (date_type, report_type) {
         success: function (data) {
             if (data.result) {
                 var tableColModel = [{
-                    name: 'location', index: 'location', cellattr: function (rowId, tv, rawObject, cm, rdata) {
+                    name: 'location', index: 'location', align: 'center',
+                    cellattr: function (rowId, tv, rawObject, cm, rdata) {
                         //合并单元格
                         return 'id=\'location' + rowId + "\'";
                     }
@@ -301,9 +452,9 @@ ItemDetail.getForecastGridData = function (date_type, report_type) {
                     rowData.push(promotionRowData);
 
                     // console.log('-----------------------rowData', rowData);
-                    $("#content-main").append('<table id="grid" class="table table-striped pivotgrid"></table>');
+                    $("#content-main-forecast").append('<table id="forecastGrid" class="table table-striped pivotgrid"></table>');
 
-                    jQuery("#grid").jqGrid({
+                    jQuery("#forecastGrid").jqGrid({
                         datatype: "local",
                         data: rowData,
                         localReader: {
@@ -311,7 +462,7 @@ ItemDetail.getForecastGridData = function (date_type, report_type) {
                         },
                         colNames: tableColName,
                         colModel: tableColModel,
-                        pager: '#gridpager',
+                        pager: '#forecastgridpager',
                         emptyrecords: "无数据显示",
                         loadtext: "卖力加载中...",
                         shrinkToFit: false,
@@ -320,15 +471,15 @@ ItemDetail.getForecastGridData = function (date_type, report_type) {
                         iconSet: "fontAwesome",
                         guiStyle: "bootstrapPrimary",
                         hidegrid: false,
-                        resizeStop: grid.saveColumnConfiguration,
+                        resizeStop: forecastGrid.saveColumnConfiguration,
                         scrollRows: true,
                         autowidth: true,
                         loadComplete: function () {
-                            $("#gird").closest(".ui-jqgrid-bdiv").css({'overflow-y': 'auto'});
+                            $("#forecastGrid").closest(".ui-jqgrid-bdiv").css({'overflow-y': 'auto'});
                         },
                         gridComplete: function () {
                             //在gridComplete调用合并方法
-                            ItemDetail.Merger('grid', 'location');
+                            ItemDetail.Merger('forecastGrid', 'location');
                         }
 
                     })
@@ -346,7 +497,7 @@ ItemDetail.getForecastGridData = function (date_type, report_type) {
 //获取预测界面chart数据
 ItemDetail.getForecastChartData = function (date_type, report_type) {
 
-    var DateTypeValue = $("#chart_chooseMonth").val();
+    var DateTypeValue = $("#forecast_chart_chooseMonth").val();
     var locationId = $("#item_detail_location").val();
 
     $.ajax({
@@ -358,7 +509,7 @@ ItemDetail.getForecastChartData = function (date_type, report_type) {
                 const series = data.content.serials
                 // console.log('data-----------------', data);
 
-                var legendData = [];
+                var legendData = ['current_time_point'];
                 var xAxis = [];
                 var yFAxis = [];
                 var yDAxis = [];
@@ -425,39 +576,25 @@ ItemDetail.getForecastChartData = function (date_type, report_type) {
                     dataZoom: [
                         {
                             show: true,
-                            start: 94,
+                            start: 0,
                             end: 100,
                             orient: "horizontal"
                         },
                         {
                             type: 'inside',
-                            start: 94,
+                            start: 0,
                             end: 100
                         },
-                        {
-                            show: true,
-                            yAxisIndex: 0,
-                            filterMode: 'empty',
-                            width: 30,
-                            height: '80%',
-                            showDataShadow: false,
-                            left: '93%'
-                        }
                     ],
                     series: [{
-                        name: 'Dispatches(Forecast basis)',
+                        name: 'current_time_point',
                         type: 'bar',
-                        data: yFAxis,
+                        data: [],
                         markLine: {
                             symbol: "none",
                             lineStyle: {
-                                // type: 'solid',
-                                // color: 'black',
-                                // width: '5px',
                                 normal: {
                                     type: 'solid',
-                                    color: '#333',
-                                    width: '10',
                                 }
                             },
                             data: [
@@ -467,6 +604,29 @@ ItemDetail.getForecastChartData = function (date_type, report_type) {
                                 },
                             ]
                         }
+                    }, {
+                        name: 'Dispatches(Forecast basis)',
+                        type: 'bar',
+                        data: yFAxis,
+                        // markLine: {
+                        //     symbol: "none",
+                        //     lineStyle: {
+                        //         // type: 'solid',
+                        //         // color: 'black',
+                        //         // width: '5px',
+                        //         normal: {
+                        //             type: 'solid',
+                        //             color: '#333',
+                        //             width: '10',
+                        //         }
+                        //     },
+                        //     data: [
+                        //         {
+                        //             name: '当前值',
+                        //             xAxis: currentValue
+                        //         },
+                        //     ]
+                        // }
                     },
                         {
                             name: 'Demand forecast',
@@ -515,20 +675,38 @@ ItemDetail.supplierChange = function () {
 };
 
 //切换查询时间类型获取数据
-ItemDetail.DateTypeChange = function (ifGrid) {
-    var currentGridValue = $("#grid_chooseMonth").val();
-    var currentChartValue = $("#chart_chooseMonth").val();
+ItemDetail.DateTypeChange = function (name, ifGrid) {
+    var currentGridValueForecast = $("#forecast_grid_chooseMonth").val();
+    var currentChartValueForecast = $("#forecast_chart_chooseMonth").val();
+    var currentChartValuePlan = $("#plan_chart_chooseMonth").val();
+    var currentChartValueSimulation = $("#simulation_chart_chooseMonth").val();
 
-    if (ifGrid) {
-        $("#grid").GridDestroy();
-        $("#content-main").append('<table id="grid" class="table table-striped pivotgrid"></table>');
-        $("#content-main").append('<div id="gridpager" class="col-md-12"></div>');
-        ItemDetail.getForecastGridData(currentGridValue);
-    } else {
-        $("#main-item_detail_forecast_chart").remove();
-        $("#main-chart").append('<div id="item_detail_forecast_chart"></div>');
-        ItemDetail.getForecastChartData(currentChartValue);
+    if (name === 'forecast') {
+        if (ifGrid) {
+            $("#forecastGrid").GridDestroy();
+            $("#content-main-forecast").append('<table id="forecastGrid" class="table table-striped pivotgrid"></table>');
+            $("#content-main-forecast").append('<div id="forecastgridpager" class="col-md-12"></div>');
+            ItemDetail.getForecastGridData(currentGridValueForecast);
+        } else {
+            $("#main-item_detail_forecast_chart").remove();
+            $("#main-chart").append('<div id="item_detail_forecast_chart"></div>');
+            ItemDetail.getForecastChartData(currentChartValueForecast);
+        }
+    } else if (name === 'plan') {
+        if (!ifGrid) {
+            $("#item_detail_plan_chart").remove();
+            $("#plan-chart").append('<div id="item_detail_plan_chart" style="height: 300px; width: 100%;"></div>');
+            ItemDetail.getPlanChartData(currentChartValuePlan);
+        }
+    } else if (name === 'simulation') {
+        if (!ifGrid) {
+            $("#item_detail_simulation_chart").remove();
+            $("#simulation-chart").append('<div id="item_detail_simulation_chart" style="height: 300px; width: 100%;"></div>');
+            ItemDetail.getPlanChartData(currentChartValueSimulation);
+            e
+        }
     }
+
 }
 
 /**
@@ -574,6 +752,10 @@ function FillData(prefix, data) {
 
                     var currentValue = value.current;
                     var valueArray = value.values;
+
+                    if (currentValue === null) {
+                        html += "<option value=" + currentValue + ">----</option>"
+                    }
 
                     if (valueArray.length > 0) {
                         for (var i = 0; i < valueArray.length; i++) {
