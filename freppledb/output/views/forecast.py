@@ -661,12 +661,12 @@ class ForecastItemGraph(View):
         while start_time < current_time:
             dispatches_points = {
                 "x_value": start_time,
-                "x_text": Bucket.get_x_time_name(start_time, date_type),
+                "x_text": Bucket.get_x_text_name(start_time, date_type),
                 "y": 0
             }
             forecast_points = {
                 "x_value": start_time,
-                "x_text": Bucket.get_x_time_name(start_time, date_type),
+                "x_text": Bucket.get_x_text_name(start_time, date_type),
                 "y": 0
             }
 
@@ -686,12 +686,12 @@ class ForecastItemGraph(View):
         while current_time <= end_time:
             dispatches_points = {
                 "x_value": current_time,
-                "x_text": Bucket.get_x_time_name(current_time, date_type),
+                "x_text": Bucket.get_x_text_name(current_time, date_type),
                 "y": 0
             }
             forecast_points = {
                 "x_value": current_time,
-                "x_text": Bucket.get_x_time_name(current_time, date_type),
+                "x_text": Bucket.get_x_text_name(current_time, date_type),
                 "y": 0
             }
             total = 0
@@ -757,9 +757,9 @@ class PlanItemGraph(View):
             transit_time = supplier.transit_time
             product_time = supplier.product_time
 
-            leadtime = la_enum.lead_time(receive_time, load_time, transit_time, product_time)
+            leadtime = 0
 
-            lead_time = Bucket.get_search_starttime_by_date_type(current_time + relativedelta(days=leadtime), date_type)
+            lead_time = current_time + relativedelta(days=leadtime)
 
         current = {
             "x_value": current_time,
@@ -815,7 +815,7 @@ class PlanItemGraph(View):
         while start_time < current_time:
             forecast_points = {
                 "x_value": start_time,
-                "x_text": Bucket.get_x_time_name(start_time, date_type),
+                "x_text": Bucket.get_x_text_name(start_time, date_type),
                 "y": 0
             }
 
@@ -826,7 +826,7 @@ class PlanItemGraph(View):
         while current_time <= end_time:
             forecast_points = {
                 "x_value": current_time,
-                "x_text": Bucket.get_x_time_name(current_time, date_type),
+                "x_text": Bucket.get_x_text_name(current_time, date_type),
                 "y": 0
             }
             total = 0

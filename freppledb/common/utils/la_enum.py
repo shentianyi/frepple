@@ -11,21 +11,21 @@ def tuple2select(tuple, blankable=False):
         return [{"value": k, "text": v} for k, v in dict(tuple).items()]
 
 
-def lead_time(receive_time, load_time, transit_time, product_time, workday=5):
+def lead_time(totall_time, workday=5):
 
-    # 从数据库取出来的值可能为None,为None时相加减会报错
-    if receive_time is None:
-        receive_time = 0
-    if load_time is None:
-        load_time = 0
-    if transit_time is None:
-        transit_time = 0
-    if product_time is None:
-        product_time = 0
+    # # 从数据库取出来的值可能为None,为None时相加减会报错
+    # if receive_time is None:
+    #     receive_time = 0
+    # if load_time is None:
+    #     load_time = 0
+    # if transit_time is None:
+    #     transit_time = 0
+    # if product_time is None:
+    #     product_time = 0
 
     now_time = datetime.now()
     # 按工作日计算前置期时间
-    totall_time = receive_time + load_time + transit_time + product_time
+    # totall_time = receive_time + load_time + transit_time + product_time
     # 休息多少天
     off_day = 7 - workday
     # 当前时间为星期几,weekday()默认周一为0，周日为6，后面加1是为了保证周一从１开始
