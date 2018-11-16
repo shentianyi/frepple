@@ -1450,7 +1450,7 @@ class ItemSupplierData(View):
     def get(self, request, id, *args, **kwargs):
         message = ResponseMessage()
         try:
-            supplier = ItemSupplier.objects.all().order_by('priority', '-ratio', 'id').get(item=id)
+            supplier = ItemSupplier.objects.all().order_by('priority', '-ratio', 'id').filter(item=id)
         except Exception as e:
             message.result = False
             message.code = 404
