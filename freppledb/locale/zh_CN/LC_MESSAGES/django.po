@@ -456,6 +456,12 @@ msgstr "锁定类型"
 msgid "lock expire at"
 msgstr "到期"
 
+msgid "locked"
+msgstr "锁定"
+
+msgid "unlocked"
+msgstr "未锁定"
+
 msgid "price abc"
 msgstr "物料ABC货值"
 
@@ -5101,9 +5107,6 @@ msgstr "报价"
 
 #~ msgid "incremental export to openbravo"
 #~ msgstr "增量导出到openbravo"
-
-#~ msgid "locked"
-#~ msgstr "已锁定"
 
 #~ msgid "loadplan"
 #~ msgstr "负荷计划"

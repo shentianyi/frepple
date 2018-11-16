@@ -15,6 +15,7 @@
 # License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 import csv
+import math
 import sys
 import traceback
 from datetime import datetime
@@ -47,7 +48,8 @@ from openpyxl.styles import NamedStyle, PatternFill
 
 from freppledb.boot import getAttributeFields
 from freppledb.common.message.responsemessage import ResponseMessage
-from freppledb.common.models import Parameter, Comment
+from freppledb.common.models import Parameter, Comment, Bucket
+from freppledb.common.utils import la_enum
 from freppledb.input.forms import ForecastUploadForm
 from freppledb.input.models import Resource, Operation, Location, SetupMatrix, SetupRule, ItemSuccessor, ItemCustomer, \
     ForecastYear, ForecastVersion, Forecast, ForecastCommentOperation
@@ -1022,11 +1024,14 @@ class ItemSupplierList(GridReport):
         # 新建一个显示列
         GridFieldText('item_display', title=_('item_display'), field_name='item__nr', editable=False),
         GridFieldText('supplier_display', title=_('supplier_display'), field_name='supplier__nr', editable=False),
+        GridFieldText('location_display', title=_('location_display'), field_name='location__nr', editable=False),
 
         # 因为是id 让外键永远不显示
         GridFieldInteger('item', title=_('item'), field_name='item__name', formatter='detail', editable=False,
                          hidden=True),
         GridFieldInteger('supplier', title=_('supplier'), field_name='supplier__name', formatter='detail',
+                         editable=False, hidden=True),
+        GridFieldInteger('location', title=_('location'), field_name='location__name', formatter='detail',
                          editable=False, hidden=True),
         GridFieldText('supplier_item_nr', title=_('supplier item nr'), editable=False),
         GridFieldText('status', title=_('status'), editable=False),
@@ -1289,9 +1294,19 @@ class EnumView(View):
             value = kwargs['value']
             if type == 'item_status_by_type':
                 t = Item.type_status[value]
-                dic = [{"value": k, "text": v} for k, v in dict(t).items()] if t != None else None
+                dic = la_enum.tuple2select(t) if t != None else None
 
                 return HttpResponse(json.dumps(dic, cls=DjangoJSONEncoder),
+                                    content_type='application/json')
+
+            if type == 'item_lock_type':
+                t = dict(Item.lock_types)[value]
+                if t == 'locked':
+                    Item.lock_expire_at = None
+                    data = {
+                        "lock_expire_at": Item.lock_expire_at
+                    }
+                return HttpResponse(json.dumps(data, cls=DjangoJSONEncoder),
                                     content_type='application/json')
         else:
             raise HttpResponseBadRequest()
@@ -1364,8 +1379,7 @@ class ItemDetail(View):
         # forecast:     预测
         template_name = "input/item/detail_base.html"
         id = kwargs['id']
-        item = Item.objects.all().get(id=id)
-        return render(request, template_name, {'template_name': template_name})
+        return render(request, template_name, {'template_name': template_name, "date_types": Bucket.chioce_date_type()})
 
 
 # 代号：GET_ITEM_MAIN_DATA_API
@@ -1387,14 +1401,12 @@ class ItemMainData(View):
         except:
             successor_nr = None
 
-        lock_types = {"current": item.lock_type,
-                      "values": [{"value": k, "text": v} for k, v in dict(Item.lock_types).items()]}
+        lock_types = {"current": item.lock_type, "values": la_enum.tuple2select(Item.lock_types)}
 
-        item_statuses = {"current": item.status,
-                         "values": [{"value": k, "text": v} for k, v in dict(Item.type_status[item.type]).items()]}
+        item_statuses = {"current": item.status, "values": la_enum.tuple2select(Item.type_status[item.type])}
 
         plan_strategies = {"current": item.plan_strategy,
-                           "values": [{"value": k, "text": v} for k, v in dict(Item.strategies).items()]}
+                           "values": la_enum.tuple2select(Item.strategies, blankable=True)}
 
         locations = Location.objects.select_related().all().order_by('id')
         location = []
@@ -1409,13 +1421,13 @@ class ItemMainData(View):
                     "buffer_price": 0
                 }
             }
-        location.append(locationdict)
+            location.append(locationdict)
         data = {
             "id": item.id,
             "nr": item.nr,
             "successor_nr": successor_nr,
             "description": item.description,
-            "project_nr":item.project_nr,
+            "project_nr": item.project_nr,
             "location": location,
             "lock_types": lock_types,
             "lock_expire_at": item.lock_expire_at,
@@ -1437,21 +1449,29 @@ class ItemMainData(View):
 class ItemSupplierData(View):
     def get(self, request, id, *args, **kwargs):
         message = ResponseMessage()
-        supplier = ItemSupplier.objects.all().filter(item=id)
+        try:
+            supplier = ItemSupplier.objects.all().order_by('priority', '-ratio', 'id').filter(item=id)
+        except Exception as e:
+            message.result = False
+            message.code = 404
+            message.message = "供应商不存在"
+            return HttpResponse(json.dumps(message.__dict__, cls=DjangoJSONEncoder, ensure_ascii=False),
+                                content_type='application/json')
         data = []
         for f in supplier:
             supplier_dict = {
                 "id": f.supplier.id,
                 "name": f.supplier.name,
+                "nr": f.supplier.nr,
                 "country": f.supplier.country,
                 "city": f.supplier.city,
                 "address": f.supplier.address,
                 "phone": f.supplier.phone,
-                "tel": f.supplier.telephone,
+                "telephone": f.supplier.telephone,
                 "email": f.supplier.email,
                 "contact": f.supplier.contact,
-                "cost": f.cost,
-                "cost_unit": f.cost_unit,
+                "cost": float(f.cost) if f.cost else None,
+                "cost_unit": float(f.cost_unit) if f.cost_unit else None,
                 "supplier_item_nr": f.supplier_item_nr
             }
             data.append(supplier_dict)
@@ -1491,57 +1511,37 @@ class MainSupplierData(View):
         load_time = supplier.load_time
         transit_time = supplier.transit_time
         product_time = supplier.product_time
-
-        if receive_time is None:
-            receive_time = 0
-        if load_time is None:
-            load_time = 0
-        if transit_time is None:
-            transit_time = 0
-        if product_time is None:
-            product_time = 0
-
-        # totall_lead_time　日历日的计算
-        totall_time = product_time + load_time + transit_time + receive_time
-        cd = int(totall_time / 5)
-        day = cd * 5
-        totall_lead_time = cd * 7 + totall_time - day
-
-        receive_time = supplier.receive_time
-        load_time = supplier.load_time
-        transit_time = supplier.transit_time
-        product_time = supplier.product_time
+        totall_lead_time = la_enum.lead_time(receive_time, load_time, transit_time, product_time)
 
         data = {
-            "id": supplier.supplier.id,
-            "supplier": supplier.supplier.name,
+            "supplier_id": supplier.supplier.id,
+            "name": supplier.supplier.name,
             "nr": supplier.supplier.nr,
-            "product_time": product_time if product_time else None,
-            "load_time": load_time if load_time else None,
-            "transit_time": transit_time if transit_time else None,
-            "receive_time": receive_time if receive_time else None,
+            "product_time": float(product_time) if product_time else None,
+            "load_time": float(load_time) if load_time else None,
+            "transit_time": float(transit_time) if transit_time else None,
+            "receive_time": float(receive_time) if receive_time else None,
             "plan_supplier_date": supplier.plan_supplier_date,
             "plan_load_date": supplier.plan_load_date,
             "plan_receive_date": supplier.plan_receive_date,
-            "totall_lead_time": totall_lead_time,
-            "cost": supplier.cost,
-            "cost_unit": supplier.cost_unit,
+            "totall_lead_time": float(totall_lead_time),
+            "cost": float(supplier.cost) if supplier.cost else supplier.cost,
+            "cost_unit": float(supplier.cost_unit) if supplier.cost_unit else None,
             "earliest_order_date": supplier.earliest_order_date,
             "lock_expire_at": item.lock_expire_at,
             "plan_list_date": supplier.plan_list_date,
             "plan_delist_date": supplier.plan_delist_date,
-            "moq": supplier.moq,
-            "mpq": supplier.mpq if supplier.mpq else None,
-            "pallet_num": supplier.pallet_num if supplier.pallet_num else None,
+            "moq": float(supplier.moq) if supplier.moq else None,
+            "mpq": float(supplier.mpq) if supplier.mpq else None,
+            "pallet_num": float(supplier.pallet_num) if supplier.pallet_num else None,
             # TODO 手工MOQ暂时无数据
             "MOQ": 0,
-            "order_unit_qty": supplier.order_unit_qty if supplier.order_unit_qty else None,
-            "outer_package_num": supplier.outer_package_num if supplier.outer_package_num else None,
-            "order_max_qty": supplier.order_max_qty if supplier.order_max_qty else None,
+            "order_unit_qty": float(supplier.order_unit_qty) if supplier.order_unit_qty else None,
+            "outer_package_num": float(supplier.outer_package_num) if supplier.outer_package_num else None,
+            "order_max_qty": float(supplier.order_max_qty) if supplier.order_max_qty else None,
             "description": supplier.description
         }
 
-        message = ResponseMessage()
         message.result = True
         message.code = 200
         message.message = "相应数据查询成功"
@@ -1568,14 +1568,14 @@ class ItemSimulation(View):
                                 content_type='application/json')
 
         data = {
+            "supplier_id": supplier.supplier.id,
+            "nr": supplier.supplier.nr,
+            "name": supplier.supplier.name,
             # TODO 目前订货点没有数据
             "now_order_point": 0,
-            "MOQ": supplier.moq,
-            "order_max_qty": supplier.order_max_qty,
-            "nr": supplier.supplier.nr,
-            "name": supplier.supplier.name
+            "moq": float(supplier.moq) if supplier.moq else None,
+            "order_max_qty": float(supplier.order_max_qty) if supplier.order_max_qty else None
         }
-        message = ResponseMessage()
         message.result = True
         message.code = 200
         message.message = "相应数据查询成功"
@@ -1584,11 +1584,88 @@ class ItemSimulation(View):
                             content_type='application/json')
 
 
-# 代号：GET_ITEM_PLAN_GRAPH_API
-# 单个物料计划图表
-class ItemGraph(View):
+# 代号：GET_ITEM_PLAN_DATA_API
+# 获取单个物料计划主数据
+class ItemPlan(View):
     def get(self, request, id, *args, **kwargs):
-        pass
+        message = ResponseMessage()
+        current_time = timezone.now()
+        try:
+            supplier = ItemSupplier.objects.filter(item=id, effective_start__lte=current_time,
+                                                effective_end__gte=current_time).order_by('priority', '-ratio',
+                                                                                          'id').first()
+        except Exception as e:
+            message.result = False
+            message.code = 404
+            message.message = "合法的主供应商不存在"
+            return HttpResponse(json.dumps(message.__dict__, cls=DjangoJSONEncoder, ensure_ascii=False),
+                                content_type='application/json')
+        receive_time = supplier.receive_time
+        load_time = supplier.load_time
+        transit_time = supplier.transit_time
+        product_time = supplier.product_time
+        lead_time = la_enum.lead_time(receive_time, load_time, transit_time, product_time)
+
+        data = {
+            "supplier_id": supplier.supplier.id,
+            "nr": supplier.supplier.nr,
+            "name": supplier.supplier.name,
+            "safe_buffer": 0,
+            "moq": float(supplier.moq) if supplier.moq else None,
+            "mpq": float(supplier.mpq) if supplier.mpq else None,
+            "outer_package_num": float(supplier.outer_package_num) if supplier.outer_package_num else None,
+            "pallet_num": float(supplier.pallet_num) if supplier.pallet_num else None,
+            "lead_time": float(lead_time),
+            "per_month_sale": 0,
+            "last_year_sale": 0,
+            "last_month_sale": 0,
+            "now_month_sale": 0,
+            "now_buffer_time": 0,
+            "now_order_point": 0
+        }
+
+        message.result = True
+        message.code = 200
+        message.message = "相应数据查询成功"
+        message.content = data
+        return HttpResponse(json.dumps(message.__dict__, cls=DjangoJSONEncoder, ensure_ascii=False),
+                            content_type='application/json')
+
+    def post(self, request, *args, **kwargs):
+        message = ResponseMessage()
+        json_data = request.body
+        data = json.loads(json_data)
+        id = data['supplier_id']
+        safe_buffer = data['safe_buffer']
+        moq = data['moq']
+        mpq = data['mpq']
+        outer_package_num = data['outer_package_num']
+        pallet_num = data['pallet_num']
+        with transaction.atomic():
+            # 创建保存点
+            save_point = transaction.savepoint()
+            try:
+                supplier = Supplier.objects.get(id=id)
+                supplier.mpq = mpq
+                supplier.outer_package_num = outer_package_num
+                supplier.pallet_num = pallet_num
+                supplier.moq = moq
+                supplier.save()
+
+            except:
+                message.result = False
+                message.code = 404
+                message.message = "供应商不存在"
+                transaction.savepoint_rollback(save_point)
+                return HttpResponse(json.dumps(message.__dict__, cls=DjangoJSONEncoder, ensure_ascii=False),
+                                    content_type='application/json')
+            else:
+                transaction.savepoint_commit(save_point)
+                message.result = True
+                message.code = 200
+                message.message = "数据保存成功"
+                return HttpResponse(json.dumps(message.__dict__, cls=DjangoJSONEncoder, ensure_ascii=False),
+                                    content_type='application/json')
 
 
 class ItemCustomerList(GridReport):

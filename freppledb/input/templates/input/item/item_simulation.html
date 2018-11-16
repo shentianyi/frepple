@@ -1,10 +1,95 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+<form class="form-span">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="row">
+                <div class="col-md-6">
+                    <h3>计划</h3>
+                    <div class="row">
+                        <div class="input-group">
+                            <span class="input-group-addon">目前订货点：</span>
+                            <input class="form-control" id="item_detail_simulation_now_order_point" type="text"
+                                   name="item_detail_simulation_now_order_point">
+                            <span class="input-group-addon unit">PCE</span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="input-group">
+                            <span class="input-group-addon">手工MOQ：</span>
+                            <input class="form-control" id="item_detail_simulation_moq" type="text"
+                                   name="item_detail_simulation_moq">
+                            <span class="input-group-addon unit">PCE</span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="input-group">
+                            <span class="input-group-addon">最大订单量：</span>
+                            <input class="form-control" id="item_detail_simulation_order_max_qty" type="text"
+                                   name="item_detail_simulation_order_max_qty">
+                            <span class="input-group-addon unit">PCE</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <h3>模拟</h3>
+                    <div class="row">
+                        <div class="checkbox input-group">
+                            <label>
+                                <input type="checkbox"> 显示优化
+                            </label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="checkbox input-group">
+                            <label>
+                                <input type="checkbox"> 显示预测
+                            </label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="input-group">
+                            <span class="input-group-addon">供应商：</span>
+                            <input class="form-control" id="item_detail_simulation_nr" type="text"
+                                   name="item_detail_simulation_nr" placeholder="供应商代码">
+                            <input class="form-control" id="item_detail_simulation_name" type="text"
+                                   name="item_detail_simulation_name" placeholder="供应商名称" style="margin-top: 10px">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-</body>
-</html>
+        <div class="col-md-6">
+            <!--<div class="row">-->
+            <!--<div class="input-group">-->
+            <!--<span class="input-group-addon">查询条件：</span>-->
+            <!--<input class="form-control" id="item_detail_plan_safe_buffer" type="text"-->
+            <!--name="item_detail_plan_safe_buffer">-->
+            <!--</div>-->
+            <!--</div>-->
+            <div class="row">
+                <!--表格 内容-->
+                <div id="content-main-simulation" class="col-md-12" style="min-height: 150px; margin-top: 0.7em">
+                </div>
+
+                <div id="simulationgridpager" class="col-md-12"></div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<form class="form-span">
+    <p class="pull-left">时标：</p>
+    <select id="simulation_chart_chooseMonth" class="form-control btn btn-primary default btn-aps btn-aps-save pull-left"
+            name="simulation_chart_chooseMonth" style="width: 34px; padding:0 5px" onchange="ItemDetail.DateTypeChange('simulation')">
+        {%for k,v in date_types%}
+        <option value="{{k}}">{{v}}</option>
+        {%endfor%}
+    </select>
+
+    <button id="simulation_chart_chooseDayButton" class="btn btn-primary default btn-aps btn-aps-save pull-left" type="button"
+            style="margin-left: 10px">今天
+    </button>
+    <div id="simulation-chart" class="row">
+        <div id="item_detail_simulation_chart" style="height: 300px; width: 100%;"></div>
+    </div>
+</form>

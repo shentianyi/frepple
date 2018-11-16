@@ -1,0 +1,37 @@
+{
+    "result": true,
+    "code": 200,
+    "message": "相应数据查询成功",
+    "content": {
+        // 供应商id
+        "supplier_id": 1,
+        // 供应商代码
+        "nr": "supplier_code",
+        // 供应商名称
+        "name": "supplier",
+        // 安全库存
+        "safe_buffer": 0,
+        // 手工MOQ
+        "moq": "12.00000000",
+        // 内箱最小包装量
+        "mpq": "1.00000000",
+        // 外箱数量
+        "outer_package_num": 1,
+        // 托盘数量
+        "pallet_num": 1,
+        // 前置期
+        "lead_time": 0,
+        // 月均销量
+        "per_month_sale": 0,
+        // 过去12个月
+        "last_year": 0,
+        // 上月销量
+        "last_month_sale": 0,
+        // 当月销量
+        "now_month_sale": 0,
+        // 当前库存周转期
+        "now_buffer_time": 0,
+        // 当前订货点
+        "now_order_point": 0
+    }
+}

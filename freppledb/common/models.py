@@ -724,6 +724,15 @@ class Bucket(AuditModel):
             return la_time.month_search_endtime(dt)
         return dt
 
+    @classmethod
+    def chioce_date_type(cls):
+        date_types = (
+            ('W', _('W')),
+            ('M', _('M')),
+        )
+
+        return date_types
+
 
 
 class BucketDetail(AuditModel):

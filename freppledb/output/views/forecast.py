@@ -3,9 +3,11 @@ import csv
 import functools
 import math
 import operator
+import random
 import urllib
 from io import BytesIO, StringIO
 
+from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib.admin.views.decorators import staff_member_required
 from django.core.serializers.json import DjangoJSONEncoder
@@ -31,8 +33,9 @@ from openpyxl import Workbook
 from openpyxl.cell import WriteOnlyCell
 
 from freppledb.common.models import Bucket
-from freppledb.common.utils import la_time
-from freppledb.input.models import Forecast, ForecastYear, Item, Location, Customer, ForecastCommentOperation
+from freppledb.common.utils import la_time, la_enum
+from freppledb.input.models import Forecast, ForecastYear, Item, Location, Customer, ForecastCommentOperation, \
+    ItemSupplier
 
 
 class ForecastCompare(View):
@@ -474,6 +477,8 @@ class ForecastItem(View):
 
         # 初始化时间类型, 默认周
         date_type = request.GET.get('date_type', 'W')
+        if date_type.isspace():
+            date_type = "W"
         date_type_full = Bucket.get_extra_trunc_by_shortcut(date_type)
 
         # 初始化查询时间
@@ -531,12 +536,12 @@ class ForecastItem(View):
 
         while start_time <= end_time:
             data = {
-                "x": Bucket.get_x_time_name(start_time, date_type),
-                "_x": start_time,
+                "x_value": start_time,
+                "x_text": Bucket.get_x_time_name(start_time, date_type),
                 "y": {
                     "total": 0,
                     "last_sale_qty": 0,
-                    "last_actual_sale_qty": 0,  # TODO forecast sale qty, CMARK
+                    "actual_sale_qty": 0,  # TODO forecast sale qty, CMARK
                     "system_forecast_qty": 0,  # TODO forecast sale qt, CMARK
                     "ratio": 0,
                     "normal_qty": 0,
@@ -549,19 +554,336 @@ class ForecastItem(View):
             # 赋值
             for row in rows:
                 if start_time == row[2]:
-                    data['y']['normal_qty'] += row[3]
-                    data['y']['new_product_plan_qty'] += row[4]
-                    data['y']['promotion_qty'] += row[5]
-                    data['y']['ratio'] += row[6]
+                    data['y']['normal_qty'] += float(row[3])
+                    data['y']['new_product_plan_qty'] += float(row[4])
+                    data['y']['promotion_qty'] += float(row[5])
+                    data['y']['ratio'] += float(row[6])
                     data['y']['_row_count'] += 1
-                    data['y']['total'] += round(row[3] * row[6] / 100, 2) + row[4] + row[5]
+                    data['y']['total'] += float(round(row[3] * row[6] / 100, 2) + row[4] + row[5])
 
             # 计算配比
             if data['y']['_row_count'] > 0:
-                data['y']['ratio'] = data['y']['ratio'] / data['y']['_row_count']
+                data['y']['ratio'] = float(data['y']['ratio'] / data['y']['_row_count'])
 
             message['content']['data'].append(data)
             # 下一个值
             start_time = Bucket.get_nex_time_by_date_type(start_time, date_type)
 
         return JsonResponse(message, encoder=DjangoJSONEncoder, safe=False)
+
+
+class ForecastItemGraph(View):
+    permissions = (('view_forecast_item_graph', 'Can view forecast item graph'),)
+
+    title = _('forecast item graph')
+
+    @method_decorator(staff_member_required())
+    def get(self, request, *args, **kwargs):
+        item = Item.objects.filter(id=request.GET.get('id', None)).first()
+        location = Location.objects.filter(id=request.GET.get('location_id', None)).first()
+
+        if item is None or location is None:
+            return JsonResponse({"result": False, "code": 404, "message": "参数错误,数据未找到"}, safe=False)
+
+        # 初始化时间类型, 默认周
+        date_type = request.GET.get('date_type', 'W')
+        if date_type.isspace():
+            date_type = "W"
+        date_type_full = Bucket.get_extra_trunc_by_shortcut(date_type)
+
+        # 初始化查询时间
+        search_start_time = request.GET.get('start_time', None)
+        search_start_time = la_time.string2dt(
+            search_start_time) if search_start_time else Bucket.get_search_starttime_by_date_type(
+            la_time.last_n_year_time(datetime.now(), 2), date_type)
+
+        search_end_time = request.GET.get('end_time', None)
+        search_end_time = la_time.string2dt(
+            search_end_time) if search_end_time else Bucket.get_search_endtime_by_date_type(
+            la_time.next_n_year_time(datetime.now(), 2), date_type)
+
+        cursor = connections[request.database].cursor()
+
+        forecast_query = '''select a.customer_id,a.year,DATE_TRUNC(%s,a.parsed_date) as trunc_parsed_date,
+                               a.normal_qty, a.new_product_plan_qty , a.promotion_qty,a.ratio from
+                               forecast as a inner join (select c.customer_id,c.parsed_date,max(c.version_id) as version_id 
+                               from forecast as c
+                               where c.status in %s and c.parsed_date between %s and %s and c.item_id = %s and c.location_id = %s
+                               group by c.customer_id, c.parsed_date) as b
+                               on a.customer_id=b.customer_id and a.parsed_date=b.parsed_date and a.version_id=b.version_id
+                               where a.status in %s and a.parsed_date between %s and %s and a.item_id = %s and a.location_id = %s
+                               '''
+        cursor.execute(forecast_query,
+                       [date_type_full, ForecastCommentOperation.compare_report_status, search_start_time,
+                        search_end_time,
+                        item.id,
+                        location.id, ForecastCommentOperation.compare_report_status, search_start_time,
+                        search_end_time,
+                        item.id, location.id])
+
+        # 返回值
+        message = {
+            "result": True,
+            "code": 200,
+            "message": "相应数据查询成功",
+            "content": {
+                "current_time_point": {},
+                "serials": [
+                    {
+                        "serial": "Dispatches(Forecast basis)",
+                        "serial_type": "FORECAST BASIS",
+                        "points": []
+                    },
+                    {
+                        "serial": "Demand forecast",
+                        "serial_type": "DEMAND FORECAST",
+                        "points": []
+                    }
+
+                ]
+            }
+        }
+        # 获取查询所有数据
+        rows = cursor.fetchall()
+        # 根据查询的开始时间,查询的结束时间, 计算出时间(列名称)
+        start_time = Bucket.get_datetime_by_type(search_start_time, date_type)
+        end_time = Bucket.get_datetime_by_type(search_end_time, date_type)
+        current = datetime.now()
+        current_time = datetime(current.year, current.month, current.day)
+        current_text = Bucket.get_x_time_name(current_time, date_type)
+        current = {
+            "x_value": current_time,
+            "x_text": current_text,
+            "y": None
+        }
+        message['content']['current_time_point'] = current
+
+        while start_time < current_time:
+            dispatches_points = {
+                "x_value": start_time,
+                "x_text": Bucket.get_x_time_name(start_time, date_type),
+                "y": 0
+            }
+            forecast_points = {
+                "x_value": start_time,
+                "x_text": Bucket.get_x_time_name(start_time, date_type),
+                "y": 0
+            }
+
+            total = 0
+            # 赋值
+            for row in rows:
+                if start_time == row[2]:
+                    total += round(row[3] * row[6] / 100, 2) + row[4] + row[5]
+
+            dispatches_points["y"] = float(total)
+            message["content"]["serials"][0]["points"].append(dispatches_points)
+            message["content"]["serials"][1]["points"].append(forecast_points)
+
+            # 下一个值
+            start_time = Bucket.get_nex_time_by_date_type(start_time, date_type)
+
+        while current_time <= end_time:
+            dispatches_points = {
+                "x_value": current_time,
+                "x_text": Bucket.get_x_time_name(current_time, date_type),
+                "y": 0
+            }
+            forecast_points = {
+                "x_value": current_time,
+                "x_text": Bucket.get_x_time_name(current_time, date_type),
+                "y": 0
+            }
+            total = 0
+            # 赋值
+            for row in rows:
+                if current_time == row[2]:
+                    total += round(row[3] * row[6] / 100, 2) + row[4] + row[5]
+
+            forecast_points["y"] = float(total)
+            message["content"]["serials"][0]["points"].append(dispatches_points)
+            message["content"]["serials"][1]["points"].append(forecast_points)
+            # 下一个值
+            current_time = Bucket.get_nex_time_by_date_type(current_time, date_type)
+
+        return JsonResponse(message, encoder=DjangoJSONEncoder, safe=False)
+
+
+class PlanItemGraph(View):
+    permissions = (('view_plan_item_graph', 'Can view plan item graph'),)
+
+    title = _('plan item graph')
+
+    @method_decorator(staff_member_required())
+    def get(self, request, *args, **kwargs):
+        item = Item.objects.filter(id=request.GET.get('id', None)).first()
+        supplier = ItemSupplier.objects.filter(item=request.GET.get('id', None), effective_start__lte=datetime.now(),
+                                               effective_end__gte=datetime.now()).order_by('priority', '-ratio',
+                                                                                           'id').first()
+
+        location = Location.objects.filter(id=request.GET.get('location_id', None)).first()
+
+        if item is None or location is None:
+            return JsonResponse({"result": False, "code": 404, "message": "参数错误,数据未找到"}, safe=False)
+
+        # 初始化时间类型, 默认周
+        date_type = request.GET.get('date_type', 'W')
+        if date_type.isspace():
+            date_type = "W"
+        date_type_full = Bucket.get_extra_trunc_by_shortcut(date_type)
+
+        # 初始化查询时间
+        search_start_time = request.GET.get('start_time', None)
+        search_start_time = la_time.string2dt(
+            search_start_time) if search_start_time else Bucket.get_search_starttime_by_date_type(
+            la_time.last_n_year_time(datetime.now(), 2), date_type)
+
+        search_end_time = request.GET.get('end_time', None)
+        search_end_time = la_time.string2dt(
+            search_end_time) if search_end_time else Bucket.get_search_endtime_by_date_type(
+            la_time.next_n_year_time(datetime.now(), 2), date_type)
+
+        start_time = Bucket.get_datetime_by_type(search_start_time, date_type)
+        end_time = Bucket.get_datetime_by_type(search_end_time, date_type)
+        current = datetime.now()
+        current_time = datetime(current.year, current.month, current.day)
+        current_text = Bucket.get_x_time_name(current_time, date_type)
+
+        if supplier is None:
+            lead_time = 0
+        else:
+            receive_time = supplier.receive_time
+            load_time = supplier.load_time
+            transit_time = supplier.transit_time
+            product_time = supplier.product_time
+
+            leadtime = la_enum.lead_time(receive_time, load_time, transit_time, product_time)
+
+            lead_time = Bucket.get_search_starttime_by_date_type(current_time + relativedelta(days=leadtime), date_type)
+
+        current = {
+            "x_value": current_time,
+            "x_text": current_text,
+            "y": None
+        }
+        lead_time_point = {
+            "x_value": lead_time,
+            "x_text": Bucket.get_x_time_name(lead_time, date_type),
+            "y": None
+
+        }
+
+        # 返回值
+        message = {
+            "result": True,
+            "code": 200,
+            "message": "相应数据查询成功",
+            "content": {
+                "current_time_point": current,
+                "lead_time_point": lead_time_point,
+                "serials": [
+                    {
+                        "serial": "预测",
+                        "serial_type": "FORECAST",
+                        "points": []
+                    }
+
+                ]
+            }
+        }
+
+        cursor = connections[request.database].cursor()
+
+        forecast_query = '''select a.customer_id,a.year,DATE_TRUNC(%s,a.parsed_date) as trunc_parsed_date,
+                               a.normal_qty, a.new_product_plan_qty , a.promotion_qty,a.ratio from
+                               forecast as a inner join (select c.customer_id,c.parsed_date,max(c.version_id) as version_id 
+                               from forecast as c
+                               where c.status in %s and c.parsed_date between %s and %s and c.item_id = %s and c.location_id = %s
+                               group by c.customer_id, c.parsed_date) as b
+                               on a.customer_id=b.customer_id and a.parsed_date=b.parsed_date and a.version_id=b.version_id
+                               where a.status in %s and a.parsed_date between %s and %s and a.item_id = %s and a.location_id = %s
+                               '''
+        cursor.execute(forecast_query,
+                       [date_type_full, ForecastCommentOperation.compare_report_status, search_start_time,
+                        search_end_time,
+                        item.id,
+                        location.id, ForecastCommentOperation.compare_report_status, search_start_time,
+                        search_end_time,
+                        item.id, location.id])
+
+        rows = cursor.fetchall()
+        while start_time < current_time:
+            forecast_points = {
+                "x_value": start_time,
+                "x_text": Bucket.get_x_time_name(start_time, date_type),
+                "y": 0
+            }
+
+            message["content"]["serials"][0]["points"].append(forecast_points)
+            # 下一个值
+            start_time = Bucket.get_nex_time_by_date_type(start_time, date_type)
+
+        while current_time <= end_time:
+            forecast_points = {
+                "x_value": current_time,
+                "x_text": Bucket.get_x_time_name(current_time, date_type),
+                "y": 0
+            }
+            total = 0
+            # 赋值
+            for row in rows:
+                if current_time == row[2]:
+                    total += float(round(row[3] * row[6] / 100, 2) + row[4] + row[5])
+
+            forecast_points["y"] = -total
+            message["content"]["serials"][0]["points"].append(forecast_points)
+            # 下一个值
+            current_time = Bucket.get_nex_time_by_date_type(current_time, date_type)
+
+        return JsonResponse(message, encoder=DjangoJSONEncoder, safe=False)
+
+
+# 单个物料模拟列表
+class ItemBufferOperateRecords(View):
+    permissions = (('view_buffer_operate_records', 'Can view buffer operate records'),)
+
+    title = _('buffer operate records')
+
+    @method_decorator(staff_member_required())
+    def get(self, request, *args, **kwargs):
+        item = Item.objects.filter(id=request.GET.get('id', None)).first()
+        page = request.GET.get('page', 1)
+        page_size = request.GET.get('page_size', 100)
+        if item is None:
+            return JsonResponse({"result": False, "code": 200, "message": "参数错误,数据未找到"}, safe=False)
+
+        message = {
+            "page": page,
+            "records": 200,
+            "total": 1,
+            "rows": []
+        }
+        data = {
+            "date_number": 0,
+            "qty": 0,
+            "move_types": 0,
+            "name": 0,
+            "order_num": 0,
+            "order_line_num": 0,
+            "buffer": 0
+        }
+
+        for i in range(0, 200):
+            data = {
+                "date_number": random.randint(1, 100),
+                "qty": random.randint(1, 100),
+                "move_types": random.randint(1, 100),
+                "name": random.randint(1, 100),
+                "order_num": random.randint(1, 100),
+                "order_line_num": random.randint(1, 100),
+                "buffer": random.randint(1, 100)
+            }
+            i += 1
+            message["rows"].append(data)
+        return JsonResponse(message, encoder=DjangoJSONEncoder, safe=False)
+

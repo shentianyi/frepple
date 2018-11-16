@@ -1,13 +1,23 @@
 <script src="{{STATIC_URL}}js/item_detail.js" type="application/javascript"></script>
 
-<form class="form-split">
+<!--<style>-->
+    <!--.form-span {-->
+        <!--padding: 10px 20px;-->
+        <!--margin-bottom: 20px;-->
+        <!--background-color: #FFFFFF;-->
+        <!--box-shadow: 0px 2px 6px 0px rgba(216, 216, 216, 1);-->
+    <!--}-->
+<!--</style>-->
+
+<form class="form-span">
     <h3>供应商</h3>
     <div class="row">
         <div class="col-md-6">
             <div class="input-group">
                 <span class="input-group-addon">供应商代码：</span>
                 <!--<input class="form-control" id="item_detail_supplier_nr" type="text" name="item_detail_supplier_nr">-->
-                <select class="form-control" name="item_detail_supplier_id" id="item_detail_supplier_id" onchange="ItemDetail.supplierChange()">
+                <select class="form-control" name="item_detail_supplier_nr" id="item_detail_supplier_nr"
+                        onchange="ItemDetail.supplierChange()">
                 </select>
             </div>
         </div>
@@ -21,7 +31,8 @@
             <div class="col-md-5" style="padding: 0">
                 <div class="input-group">
                     <span class="input-group-addon" style="width: 55px; text-align: center; font-size: 20px">/</span>
-                    <input class="form-control" id="item_detail_supplier_tel" type="text" name="item_detail_supplier_tel">
+                    <input class="form-control" id="item_detail_supplier_telephone" type="text"
+                           name="item_detail_supplier_tel">
                 </div>
             </div>
         </div>
@@ -36,7 +47,8 @@
         <div class="col-md-6">
             <div class="input-group">
                 <span class="input-group-addon">邮箱：</span>
-                <input class="form-control" id="item_detail_supplier_email" type="text" name="item_detail_supplier_email">
+                <input class="form-control" id="item_detail_supplier_email" type="text"
+                       name="item_detail_supplier_email">
             </div>
         </div>
     </div>
@@ -44,13 +56,15 @@
         <div class="col-md-6">
             <div class="input-group">
                 <span class="input-group-addon">国家：</span>
-                <input class="form-control" id="item_detail_supplier_address" type="text" name="item_detail_supplier_address">
+                <input class="form-control" id="item_detail_supplier_country" type="text"
+                       name="item_detail_supplier_country">
             </div>
         </div>
         <div class="col-md-6">
             <div class="input-group">
                 <span class="input-group-addon">联系人：</span>
-                <input class="form-control" id="item_detail_supplier_contact" type="text" name="item_detail_supplier_contact">
+                <input class="form-control" id="item_detail_supplier_contact" type="text"
+                       name="item_detail_supplier_contact">
             </div>
         </div>
     </div>
@@ -64,13 +78,14 @@
     </div>
 </form>
 
-<form class="form-split">
+<form class="form-span">
     <h3>供应商物料数据</h3>
     <div class="row">
         <div class="col-md-6">
             <div class="input-group">
                 <span class="input-group-addon">采购价格：</span>
                 <input class="form-control" id="item_detail_supplier_cost" type="text" name="item_detail_supplier_cost">
+                <span class="input-group-addon unit">CNY</span>
             </div>
         </div>
         <div class="col-md-6">
@@ -85,7 +100,8 @@
         <div class="col-md-6">
             <div class="input-group">
                 <span class="input-group-addon">计价单位：</span>
-                <input class="form-control" id="item_detail_supplier_cost_unit" type="text" name="item_detail_supplier_cost_unit">
+                <input class="form-control" id="item_detail_supplier_cost_unit" type="text"
+                       name="item_detail_supplier_cost_unit">
             </div>
         </div>
     </div>
