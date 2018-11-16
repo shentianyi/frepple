@@ -42,7 +42,7 @@ class Calendar(AuditModel):
     name = models.CharField(_('name'), max_length=300, primary_key=True)
     defaultvalue = models.DecimalField(
         _('default value'), max_digits=20,
-        decimal_places=8, default=0.00, null=True, blank=True,
+        decimal_places=8, default=0, null=True, blank=True,
         help_text=_('Value to be used when no entry is effective')
     )
     description = models.CharField(
@@ -81,7 +81,7 @@ class CalendarBucket(AuditModel):
     startdate = models.DateField(_('start date'), null=True, blank=True)
     enddate = models.DateField(_('end date'), null=True, blank=True, default=datetime(2030, 12, 31))
     value = models.DecimalField(
-        _('value'), default=0.00, blank=True,
+        _('value'), default=0, blank=True,
         max_digits=20, decimal_places=8
     )
     priority = models.IntegerField(_('priority'), default=0, blank=True, null=True)
@@ -284,10 +284,10 @@ class Item(AuditModel, HierarchyModel):
     nr = models.CharField(_('item nr'), max_length=300, db_index=True, unique=True)
     name = models.CharField(_('name'), max_length=300, primary_key=False, db_index=True)
     barcode = models.CharField(_('barcode'), max_length=300, db_index=True, null=True, blank=True)
-    type = models.CharField(_('type'), max_length=20, choices=types)
+    type = models.CharField(_('type'), max_length=20, choices=types, null=True, blank=True)
     status = models.CharField(_('status'), max_length=20, null=True, blank=True, choices=fg_status)
     plan_strategy = models.CharField(_('plan strategy'), max_length=20, null=True, blank=True, choices=strategies)
-    lock_type = models.CharField(_('lock type'), max_length=20, null=True, blank=True, choices=lock_types)
+    lock_type = models.CharField(_('lock type'), max_length=20, null=True, blank=True, choices=lock_types,default="unlocked")
     lock_expire_at = models.DateField(_('lock expire at'), null=True, blank=True)
     price_abc = models.CharField(_('price abc'), max_length=20, null=True, blank=True, choices=abc_types)
     qty_abc = models.CharField(_('qty abc'), max_length=20, null=True, blank=True, choices=abc_types)
@@ -421,7 +421,7 @@ class ItemSuccessor(AuditModel):
 
     priority = models.IntegerField(_('priority'), default=0)
     ratio = models.DecimalField(
-        _('ratio'), max_digits=20, decimal_places=8, default=100.00,
+        _('ratio'), max_digits=20, decimal_places=8, default=100,
     )
 
     effective_start = models.DateTimeField(
@@ -1207,6 +1207,11 @@ class ItemSupplier(AuditModel):
         db_index=True, related_name='suppliers',
         null=False, blank=False, on_delete=models.CASCADE
     )
+    location = models.ForeignKey(
+        Location, verbose_name=_('location'),
+        db_index=True, related_name='itemsupplier_location',
+        null=False, blank=False, on_delete=models.CASCADE
+    )
     supplier_item_nr = models.CharField(_('supplier item nr'), max_length=300, db_index=True, null=True, blank=True)
     status = models.CharField(_('status'), max_length=20, choices=Item.rm_status)
     cost = models.DecimalField(_('cost'), max_digits=20, decimal_places=8)
@@ -1217,13 +1222,13 @@ class ItemSupplier(AuditModel):
     moq = models.DecimalField(_('MOQ'), max_digits=20, decimal_places=8)
     order_unit_qty = models.DecimalField(_('order unit qty'), max_digits=20, decimal_places=8,default=0)
     order_max_qty = models.DecimalField(_('order max qty'), max_digits=20, decimal_places=8,default=0)
-    product_time = models.DecimalField(_('product time'), max_digits=20, decimal_places=8, default=0.00, null=True,
+    product_time = models.DecimalField(_('product time'), max_digits=20, decimal_places=8, default=0, null=True,
                                        blank=True)
-    load_time = models.DecimalField(_('load time'), null=True, max_digits=20, decimal_places=8, default=0.00,
+    load_time = models.DecimalField(_('load time'), null=True, max_digits=20, decimal_places=8, default=0,
                                     blank=True)
-    transit_time = models.DecimalField(_('transit time'), max_digits=20, decimal_places=8, default=0.00, null=True,
+    transit_time = models.DecimalField(_('transit time'), max_digits=20, decimal_places=8, default=0, null=True,
                                        blank=True)
-    receive_time = models.DecimalField(_('receive time'), max_digits=20, decimal_places=8, default=0.00, null=True,
+    receive_time = models.DecimalField(_('receive time'), max_digits=20, decimal_places=8, default=0, null=True,
                                        blank=True)
     mpq = models.DecimalField(_('mpq'), max_digits=20, decimal_places=8, null=True, blank=True)
     earliest_order_date = models.DateField(_('earliest order date'), null=True, blank=True)
@@ -1338,23 +1343,23 @@ class ItemDistribution(AuditModel):
         _('cost'), max_digits=20, decimal_places=8, help_text=_("Shipping cost per unit"))
     load_time = models.DecimalField(
         _('load time'), null=True, blank=True,
-        max_digits=20, decimal_places=8, default=0.0
+        max_digits=20, decimal_places=8, default=0
     )
     transit_time = models.DecimalField(
         _('transit time'), null=True, blank=True,
-        max_digits=20, decimal_places=8, default=0.0
+        max_digits=20, decimal_places=8, default=0
     )
     receive_time = models.DecimalField(
         _('receive time'), null=True, blank=True,
-        max_digits=20, decimal_places=8, default=0.0
+        max_digits=20, decimal_places=8, default=0
     )
     size_minimum = models.DecimalField(
         _('size minimum'), null=True, blank=True,
-        max_digits=20, decimal_places=8, default=1.0
+        max_digits=20, decimal_places=8, default=1
     )
     size_multiple = models.DecimalField(
         _('size multiple'), null=True, blank=True,
-        max_digits=20, decimal_places=8, default=0.0
+        max_digits=20, decimal_places=8, default=0
     )
     priority = models.IntegerField(
         _('priority'), default=1, null=True, blank=True,
@@ -1767,7 +1772,7 @@ class OperationPlan(AuditModel):
     )
     color = models.DecimalField(
         _('color'), max_digits=20, null=True, blank=True,
-        decimal_places=8, default=0.00
+        decimal_places=8, default=0
     )
     startdate = models.DateTimeField(
         _('start date'), help_text=_('start date'),

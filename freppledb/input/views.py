@@ -49,6 +49,7 @@ from openpyxl.styles import NamedStyle, PatternFill
 from freppledb.boot import getAttributeFields
 from freppledb.common.message.responsemessage import ResponseMessage
 from freppledb.common.models import Parameter, Comment, Bucket
+from freppledb.common.utils import la_enum
 from freppledb.input.forms import ForecastUploadForm
 from freppledb.input.models import Resource, Operation, Location, SetupMatrix, SetupRule, ItemSuccessor, ItemCustomer, \
     ForecastYear, ForecastVersion, Forecast, ForecastCommentOperation
@@ -1023,11 +1024,14 @@ class ItemSupplierList(GridReport):
         # 新建一个显示列
         GridFieldText('item_display', title=_('item_display'), field_name='item__nr', editable=False),
         GridFieldText('supplier_display', title=_('supplier_display'), field_name='supplier__nr', editable=False),
+        GridFieldText('location_display', title=_('location_display'), field_name='location__nr', editable=False),
 
         # 因为是id 让外键永远不显示
         GridFieldInteger('item', title=_('item'), field_name='item__name', formatter='detail', editable=False,
                          hidden=True),
         GridFieldInteger('supplier', title=_('supplier'), field_name='supplier__name', formatter='detail',
+                         editable=False, hidden=True),
+        GridFieldInteger('location', title=_('location'), field_name='location__name', formatter='detail',
                          editable=False, hidden=True),
         GridFieldText('supplier_item_nr', title=_('supplier item nr'), editable=False),
         GridFieldText('status', title=_('status'), editable=False),
@@ -1290,9 +1294,19 @@ class EnumView(View):
             value = kwargs['value']
             if type == 'item_status_by_type':
                 t = Item.type_status[value]
-                dic = [{"value": k, "text": v} for k, v in dict(t).items()] if t != None else None
+                dic = la_enum.tuple2select(t) if t != None else None
 
                 return HttpResponse(json.dumps(dic, cls=DjangoJSONEncoder),
+                                    content_type='application/json')
+
+            if type == 'item_lock_type':
+                t = dict(Item.lock_types)[value]
+                if t == 'locked':
+                    Item.lock_expire_at = None
+                    data = {
+                        "lock_expire_at": Item.lock_expire_at
+                    }
+                return HttpResponse(json.dumps(data, cls=DjangoJSONEncoder),
                                     content_type='application/json')
         else:
             raise HttpResponseBadRequest()
@@ -1357,7 +1371,6 @@ class ItemList(GridReport):
 # TODO 物料详情
 class ItemDetail(View):
     def get(self, request, *args, **kwargs):
-
         # 默认为main
         # main:         主数据
         # supplier:     供应商
@@ -1366,7 +1379,7 @@ class ItemDetail(View):
         # forecast:     预测
         template_name = "input/item/detail_base.html"
         id = kwargs['id']
-        return render(request, template_name, {'template_name': template_name,"date_types": Bucket.chioce_date_type()})
+        return render(request, template_name, {'template_name': template_name, "date_types": Bucket.chioce_date_type()})
 
 
 # 代号：GET_ITEM_MAIN_DATA_API
@@ -1388,14 +1401,12 @@ class ItemMainData(View):
         except:
             successor_nr = None
 
-        lock_types = {"current": item.lock_type,
-                      "values": [{"value": k, "text": v} for k, v in dict(Item.lock_types).items()]}
+        lock_types = {"current": item.lock_type, "values": la_enum.tuple2select(Item.lock_types)}
 
-        item_statuses = {"current": item.status,
-                         "values": [{"value": k, "text": v} for k, v in dict(Item.type_status[item.type]).items()]}
+        item_statuses = {"current": item.status, "values": la_enum.tuple2select(Item.type_status[item.type])}
 
         plan_strategies = {"current": item.plan_strategy,
-                           "values": [{"value": k, "text": v} for k, v in dict(Item.strategies).items()]}
+                           "values": la_enum.tuple2select(Item.strategies, blankable=True)}
 
         locations = Location.objects.select_related().all().order_by('id')
         location = []
@@ -1438,7 +1449,14 @@ class ItemMainData(View):
 class ItemSupplierData(View):
     def get(self, request, id, *args, **kwargs):
         message = ResponseMessage()
-        supplier = ItemSupplier.objects.all().filter(item=id)
+        try:
+            supplier = ItemSupplier.objects.all().order_by('priority', '-ratio', 'id').get(item=id)
+        except Exception as e:
+            message.result = False
+            message.code = 404
+            message.message = "供应商不存在"
+            return HttpResponse(json.dumps(message.__dict__, cls=DjangoJSONEncoder, ensure_ascii=False),
+                                content_type='application/json')
         data = []
         for f in supplier:
             supplier_dict = {
@@ -1493,26 +1511,7 @@ class MainSupplierData(View):
         load_time = supplier.load_time
         transit_time = supplier.transit_time
         product_time = supplier.product_time
-
-        if receive_time is None:
-            receive_time = 0
-        if load_time is None:
-            load_time = 0
-        if transit_time is None:
-            transit_time = 0
-        if product_time is None:
-            product_time = 0
-
-        # totall_lead_time　日历日的计算
-        totall_time = product_time + load_time + transit_time + receive_time
-        cd = int(totall_time / 5)
-        day = cd * 5
-        totall_lead_time = math.ceil(cd * 7 + totall_time - day)
-
-        receive_time = supplier.receive_time
-        load_time = supplier.load_time
-        transit_time = supplier.transit_time
-        product_time = supplier.product_time
+        totall_lead_time = la_enum.lead_time(receive_time, load_time, transit_time, product_time)
 
         data = {
             "supplier_id": supplier.supplier.id,
@@ -1592,9 +1591,9 @@ class ItemPlan(View):
         message = ResponseMessage()
         current_time = timezone.now()
         try:
-            supplier = ItemSupplier.objects.filter(item=id, effective_start__lte=current_time,
-                                                   effective_end__gte=current_time).order_by('priority', '-ratio',
-                                                                                             'id').first()
+            supplier = ItemSupplier.objects.get(item=id, effective_start__lte=current_time,
+                                                effective_end__gte=current_time).order_by('priority', '-ratio',
+                                                                                          'id').first()
         except Exception as e:
             message.result = False
             message.code = 404
@@ -1605,20 +1604,7 @@ class ItemPlan(View):
         load_time = supplier.load_time
         transit_time = supplier.transit_time
         product_time = supplier.product_time
-
-        if receive_time is None:
-            receive_time = 0
-        if load_time is None:
-            load_time = 0
-        if transit_time is None:
-            transit_time = 0
-        if product_time is None:
-            product_time = 0
-        # totall_lead_time　日历日的计算
-        totall_time = product_time + load_time + transit_time + receive_time
-        cd = int(totall_time / 5)
-        day = cd * 5
-        lead_time = math.ceil(cd * 7 + totall_time - day)
+        lead_time = la_enum.lead_time(receive_time, load_time, transit_time, product_time)
 
         data = {
             "supplier_id": supplier.supplier.id,
@@ -1644,6 +1630,42 @@ class ItemPlan(View):
         message.content = data
         return HttpResponse(json.dumps(message.__dict__, cls=DjangoJSONEncoder, ensure_ascii=False),
                             content_type='application/json')
+
+    def post(self, request, *args, **kwargs):
+        message = ResponseMessage()
+        json_data = request.body
+        data = json.loads(json_data)
+        id = data['supplier_id']
+        safe_buffer = data['safe_buffer']
+        moq = data['moq']
+        mpq = data['mpq']
+        outer_package_num = data['outer_package_num']
+        pallet_num = data['pallet_num']
+        with transaction.atomic():
+            # 创建保存点
+            save_point = transaction.savepoint()
+            try:
+                supplier = Supplier.objects.get(id=id)
+                supplier.mpq = mpq
+                supplier.outer_package_num = outer_package_num
+                supplier.pallet_num = pallet_num
+                supplier.moq = moq
+                supplier.save()
+
+            except:
+                message.result = False
+                message.code = 404
+                message.message = "供应商不存在"
+                transaction.savepoint_rollback(save_point)
+                return HttpResponse(json.dumps(message.__dict__, cls=DjangoJSONEncoder, ensure_ascii=False),
+                                    content_type='application/json')
+            else:
+                transaction.savepoint_commit(save_point)
+                message.result = True
+                message.code = 200
+                message.message = "数据保存成功"
+                return HttpResponse(json.dumps(message.__dict__, cls=DjangoJSONEncoder, ensure_ascii=False),
+                                    content_type='application/json')
 
 
 class ItemCustomerList(GridReport):

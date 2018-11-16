@@ -233,7 +233,7 @@ class ItemSupplier_admin(MultiDBModelAdmin):
     model = ItemSupplier
     save_on_top = True
     # raw_id_fields = ('item', 'supplier', 'resource')
-    raw_id_fields = ('item', 'supplier')
+    raw_id_fields = ('item', 'supplier', 'location')
     exclude = ('source', 'id')
     tabs = [
         {"name": 'edit', "label": _("edit"), "view": "admin:input_itemsupplier_change",

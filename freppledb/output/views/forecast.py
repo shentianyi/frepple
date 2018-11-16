@@ -33,7 +33,7 @@ from openpyxl import Workbook
 from openpyxl.cell import WriteOnlyCell
 
 from freppledb.common.models import Bucket
-from freppledb.common.utils import la_time
+from freppledb.common.utils import la_time, la_enum
 from freppledb.input.models import Forecast, ForecastYear, Item, Location, Customer, ForecastCommentOperation, \
     ItemSupplier
 
@@ -648,7 +648,8 @@ class ForecastItemGraph(View):
         # 根据查询的开始时间,查询的结束时间, 计算出时间(列名称)
         start_time = Bucket.get_datetime_by_type(search_start_time, date_type)
         end_time = Bucket.get_datetime_by_type(search_end_time, date_type)
-        current_time = Bucket.get_search_starttime_by_date_type(datetime.now(), date_type)
+        current = datetime.now()
+        current_time = datetime(current.year, current.month, current.day)
         current_text = Bucket.get_x_time_name(current_time, date_type)
         current = {
             "x_value": current_time,
@@ -744,7 +745,8 @@ class PlanItemGraph(View):
 
         start_time = Bucket.get_datetime_by_type(search_start_time, date_type)
         end_time = Bucket.get_datetime_by_type(search_end_time, date_type)
-        current_time = Bucket.get_search_starttime_by_date_type(datetime.now(), date_type)
+        current = datetime.now()
+        current_time = datetime(current.year, current.month, current.day)
         current_text = Bucket.get_x_time_name(current_time, date_type)
 
         if supplier is None:
@@ -755,20 +757,8 @@ class PlanItemGraph(View):
             transit_time = supplier.transit_time
             product_time = supplier.product_time
 
-            if receive_time is None:
-                receive_time = 0
-            if load_time is None:
-                load_time = 0
-            if transit_time is None:
-                transit_time = 0
-            if product_time is None:
-                product_time = 0
+            leadtime = la_enum.lead_time(receive_time, load_time, transit_time, product_time)
 
-            # totall_lead_time　日历日的计算
-            totall_time = product_time + load_time + transit_time + receive_time
-            cd = int(totall_time / 5)
-            day = cd * 5
-            leadtime = math.ceil(cd * 7 + totall_time - day)
             lead_time = Bucket.get_search_starttime_by_date_type(current_time + relativedelta(days=leadtime), date_type)
 
         current = {
@@ -864,11 +854,13 @@ class ItemBufferOperateRecords(View):
         item = Item.objects.filter(id=request.GET.get('id', None)).first()
         page = request.GET.get('page', 1)
         page_size = request.GET.get('page_size', 100)
+        if item is None:
+            return JsonResponse({"result": False, "code": 200, "message": "参数错误,数据未找到"}, safe=False)
 
         message = {
             "page": page,
-            "records": 0,
-            "total": 0,
+            "records": 200,
+            "total": 1,
             "rows": []
         }
         data = {
@@ -881,7 +873,7 @@ class ItemBufferOperateRecords(View):
             "buffer": 0
         }
 
-        for i in range(0, 50):
+        for i in range(0, 200):
             data = {
                 "date_number": random.randint(1, 100),
                 "qty": random.randint(1, 100),
@@ -894,3 +886,4 @@ class ItemBufferOperateRecords(View):
             i += 1
             message["rows"].append(data)
         return JsonResponse(message, encoder=DjangoJSONEncoder, safe=False)
+
