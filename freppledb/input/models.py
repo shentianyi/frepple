@@ -40,6 +40,7 @@ class Calendar(AuditModel):
     # Database fields
     # . Translators: Translation included with Django
     name = models.CharField(_('name'), max_length=300, primary_key=True)
+
     defaultvalue = models.DecimalField(
         _('default value'), max_digits=20,
         decimal_places=8, default=0.00, null=True, blank=True,
@@ -57,6 +58,28 @@ class Calendar(AuditModel):
         _('subcategory'), max_length=300,
         null=True, blank=True, db_index=True
     )
+
+    max_cd_cal_steps = 999
+    @classmethod
+    def cd(cls,calendar,start_date,work_days):
+        """
+        计算 calendar day
+        :param calendar: 日历对象,
+        :param start_date: 开始日期
+        :param work_days: 工作日天数
+        :return:
+        """
+        if calendar:
+            cd_days = 0
+
+            work_days_find = 0
+
+            while work_days_find<work_days and cd_days<cls.max_cd_cal_steps:
+                return 0
+
+
+        else:
+            return 7
 
     def __str__(self):
         return self.name
