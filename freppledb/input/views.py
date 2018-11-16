@@ -1591,7 +1591,7 @@ class ItemPlan(View):
         message = ResponseMessage()
         current_time = timezone.now()
         try:
-            supplier = ItemSupplier.objects.get(item=id, effective_start__lte=current_time,
+            supplier = ItemSupplier.objects.filter(item=id, effective_start__lte=current_time,
                                                 effective_end__gte=current_time).order_by('priority', '-ratio',
                                                                                           'id').first()
         except Exception as e:
