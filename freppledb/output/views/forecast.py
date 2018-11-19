@@ -34,8 +34,9 @@ from openpyxl.cell import WriteOnlyCell
 
 from freppledb.common.models import Bucket
 from freppledb.common.utils import la_time, la_enum
+from freppledb.common.utils.la_field import decimal2calculate
 from freppledb.input.models import Forecast, ForecastYear, Item, Location, Customer, ForecastCommentOperation, \
-    ItemSupplier
+    ItemSupplier, Calendar
 
 
 class ForecastCompare(View):
@@ -554,16 +555,18 @@ class ForecastItem(View):
             # 赋值
             for row in rows:
                 if start_time == row[2]:
-                    data['y']['normal_qty'] += float(row[3])
-                    data['y']['new_product_plan_qty'] += float(row[4])
-                    data['y']['promotion_qty'] += float(row[5])
-                    data['y']['ratio'] += float(row[6])
+                    data['y']['normal_qty'] += decimal2calculate(row[3])
+                    data['y']['new_product_plan_qty'] += decimal2calculate(row[4])
+                    data['y']['promotion_qty'] += decimal2calculate(row[5])
+                    data['y']['ratio'] += decimal2calculate(row[6])
                     data['y']['_row_count'] += 1
-                    data['y']['total'] += float(round(row[3] * row[6] / 100, 2) + row[4] + row[5])
+                    data['y']['total'] += decimal2calculate(
+                        round(decimal2calculate(row[3]) * decimal2calculate(row[6]) / 100, 2) + decimal2calculate(
+                            row[4]) + decimal2calculate(row[5]))
 
             # 计算配比
             if data['y']['_row_count'] > 0:
-                data['y']['ratio'] = float(data['y']['ratio'] / data['y']['_row_count'])
+                data['y']['ratio'] = decimal2calculate(data['y']['ratio'] / data['y']['_row_count'])
 
             message['content']['data'].append(data)
             # 下一个值
@@ -674,9 +677,10 @@ class ForecastItemGraph(View):
             # 赋值
             for row in rows:
                 if start_time == row[2]:
-                    total += round(row[3] * row[6] / 100, 2) + row[4] + row[5]
+                    total += round(decimal2calculate(row[3]) * decimal2calculate(row[6]) / 100, 2) + decimal2calculate(
+                        row[4]) + decimal2calculate(row[5])
 
-            dispatches_points["y"] = float(total)
+            dispatches_points["y"] = total
             message["content"]["serials"][0]["points"].append(dispatches_points)
             message["content"]["serials"][1]["points"].append(forecast_points)
 
@@ -698,9 +702,10 @@ class ForecastItemGraph(View):
             # 赋值
             for row in rows:
                 if current_time == row[2]:
-                    total += round(row[3] * row[6] / 100, 2) + row[4] + row[5]
+                    total += round(decimal2calculate(row[3]) * decimal2calculate(row[6]) / 100, 2) + decimal2calculate(
+                        row[4]) + decimal2calculate(row[5])
 
-            forecast_points["y"] = float(total)
+            forecast_points["y"] = total
             message["content"]["serials"][0]["points"].append(dispatches_points)
             message["content"]["serials"][1]["points"].append(forecast_points)
             # 下一个值
@@ -717,7 +722,7 @@ class PlanItemGraph(View):
     @method_decorator(staff_member_required())
     def get(self, request, *args, **kwargs):
         item = Item.objects.filter(id=request.GET.get('id', None)).first()
-        supplier = ItemSupplier.objects.filter(item=request.GET.get('id', None), effective_start__lte=datetime.now(),
+        item_supplier = ItemSupplier.objects.filter(item=request.GET.get('id', None), effective_start__lte=datetime.now(),
                                                effective_end__gte=datetime.now()).order_by('priority', '-ratio',
                                                                                            'id').first()
 
@@ -749,17 +754,11 @@ class PlanItemGraph(View):
         current_time = datetime(current.year, current.month, current.day)
         current_text = Bucket.get_x_time_name(current_time, date_type)
 
-        if supplier is None:
+        if item_supplier is None:
             lead_time = 0
         else:
-            receive_time = supplier.receive_time
-            load_time = supplier.load_time
-            transit_time = supplier.transit_time
-            product_time = supplier.product_time
-
-            leadtime = 0
-
-            lead_time = current_time + relativedelta(days=leadtime)
+            lead_time_num = item_supplier.wd2cd()
+            lead_time = current_time + relativedelta(days=lead_time_num)
 
         current = {
             "x_value": current_time,
@@ -833,7 +832,8 @@ class PlanItemGraph(View):
             # 赋值
             for row in rows:
                 if current_time == row[2]:
-                    total += float(round(row[3] * row[6] / 100, 2) + row[4] + row[5])
+                    total += round(decimal2calculate(row[3]) * decimal2calculate(row[6]) / 100, 2) + decimal2calculate(
+                        row[4]) + decimal2calculate(row[5])
 
             forecast_points["y"] = -total
             message["content"]["serials"][0]["points"].append(forecast_points)
@@ -886,4 +886,3 @@ class ItemBufferOperateRecords(View):
             i += 1
             message["rows"].append(data)
         return JsonResponse(message, encoder=DjangoJSONEncoder, safe=False)
-

@@ -16,6 +16,7 @@
 #
 
 from datetime import datetime, time
+from functools import reduce
 
 from dateutil.relativedelta import relativedelta
 from django.contrib.contenttypes.fields import GenericRelation
@@ -27,7 +28,8 @@ from django.utils.translation import ugettext_lazy as _
 
 from freppledb.common.fields import JSONBField, AliasDateTimeField
 from freppledb.common.models import HierarchyModel, AuditModel, MultiDBManager, User, Comment
-from freppledb.common.utils import la_time, la_enum
+from freppledb.common.utils import la_time
+from freppledb.common.utils.la_calendar import normal_calendar
 
 searchmode = (
     ('PRIORITY', _('priority')),
@@ -72,18 +74,18 @@ class Calendar(AuditModel):
         :return:
         """
         day = int((start_date + relativedelta(days=1)).strftime("%w"))
-        buckets = calendar.buckets.order_by('priority').all()
 
         adict = {0: 'sunday', 1: 'monday', 2: 'tuesday', 3: 'wednesday', 4: 'thursday', 5: 'friday', 6: 'saturday'}
         if calendar:
-            cd_days = 0
+            cd_days = 1
+            buckets = calendar.buckets.order_by('priority').all()
 
             work_days_find = 0
 
             while work_days_find < work_days and cd_days < cls.max_cd_cal_steps:
                 bucket = None
                 for b in buckets:
-                    if b.startdate <= start_date and b.enddate >= start_date:
+                    if b.startdate <= start_date.date() <= b.enddate:
                         bucket = b
                         break
 
@@ -96,7 +98,7 @@ class Calendar(AuditModel):
 
             return cd_days
         else:
-            return la_enum.normal_calendar(start_date, work_days)
+            return normal_calendar(start_date, work_days)
 
     def __str__(self):
         return self.name
@@ -1298,48 +1300,6 @@ class ItemSupplier(AuditModel):
     )
     description = models.CharField(_('descriptiony'), max_length=500, null=True, blank=True)
 
-    # location = models.ForeignKey(
-    #     Location, verbose_name=_('location'), null=True, blank=True,
-    #     db_index=True, related_name='itemsuppliers', on_delete=models.CASCADE
-    # )
-    # leadtime = models.DurationField(
-    #     _('lead time'), null=True, blank=True,
-    #     help_text=_('Purchasing lead time')
-    # )
-    # sizeminimum = models.DecimalField(
-    #     _('size minimum'), max_digits=20, decimal_places=8,
-    #     null=True, blank=True, default='1.0',
-    #     help_text=_("A minimum purchasing quantity")
-    # )
-    # sizemultiple = models.DecimalField(
-    #     _('size multiple'), null=True, blank=True,
-    #     max_digits=20, decimal_places=8,
-    #     help_text=_("A multiple purchasing quantity")
-    # )
-    # cost = models.DecimalField(
-    #     _('cost'), null=True, blank=True,
-    #     max_digits=20, decimal_places=8,
-    #     help_text=_("Purchasing cost per unit")
-    # )
-    # priority = models.IntegerField(
-    #     _('priority'), default=1, null=True, blank=True,
-    #     help_text=_('Priority among all alternates')
-    # )
-    # resource = models.ForeignKey(
-    #     Resource, verbose_name=_('resource'), null=True, blank=True,
-    #     db_index=True, related_name='itemsuppliers', on_delete=models.CASCADE,
-    #     help_text=_("Resource to model the supplier capacity")
-    # )
-    # resource_qty = models.DecimalField(
-    #     _('resource quantity'), null=True, blank=True,
-    #     max_ddigits=20, decimal_places=8, default='1.0',
-    #     help_text=_("Resource capacity consumed per purchased unit")
-    # )
-    # fence = models.DurationField(
-    #     _('fence'), null=True, blank=True,
-    #     help_text=_('Frozen fence for creating new procurements')
-    # )
-
     class Manager(MultiDBManager):
         def get_by_natural_key(self, item, supplier):
             return self.get(item=item, supplier=supplier)
@@ -1350,7 +1310,6 @@ class ItemSupplier(AuditModel):
     objects = Manager()
 
     def __str__(self):
-        # return '%s - %s - %s' % (
         return '%s - %s' % (
             self.supplier.nr if self.supplier else 'No supplier',
             self.item.nr if self.item else 'No item',
@@ -1361,6 +1320,15 @@ class ItemSupplier(AuditModel):
         unique_together = (('item', 'supplier'),)
         verbose_name = _('item supplier')
         verbose_name_plural = _('item suppliers')
+
+    def wd2cd(self):
+        calendar = self.supplier.available
+        return Calendar.cd(calendar, datetime.now().date(), self.total_wds())
+
+    def total_wds(self):
+        return reduce(lambda x, y: x + y, map(lambda x: x if x else 0,
+                                              [self.product_time, self.load_time, self.transit_time,
+                                               self.receive_time]))
 
 
 class ItemDistribution(AuditModel):
@@ -1424,24 +1392,6 @@ class ItemDistribution(AuditModel):
         _('effective end'), null=True, blank=True,
         help_text=_('Validity end date'))
 
-    # leadtime = models.DurationField(
-    #     _('lead time'), null=True, blank=True,
-    #     help_text=_('lead time')
-    # )
-    # sizeminimum = models.DecimalField(
-    #     _('size minimum'), max_digits=20, decimal_places=8,
-    #     null=True, blank=True, default='1.0',
-    #     help_text=_("A minimum shipping quantity")
-    # )
-    # sizemultiple = models.DecimalField(
-    #     _('size multiple'), null=True, blank=True,
-    #     max_digits=20, decimal_places=8,
-    #     help_text=_("A multiple shipping quantity")
-    # )
-    # fence = models.DurationField(
-    #     _('fence'), null=True, blank=True,
-    #     help_text=_('Frozen fence for creating new shipments')
-
     class Manager(MultiDBManager):
         def get_by_natural_key(self, item, origin, destination, resource):
             return self.get(item=item, origin=origin, destination=destination, resource=resource)
@@ -1452,11 +1402,6 @@ class ItemDistribution(AuditModel):
     objects = Manager()
 
     def __str__(self):
-        # return '%s - %s - %s' % (
-        #     self.location.nr if self.location else 'Any destination',
-        #     self.item.name if self.item else 'No item',
-        #     self.origin.name if self.origin else 'No origin'
-        # )
         return '%s - %s - %s - %s' % (
             self.item.nr if self.item else 'No item',
             self.origin.nr if self.origin else 'No origin',
@@ -1476,7 +1421,6 @@ class ForecastYear(AuditModel):
         ('M', _('M')),
     )
 
-    # id = models.AutoField(_('id'), primary_key=True)
     id = models.AutoField(_('id'), help_text=_('Unique identifier'), primary_key=True)
     item = models.ForeignKey(
         Item, verbose_name=_('item'),
