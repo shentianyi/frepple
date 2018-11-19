@@ -207,7 +207,7 @@
 }
 
 .ui-jqgrid .ui-jqgrid-htable th {
-    height: 60px;
+    height: 42px;
     padding: 0 2px 0 2px
 }
 
@@ -1442,7 +1442,7 @@ a.clearsearchclass, a.g-menu-item, a.soptclass {
 
 .ui-jqgrid.ui-jqgrid-bootstrap tr.jqfoot > td, .ui-jqgrid.ui-jqgrid-bootstrap tr.jqgfirstrow > td, .ui-jqgrid.ui-jqgrid-bootstrap tr.jqgroup > td, .ui-jqgrid.ui-jqgrid-bootstrap tr.jqgrow > td {
     padding: .2em .3em;
-    height: 60px;
+    height: 42px;
 }
 
 .ui-jqgrid.ui-jqgrid-bootstrap tr.jqgfirstrow > td {
@@ -1723,6 +1723,10 @@ a.clearsearchclass, a.g-menu-item, a.soptclass {
 
 .subgrid-data .ui-jqgrid-legacy-subgrid {
     margin: 0
+}
+
+.ui-jqgrid.ui-jqgrid-bootstrap>.ui-jqgrid-view {
+    font-size: 14px !important;
 }
 
 /*# sourceMappingURL=ui.jqgrid.min.css.map */
