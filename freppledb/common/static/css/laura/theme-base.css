@@ -1,20 +1,44 @@
-.navbar-default .navbar-nav>li>a {
+.navbar-default {
+    background-color: transparent;
+    border-color: transparent;
+    background-image: url("../../img/navBar_background.png");
+}
+
+.navbar-default .navbar-nav > li > a {
     font-size: 20px !important;
+    color: #FFFFFF;
+}
+
+.navbar-default .navbar-nav > li > a:hover, .navbar-default .navbar-nav > li > a:focus {
+    color: #2F54EB !important;
+    background-color: transparent !important;
+}
+
+.navbar-default .navbar-nav > .open > a, .navbar-default .navbar-nav > .open > a:hover, .navbar-default .navbar-nav > .open > a:focus {
+    color: #2F54EB !important;
+    background-color: transparent !important;
 }
 
 .navbar-nav-menu {
     margin: 12px 0 0 40px;
 }
 
-.navbar .dropdown-menu>li>a {
+.navbar .dropdown-menu > li > a {
     font-size: 18px !important;
+    color: #333;
 }
 
-.navbar .dropdown-menu>li>a:hover {
-    background-color: #85A5FF;
+.navbar .dropdown-menu > li > a:hover {
+    background-color: rgba(243, 246, 245, 1);
 }
 
-.table.table-condensed.table-hover:not(.ui-jqgrid-btable) thead>tr>th {
+.dropdown-menu {
+    background: rgba(255, 255, 255, 1);
+    box-shadow: 0 1px 6px 0 rgba(216, 216, 216, 1);
+    border-radius: 4px;
+}
+
+.table.table-condensed.table-hover:not(.ui-jqgrid-btable) thead > tr > th {
     background-color: #D6E4FF !important;
 }
 
@@ -25,25 +49,25 @@
     font-size: 15px;
 }
 
-.table-striped>tbody>tr:nth-of-type(odd) {
+.table-striped > tbody > tr:nth-of-type(odd) {
     background-color: #F9FAFB !important;
 }
 
 /*.table-striped>tbody>tr:nth-of-type(odd) {*/
-    /*background-color: #F4F6FF;*/
-    /*#F9FAFB*/
+/*background-color: #F4F6FF;*/
+/*#F9FAFB*/
 /*}*/
 
-.table-hover>tbody>tr:hover {
+.table-hover > tbody > tr:hover {
     background-color: #F4F6FF !important;
 }
 
-.table-bordered>thead>tr>th,
-.table-bordered>tbody>tr>th,
-.table-bordered>tfoot>tr>th,
-.table-bordered>thead>tr>td,
-.table-bordered>tbody>tr>td,
-.table-bordered>tfoot>tr>td {
+.table-bordered > thead > tr > th,
+.table-bordered > tbody > tr > th,
+.table-bordered > tfoot > tr > th,
+.table-bordered > thead > tr > td,
+.table-bordered > tbody > tr > td,
+.table-bordered > tfoot > tr > td {
     /*border: 2px solid #E4EBE9 !important;*/
     border-right-color: rgb(228, 235, 233);
     border-bottom-color: rgb(228, 235, 233);
@@ -59,18 +83,18 @@
     border: 0;
 }
 
-.table>thead>tr>td.success,
-.table>tbody>tr>td.success,
-.table>tfoot>tr>td.success,
-.table>thead>tr>th.success,
-.table>tbody>tr>th.success,
-.table>tfoot>tr>th.success,
-.table>thead>tr.success>td,
-.table>tbody>tr.success>td,
-.table>tfoot>tr.success>td,
-.table>thead>tr.success>th,
-.table>tbody>tr.success>th,
-.table>tfoot>tr.success>th {
+.table > thead > tr > td.success,
+.table > tbody > tr > td.success,
+.table > tfoot > tr > td.success,
+.table > thead > tr > th.success,
+.table > tbody > tr > th.success,
+.table > tfoot > tr > th.success,
+.table > thead > tr.success > td,
+.table > tbody > tr.success > td,
+.table > tfoot > tr.success > td,
+.table > thead > tr.success > th,
+.table > tbody > tr.success > th,
+.table > tfoot > tr.success > th {
     background-color: #F4F6FF !important;
 }
 
@@ -83,22 +107,22 @@
 }
 
 /*.jqgrow .ui-row-ltr .active:hover {*/
-    /*!*background-color: transparent !important;*!*/
-    /*background-color: #F4F6FF !important;*/
+/*!*background-color: transparent !important;*!*/
+/*background-color: #F4F6FF !important;*/
 /*}*/
 
-.table>thead>tr>td.active,
-.table>tbody>tr>td.active,
-.table>tfoot>tr>td.active,
-.table>thead>tr>th.active,
-.table>tbody>tr>th.active,
-.table>tfoot>tr>th.active,
-.table>thead>tr.active>td,
-.table>tbody>tr.active>td,
-.table>tfoot>tr.active>td,
-.table>thead>tr.active>th,
-.table>tbody>tr.active>th,
-.table>tfoot>tr.active>th {
+.table > thead > tr > td.active,
+.table > tbody > tr > td.active,
+.table > tfoot > tr > td.active,
+.table > thead > tr > th.active,
+.table > tbody > tr > th.active,
+.table > tfoot > tr > th.active,
+.table > thead > tr.active > td,
+.table > tbody > tr.active > td,
+.table > tfoot > tr.active > td,
+.table > thead > tr.active > th,
+.table > tbody > tr.active > th,
+.table > tfoot > tr.active > th {
     /*background-color: #F4F6FF !important;*/
     background-color: transparent !important;
 }

@@ -512,7 +512,7 @@ ItemDetail.getForecastChartData = function (date_type, report_type) {
         success: function (data) {
             if (data.result) {
                 const series = data.content.serials
-                // console.log('data-----------------', data);
+                console.log('data-----------------', data);
 
                 var legendData = ['current_time_point'];
                 var xAxis = [];
@@ -772,7 +772,7 @@ function FillData(prefix, data) {
                     var valueArray = value.values;
 
                     if (currentValue === null) {
-                        html += "<option value=" + currentValue + ">----</option>"
+                        html += "<option value=" + currentValue + " style='display: none' >----</option>"
                     }
 
                     if (valueArray.length > 0) {
