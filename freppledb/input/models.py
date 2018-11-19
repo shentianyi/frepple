@@ -30,6 +30,7 @@ from freppledb.common.fields import JSONBField, AliasDateTimeField
 from freppledb.common.models import HierarchyModel, AuditModel, MultiDBManager, User, Comment
 from freppledb.common.utils import la_time
 from freppledb.common.utils.la_calendar import normal_calendar
+from freppledb.input.enum import FgStatus
 
 searchmode = (
     ('PRIORITY', _('priority')),
@@ -85,7 +86,7 @@ class Calendar(AuditModel):
             while work_days_find < work_days and cd_days < cls.max_cd_cal_steps:
                 bucket = None
                 for b in buckets:
-                    if b.startdate <= start_date.date() <= b.enddate:
+                    if b.startdate <= start_date <= b.enddate:
                         bucket = b
                         break
 
@@ -327,7 +328,7 @@ class Item(AuditModel, HierarchyModel):
     name = models.CharField(_('name'), max_length=300, primary_key=False, db_index=True)
     barcode = models.CharField(_('barcode'), max_length=300, db_index=True, null=True, blank=True)
     type = models.CharField(_('type'), max_length=20, choices=types, null=False, blank=False)
-    status = models.CharField(_('status'), max_length=20, null=True, blank=True, choices=fg_status)
+    status = models.CharField(_('status'), max_length=20, null=True, blank=True, choices=FgStatus.to_tuple())
     plan_strategy = models.CharField(_('plan strategy'), max_length=20, null=True, blank=True, choices=strategies)
     lock_type = models.CharField(_('lock type'), max_length=20, null=True, blank=True, choices=lock_types,
                                  default="unlocked")

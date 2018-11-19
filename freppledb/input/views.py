@@ -51,6 +51,7 @@ from freppledb.common.message.responsemessage import ResponseMessage
 from freppledb.common.models import Parameter, Comment, Bucket
 from freppledb.common.utils import la_enum, la_field
 from freppledb.common.utils.la_field import decimal2float
+from freppledb.input.enum import LockTypes
 from freppledb.input.forms import ForecastUploadForm
 from freppledb.input.models import Resource, Operation, Location, SetupMatrix, SetupRule, ItemSuccessor, ItemCustomer, \
     ForecastYear, ForecastVersion, Forecast, ForecastCommentOperation
@@ -1393,7 +1394,8 @@ class ItemMainData(View):
         except:
             successor_nr = None
 
-        lock_types = {"current": item.lock_type, "values": la_enum.tuple2select(Item.lock_types)}
+        # lock_types = {"current": item.lock_type, "values": la_enum.tuple2select(Item.lock_types)}
+        lock_types = {"current": item.lock_type, "values": la_enum.enum2select(LockTypes)}
 
         item_statuses = {"current": item.status, "values": la_enum.tuple2select(Item.type_status[item.type])}
 
