@@ -679,6 +679,19 @@ ItemDetail.supplierChange = function () {
     }
 };
 
+//根据料号是否锁定控制“到期”是否为必填
+ItemDetail.lockTypeChange = function () {
+    var selectedValue = $("#item_detail_lock_types").val();
+
+    if (selectedValue === 'locked') {
+        $("#item_detail_lock_expire_at_required").css('display','inline-block');
+        $("#item_detail_lock_expire_at").attr('required', 'true');
+    } else {
+        $("#item_detail_lock_expire_at_required").css('display','none');
+        $("#item_detail_lock_expire_at").attr('required', 'false');
+    }
+}
+
 //切换查询时间类型获取数据
 ItemDetail.DateTypeChange = function (name, ifGrid) {
     var currentGridValueForecast = $("#forecast_grid_chooseMonth").val();
