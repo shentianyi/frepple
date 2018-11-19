@@ -21,7 +21,8 @@
 .ui-jqgrid .ui-jqgrid-htable .ui-jqgrid-labels th div {
     color: #333333;
     font-weight: normal;
-    font-size: 18px;
+    /*font-size: 18px;*/
+    font-size: 15px;
 }
 
 .table-striped>tbody>tr:nth-of-type(odd) {

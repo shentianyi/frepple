@@ -316,7 +316,7 @@ function customerDetail(event) {
     event.preventDefault();
     event.stopImmediatePropagation();
 
-    window.location.href = url_prefix + curlink.replace('#key#',  admin_escape(objectid));
+    window.location.href = url_prefix + curlink.replace('#key#', admin_escape(objectid));
 }
 
 function formatDuration(cellvalue, options, rowdata) {
@@ -617,7 +617,7 @@ var grid = {
         var graph = false;
 
         var row0 = "" +
-            '<div class="row">' +
+            '<div class="row" style="display: flex; flex-direction: row;align-items: center;">' +
             '<div class="col-xs-5">' +
             '<div class="panel panel-default custom-header-panel"><div class="panel-heading">' + gettext("Selected options") + '</div>' +
             '<div class="panel-body">' +
@@ -625,10 +625,16 @@ var grid = {
             '</div>' +
             '</div>' +
             '</div>' +
-            // '<div class="col-xs-2"> ' +
-            // '<span>向右移除</span>' +
-            // '<span>向左添加</span>' +
-            // '</div>' +
+            '<div class="col-xs-2" style="text-align: center"> ' +
+            '<div>' +
+            '<img src="/static/img/table/right.png">'+
+            '</div>' +
+            '<span style="font-size: 12px; color: #999999">向右移除</span>' +
+            '<div style="margin-top: 30px">' +
+            '<img src="/static/img/table/left.png">' +
+            '</div>' +
+            '<span style="font-size: 12px; color: #999999">向左添加</span>' +
+            '</div>' +
             '<div class="col-xs-5">' +
             '<div class="panel panel-default custom-header-panel" ><div class="panel-heading">' + gettext("Available options") + '</div>' +
             '<div class="panel-body">' +
@@ -653,7 +659,7 @@ var grid = {
             else if (colModel[i].name != "rn" && colModel[i].name != "cb" && colModel[i].counter != null && colModel[i].label != '' && !('alwayshidden' in colModel[i])) {
                 if (colModel[i].frozen) maxfrozen = parseInt(i, 10) + 1 - skipped;
                 // 处理重复
-                if(allArray.indexOf(colModel[i].index) === -1){
+                if (allArray.indexOf(colModel[i].index) === -1) {
                     if (!colModel[i].hidden) {
                         val0s += '<li id="' + (i) + '"  class="list-group-item" style="cursor: move;">' + colModel[i].label + '</li>';
                     } else {
@@ -661,7 +667,7 @@ var grid = {
                     }
 
                     allArray.push(colModel[i].index);
-                }else {
+                } else {
                     // do something
                 }
             }
@@ -813,10 +819,10 @@ var grid = {
             var colModel = $("#grid")[0].p.colModel;
             var newModel = new Array();
 
-            for(var i = 0; i< colModel.length; i++) {
-                if(newModel.indexOf(colModel[i].index) === -1){
-                   newModel.push(colModel)
-                }else {
+            for (var i = 0; i < colModel.length; i++) {
+                if (newModel.indexOf(colModel[i].index) === -1) {
+                    newModel.push(colModel)
+                } else {
                     colModel.splice(i, 1)
                 }
             }
@@ -824,14 +830,14 @@ var grid = {
             var perm = [];
             var hiddenrows = [];
 
-            if(colModel[0].name == "rn") {
+            if (colModel[0].name == "rn") {
                 perm.push(0);
-                if(colModel[1].name == "cb"){
+                if (colModel[1].name == "cb") {
                     perm.push(1);
                 }
-            }else if(colModel[0].name == "cb"){
+            } else if (colModel[0].name == "cb") {
                 perm.push(0);
-            }else{
+            } else {
             }
             // if (colModel[0].name == "cb") perm.push(0);
             cross_idx = [];
@@ -933,13 +939,13 @@ var grid = {
 
         var allArray = new Array()
         for (var i in colModel) {
-            if (colModel[i].name != "rn" && colModel[i].name != "cb" && "counter" in colModel[i] && !('alwayshidden' in colModel[i])){
+            if (colModel[i].name != "rn" && colModel[i].name != "cb" && "counter" in colModel[i] && !('alwayshidden' in colModel[i])) {
                 // 保证 colArray 是唯一的
-                if(allArray.indexOf(colModel[i].index) === -1){
+                if (allArray.indexOf(colModel[i].index) === -1) {
                     colArray.push([colModel[i].counter, colModel[i].hidden, colModel[i].width]);
                     if (colModel[i].frozen) maxfrozen = parseInt(i) + 1 - skipped;
                     allArray.push(colModel[i].index);
-                }else {
+                } else {
                     // do something
                 }
             }
@@ -1109,7 +1115,7 @@ var grid = {
                 .modal('show');
         $('#exportbutton').on('click', function () {
             // Fetch the report data
-            var url = (location.href.indexOf("#") != -1 ? location.href.substr(0, location.href.indexOf("#")) : location.href) ;
+            var url = (location.href.indexOf("#") != -1 ? location.href.substr(0, location.href.indexOf("#")) : location.href);
             if (location.search.length > 0)
             // URL already has arguments
                 url += "&format=" + $('#csvformat input:radio:checked').val();
@@ -1215,8 +1221,8 @@ var grid = {
         //     // $("#deleteDialog").modal('show');
         // }
         // else
-            if (sel.length > 0) {
-                $("#deleteDialog").modal('show');
+        if (sel.length > 0) {
+            $("#deleteDialog").modal('show');
             // $('#timebuckets').modal('hide');
             // $.jgrid.hideModal("#searchmodfbox_grid");
             // $('#popup').html('<div class="modal-dialog">' +
@@ -3007,7 +3013,7 @@ function import_custom_show(modalcontentId, myUrl, title, paragraph, multiple, f
         gettext('The first row should contain the field names.') + '<br><br>' +
         '</p>';
 
-    modalcontent += $("#"+modalcontentId).clone().css('display', 'block').html();
+    modalcontent += $("#" + modalcontentId).clone().css('display', 'block').html();
 
     if (isDragnDropUploadCapable()) {
         modalcontent += '' +
@@ -3159,9 +3165,9 @@ function import_custom_show(modalcontentId, myUrl, title, paragraph, multiple, f
                     cache: false,
                     data: filesdata,
                     success: function (data) {
-                        if(data.result){
+                        if (data.result) {
                             window.location.reload();
-                        }else {
+                        } else {
                             var el = $('#uploadResponse');
                             el.html(data.message);
                             if (el.attr('data-scrolled') !== "true") {

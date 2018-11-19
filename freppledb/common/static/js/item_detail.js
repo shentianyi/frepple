@@ -476,6 +476,11 @@ ItemDetail.getForecastGridData = function (date_type, report_type) {
                         autowidth: true,
                         loadComplete: function () {
                             $("#forecastGrid").closest(".ui-jqgrid-bdiv").css({'overflow-y': 'auto'});
+                            $(function () {
+                                $(window).resize(function () {
+                                    $("#forecastGrid").setGridWidth($('#content-main-forecast').width());
+                                });
+                            });
                         },
                         gridComplete: function () {
                             //在gridComplete调用合并方法
