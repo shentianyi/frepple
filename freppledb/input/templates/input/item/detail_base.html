@@ -107,7 +107,7 @@
     }
 
     /*.ui-jqgrid tr.ui-row-ltr td {*/
-        /*height: 42px !important;*/
+    /*height: 42px !important;*/
     /*}*/
 
 </style>
@@ -150,7 +150,8 @@
                 <div class="input-group">
                     <span class="input-group-addon">物料锁定类型：</span>
                     <!--<input class="form-control" id="item_detail_lock_types" type="text" name="item_detail_lock_types">-->
-                    <select class="form-control" name="item_detail_lock_types" id="item_detail_lock_types">
+                    <select class="form-control" name="item_detail_lock_types" id="item_detail_lock_types"
+                            onchange="ItemDetail.lockTypeChange()">
                     </select>
                 </div>
             </div>
@@ -180,10 +181,14 @@
                     <span class="input-group-addon unit">PCE</span>
                 </div>
             </div>
-            <div class="col-md-3">
+            <div id="deadline-item-detail" class="col-md-3">
                 <div class="input-group">
-                    <span class="input-group-addon">到期：</span>
+                    <span class="input-group-addon">
+                        <label id="item_detail_lock_expire_at_required" class="input-required"
+                                                   title="" data-toggle="tooltip" data-original-title="该项必填"
+                                                   style="display: none"></label>
 
+                        到期：</span>
                     <input class="form-control vDateField" id="item_detail_lock_expire_at" type="text"
                            name="item_detail_lock_expire_at"
                            placeholder="日期">
