@@ -49,7 +49,8 @@ from openpyxl.styles import NamedStyle, PatternFill
 from freppledb.boot import getAttributeFields
 from freppledb.common.message.responsemessage import ResponseMessage
 from freppledb.common.models import Parameter, Comment, Bucket
-from freppledb.common.utils import la_enum
+from freppledb.common.utils import la_enum, la_field
+from freppledb.common.utils.la_field import decimal2float
 from freppledb.input.forms import ForecastUploadForm
 from freppledb.input.models import Resource, Operation, Location, SetupMatrix, SetupRule, ItemSuccessor, ItemCustomer, \
     ForecastYear, ForecastVersion, Forecast, ForecastCommentOperation
@@ -1298,18 +1299,8 @@ class EnumView(View):
 
                 return HttpResponse(json.dumps(dic, cls=DjangoJSONEncoder),
                                     content_type='application/json')
-
-            if type == 'item_lock_type':
-                t = dict(Item.lock_types)[value]
-                if t == 'locked':
-                    Item.lock_expire_at = None
-                    data = {
-                        "lock_expire_at": Item.lock_expire_at
-                    }
-                return HttpResponse(json.dumps(data, cls=DjangoJSONEncoder),
-                                    content_type='application/json')
         else:
-            raise HttpResponseBadRequest()
+            return HttpResponseBadRequest()
 
 
 class ItemList(GridReport):
@@ -1407,7 +1398,7 @@ class ItemMainData(View):
         item_statuses = {"current": item.status, "values": la_enum.tuple2select(Item.type_status[item.type])}
 
         plan_strategies = {"current": item.plan_strategy,
-                           "values": la_enum.tuple2select(Item.strategies, blankable=True)}
+                           "values": la_enum.tuple2select(Item.strategies)}
 
         locations = Location.objects.select_related().all().order_by('id')
         location = []
@@ -1444,7 +1435,7 @@ class ItemMainData(View):
         return HttpResponse(json.dumps(message.__dict__, cls=DjangoJSONEncoder, ensure_ascii=False),
                             content_type='application/json')
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request, id, *args, **kwargs):
         message = ResponseMessage()
         json_data = request.body
         data = json.loads(json_data)
@@ -1452,19 +1443,31 @@ class ItemMainData(View):
             # 创建保存点
             save_point = transaction.savepoint()
             try:
-                item = Item.objects.get(id=data['item_id'])
+                item = Item.objects.get(id=id)
                 item.description = data['description']
                 item.project_nr = data['project_nr']
                 if data['lock_types'] is None:
-                    return HttpResponse({'message': '请选择锁定类型'})
+                    message.result = False
+                    message.code = 200
+                    message.message = "请选择锁定类型"
+                    return HttpResponse(json.dumps(message.__dict__, cls=DjangoJSONEncoder, ensure_ascii=False),
+                                        content_type='application/json')
+
                 if data['lock_expire_at'] is None and data['lock_types'] == 'locked':
-                    return HttpResponse({'message': '请选择到期时间'})
+                    message.result = False
+                    message.code = 200
+                    message.message = "请选择到期时间"
+                    return HttpResponse(json.dumps(message.__dict__, cls=DjangoJSONEncoder, ensure_ascii=False),
+                                        content_type='application/json')
+
+                item.lock_type = data['lock_types']
+                item.lock_expire_at = data['lock_expire_at']
                 item.save()
 
-            except:
+            except Exception as e:
                 message.result = False
                 message.code = 404
-                message.message = "数据不存在"
+                message.message = "数据保存失败"
                 transaction.savepoint_rollback(save_point)
                 return HttpResponse(json.dumps(message.__dict__, cls=DjangoJSONEncoder, ensure_ascii=False),
                                     content_type='application/json')
@@ -1503,8 +1506,8 @@ class ItemSupplierData(View):
                 "telephone": f.supplier.telephone,
                 "email": f.supplier.email,
                 "contact": f.supplier.contact,
-                "cost": float(f.cost) if f.cost else None,
-                "cost_unit": float(f.cost_unit) if f.cost_unit else None,
+                "cost": decimal2float(f.cost),
+                "cost_unit": decimal2float(f.cost_unit),
                 "supplier_item_nr": f.supplier_item_nr
             }
             data.append(supplier_dict)
@@ -1524,55 +1527,52 @@ class MainSupplierData(View):
         current_time = timezone.now()
         try:
             item = Item.objects.get(id=id)
-        except:
+        except Exception as e:
             message.result = False
             message.code = 404
             message.message = "没有对应的物料"
             return HttpResponse(json.dumps(message.__dict__, cls=DjangoJSONEncoder, ensure_ascii=False),
                                 content_type='application/json')
         try:
-            supplier = ItemSupplier.objects.filter(item=id, effective_start__lte=current_time,
-                                                   effective_end__gte=current_time).order_by('priority', '-ratio',
-                                                                                             'id').first()
+            item_supplier = ItemSupplier.objects.filter(item=id, effective_start__lte=current_time,
+                                                        effective_end__gte=current_time).order_by('priority', '-ratio',
+                                                                                                  'id').first()
         except Exception as e:
             message.result = False
             message.code = 404
             message.message = "合法的主供应商不存在"
             return HttpResponse(json.dumps(message.__dict__, cls=DjangoJSONEncoder, ensure_ascii=False),
                                 content_type='application/json')
-        receive_time = supplier.receive_time
-        load_time = supplier.load_time
-        transit_time = supplier.transit_time
-        product_time = supplier.product_time
-        totall_lead_time = la_enum.lead_time(receive_time, load_time, transit_time, product_time)
+
+        lead_time = item_supplier.wd2cd()
 
         data = {
-            "supplier_id": supplier.supplier.id,
-            "name": supplier.supplier.name,
-            "nr": supplier.supplier.nr,
-            "product_time": float(product_time) if product_time else None,
-            "load_time": float(load_time) if load_time else None,
-            "transit_time": float(transit_time) if transit_time else None,
-            "receive_time": float(receive_time) if receive_time else None,
-            "plan_supplier_date": supplier.plan_supplier_date,
-            "plan_load_date": supplier.plan_load_date,
-            "plan_receive_date": supplier.plan_receive_date,
-            "totall_lead_time": float(totall_lead_time),
-            "cost": float(supplier.cost) if supplier.cost else supplier.cost,
-            "cost_unit": float(supplier.cost_unit) if supplier.cost_unit else None,
-            "earliest_order_date": supplier.earliest_order_date,
+            "supplier_id": item_supplier.supplier.id,
+            "name": item_supplier.supplier.name,
+            "nr": item_supplier.supplier.nr,
+            "product_time": decimal2float(item_supplier.product_time),
+            "load_time": decimal2float(item_supplier.load_time),
+            "transit_time": decimal2float(item_supplier.transit_time),
+            "receive_time": decimal2float(item_supplier.receive_time),
+            "plan_supplier_date": item_supplier.plan_supplier_date,
+            "plan_load_date": item_supplier.plan_load_date,
+            "plan_receive_date": item_supplier.plan_receive_date,
+            "totall_lead_time": decimal2float(lead_time),
+            "cost": decimal2float(item_supplier.cost),
+            "cost_unit": decimal2float(item_supplier.cost_unit),
+            "earliest_order_date": item_supplier.earliest_order_date,
             "lock_expire_at": item.lock_expire_at,
-            "plan_list_date": supplier.plan_list_date,
-            "plan_delist_date": supplier.plan_delist_date,
-            "moq": float(supplier.moq) if supplier.moq else None,
-            "mpq": float(supplier.mpq) if supplier.mpq else None,
-            "pallet_num": float(supplier.pallet_num) if supplier.pallet_num else None,
+            "plan_list_date": item_supplier.plan_list_date,
+            "plan_delist_date": item_supplier.plan_delist_date,
+            "moq": decimal2float(item_supplier.moq),
+            "mpq": decimal2float(item_supplier.mpq),
+            "pallet_num": decimal2float(item_supplier.pallet_num),
             # TODO 手工MOQ暂时无数据
             "MOQ": 0,
-            "order_unit_qty": float(supplier.order_unit_qty) if supplier.order_unit_qty else None,
-            "outer_package_num": float(supplier.outer_package_num) if supplier.outer_package_num else None,
-            "order_max_qty": float(supplier.order_max_qty) if supplier.order_max_qty else None,
-            "description": supplier.description
+            "order_unit_qty": decimal2float(item_supplier.order_unit_qty),
+            "outer_package_num": decimal2float(item_supplier.outer_package_num),
+            "order_max_qty": decimal2float(item_supplier.order_max_qty),
+            "description": item_supplier.description
         }
 
         message.result = True
@@ -1581,6 +1581,46 @@ class MainSupplierData(View):
         message.content = data
         return HttpResponse(json.dumps(message.__dict__, cls=DjangoJSONEncoder, ensure_ascii=False),
                             content_type='application/json')
+
+    def post(self, request, id, *args, **kwargs):
+        message = ResponseMessage()
+        current_time = datetime.now()
+        json_data = request.body
+        data = json.loads(json_data)
+        with transaction.atomic():
+            # 创建保存点
+            save_point = transaction.savepoint()
+            try:
+                item = Item.objects.get(id=id)
+                item_supplier = ItemSupplier.objects.filter(item=id, effective_start__lte=current_time,
+                                                            effective_end__gte=current_time).order_by('priority',
+                                                                                                      '-ratio',
+                                                                                                      'id').first()
+
+                item_supplier.plan_supplier_date = data['plan_supplier_date']
+                item_supplier.plan_load_date = data['plan_load_date']
+                item_supplier.plan_receive_date = data['plan_receive_date']
+                item_supplier.earliest_order_date = data['earliest_order_date']
+                item.lock_expire_at = data['lock_expire_at']
+                item_supplier.plan_list_date = data['plan_list_date']
+                item_supplier.plan_delist_date = data['plan_delist_date']
+                item_supplier.save()
+                item.save()
+
+            except Exception as e:
+                message.result = False
+                message.code = 404
+                message.message = "数据保存失败"
+                transaction.savepoint_rollback(save_point)
+                return HttpResponse(json.dumps(message.__dict__, cls=DjangoJSONEncoder, ensure_ascii=False),
+                                    content_type='application/json')
+            else:
+                transaction.savepoint_commit(save_point)
+                message.result = True
+                message.code = 200
+                message.message = "数据保存成功"
+                return HttpResponse(json.dumps(message.__dict__, cls=DjangoJSONEncoder, ensure_ascii=False),
+                                    content_type='application/json')
 
 
 # 代号：GET_ITEM_SIMULATION_DATA_API
@@ -1590,7 +1630,7 @@ class ItemSimulation(View):
         message = ResponseMessage()
         current_time = timezone.now()
         try:
-            supplier = ItemSupplier.objects.filter(item=id, effective_start__lte=current_time,
+            item_supplier = ItemSupplier.objects.filter(item=id, effective_start__lte=current_time,
                                                    effective_end__gte=current_time).order_by('priority', '-ratio',
                                                                                              'id').first()
         except Exception as e:
@@ -1601,13 +1641,13 @@ class ItemSimulation(View):
                                 content_type='application/json')
 
         data = {
-            "supplier_id": supplier.supplier.id,
-            "nr": supplier.supplier.nr,
-            "name": supplier.supplier.name,
+            "supplier_id": item_supplier.supplier.id,
+            "nr": item_supplier.supplier.nr,
+            "name": item_supplier.supplier.name,
             # TODO 目前订货点没有数据
             "now_order_point": 0,
-            "moq": float(supplier.moq) if supplier.moq else None,
-            "order_max_qty": float(supplier.order_max_qty) if supplier.order_max_qty else None
+            "moq": decimal2float(item_supplier.moq),
+            "order_max_qty": decimal2float(item_supplier.order_max_qty)
         }
         message.result = True
         message.code = 200
@@ -1615,6 +1655,40 @@ class ItemSimulation(View):
         message.content = data
         return HttpResponse(json.dumps(message.__dict__, cls=DjangoJSONEncoder, ensure_ascii=False),
                             content_type='application/json')
+
+    def post(self, request, id, *args, **kwargs):
+        current_time = datetime.now()
+        message = ResponseMessage()
+        json_data = request.body
+        data = json.loads(json_data)
+        with transaction.atomic():
+            # 创建保存点
+            save_point = transaction.savepoint()
+            try:
+                item_supplier = ItemSupplier.objects.filter(item=id, effective_start__lte=current_time,
+                                                       effective_end__gte=current_time).order_by('priority', '-ratio',
+                                                                                                 'id').first()
+
+                item_supplier.mpq = data['mpq']
+                item_supplier.outer_package_num = data['outer_package_num']
+                item_supplier.pallet_num = data['pallet_num']
+                item_supplier.moq = data['moq']
+                item_supplier.save()
+
+            except:
+                message.result = False
+                message.code = 404
+                message.message = "数据保存失败"
+                transaction.savepoint_rollback(save_point)
+                return HttpResponse(json.dumps(message.__dict__, cls=DjangoJSONEncoder, ensure_ascii=False),
+                                    content_type='application/json')
+            else:
+                transaction.savepoint_commit(save_point)
+                message.result = True
+                message.code = 200
+                message.message = "数据保存成功"
+                return HttpResponse(json.dumps(message.__dict__, cls=DjangoJSONEncoder, ensure_ascii=False),
+                                    content_type='application/json')
 
 
 # 代号：GET_ITEM_PLAN_DATA_API
@@ -1624,7 +1698,7 @@ class ItemPlan(View):
         message = ResponseMessage()
         current_time = timezone.now()
         try:
-            supplier = ItemSupplier.objects.filter(item=id, effective_start__lte=current_time,
+            item_supplier = ItemSupplier.objects.filter(item=id, effective_start__lte=current_time,
                                                    effective_end__gte=current_time).order_by('priority', '-ratio',
                                                                                              'id').first()
         except Exception as e:
@@ -1633,22 +1707,19 @@ class ItemPlan(View):
             message.message = "合法的主供应商不存在"
             return HttpResponse(json.dumps(message.__dict__, cls=DjangoJSONEncoder, ensure_ascii=False),
                                 content_type='application/json')
-        receive_time = supplier.receive_time
-        load_time = supplier.load_time
-        transit_time = supplier.transit_time
-        product_time = supplier.product_time
-        lead_time = la_enum.lead_time(receive_time, load_time, transit_time, product_time)
+
+        lead_time = item_supplier.wd2cd()
 
         data = {
-            "supplier_id": supplier.supplier.id,
-            "nr": supplier.supplier.nr,
-            "name": supplier.supplier.name,
+            "supplier_id": item_supplier.supplier.id,
+            "nr": item_supplier.supplier.nr,
+            "name": item_supplier.supplier.name,
             "safe_buffer": 0,
-            "moq": float(supplier.moq) if supplier.moq else None,
-            "mpq": float(supplier.mpq) if supplier.mpq else None,
-            "outer_package_num": float(supplier.outer_package_num) if supplier.outer_package_num else None,
-            "pallet_num": float(supplier.pallet_num) if supplier.pallet_num else None,
-            "lead_time": float(lead_time),
+            "moq": decimal2float(item_supplier.moq),
+            "mpq": decimal2float(item_supplier.mpq),
+            "outer_package_num": decimal2float(item_supplier.outer_package_num),
+            "pallet_num": decimal2float(item_supplier.pallet_num),
+            "lead_time": decimal2float(lead_time),
             "per_month_sale": 0,
             "last_year_sale": 0,
             "last_month_sale": 0,
@@ -1664,47 +1735,29 @@ class ItemPlan(View):
         return HttpResponse(json.dumps(message.__dict__, cls=DjangoJSONEncoder, ensure_ascii=False),
                             content_type='application/json')
 
-    def workday(self, request, supplier):
-        receive_time = supplier.receive_time
-        load_time = supplier.load_time
-        transit_time = supplier.transit_time
-        product_time = supplier.product_time
-        if receive_time is None:
-            receive_time = 0
-        if load_time is None:
-            load_time = 0
-        if transit_time is None:
-            transit_time = 0
-        if product_time is None:
-            product_time = 0
-        workday = receive_time + load_time + transit_time + product_time
-        return workday
-
-    def post(self, request, *args, **kwargs):
+    def post(self, request, id, *args, **kwargs):
         message = ResponseMessage()
+        current_time = datetime.now()
         json_data = request.body
         data = json.loads(json_data)
-        id = data['supplier_id']
         safe_buffer = data['safe_buffer']
-        moq = data['moq']
-        mpq = data['mpq']
-        outer_package_num = data['outer_package_num']
-        pallet_num = data['pallet_num']
         with transaction.atomic():
             # 创建保存点
             save_point = transaction.savepoint()
             try:
-                supplier = Supplier.objects.get(id=id)
-                supplier.mpq = mpq
-                supplier.outer_package_num = outer_package_num
-                supplier.pallet_num = pallet_num
-                supplier.moq = moq
-                supplier.save()
+                item_supplier = ItemSupplier.objects.filter(item=id, effective_start__lte=current_time,
+                                                            effective_end__gte=current_time).order_by('priority', '-ratio',
+                                                                                                 'id').first()
+                item_supplier.mpq = data['mpq']
+                item_supplier.outer_package_num = data['outer_package_num']
+                item_supplier.pallet_num = data['pallet_num']
+                item_supplier.moq = data['moq']
+                item_supplier.save()
 
             except:
                 message.result = False
                 message.code = 404
-                message.message = "供应商不存在"
+                message.message = "数据保存失败"
                 transaction.savepoint_rollback(save_point)
                 return HttpResponse(json.dumps(message.__dict__, cls=DjangoJSONEncoder, ensure_ascii=False),
                                     content_type='application/json')
