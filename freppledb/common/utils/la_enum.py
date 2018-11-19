@@ -7,3 +7,8 @@ def tuple2select(tuple, blankable=False):
     return [{"value": k, "text": v} for k, v in dict(tuple).items()]
 
 
+def enum2select(x):
+
+    return [{"value": a.name, "text": a.value} for a in x]
+
+
