@@ -654,6 +654,8 @@ class ForecastItemGraph(View):
         current = datetime.now()
         current_time = datetime(current.year, current.month, current.day)
         current_text = Bucket.get_x_time_name(current_time, date_type)
+        # 以月初或者周一计算的当前的时间
+        current_date = Bucket.get_datetime_by_type(current_time, date_type)
         current = {
             "x_value": current_time,
             "x_text": current_text,
@@ -661,7 +663,7 @@ class ForecastItemGraph(View):
         }
         message['content']['current_time_point'] = current
 
-        while start_time < current_time:
+        while start_time < current_date:
             dispatches_points = {
                 "x_value": start_time,
                 "x_text": Bucket.get_x_text_name(start_time, date_type),
@@ -687,21 +689,21 @@ class ForecastItemGraph(View):
             # 下一个值
             start_time = Bucket.get_nex_time_by_date_type(start_time, date_type)
 
-        while current_time <= end_time:
+        while current_date <= end_time:
             dispatches_points = {
-                "x_value": current_time,
-                "x_text": Bucket.get_x_text_name(current_time, date_type),
+                "x_value": current_date,
+                "x_text": Bucket.get_x_text_name(current_date, date_type),
                 "y": 0
             }
             forecast_points = {
-                "x_value": current_time,
-                "x_text": Bucket.get_x_text_name(current_time, date_type),
+                "x_value": current_date,
+                "x_text": Bucket.get_x_text_name(current_date, date_type),
                 "y": 0
             }
             total = 0
             # 赋值
             for row in rows:
-                if current_time == row[2]:
+                if current_date == row[2]:
                     total += round(decimal2calculate(row[3]) * decimal2calculate(row[6]) / 100, 2) + decimal2calculate(
                         row[4]) + decimal2calculate(row[5])
 
@@ -709,7 +711,7 @@ class ForecastItemGraph(View):
             message["content"]["serials"][0]["points"].append(dispatches_points)
             message["content"]["serials"][1]["points"].append(forecast_points)
             # 下一个值
-            current_time = Bucket.get_nex_time_by_date_type(current_time, date_type)
+            current_date = Bucket.get_nex_time_by_date_type(current_date, date_type)
 
         return JsonResponse(message, encoder=DjangoJSONEncoder, safe=False)
 
@@ -753,12 +755,16 @@ class PlanItemGraph(View):
         current = datetime.now()
         current_time = datetime(current.year, current.month, current.day)
         current_text = Bucket.get_x_time_name(current_time, date_type)
+        # 以月初或者周一计算的当前的时间
+        current_date = Bucket.get_datetime_by_type(current_time, date_type)
 
         if item_supplier is None:
-            lead_time = 0
+            lead_time = None
+            lead_time_text = None
         else:
             lead_time_num = item_supplier.wd2cd()
             lead_time = current_time + relativedelta(days=lead_time_num)
+            lead_time_text = Bucket.get_x_time_name(current_time + relativedelta(days=lead_time_num), date_type)
 
         current = {
             "x_value": current_time,
@@ -767,7 +773,7 @@ class PlanItemGraph(View):
         }
         lead_time_point = {
             "x_value": lead_time,
-            "x_text": Bucket.get_x_time_name(lead_time, date_type),
+            "x_text": lead_time_text,
             "y": None
 
         }
@@ -811,7 +817,7 @@ class PlanItemGraph(View):
                         item.id, location.id])
 
         rows = cursor.fetchall()
-        while start_time < current_time:
+        while start_time < current_date:
             forecast_points = {
                 "x_value": start_time,
                 "x_text": Bucket.get_x_text_name(start_time, date_type),
@@ -822,23 +828,23 @@ class PlanItemGraph(View):
             # 下一个值
             start_time = Bucket.get_nex_time_by_date_type(start_time, date_type)
 
-        while current_time <= end_time:
+        while current_date <= end_time:
             forecast_points = {
-                "x_value": current_time,
-                "x_text": Bucket.get_x_text_name(current_time, date_type),
+                "x_value": current_date,
+                "x_text": Bucket.get_x_text_name(current_date, date_type),
                 "y": 0
             }
             total = 0
             # 赋值
             for row in rows:
-                if current_time == row[2]:
+                if current_date == row[2]:
                     total += round(decimal2calculate(row[3]) * decimal2calculate(row[6]) / 100, 2) + decimal2calculate(
                         row[4]) + decimal2calculate(row[5])
 
             forecast_points["y"] = -total
             message["content"]["serials"][0]["points"].append(forecast_points)
             # 下一个值
-            current_time = Bucket.get_nex_time_by_date_type(current_time, date_type)
+            current_date = Bucket.get_nex_time_by_date_type(current_date, date_type)
 
         return JsonResponse(message, encoder=DjangoJSONEncoder, safe=False)
 

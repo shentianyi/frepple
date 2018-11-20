@@ -30,7 +30,7 @@ from freppledb.common.fields import JSONBField, AliasDateTimeField
 from freppledb.common.models import HierarchyModel, AuditModel, MultiDBManager, User, Comment
 from freppledb.common.utils import la_time
 from freppledb.common.utils.la_calendar import normal_calendar
-from freppledb.input.enum import FgStatus
+from freppledb.input import enum
 
 searchmode = (
     ('PRIORITY', _('priority')),
@@ -283,40 +283,8 @@ class Customer(AuditModel, HierarchyModel):
 
 
 class Item(AuditModel, HierarchyModel):
-    fg_status = (
-        ('S0', _('S0')),
-        ('S1', _('S1')),
-        ('S2', _('S2')),
-        ('S3', _('S3')),
-        ('S4', _('S4')))
-    rm_status = (
-        ('A0', _('A0')),
-        ('A1', _('A1')),
-        ('A2', _('A2')),
-        ('A3', _('A3')))
-    types = (
-        ('FG', _('FG')),
-        ('WIP', _('WIP')),
-        ('RM', _('RM')),
-    )
-    strategies = (
-        ('MTS', _('MTS')),
-        ('MTO', _('MTO')),
-        ('ETO', _('ETO')),
-    )
 
-    lock_types = (
-        ('locked', _('locked')),
-        ('unlocked', _('unlocked')),
-    )
-    abc_types = (
-        ('A', _('A')),
-        ('B', _('B')),
-        ('C', _('C')),
-        ('D', _('D')),
-    )
-
-    type_status = {'FG': fg_status, 'RM': rm_status, 'WIP': ()}
+    type_status = {'FG': enum.FgStatus.to_tuple(), 'RM': enum.RmStatus.to_tuple(), 'WIP': ()}
 
     # Database fields
     # 设置外键显示的值
@@ -327,14 +295,14 @@ class Item(AuditModel, HierarchyModel):
     nr = models.CharField(_('item nr'), max_length=300, db_index=True, unique=True)
     name = models.CharField(_('name'), max_length=300, primary_key=False, db_index=True)
     barcode = models.CharField(_('barcode'), max_length=300, db_index=True, null=True, blank=True)
-    type = models.CharField(_('type'), max_length=20, choices=types, null=False, blank=False)
-    status = models.CharField(_('status'), max_length=20, null=True, blank=True, choices=FgStatus.to_tuple())
-    plan_strategy = models.CharField(_('plan strategy'), max_length=20, null=True, blank=True, choices=strategies)
-    lock_type = models.CharField(_('lock type'), max_length=20, null=True, blank=True, choices=lock_types,
+    type = models.CharField(_('type'), max_length=20, choices=enum.ItemType.to_tuple(), null=False, blank=False)
+    status = models.CharField(_('status'), max_length=20, null=True, blank=True, choices=enum.FgStatus.to_tuple())
+    plan_strategy = models.CharField(_('plan strategy'), max_length=20, null=True, blank=True, choices=enum.ItemProductStrategy.to_tuple())
+    lock_type = models.CharField(_('lock type'), max_length=20, null=True, blank=True, choices=enum.LockType.to_tuple(),
                                  default="unlocked")
     lock_expire_at = models.DateField(_('lock expire at'), null=True, blank=True)
-    price_abc = models.CharField(_('price abc'), max_length=20, null=True, blank=True, choices=abc_types)
-    qty_abc = models.CharField(_('qty abc'), max_length=20, null=True, blank=True, choices=abc_types)
+    price_abc = models.CharField(_('price abc'), max_length=20, null=True, blank=True, choices=enum.AbcType.to_tuple())
+    qty_abc = models.CharField(_('qty abc'), max_length=20, null=True, blank=True, choices=enum.AbcType.to_tuple())
 
     cost = models.DecimalField(
         _('cost'), null=True, blank=True,
@@ -406,8 +374,8 @@ class ItemCustomer(AuditModel):
         db_index=True, related_name='itemcustomer_location',
         null=False, blank=False, on_delete=models.CASCADE)
     customer_item_nr = models.CharField(_('customer item nr'), max_length=300, null=True, blank=True, db_index=True)
-    status = models.CharField(_('status'), max_length=20, null=True, blank=True, choices=Item.fg_status)
-    lock_type = models.CharField(_('lock type'), max_length=20, null=True, blank=True, choices=Item.lock_types)
+    status = models.CharField(_('status'), max_length=20, null=True, blank=True, choices=enum.FgStatus.to_tuple())
+    lock_type = models.CharField(_('lock type'), max_length=20, null=True, blank=True, choices=enum.LockType.to_tuple())
     lock_expire_at = models.DateField(_('lock expire at'), null=True, blank=True)
     plan_list_date = models.DateField(_('plan list date'), db_index=True, null=True, blank=True)
     plan_delist_date = models.DateField(_('plan delist date'), db_index=True, null=True, blank=True)
@@ -420,7 +388,6 @@ class ItemCustomer(AuditModel):
 
     # CMARK 的显示值是这个返回的
     def __str__(self):
-        # return '%s - %s - %s' % (
         return '%s - %s -%s -%s' % (
             self.sale_item.nr if self.sale_item else 'No item',
             self.product_item.nr if self.product_item else 'No product item',
@@ -499,26 +466,12 @@ class ItemSuccessor(AuditModel):
 
 
 class Operation(AuditModel):
-    # Types of operations
-    # Database fields
-    # . Translators: Translation included with Django
-    types = (
-        ('fixed_time', _('fixed_time')),
-        ('time_per', _('time_per')),
-        ('alternate', _('alternate')),
-        ('split', _('split')),
-        ('routing', _('routing')),
-    )
-    modes = (
-        ('priority', _('priority')),
-        ('mincost', _('mincost')),
-    )
 
     id = models.AutoField(_('id'), primary_key=True)
     nr = models.CharField(_('nr'), max_length=300, db_index=True, unique=True)
     name = models.CharField(_('name'), max_length=300, primary_key=False, db_index=True)
     type = models.CharField(
-        _('type'), max_length=20, null=True, blank=True, choices=types)
+        _('type'), max_length=20, null=True, blank=True, choices=enum.OperationType.to_tuple())
 
     location = models.ForeignKey(Location, verbose_name=_('location'), related_name='operation_location',
                                  on_delete=models.CASCADE)
@@ -566,7 +519,7 @@ class Operation(AuditModel):
         help_text=_('Validity end date')
     )
     alternative_process_mode = models.CharField(
-        _('alternative process mode'), max_length=20, null=True, blank=True, choices=modes)
+        _('alternative process mode'), max_length=20, null=True, blank=True, choices=enum.OperationMode.to_tuple())
 
     # fence = models.DurationField(
     #     _('release fence'), null=True, blank=True,
@@ -665,12 +618,6 @@ class SubOperation(AuditModel):
 
 
 class Buffer(AuditModel):
-    # Types of buffers
-    types = (
-        ('default', _('default')),
-        ('infinite', _('infinite')),
-    )
-
     # Fields common to all buffer types
     name = models.CharField(_('name'), max_length=300, primary_key=True,
                             help_text=_('Unique identifier'))
@@ -684,7 +631,7 @@ class Buffer(AuditModel):
         _('subcategory'), max_length=300, null=True, blank=True, db_index=True
     )
     type = models.CharField(
-        _('type'), max_length=20, null=True, blank=True, choices=types,
+        _('type'), max_length=20, null=True, blank=True, choices=enum.CommonType.to_tuple(),
         default='default'
     )
     location = models.ForeignKey(
@@ -827,12 +774,6 @@ class SetupRule(AuditModel):
 
 
 class Resource(AuditModel, HierarchyModel):
-    # Types of resources
-    types = (
-        ('default', _('default')),
-        # ('buckets', _('buckets')),
-        ('infinite', _('infinite')),
-    )
 
     # Database fields
     id = models.AutoField(_('id'), help_text=_('Unique identifier'), primary_key=True)
@@ -850,7 +791,7 @@ class Resource(AuditModel, HierarchyModel):
         _('subcategory'), max_length=300, null=True, blank=True, db_index=True
     )
     type = models.CharField(
-        _('type'), max_length=20, null=True, blank=True, choices=types, default='default'
+        _('type'), max_length=20, null=True, blank=True, choices=enum.CommonType.to_tuple(), default='default'
     )
     maximum = models.DecimalField(
         _('maximum'), default="1.00", null=True, blank=True,
@@ -1002,12 +943,6 @@ class ResourceSkill(AuditModel):
 
 
 class OperationMaterial(AuditModel):
-    # Types of flow
-    types = (
-        ('start', _('Start')),
-        ('end', _('End')),
-        # ('transfer_batch', _('Batch transfer'))
-    )
 
     # Database fields
     id = models.AutoField(_('id'), primary_key=True)
@@ -1022,7 +957,7 @@ class OperationMaterial(AuditModel):
         blank=False, null=False, on_delete=models.CASCADE
     )
     type = models.CharField(
-        _('type'), max_length=20, null=True, blank=True, choices=types, default='start',
+        _('type'), max_length=20, null=True, blank=True, choices=enum.MaterialType.to_tuple(), default='start',
         help_text=_('Consume/produce material at the start or the end of the operationplan'),
     )
     priority = models.IntegerField(
@@ -1052,23 +987,8 @@ class OperationMaterial(AuditModel):
         help_text=_('Validity end date')
     )
     alternative_process_mode = models.CharField(
-        _('alternative process mode'), max_length=20, null=True, blank=True, choices=Operation.modes)
+        _('alternative process mode'), max_length=20, null=True, blank=True, choices=enum.OperationMode.to_tuple())
 
-    # transferbatch = models.DecimalField(
-    #     _('transfer batch quantity'),
-    #     max_digits=20, decimal_places=8, null=True, blank=True,
-    #     help_text=_('Batch size by in which material is produced or consumed')
-    # )
-    # name = models.CharField(
-    #     # . Translators: Translation included with Django
-    #     _('name'), max_length=300, null=True, blank=True,
-    #     help_text=_('Optional name of this operation material')
-    # )
-    # search = models.CharField(
-    #     _('search mode'), max_length=20,
-    #     null=True, blank=True, choices=searchmode,
-    #     help_text=_('Method to select preferred alternate')
-    # )
 
     class Manager(MultiDBManager):
         def get_by_natural_key(self, operation, item, effective_start):
@@ -1137,7 +1057,7 @@ class OperationResource(AuditModel):
         help_text=_('Validity end date')
     )
     alternative_process_mode = models.CharField(
-        _('alternative process mode'), max_length=20, null=True, blank=True, choices=Operation.modes)
+        _('alternative process mode'), max_length=20, null=True, blank=True, choices=enum.OperationMode.to_tuple())
 
     # name = models.CharField(
     #     # . Translators: Translation included with Django
@@ -1257,7 +1177,7 @@ class ItemSupplier(AuditModel):
         null=False, blank=False, on_delete=models.CASCADE
     )
     supplier_item_nr = models.CharField(_('supplier item nr'), max_length=300, db_index=True, null=True, blank=True)
-    status = models.CharField(_('status'), max_length=20, choices=Item.rm_status)
+    status = models.CharField(_('status'), max_length=20, choices=enum.RmStatus.to_tuple())
     cost = models.DecimalField(_('cost'), max_digits=20, decimal_places=8)
     monetary_unit = models.CharField(_('monetary unit'), max_length=20)
     cost_unit = models.DecimalField(_('cost unit'), max_digits=20, decimal_places=8)
@@ -1442,7 +1362,7 @@ class ForecastYear(AuditModel):
     date_number = models.IntegerField(_('date_number'), db_index=True)
 
     date_type = models.CharField(
-        _('date_type'), max_length=20, choices=date_types, default='W', null=True, blank=True)
+        _('date_type'), max_length=20, choices=enum.DateType.to_tuple(), default='W', null=True, blank=True)
 
     ratio = models.DecimalField(_('forecast ratio'), max_digits=20, decimal_places=8, default=100, null=False,
                                 blank=True)
@@ -1455,27 +1375,16 @@ class ForecastYear(AuditModel):
     parsed_date = models.DateTimeField(_('parsed_date'), editable=False, db_index=True, default=timezone.now)
 
     class Manager(MultiDBManager):
-        # def get_by_natural_key(self, item, location, customer,year, date_type, date_number):
-        #     return self.get(item=item, location=location, customer=customer,year=year, date_type=date_type,
-        #                     date_number=date_number)
-
         # 批量创建复写
         def bulk_create(self, objs, batch_size=None):
             for o in objs:
                 o.set_parsed_date()
             super(ForecastYear.Manager, self).bulk_create(objs, batch_size)
 
-    # def natural_key(self):
-    #     return (self.item, self.location, self.customer,self.year, self.date_type, self.date_number)
-
     def set_parsed_date(self):
         self.parsed_date = Forecast.parse_date(self.date_type, self.year, self.date_number)
 
     objects = Manager()
-
-    # def __str__(self):
-    #     return '%s - %s - %s' % (
-    #         self.item.nr, self.location.nr, self.customer.nr)
 
     class Meta(AuditModel.Meta):
         db_table = 'forecast_year'
@@ -1524,7 +1433,7 @@ class ForecastCommentOperation:
 class ForecastVersion(AuditModel, ForecastCommentOperation):
     nr = models.CharField(_('nr'), max_length=300, editable=False, db_index=True,
                           primary_key=True)
-    status = models.CharField(_('status'), max_length=20, choices=ForecastCommentOperation.statuses, default='init')
+    status = models.CharField(_('status'), max_length=20, choices=enum.ForecastCommentStatus.to_tuple(), default='init')
     create_user = models.ForeignKey(
         User, verbose_name=_('create_user'),
         db_index=True, related_name='forecastversion_create_user',
@@ -1567,13 +1476,13 @@ class Forecast(AuditModel, ForecastCommentOperation):
     date_number = models.IntegerField(_('date_number'), db_index=True)
 
     date_type = models.CharField(
-        _('date_type'), max_length=20, choices=ForecastYear.date_types, default='W')
+        _('date_type'), max_length=20, choices=enum.DateType.to_tuple(), default='W')
 
     ratio = models.DecimalField(_('forecast ratio'), max_digits=20, decimal_places=8, default=100)
     normal_qty = models.DecimalField(_('normal qty'), max_digits=20, decimal_places=8, default=0)
     new_product_plan_qty = models.DecimalField(_('new product plan qty'), max_digits=20, decimal_places=8, default=0)
     promotion_qty = models.DecimalField(_('promotion qty'), max_digits=20, decimal_places=8, default=0)
-    status = models.CharField(_('status'), max_length=20, choices=ForecastCommentOperation.statuses, default='init')
+    status = models.CharField(_('status'), max_length=20, choices=enum.ForecastCommentStatus.to_tuple(), default='init')
     create_user = models.ForeignKey(
         User, verbose_name=_('create_user'),
         db_index=True, related_name='forecast_create_user',

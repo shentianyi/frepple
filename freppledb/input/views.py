@@ -51,7 +51,8 @@ from freppledb.common.message.responsemessage import ResponseMessage
 from freppledb.common.models import Parameter, Comment, Bucket
 from freppledb.common.utils import la_enum, la_field
 from freppledb.common.utils.la_field import decimal2float
-from freppledb.input.enum import LockTypes
+from freppledb.input import enum
+from freppledb.input.enum import LockType
 from freppledb.input.forms import ForecastUploadForm
 from freppledb.input.models import Resource, Operation, Location, SetupMatrix, SetupRule, ItemSuccessor, ItemCustomer, \
     ForecastYear, ForecastVersion, Forecast, ForecastCommentOperation
@@ -681,7 +682,7 @@ class BufferList(GridReport):
         GridFieldText('item', title=_('item'), field_name='item__name', formatter='detail',
                       extra='"role":"input/item"'),
         GridFieldNumber('onhand', title=_('onhand')),
-        GridFieldChoice('type', title=_('type'), choices=Buffer.types),
+        GridFieldChoice('type', title=_('type'), choices=enum.CommonType.to_tuple()),
         GridFieldNumber('minimum', title=_('minimum')),
         GridFieldText('minimum_calendar', title=_('minimum calendar'), field_name='minimum_calendar__name',
                       formatter='detail', extra='"role":"input/calendar"', initially_hidden=True),
@@ -820,7 +821,7 @@ class ResourceList(GridReport):
         GridFieldText('description', title=_('description'), editable=False),
         GridFieldText('category', title=_('category'), initially_hidden=True, editable=False),
         GridFieldText('subcategory', title=_('subcategory'), initially_hidden=True, editable=False),
-        GridFieldChoice('type', title=_('type'), choices=Resource.types, editable=False),
+        GridFieldChoice('type', title=_('type'), choices=enum.CommonType.to_tuple(), editable=False),
         GridFieldNumber('maximum', title=_('maximum'), editable=False),
 
         GridFieldText('maximum_calendar', title=_('maximum calendar'), field_name='maximum_calendar__name',
@@ -1295,7 +1296,8 @@ class EnumView(View):
             type = kwargs['type']
             value = kwargs['value']
             if type == 'item_status_by_type':
-                t = Item.type_status[value]
+                # t = Item.type_status[value]
+                t = enum.ItemTypyStatus.to_dic()[value]
                 dic = la_enum.tuple2select(t) if t != None else None
 
                 return HttpResponse(json.dumps(dic, cls=DjangoJSONEncoder),
@@ -1321,13 +1323,13 @@ class ItemList(GridReport):
         GridFieldText('nr', title=_('item nr'), editable=False),
         GridFieldText('name', title=_('name'), editable=False),
         GridFieldText('barcode', title=_('barcode'), editable=False),
-        GridFieldChoice('type', title=_('type'), choices=Item.types, editable=False),
+        GridFieldChoice('type', title=_('type'), choices=enum.ItemType.to_tuple(), editable=False),
         GridFieldText('status', field_name='status', title=_('status'), editable=False),
-        GridFieldChoice('plan_strategy', title=_('plan strategy'), choices=Item.strategies, editable=False),
-        GridFieldChoice('lock_type', title=_('lock type'), choices=Item.lock_types, editable=False),
+        GridFieldChoice('plan_strategy', title=_('plan strategy'), choices=enum.ItemProductStrategy.to_tuple(), editable=False),
+        GridFieldChoice('lock_type', title=_('lock type'), choices=enum.LockType.to_tuple(), editable=False),
         GridFieldDate('lock_expire_at', title=_('lock expire at'), editable=False),
-        GridFieldChoice('price_abc', title=_('price abc'), choices=Item.abc_types, editable=False),
-        GridFieldChoice('qty_abc', title=_('qty abc'), choices=Item.abc_types, editable=False),
+        GridFieldChoice('price_abc', title=_('price abc'), choices=enum.AbcType.to_tuple(), editable=False),
+        GridFieldChoice('qty_abc', title=_('qty abc'), choices=enum.AbcType.to_tuple(), editable=False),
         GridFieldCurrency('cost', title=_('cost'), editable=False),
         GridFieldText('source', title=_('source'), editable=False, initially_hidden=True),
         # 新建一个显示列
@@ -1395,12 +1397,13 @@ class ItemMainData(View):
             successor_nr = None
 
         # lock_types = {"current": item.lock_type, "values": la_enum.tuple2select(Item.lock_types)}
-        lock_types = {"current": item.lock_type, "values": la_enum.enum2select(LockTypes)}
+        lock_types = {"current": item.lock_type, "values": la_enum.tuple2select(enum.LockType.to_tuple())}
 
         item_statuses = {"current": item.status, "values": la_enum.tuple2select(Item.type_status[item.type])}
+        item_statuses = {"current": item.status, "values": la_enum.tuple2select(enum.ItemTypyStatus.to_dic()[item.type])}
 
         plan_strategies = {"current": item.plan_strategy,
-                           "values": la_enum.tuple2select(Item.strategies)}
+                           "values": la_enum.tuple2select(enum.ItemProductStrategy.to_tuple())}
 
         locations = Location.objects.select_related().all().order_by('id')
         location = []
@@ -1535,14 +1538,13 @@ class MainSupplierData(View):
             message.message = "没有对应的物料"
             return HttpResponse(json.dumps(message.__dict__, cls=DjangoJSONEncoder, ensure_ascii=False),
                                 content_type='application/json')
-        try:
-            item_supplier = ItemSupplier.objects.filter(item=id, effective_start__lte=current_time,
-                                                        effective_end__gte=current_time).order_by('priority', '-ratio',
-                                                                                                  'id').first()
-        except Exception as e:
-            message.result = False
-            message.code = 404
-            message.message = "合法的主供应商不存在"
+        item_supplier = ItemSupplier.objects.filter(item=id, effective_start__lte=current_time,
+                                                    effective_end__gte=current_time).order_by('priority', '-ratio',
+                                                                                              'id').first()
+        if item_supplier is None:
+            message.result = True
+            message.code = 200
+            message.message = "没有数据"
             return HttpResponse(json.dumps(message.__dict__, cls=DjangoJSONEncoder, ensure_ascii=False),
                                 content_type='application/json')
 
@@ -1631,14 +1633,14 @@ class ItemSimulation(View):
     def get(self, request, id, *args, **kwargs):
         message = ResponseMessage()
         current_time = timezone.now()
-        try:
-            item_supplier = ItemSupplier.objects.filter(item=id, effective_start__lte=current_time,
-                                                   effective_end__gte=current_time).order_by('priority', '-ratio',
-                                                                                             'id').first()
-        except Exception as e:
-            message.result = False
-            message.code = 404
-            message.message = "合法的主供应商不存在"
+
+        item_supplier = ItemSupplier.objects.filter(item=id, effective_start__lte=current_time,
+                                               effective_end__gte=current_time).order_by('priority', '-ratio',
+                                                                                         'id').first()
+        if item_supplier is None:
+            message.result = True
+            message.code = 200
+            message.message = "没有数据"
             return HttpResponse(json.dumps(message.__dict__, cls=DjangoJSONEncoder, ensure_ascii=False),
                                 content_type='application/json')
 
@@ -1699,14 +1701,13 @@ class ItemPlan(View):
     def get(self, request, id, *args, **kwargs):
         message = ResponseMessage()
         current_time = timezone.now()
-        try:
-            item_supplier = ItemSupplier.objects.filter(item=id, effective_start__lte=current_time,
-                                                   effective_end__gte=current_time).order_by('priority', '-ratio',
-                                                                                             'id').first()
-        except Exception as e:
-            message.result = False
-            message.code = 404
-            message.message = "合法的主供应商不存在"
+        item_supplier = ItemSupplier.objects.filter(item=id, effective_start__lte=current_time,
+                                               effective_end__gte=current_time).order_by('priority', '-ratio',
+                                                                                         'id').first()
+        if item_supplier is None:
+            message.result = True
+            message.code = 200
+            message.message = "没有数据"
             return HttpResponse(json.dumps(message.__dict__, cls=DjangoJSONEncoder, ensure_ascii=False),
                                 content_type='application/json')
 
@@ -1800,7 +1801,7 @@ class ItemCustomerList(GridReport):
         GridFieldInteger('location', title=_('location_id'), field_name='location_id', editable=False, hidden=True),
         GridFieldText('customer_item_nr', title=_('customer item nr'), editable=False),
         GridFieldText('status', title=_('status'), editable=False),
-        GridFieldChoice('lock_type', title=_('lock type'), choices=Item.lock_types, editable=False),
+        GridFieldChoice('lock_type', title=_('lock type'), choices=enum.LockType.to_tuple(), editable=False),
         GridFieldDate('lock_expire_at', title=_('lock expire at'), editable=False),
         GridFieldDate('plan_list_date', title=_('plan list date'), editable=False, initially_hidden=True),
         GridFieldDate('plan_delist_date', title=_('plan delist date'), editable=False, initially_hidden=True),
@@ -1931,7 +1932,7 @@ class OperationResourceList(GridReport):
         GridFieldText('setup', title=_('setup'), editable=False),
         GridFieldDateTime('effective_start', title=_('effective start'), editable=False),
         GridFieldDateTime('effective_end', title=_('effective end'), editable=False),
-        GridFieldChoice('alternative_process_mode', title=_('alternative process mode'), choices=Operation.modes,
+        GridFieldChoice('alternative_process_mode', title=_('alternative process mode'), choices=enum.OperationMode.to_tuple(),
                         editable=False),
         GridFieldCreateOrUpdateDate('created_at', title=_('created_at'), editable=False),
         GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at'), editable=False),
@@ -2005,7 +2006,7 @@ class OperationMaterialList(GridReport):
         GridFieldInteger('item', title=_('item_id'), field_name='item_id', formatter='detail', editable=False,
                          hidden=True),
 
-        GridFieldChoice('type', title=_('type'), choices=OperationMaterial.types, editable=False),
+        GridFieldChoice('type', title=_('type'), choices=enum.MaterialType.to_tuple(), editable=False),
         GridFieldInteger('priority', title=_('priority'), editable=False),
         GridFieldNumber('quantity', title=_('quantity'), editable=False),
         GridFieldNumber('quantity_fixed', title=_('fixed quantity'), editable=False),
@@ -2013,7 +2014,7 @@ class OperationMaterialList(GridReport):
 
         GridFieldDateTime('effective_start', title=_('effective start'), editable=False),
         GridFieldDateTime('effective_end', title=_('effective end'), editable=False),
-        GridFieldChoice('alternative_process_mode', title=_('alternative process mode'), choices=Operation.modes,
+        GridFieldChoice('alternative_process_mode', title=_('alternative process mode'), choices=enum.OperationMode.to_tuple(),
                         editable=False),
         GridFieldCreateOrUpdateDate('created_at', title=_('created_at'), editable=False),
         GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at'), editable=False),
@@ -2109,7 +2110,7 @@ class ForecastVersionView(GridReport):
         # GridFieldText('id', title=_('id'), editable=False),
         GridFieldText('nr', title=_('version nr'), key=True, formatter='customer',
                       extra='"role":"/data/input/forecast/?version_nr="', editable=False),
-        GridFieldChoice('status', title=_('status'), choices=ForecastCommentOperation.statuses, editable=False),
+        GridFieldChoice('status', title=_('status'), choices=enum.ForecastCommentStatus.to_tuple(), editable=False),
         GridFieldText('status_value', title=_('status_value'), field_name='status', editable=False, hidden=True,
                       search=False),
         GridFieldText('create_user_display', title=_('create_user_display'), field_name='create_user__username',
@@ -2263,7 +2264,7 @@ class ForecastList(GridReport):
         GridFieldNumber('normal_qty', title=_('normal qty'), editable=False),
         GridFieldNumber('new_product_plan_qty', title=_('new product plan qty'), editable=False),
         GridFieldNumber('promotion_qty', title=_('promotion qty'), editable=False),
-        GridFieldChoice('status', title=_('status'), choices=ForecastCommentOperation.statuses, editable=False),
+        GridFieldChoice('status', title=_('status'), choices=enum.ForecastCommentStatus.to_tuple(), editable=False),
         GridFieldText('status_value', title=_('status_value'), field_name='status', editable=False, hidden=True,
                       search=False),
         GridFieldText('create_user_display', title=_('create_user_display'), field_name='create_user__username',
@@ -2669,7 +2670,7 @@ class OperationList(GridReport):
                       editable=False),
         GridFieldText('nr', title=_('nr'), editable=False),
         GridFieldText('name', title=_('name'), editable=False),
-        GridFieldChoice('type', title=_('type'), choices=Operation.types, editable=False),
+        GridFieldChoice('type', title=_('type'), choices=enum.OperationType.to_tuple(), editable=False),
         GridFieldText('location_display', title=_('location_display'), field_name='location__nr', editable=False),
         GridFieldText('location', title=_('location_id'), field_name='location_id', editable=False, hidden=True),
         GridFieldText('category', title=_('category'), initially_hidden=True, editable=False),
@@ -2683,7 +2684,7 @@ class OperationList(GridReport):
                       extra='"role":"input/calendar"', editable=False),
         GridFieldDateTime('effective_start', title=_('effective start'), editable=False),
         GridFieldDateTime('effective_end', title=_('effective end'), editable=False),
-        GridFieldChoice('alternative_process_mode', title=_('alternative process mode'), choices=Operation.modes,
+        GridFieldChoice('alternative_process_mode', title=_('alternative process mode'), choices=enum.OperationMode.to_tuple(),
                         editable=False),
         GridFieldCreateOrUpdateDate('created_at', title=_('created_at'), editable=False),
         GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at'), editable=False),
@@ -2954,7 +2955,7 @@ class ManufacturingOrderList(OperationPlanMixin, GridReport):
         GridFieldText('operation__subcategory', title=string_concat(_('operation'), ' - ', _('subcategory')),
                       initially_hidden=True),
         GridFieldChoice('operation__type', title=string_concat(_('operation'), ' - ', _('type')),
-                        choices=Operation.types, initially_hidden=True),
+                        choices=enum.OperationType.to_tuple(), initially_hidden=True),
         GridFieldDuration('operation__duration', title=string_concat(_('operation'), ' - ', _('duration')),
                           initially_hidden=True),
         GridFieldDuration('operation__duration_per', title=string_concat(_('operation'), ' - ', _('duration per unit')),

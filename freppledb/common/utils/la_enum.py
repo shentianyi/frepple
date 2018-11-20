@@ -1,4 +1,4 @@
-def tuple2select(tuple, blankable=False):
+def tuple2select(tuple):
     # if blankable == True:
     #     adict = dict(tuple)
     #     adict[''] = ''
