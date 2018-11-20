@@ -218,7 +218,7 @@ MIDDLEWARE_CLASSES = (
     'freppledb.common.middleware.MultiDBMiddleware',
     'freppledb.common.middleware.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
-    # 'django.middleware.csrf.CsrfViewMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
 )
 
 # Installed applications.
