@@ -206,12 +206,14 @@ ItemDetail.getPlanChartData = function (date_type, report_type) {
         type: 'application/json',
         method: 'get',
         success: function (data) {
-            // console.log('-------------data', data);
+            console.log('-------------data', data);
             if (data.result) {
                 const series = data.content.serials
-                var legendData = [];
+                var legendData = ['current_time_point', 'lead_time_point'];
                 var xAxis = [];
                 var seriesPlan = [];
+                var currentValue = data.content.current_time_point.x_text;
+                var leadTimeValue = data.content.lead_time_point.x_text;
 
 
                 for (var i = 0; i < series.length; i++) {
@@ -224,6 +226,45 @@ ItemDetail.getPlanChartData = function (date_type, report_type) {
                     var chartType = 'bar';
                     seriesPlan[i] = {name: series[i].serial, type: chartType, data: yAxis};
                 }
+                seriesPlan.push({
+                    name: 'current_time_point', type: 'bar', data: [], markLine: {
+                        symbol: "none",
+                        lineStyle: {
+                            normal: {
+                                type: 'solid',
+                            }
+                        },
+                        label: {
+                            formatter: ''
+                        },
+                        data: [
+                            {
+                                name: '当前值',
+                                xAxis: currentValue
+                            },
+                        ]
+                    }
+                });
+                seriesPlan.push({
+                    name: 'lead_time_point', type: 'bar', data: [], markLine: {
+                        symbol: "none",
+                        lineStyle: {
+                            normal: {
+                                type: 'solid',
+                            }
+                        },
+                        label: {
+                            formatter: ''
+                        },
+                        data: [
+                            {
+                                name: '提前期',
+                                xAxis: leadTimeValue
+                            },
+                        ]
+                    }
+                });
+
                 for (var i = 0; i < series[0].points.length; i++) {
                     xAxis.push(series[0].points[i].x_text)
                 }
@@ -238,9 +279,7 @@ ItemDetail.getPlanChartData = function (date_type, report_type) {
                     title: {
                         show: false
                     },
-                    tooltip: {
-                        position: [0, 0]
-                    },
+                    tooltip: {},
                     legend: {
                         data: legendData
                     },
@@ -250,6 +289,19 @@ ItemDetail.getPlanChartData = function (date_type, report_type) {
                     yAxis: {
                         show: false,
                     },
+                    dataZoom: [
+                        {
+                            show: true,
+                            start: 0,
+                            end: 100,
+                            orient: "horizontal"
+                        },
+                        {
+                            type: 'inside',
+                            start: 0,
+                            end: 100
+                        },
+                    ],
                     series: seriesPlan
                 };
                 planChart.setOption(option);
@@ -512,7 +564,7 @@ ItemDetail.getForecastChartData = function (date_type, report_type) {
         success: function (data) {
             if (data.result) {
                 const series = data.content.serials
-                console.log('data-----------------', data);
+                // console.log('data-----------------', data);
 
                 var legendData = ['current_time_point'];
                 var xAxis = [];
@@ -566,9 +618,7 @@ ItemDetail.getForecastChartData = function (date_type, report_type) {
                     title: {
                         show: false
                     },
-                    tooltip: {
-                        position: [0, 0]
-                    },
+                    tooltip: {},
                     legend: {
                         data: legendData
                     },
@@ -684,10 +734,10 @@ ItemDetail.lockTypeChange = function () {
     var selectedValue = $("#item_detail_lock_types").val();
 
     if (selectedValue === 'locked') {
-        $("#item_detail_lock_expire_at_required").css('display','inline-block');
+        $("#item_detail_lock_expire_at_required").css('display', 'inline-block');
         $("#item_detail_lock_expire_at").attr('required', 'true');
     } else {
-        $("#item_detail_lock_expire_at_required").css('display','none');
+        $("#item_detail_lock_expire_at_required").css('display', 'none');
         $("#item_detail_lock_expire_at").attr('required', 'false');
     }
 }
