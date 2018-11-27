@@ -369,22 +369,22 @@ class ForecastCompare(View):
             # 全年值
             for i in foreactyear_total_query:
                 if (report_type == 'detail' and i['item_id'] == c['item_id'] \
-                    and i['location_id'] == c['location_id'] \
-                    and i['customer_id'] == c['customer_id']) \
+                            and i['location_id'] == c['location_id'] \
+                            and i['customer_id'] == c['customer_id']) \
                         or (report_type == 'aggre' and i['item_id'] == c['item_id'] \
-                            and i['location_id'] == c['location_id']):
+                                    and i['location_id'] == c['location_id']):
                     data['total_year_qty'] = round(i['qty'], 2)
                     break
 
             # 年初值
             for i in forecastyear_query:
                 if (report_type == 'detail' and i['item_id'] == c['item_id'] \
-                    and i['location_id'] == c['location_id'] \
-                    and i['customer_id'] == c['customer_id'] \
-                    and i['year'] == current_year and i['month_num'].month == current_month) \
-                        or (report_type == 'aggre' and i['item_id'] == c['item_id'] \
                             and i['location_id'] == c['location_id'] \
-                            and i['year'] == current_year and i['month_num'].month == current_month):
+                            and i['customer_id'] == c['customer_id'] \
+                            and i['year'] == current_year and i['month_num'].month == current_month) \
+                        or (report_type == 'aggre' and i['item_id'] == c['item_id'] \
+                                    and i['location_id'] == c['location_id'] \
+                                    and i['year'] == current_year and i['month_num'].month == current_month):
                     data['year_qty'] = round(i['qty'], 2)
                     break
 
@@ -400,10 +400,10 @@ class ForecastCompare(View):
                     'qty': row[5]
                 }
                 if (report_type == 'detail' and i['item_id'] == c['item_id'] \
-                    and i['location_id'] == c['location_id'] \
-                    and i['customer_id'] == c['customer_id']) \
+                            and i['location_id'] == c['location_id'] \
+                            and i['customer_id'] == c['customer_id']) \
                         or (report_type == 'aggre' and i['item_id'] == c['item_id'] \
-                            and i['location_id'] == c['location_id']):
+                                    and i['location_id'] == c['location_id']):
 
                     if i['year'] == last_year and i['month_num'].month == last_month:
                         if data['last_qty'] is None:
@@ -470,8 +470,14 @@ class ForecastItem(View):
 
     @method_decorator(staff_member_required())
     def get(self, request, *args, **kwargs):
-        item = Item.objects.filter(id=request.GET.get('id', None)).first()
-        location = Location.objects.filter(id=request.GET.get('location_id', None)).first()
+        item_id = request.GET.get('id', None)
+        location_id = request.GET.get('location_id', None)
+        if item_id is None or location_id in [None, "null"]:
+            return JsonResponse({"result": False, "code": 404, "message": "无数据"}, safe=False)
+
+        item = Item.objects.filter(id=item_id).first()
+
+        location = Location.objects.filter(id=location_id).first()
 
         if item is None or location is None:
             return JsonResponse({"result": False, "code": 200, "message": "参数错误,数据未找到"}, safe=False)
@@ -582,11 +588,17 @@ class ForecastItemGraph(View):
 
     @method_decorator(staff_member_required())
     def get(self, request, *args, **kwargs):
-        item = Item.objects.filter(id=request.GET.get('id', None)).first()
-        location = Location.objects.filter(id=request.GET.get('location_id', None)).first()
+        item_id = request.GET.get('id', None)
+        location_id = request.GET.get('location_id', None)
+        if item_id is None or location_id in [None, "null"]:
+            return JsonResponse({"result": False, "code": 404, "message": "无数据"}, safe=False)
+
+        item = Item.objects.filter(id=item_id).first()
+
+        location = Location.objects.filter(id=location_id).first()
 
         if item is None or location is None:
-            return JsonResponse({"result": False, "code": 404, "message": "参数错误,数据未找到"}, safe=False)
+            return JsonResponse({"result": False, "code": 200, "message": "参数错误,数据未找到"}, safe=False)
 
         # 初始化时间类型, 默认周
         date_type = request.GET.get('date_type', 'W')
@@ -723,12 +735,18 @@ class PlanItemGraph(View):
 
     @method_decorator(staff_member_required())
     def get(self, request, *args, **kwargs):
-        item = Item.objects.filter(id=request.GET.get('id', None)).first()
-        item_supplier = ItemSupplier.objects.filter(item=request.GET.get('id', None), effective_start__lte=datetime.now(),
-                                               effective_end__gte=datetime.now()).order_by('priority', '-ratio',
-                                                                                           'id').first()
+        item_id = request.GET.get('id', None)
+        location_id = request.GET.get('location_id', None)
+        if item_id is None or location_id in [None, "null"]:
+            return JsonResponse({"result": False, "code": 404, "message": "无数据"}, safe=False)
 
-        location = Location.objects.filter(id=request.GET.get('location_id', None)).first()
+        item = Item.objects.filter(id=item_id).first()
+        item_supplier = ItemSupplier.objects.filter(item=request.GET.get('id', None),
+                                                    effective_start__lte=datetime.now(),
+                                                    effective_end__gte=datetime.now()).order_by('priority', '-ratio',
+                                                                                                'id').first()
+
+        location = Location.objects.filter(id=location_id).first()
 
         if item is None or location is None:
             return JsonResponse({"result": False, "code": 404, "message": "参数错误,数据未找到"}, safe=False)
@@ -857,7 +875,11 @@ class ItemBufferOperateRecords(View):
 
     @method_decorator(staff_member_required())
     def get(self, request, *args, **kwargs):
-        item = Item.objects.filter(id=request.GET.get('id', None)).first()
+        item_id = request.GET.get('id', None)
+        if item_id:
+            return JsonResponse({"result": False, "code": 404, "message": "无数据"}, safe=False)
+
+        item = Item.objects.filter(id=item_id).first()
         page = request.GET.get('page', 1)
         page_size = request.GET.get('page_size', 100)
         if item is None:
