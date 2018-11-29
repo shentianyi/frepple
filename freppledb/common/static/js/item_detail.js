@@ -206,7 +206,7 @@ ItemDetail.getPlanChartData = function (date_type, report_type) {
         type: 'application/json',
         method: 'get',
         success: function (data) {
-            console.log('-------------data', data);
+            // console.log('-------------data', data);
             if (data.result) {
                 const series = data.content.serials
                 var legendData = ['current_time_point', 'lead_time_point'];
