@@ -55,7 +55,7 @@ from freppledb.input import enum
 from freppledb.input.enum import LockType
 from freppledb.input.forms import ForecastUploadForm
 from freppledb.input.models import Resource, Operation, Location, SetupMatrix, SetupRule, ItemSuccessor, ItemCustomer, \
-    ForecastYear, ForecastVersion, Forecast, ForecastCommentOperation
+    ForecastYear, ForecastVersion, Forecast, ForecastCommentOperation, ItemLocation
 from freppledb.input.models import Skill, Buffer, Customer, Demand, DeliveryOrder
 from freppledb.input.models import Item, OperationResource, OperationMaterial
 from freppledb.input.models import Calendar, CalendarBucket, ManufacturingOrder, SubOperation
@@ -222,7 +222,7 @@ class PathReport(GridReport):
         if Location.objects.using(db).count() > 1:
             # Multiple locations
             for i in ItemSupplier.objects.using(db).filter(
-                    Q(location__isnull=True) | Q(location__name=buffer.location.nr),
+                            Q(location__isnull=True) | Q(location__name=buffer.location.nr),
                     item__lft__lte=buffer.item.lft, item__rght__gt=buffer.item.lft
             ):
                 i.item = buffer.item
@@ -232,7 +232,7 @@ class PathReport(GridReport):
                      buffer.location.nr if buffer.location else None)
                 )
             for i in ItemDistribution.objects.using(db).filter(
-                    Q(location__isnull=True) | Q(location__name=buffer.location.nr),
+                            Q(location__isnull=True) | Q(location__name=buffer.location.nr),
                     item__lft__lte=buffer.item.lft, item__rght__gt=buffer.item.lft
             ):
                 i.item = buffer.item
@@ -241,7 +241,7 @@ class PathReport(GridReport):
                     (level, None, i, curqty, 0, None, realdepth, pushsuper, i.location.nr if i.location else None)
                 )
             for i in Operation.objects.using(db).filter(
-                    Q(location__isnull=True) | Q(location__name=buffer.location.nr),
+                            Q(location__isnull=True) | Q(location__name=buffer.location.nr),
                     item__lft__lte=buffer.item.lft, item__rght__gt=buffer.item.lft
             ):
                 i.item = buffer.item
@@ -1325,7 +1325,8 @@ class ItemList(GridReport):
         GridFieldText('barcode', title=_('barcode'), editable=False),
         GridFieldChoice('type', title=_('type'), choices=enum.ItemType.to_tuple(), editable=False),
         GridFieldText('status', field_name='status', title=_('status'), editable=False),
-        GridFieldChoice('plan_strategy', title=_('plan strategy'), choices=enum.ItemProductStrategy.to_tuple(), editable=False),
+        GridFieldChoice('plan_strategy', title=_('plan strategy'), choices=enum.ItemProductStrategy.to_tuple(),
+                        editable=False),
         GridFieldChoice('lock_type', title=_('lock type'), choices=enum.LockType.to_tuple(), editable=False),
         GridFieldDate('lock_expire_at', title=_('lock expire at'), editable=False),
         GridFieldChoice('price_abc', title=_('price abc'), choices=enum.AbcType.to_tuple(), editable=False),
@@ -1362,6 +1363,74 @@ class ItemList(GridReport):
     )
 
 
+class ItemLocationList(GridReport):
+    '''
+    A list report to show items.
+    '''
+    title = _("item locations")
+    basequeryset = ItemLocation.objects.all()
+    model = ItemLocation
+    frozenColumns = 1
+    editable = True
+    help_url = 'user-guide/modeling-wizard/master-data/items.html'
+
+    rows = (
+        # . Translators: Translation included with Django
+        GridFieldInteger('id', title=_('id'), key=True, formatter='detail', extra='"role":"input/itemlocation"'),
+        GridFieldText('item_display', title=_('item_display'), field_name='item__nr', editable=False),
+        GridFieldText('location_display', title=_('location_display'), field_name='location__nr', editable=False),
+
+        # 因为是id 让外键永远不显示
+        GridFieldInteger('item', title=_('item'), field_name='item__nr', formatter='detail', editable=False,
+                         hidden=True),
+        GridFieldInteger('location', title=_('location'), field_name='location__nr', formatter='detail',
+                         editable=False, hidden=True),
+        GridFieldChoice('type', title=_('type'), choices=enum.ItemType.to_tuple(), editable=False),
+        GridFieldText('status', field_name='status', title=_('status'), editable=False),
+        GridFieldChoice('plan_strategy', title=_('plan strategy'), choices=enum.ItemProductStrategy.to_tuple(),
+                        editable=False),
+        GridFieldChoice('lock_type', title=_('lock type'), choices=enum.LockType.to_tuple(), editable=False),
+        GridFieldDate('lock_expire_at', title=_('lock expire at'), editable=False),
+        GridFieldNumber('inventory_qty', title=_('inventory qty'), editable=False, initially_hidden=True),
+        GridFieldNumber('available_inventory', title=_('available inventory'), editable=False, initially_hidden=True),
+        GridFieldNumber('inventory_cost', title=_('inventory cost'), editable=False, initially_hidden=True),
+        GridFieldChoice('price_abc', title=_('price abc'), choices=enum.AbcType.to_tuple(), editable=False),
+        GridFieldChoice('qty_abc', title=_('qty abc'), choices=enum.AbcType.to_tuple(), editable=False),
+        GridFieldCurrency('cost', title=_('cost'), editable=False),
+
+        GridFieldNumber('gross_weight', title=_('gross weight'), editable=False),
+        GridFieldNumber('net_weight', title=_('net weight'), editable=False),
+        GridFieldText('physical_unit', title=_('physical unit'), editable=False),
+        GridFieldText('project_nr', title=_('project nr'), editable=False, initially_hidden=True),
+        GridFieldInteger('moq', title=_('moq'), editable=False),
+        GridFieldNumber('order_unit_qty', title=_('order unit qty'), editable=False),
+        GridFieldNumber('order_max_qty', title=_('order max qty'), editable=False),
+        GridFieldNumber('product_time', title=_('product time'), editable=False),
+        GridFieldNumber('load_time', title=_('load time'), editable=False),
+        GridFieldNumber('transit_time', title=_('transit time'), editable=False),
+        GridFieldNumber('receive_time', title=_('receive time'), editable=False),
+        GridFieldInteger('mpq', title=_('mpq'), editable=False),
+        GridFieldDate('earliest_order_date', title=_('earliest order date'), editable=False, initially_hidden=True),
+        GridFieldDate('plan_supplier_date', title=_('plan supplier date'), editable=False, initially_hidden=True),
+        GridFieldDate('plan_load_date', title=_('plan load date'), editable=False, initially_hidden=True),
+        GridFieldDate('plan_receive_date', title=_('plan receive date'), editable=False, initially_hidden=True),
+        GridFieldInteger('outer_package_num', title=_('outer package num'), editable=False, initially_hidden=True),
+        GridFieldInteger('pallet_num', title=_('pallet num'), editable=False, initially_hidden=True),
+        GridFieldNumber('outer_package_gross_weight', title=_('outer package gross weight'), editable=False,
+                        initially_hidden=True),
+        GridFieldNumber('pallet_gross_weight', title=_('pallet gross weight'), editable=False, initially_hidden=True),
+        GridFieldNumber('outer_package_volume', title=_('outer package volume'), editable=False, initially_hidden=True),
+        GridFieldNumber('pallet_volume', title=_('pallet volume'), editable=False, initially_hidden=True),
+        GridFieldDate('plan_list_date', title=_('plan list date'), editable=False, initially_hidden=True),
+        GridFieldDate('plan_delist_date', title=_('plan delist date'), editable=False, initially_hidden=True),
+        GridFieldText('category', title=_('category'), editable=False, initially_hidden=True),
+        GridFieldText('subcategory', title=_('subcategory'), editable=False, initially_hidden=True),
+        GridFieldText('description', title=_('description'), editable=False),
+        GridFieldCreateOrUpdateDate('created_at', title=_('created_at'), editable=False),
+        GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at'), editable=False),
+    )
+
+
 # TODO 物料详情
 class ItemDetail(View):
     def get(self, request, *args, **kwargs):
@@ -1381,7 +1450,6 @@ class ItemDetail(View):
 class ItemMainData(View):
     def get(self, request, id, *args, **kwargs):
         message = ResponseMessage()
-        current_time = datetime.now()
         try:
             item = Item.objects.get(id=id)
         except:
@@ -1390,49 +1458,55 @@ class ItemMainData(View):
             message.message = "没有对应的物料"
             return HttpResponse(json.dumps(message.__dict__, cls=DjangoJSONEncoder, ensure_ascii=False),
                                 content_type='application/json')
-
         try:
             successor_nr = ItemSuccessor.objects.filter(item=item).order_by('priority').first().item_successor.nr
         except:
             successor_nr = None
 
-        # lock_types = {"current": item.lock_type, "values": la_enum.tuple2select(Item.lock_types)}
-        lock_types = {"current": item.lock_type, "values": la_enum.tuple2select(enum.LockType.to_tuple())}
+        item_location = ItemLocation.objects.filter(item=item)
+        lock_types = {"current": None, "values": la_enum.tuple2select(enum.LockType.to_tuple())}
 
-        item_statuses = {"current": item.status, "values": la_enum.tuple2select(Item.type_status[item.type])}
-        item_statuses = {"current": item.status, "values": la_enum.tuple2select(enum.ItemTypyStatus.to_dic()[item.type])}
+        statuses = {"current": None,
+                    "values": la_enum.tuple2select(enum.ItemTypyStatus.to_dic()[item.type])}
 
-        plan_strategies = {"current": item.plan_strategy,
+        plan_strategies = {"current": None,
                            "values": la_enum.tuple2select(enum.ItemProductStrategy.to_tuple())}
 
-        locations = Location.objects.select_related().all().order_by('id')
-        location = []
-        for f in locations:
-            locationdict = {
-                "id": f.id,
-                "nr": f.nr,
-                # TODO 暂时无数据
-                "buffer": {
-                    "total_qty": 0,
-                    "available_qty": 0,
-                    "buffer_price": 0
-                }
-            }
-            location.append(locationdict)
         data = {
             "id": item.id,
             "nr": item.nr,
             "successor_nr": successor_nr,
-            "description": item.description,
-            "project_nr": item.project_nr,
-            "location": location,
+            "project_nr": None,
+            "inventory_qty": None,
+            "available_inventory": None,
+            "inventory_cost": None,
+            "location": None,
             "lock_types": lock_types,
-            "lock_expire_at": item.lock_expire_at,
+            "lock_expire_at": None,
             "plan_strategies": plan_strategies,
-            "statuses": item_statuses,
-            "price_abc": item.price_abc,
-            "qty_abc": item.qty_abc
+            "statuses": statuses,
+            "price_abc": None,
+            "qty_abc": None,
+            "description": None,
         }
+
+        if item_location:
+            item_location = item_location.first()
+            data["lock_types"]["current"] = item_location.lock_type
+
+            data["statuses"]["current"] = item_location.status
+
+            data["plan_strategies"]["current"] = item_location.plan_strategy
+
+            data["location"] = item_location.location.nr
+            data["inventory_qty"] = item_location.inventory_qty
+            data["available_inventory"] = item_location.available_inventory
+            data["inventory_cost"] = item_location.inventory_cost
+            data["project_nr"] = item_location.project_nr
+            data["description"] = item_location.description
+            data["price_abc"] = item_location.price_abc
+            data["qty_abc"] = item_location.qty_abc
+
         message.result = True
         message.code = 200
         message.message = "相应数据查询成功"
@@ -1448,9 +1522,9 @@ class ItemMainData(View):
             # 创建保存点
             save_point = transaction.savepoint()
             try:
-                item = Item.objects.get(id=id)
-                item.description = data['description']
-                item.project_nr = data['project_nr']
+                item_location = ItemLocation.objects.get(item_id=id)
+                item_location.description = data['description']
+                item_location.project_nr = data['project_nr']
                 if data['lock_types'] is None:
                     message.result = False
                     message.code = 200
@@ -1465,9 +1539,9 @@ class ItemMainData(View):
                     return HttpResponse(json.dumps(message.__dict__, cls=DjangoJSONEncoder, ensure_ascii=False),
                                         content_type='application/json')
 
-                item.lock_type = data['lock_types']
-                item.lock_expire_at = data['lock_expire_at']
-                item.save()
+                item_location.lock_type = data['lock_types']
+                item_location.lock_expire_at = data['lock_expire_at']
+                item_location.save()
 
             except Exception as e:
                 message.result = False
@@ -1538,47 +1612,71 @@ class MainSupplierData(View):
             message.message = "没有对应的物料"
             return HttpResponse(json.dumps(message.__dict__, cls=DjangoJSONEncoder, ensure_ascii=False),
                                 content_type='application/json')
+
+        data = {
+            "product_time": None,
+            "load_time": None,
+            "transit_time": None,
+            "receive_time": None,
+            "plan_supplier_date": None,
+            "plan_load_date": None,
+            "plan_receive_date": None,
+            "totall_lead_time": None,
+            "supplier_id": None,
+            "name": None,
+            "nr": None,
+            "cost": None,
+            "cost_unit": None,
+            "earliest_order_date": None,
+            "lock_expire_at": None,
+            "plan_list_date": None,
+            "plan_delist_date": None,
+            "moq": None,
+            "mpq": None,
+            "pallet_num": None,
+            # TODO 手工MOQ暂时无数据
+            "MOQ": 0,
+            "order_unit_qty": None,
+            "outer_package_num": None,
+            "order_max_qty": None,
+            "description": None
+        }
         item_supplier = ItemSupplier.objects.filter(item=id, effective_start__lte=current_time,
                                                     effective_end__gte=current_time).order_by('priority', '-ratio',
                                                                                               'id').first()
-        if item_supplier is None:
-            message.result = True
-            message.code = 200
-            message.message = "没有数据"
-            return HttpResponse(json.dumps(message.__dict__, cls=DjangoJSONEncoder, ensure_ascii=False),
-                                content_type='application/json')
+        item_location = ItemLocation.objects.filter(item=item)
 
-        lead_time = item_supplier.wd2cd()
+        if item_location:
+            item_location = item_location.first()
+            data["product_time"] = decimal2float(item_location.product_time)
+            data["load_time"] = decimal2float(item_location.load_time)
+            data["transit_time"] = decimal2float(item_location.transit_time)
+            data["receive_time"] = decimal2float(item_location.receive_time)
+            data["plan_supplier_date"] = item_location.plan_supplier_date
+            data["plan_load_date"] = item_location.plan_load_date
+            data["plan_receive_date"] = item_location.plan_receive_date
+            lead_time = item_location.wd2cd()
+            data["totall_lead_time"] = decimal2float(lead_time)
 
-        data = {
-            "supplier_id": item_supplier.supplier.id,
-            "name": item_supplier.supplier.name,
-            "nr": item_supplier.supplier.nr,
-            "product_time": decimal2float(item_supplier.product_time),
-            "load_time": decimal2float(item_supplier.load_time),
-            "transit_time": decimal2float(item_supplier.transit_time),
-            "receive_time": decimal2float(item_supplier.receive_time),
-            "plan_supplier_date": item_supplier.plan_supplier_date,
-            "plan_load_date": item_supplier.plan_load_date,
-            "plan_receive_date": item_supplier.plan_receive_date,
-            "totall_lead_time": decimal2float(lead_time),
-            "cost": decimal2float(item_supplier.cost),
-            "cost_unit": decimal2float(item_supplier.cost_unit),
-            "earliest_order_date": item_supplier.earliest_order_date,
-            "lock_expire_at": item.lock_expire_at,
-            "plan_list_date": item_supplier.plan_list_date,
-            "plan_delist_date": item_supplier.plan_delist_date,
-            "moq": decimal2float(item_supplier.moq),
-            "mpq": decimal2float(item_supplier.mpq),
-            "pallet_num": decimal2float(item_supplier.pallet_num),
+        if item_supplier:
+            data["supplier_id"] = item_supplier.supplier.id
+            data["name"] = item_supplier.supplier.name
+            data["nr"] = item_supplier.supplier.nr
+            data["cost"] = decimal2float(item_supplier.cost)
+            data["cost_unit"] =  decimal2float(item_supplier.cost_unit)
+            data["earliest_order_date"] = item_supplier.earliest_order_date
+            data["lock_expire_at"] = item.lock_expire_at
+            data["plan_list_date"] = item_supplier.plan_list_date
+            data["plan_delist_date"] = item_supplier.plan_delist_date
+            data["moq"] = decimal2float(item_supplier.moq)
+            data["mpq"] = decimal2float(item_supplier.mpq)
+            data["pallet_num"] = decimal2float(item_supplier.pallet_num)
             # TODO 手工MOQ暂时无数据
-            "MOQ": 0,
-            "order_unit_qty": decimal2float(item_supplier.order_unit_qty),
-            "outer_package_num": decimal2float(item_supplier.outer_package_num),
-            "order_max_qty": decimal2float(item_supplier.order_max_qty),
-            "description": item_supplier.description
-        }
-
+            data["MOQ"] = 0
+            data["order_unit_qty"] = decimal2float(item_supplier.order_unit_qty)
+            data["outer_package_num"] = decimal2float(item_supplier.outer_package_num)
+            data["order_max_qty"] = decimal2float(item_supplier.order_max_qty)
+            data["description"] = item_supplier.description
         message.result = True
         message.code = 200
         message.message = "相应数据查询成功"
@@ -1635,8 +1733,8 @@ class ItemSimulation(View):
         current_time = timezone.now()
 
         item_supplier = ItemSupplier.objects.filter(item=id, effective_start__lte=current_time,
-                                               effective_end__gte=current_time).order_by('priority', '-ratio',
-                                                                                         'id').first()
+                                                    effective_end__gte=current_time).order_by('priority', '-ratio',
+                                                                                              'id').first()
         if item_supplier is None:
             message.result = True
             message.code = 200
@@ -1670,8 +1768,9 @@ class ItemSimulation(View):
             save_point = transaction.savepoint()
             try:
                 item_supplier = ItemSupplier.objects.filter(item=id, effective_start__lte=current_time,
-                                                       effective_end__gte=current_time).order_by('priority', '-ratio',
-                                                                                                 'id').first()
+                                                            effective_end__gte=current_time).order_by('priority',
+                                                                                                      '-ratio',
+                                                                                                      'id').first()
 
                 item_supplier.mpq = data['mpq']
                 item_supplier.outer_package_num = data['outer_package_num']
@@ -1702,8 +1801,8 @@ class ItemPlan(View):
         message = ResponseMessage()
         current_time = timezone.now()
         item_supplier = ItemSupplier.objects.filter(item=id, effective_start__lte=current_time,
-                                               effective_end__gte=current_time).order_by('priority', '-ratio',
-                                                                                         'id').first()
+                                                    effective_end__gte=current_time).order_by('priority', '-ratio',
+                                                                                              'id').first()
         if item_supplier is None:
             message.result = True
             message.code = 200
@@ -1749,8 +1848,9 @@ class ItemPlan(View):
             save_point = transaction.savepoint()
             try:
                 item_supplier = ItemSupplier.objects.filter(item=id, effective_start__lte=current_time,
-                                                            effective_end__gte=current_time).order_by('priority', '-ratio',
-                                                                                                 'id').first()
+                                                            effective_end__gte=current_time).order_by('priority',
+                                                                                                      '-ratio',
+                                                                                                      'id').first()
                 item_supplier.mpq = data['mpq']
                 item_supplier.outer_package_num = data['outer_package_num']
                 item_supplier.pallet_num = data['pallet_num']
@@ -1834,6 +1934,8 @@ class ItemSuccessorList(GridReport):
         # 因为是id 让外键永远不显示
         GridFieldText('item_successor', title=_('item_successor'), field_name='item_successor_id', editable=False,
                       hidden=True),
+        GridFieldChoice('relation_type', title=_('relation type'), choices=enum.RelationType.to_tuple(),
+                        editable=False),
         GridFieldInteger('priority', title=_('priority'), editable=False),
         GridFieldNumber('ratio', title=_('ratio'),
                         extra='"formatoptions":{"suffix":" %","defaultValue":"100.00"}', editable=False),
@@ -1932,7 +2034,8 @@ class OperationResourceList(GridReport):
         GridFieldText('setup', title=_('setup'), editable=False),
         GridFieldDateTime('effective_start', title=_('effective start'), editable=False),
         GridFieldDateTime('effective_end', title=_('effective end'), editable=False),
-        GridFieldChoice('alternative_process_mode', title=_('alternative process mode'), choices=enum.OperationMode.to_tuple(),
+        GridFieldChoice('alternative_process_mode', title=_('alternative process mode'),
+                        choices=enum.OperationMode.to_tuple(),
                         editable=False),
         GridFieldCreateOrUpdateDate('created_at', title=_('created_at'), editable=False),
         GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at'), editable=False),
@@ -2014,7 +2117,8 @@ class OperationMaterialList(GridReport):
 
         GridFieldDateTime('effective_start', title=_('effective start'), editable=False),
         GridFieldDateTime('effective_end', title=_('effective end'), editable=False),
-        GridFieldChoice('alternative_process_mode', title=_('alternative process mode'), choices=enum.OperationMode.to_tuple(),
+        GridFieldChoice('alternative_process_mode', title=_('alternative process mode'),
+                        choices=enum.OperationMode.to_tuple(),
                         editable=False),
         GridFieldCreateOrUpdateDate('created_at', title=_('created_at'), editable=False),
         GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at'), editable=False),
@@ -2415,10 +2519,10 @@ class ForecastCommentView(View):
             traceback.print_exc()
             return HttpResponseServerError("server error, " + str(e), content_type='application/json')
 
-    #
-    # @classmethod
-    # def _generate_spreadsheet_data(reportclass, request, output, *args, **kwargs):
-    #     i=1
+            #
+            # @classmethod
+            # def _generate_spreadsheet_data(reportclass, request, output, *args, **kwargs):
+            #     i=1
 
 
 class DemandList(GridReport):
@@ -2684,7 +2788,8 @@ class OperationList(GridReport):
                       extra='"role":"input/calendar"', editable=False),
         GridFieldDateTime('effective_start', title=_('effective start'), editable=False),
         GridFieldDateTime('effective_end', title=_('effective end'), editable=False),
-        GridFieldChoice('alternative_process_mode', title=_('alternative process mode'), choices=enum.OperationMode.to_tuple(),
+        GridFieldChoice('alternative_process_mode', title=_('alternative process mode'),
+                        choices=enum.OperationMode.to_tuple(),
                         editable=False),
         GridFieldCreateOrUpdateDate('created_at', title=_('created_at'), editable=False),
         GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at'), editable=False),
@@ -3741,7 +3846,6 @@ class DeliveryOrderList(GridReport):
 
 
 class OperationPlanDetail(View):
-
     def getData(self, request):
         # Current date
         try:

@@ -46,6 +46,7 @@ urlpatterns = [
   url(r'^data/input/item/plandata/(?P<id>(.+))/$', freppledb.input.views.ItemPlan.as_view(),name="input_item_detail_plan"),
 
   url(r'^data/input/itemcustomer/$', freppledb.input.views.ItemCustomerList.as_view(), name="input_itemcustomer_changelist"),
+  url(r'^data/input/itemlocation/$', freppledb.input.views.ItemLocationList.as_view(), name="input_itemlocation_changelist"),
   url(r'^data/input/itemsuccessor/$', freppledb.input.views.ItemSuccessorList.as_view(), name="input_itemsuccessor_changelist"),
 
   url(r'^data/input/operationresource/$', freppledb.input.views.OperationResourceList.as_view(), name="input_operationresource_changelist"),
@@ -125,6 +126,7 @@ urlpatterns = [
   url(r'^api/input/itemsupplier/$', freppledb.input.serializers.ItemSupplierAPI.as_view()),
   url(r'^api/input/itemdistribution/$', freppledb.input.serializers.ItemDistributionAPI.as_view()),
   url(r'^api/input/itemcustomer/$', freppledb.input.serializers.ItemCustomerAPI.as_view()),
+  url(r'^api/input/itemlocation/$', freppledb.input.serializers.ItemLocationAPI.as_view()),
   url(r'^api/input/itemsuccessor/$', freppledb.input.serializers.ItemSuccessorAPI.as_view()),
 
   url(r'^api/input/forecastyear/$', freppledb.input.serializers.ForecastYearAPI.as_view()),
@@ -165,6 +167,7 @@ urlpatterns = [
   url(r'^api/input/itemsupplier/(?P<pk>(.+))/$', freppledb.input.serializers.ItemSupplierdetailAPI.as_view()),
   url(r'^api/input/itemdistribution/(?P<pk>(.+))/$', freppledb.input.serializers.ItemDistributiondetailAPI.as_view()),
   url(r'^api/input/itemcustomer/(?P<pk>(.+))/$', freppledb.input.serializers.ItemCustomerdetailAPI.as_view()),
+  url(r'^api/input/itemlocation/(?P<pk>(.+))/$', freppledb.input.serializers.ItemLocationDetailAPI.as_view()),
   url(r'^api/input/itemsuccessor/(?P<pk>(.+))/$', freppledb.input.serializers.ItemSuccessordetailAPI.as_view()),
 
   ]

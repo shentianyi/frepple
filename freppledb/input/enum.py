@@ -31,6 +31,12 @@ class ItemType(BaseEnum):
     RM = _('RM')
 
 
+class RelationType(BaseEnum):
+    """物料替代关系类型"""
+    successor = _('successor')
+    replacement = _('replacement')
+
+
 class ItemTypyStatus(BaseEnum):
     """物料类型状态关系"""
     FG = FgStatus.to_tuple()

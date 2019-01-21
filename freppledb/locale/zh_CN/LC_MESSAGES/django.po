@@ -415,6 +415,10 @@ msgstr "客户物料编号"
 msgid "item successor"
 msgstr "物料替代"
 
+#: input/views.py:1903
+msgid "relation type"
+msgstr "关系类型"
+
 #: input/models.py:339 input/views.py:1279
 msgid "item_successor_display"
 msgstr "替代物料"
@@ -3249,6 +3253,22 @@ msgstr "物料供应商"
 #: input/models.py:874 input/views.py:806
 msgid "item suppliers"
 msgstr "物料供应商"
+
+#: input/views.py:1369
+msgid "item locations"
+msgstr "物料地点"
+
+#: input/views.py:1392
+msgid "inventory qty"
+msgstr "库存数量"
+
+#: input/views.py:1393
+msgid "available inventory"
+msgstr "可用库存"
+
+#: input/views.py:1393
+msgid "inventory cost"
+msgstr "库存金额"
 
 # "origin" translation must be different from "source" translation
 #: input/models.py:891 input/models.py:1122 input/views.py:846

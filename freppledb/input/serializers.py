@@ -387,6 +387,67 @@ class ItemdetailAPI(frePPleRetrieveUpdateDestroyAPIView):
     serializer_class = ItemSerializer
 
 
+# CMARK begin itemlocation API---------------------------------------
+
+class ItemLocationFilter(filters.FilterSet):
+    created_at__gte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='gte')
+    created_at__lte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='lte')
+    updated_at__gte = django_filters.DateTimeFilter(field_name="updated_at", lookup_expr='gte')
+    updated_at__lte = django_filters.DateTimeFilter(field_name="updated_at", lookup_expr='lte')
+
+    class Meta:
+        model = freppledb.input.models.ItemLocation
+        fields = {
+            'id': ['exact', 'in'],
+            'item__nr': ['exact'],
+            'location__nr': ['exact'],
+            'project_nr': ['exact'],
+            'description': ['exact', 'contains'],
+            'category': ['exact', 'contains'],
+            'subcategory': ['exact', 'contains'],
+            'cost': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
+            'source': ['exact', 'in'],
+        }
+        filter_fields = (
+            'id', 'item__nr', 'location__nr', 'project_nr', 'description', 'category', 'subcategory', 'cost', 'source',
+            'created_at', 'updated_at')
+
+
+class ItemLocationSerializer(BulkSerializerMixin, ModelSerializer):
+    item = ItemOwnerSerializer(many=False, allow_null=True)
+    location = LocationOwnerSerializer(many=False, allow_null=True)
+    id = serializers.IntegerField(read_only=False)
+
+    class Meta:
+        model = freppledb.input.models.ItemLocation
+        fields = '__all__'
+        list_serializer_class = BulkListSerializer
+        update_lookup_field = 'id'
+        partial = True
+
+
+class ItemLocationAPI(frePPleListCreateAPIView):
+    queryset = freppledb.input.models.ItemLocation.objects.all()
+    serializer_class = ItemLocationSerializer
+    filter_class = ItemLocationFilter
+    # 排序
+    ordering_fields = ('id',)
+    pagination_class = CustomerNumberPagination
+
+
+# class ItemLocationdetailNkAPI(frePPleRetrieveUpdateDestroyAPIView):
+#     # natural key 自然键
+#     lookup_field = 'nr'
+#     queryset = freppledb.input.models.ItemLocation.objects.all()
+#     serializer_class = ItemLocationSerializer
+
+
+class ItemLocationDetailAPI(frePPleRetrieveUpdateDestroyAPIView):
+    queryset = freppledb.input.models.ItemLocation.objects.all()
+    serializer_class = ItemLocationSerializer
+# CMARK end itemlocation API-----------------------------------------
+
+
 # CMARK begin itemclient API-----------------------------------------
 class ItemCustomerFilter(filters.FilterSet):
     created_at__gte = django_filters.DateTimeFilter(field_name=("created_at", "update_at"), lookup_expr='gte')
@@ -436,7 +497,7 @@ class ItemCustomerAPI(frePPleListCreateAPIView):
     # 过滤类-查询相关内容
     filter_class = ItemCustomerFilter
     # 排序
-    ordering_fields = ('id')
+    ordering_fields = ('id',)
 
 
 class ItemCustomerdetailAPI(frePPleRetrieveUpdateDestroyAPIView):
