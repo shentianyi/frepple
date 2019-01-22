@@ -31,6 +31,8 @@ urlpatterns = [
   url(r'^data/input/location/$', freppledb.input.views.LocationList.as_view(), name="input_location_changelist"),
   url(r'^data/input/customer/$', freppledb.input.views.CustomerList.as_view(), name="input_customer_changelist"),
   url(r'^data/input/demand/$', freppledb.input.views.DemandList.as_view(), name="input_demand_changelist"),
+  url(r'^data/input/salesorder/$', freppledb.input.views.SalesOrderList.as_view(), name="input_salesorder_changelist"),
+  url(r'^data/input/salesorderitem/$', freppledb.input.views.SalesOrderItemList.as_view(), name="input_salesorderitem_changelist"),
   url(r'^data/input/item/$', freppledb.input.views.ItemList.as_view(), name="input_item_changelist"),
   # TODO CMARK 物料详细页面
   url(r'^data/input/item_detail/(?P<id>(.+))/$', freppledb.input.views.ItemDetail.as_view(),name="input_item_detail"),
@@ -84,6 +86,8 @@ urlpatterns = [
 
   url(r'^data/input/enum/(?P<type>(.+))/(?P<value>(.+))/$', freppledb.input.views.EnumView.as_view(), name="enum_get"),
   url(r'^data/input/forecast/version/(?P<version>(.+))/$',freppledb.input.serializers.ForecastdetailVersionAPI.as_view()),
+  url(r'^data/input/buffer/$', freppledb.input.views.BufferList.as_view(), name="input_buffer_changelist"),
+  url(r'^data/input/inventoryparameter/$', freppledb.input.views.InventoryParameterList.as_view(), name="input_inventoryparameter_changelist"),
 
 
   # Special reports
@@ -100,7 +104,6 @@ urlpatterns = [
   url(r'^operationplan/$', freppledb.input.views.OperationPlanDetail.as_view(), name="operationplandetail"),
 
   # REST API framework
-  url(r'^data/input/buffer/$', freppledb.input.views.BufferList.as_view(), name="input_buffer_changelist"),
   url(r'^api/input/resource/$', freppledb.input.serializers.ResourceAPI.as_view()),
   url(r'^api/input/location/$', freppledb.input.serializers.LocationAPI.as_view()),
   # url(r'^api/input/location/$', freppledb.input.api.views.LocationAPI.as_view()),

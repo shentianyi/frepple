@@ -45,7 +45,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='itemsupplier',
             name='description',
-            field=models.CharField(blank=True, max_length=500, null=True, verbose_name='descriptiony'),
+            field=models.CharField(blank=True, max_length=500, null=True, verbose_name='description'),
         ),
         migrations.AddField(
             model_name='itemsupplier',

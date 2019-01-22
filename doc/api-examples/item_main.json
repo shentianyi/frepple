@@ -1,45 +1,64 @@
 {
-    "result": true,
-    "code": 200,
-    "message": "相应数据查询成功",
-    "content": {
-        "id": 1,
-        "nr": "A",
-        "successor_nr": "B",
-        "location":"beijing",
-        "inventory_qty": 0,
-        "available_inventory": 0,
-        "inventory_cost": 0,
-        "lock_types": {
-            "current": "FG",
-            "values": [
-                {
-                    "value": "locked",
-                    "text": "locked"
-                }
-            ]
-        },
-        "lock_expire_at": null,
-        "plan_strategies": {
-            "current": null,
-            "values": [
-                {
-                    "value": "MTS",
-                    "text": "MTS"
-                }
-            ]
-        },
-        "statuses": {
-            "current": "S2",
-            "values": [
-                {
-                    "value": "S0",
-                    "text": "S0"
-                }
-            ]
-        },
-        "price_abc": null,
-        "qty_abc": null,
-        "description": null
-    }
+  "result": true,
+  "code": 200,
+  "message": "相应数据查询成功",
+  "content": {
+    // 物料id
+    "id": 1,
+     // 物料编码
+    "nr": "A",
+     // 替代物料号
+    "successor_nr": "B",
+    // 项目号
+    "project_nr":"ABC",
+    // 仓库代码
+    "location": {
+      "id": 1,
+      "nr": "beijing"
+    },
+      //库存数量
+    "inventory_qty": 0,
+     // 可用库存
+    "available_inventory": 0,
+    // 库存金额
+    "inventory_cost": 0,
+      // 锁定类型
+    "lock_types": {
+      "current": "FG",
+      "values": [
+        {
+          "value": "locked",
+          "text": "locked"
+        }
+      ]
+    },
+    // 到期时间
+    "lock_expire_at": null,
+      //计划策略
+    "plan_strategies": {
+      "current": null,
+      "values": [
+        {
+          "value": "MTS",
+          "text": "MTS"
+        }
+      ]
+    },
+      // 物料状态
+    "statuses": {
+      "current": "S2",
+      "values": [
+        {
+          "value": "S0",
+          "text": "S0"
+        }
+      ]
+    },
+    // 物料ABC货值
+    "price_abc": null,
+     // 物料ABC数量
+    "qty_abc": null,
+    // 物料描述信息
+    "description": null
+  }
 }

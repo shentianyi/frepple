@@ -14,7 +14,7 @@
   // 计划收货日期
   "plan_receive_date": "2019-1-3",
   // 总前置期
-  "totall_lead_time": 28,
+  "total_lead_time": 28,
   // 主供应商
   "main_supplier": "abc",
   // 供应商代码
