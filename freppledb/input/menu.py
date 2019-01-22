@@ -17,7 +17,8 @@
 from freppledb.menu import menu
 
 import freppledb.input.views
-from freppledb.input.models import Buffer, Item, Customer, Location, Demand, ForecastYear, ForecastVersion, Forecast
+from freppledb.input.models import Buffer, Item, Customer, Location, Demand, ForecastYear, ForecastVersion, Forecast, \
+  InventoryParameter, SalesOrder, SalesOrderItem
 from freppledb.input.models import DistributionOrder, ManufacturingOrder, CalendarBucket
 from freppledb.input.models import PurchaseOrder, Supplier, ItemSupplier, OperationMaterial
 from freppledb.input.models import ItemDistribution, Skill, Resource, OperationResource
@@ -36,6 +37,13 @@ menu.addItem(
   report=freppledb.input.views.BufferList, index=1200, model=Buffer,
   dependencies=[Item, Location]
   )
+
+menu.addItem(
+  "inventory", "inventory parameters", url="/data/input/inventoryparameter/",
+  report=freppledb.input.views.InventoryParameterList, index=1250, model=InventoryParameter,
+  dependencies=[Item, Location]
+  )
+
 menu.addItem(
   "inventory", "item distributions", url="/data/input/itemdistribution/",
   report=freppledb.input.views.ItemDistributionList, index=1300, model=ItemDistribution,
@@ -63,9 +71,15 @@ menu.addItem(
   )
 
 menu.addItem(
-  "sales", "demand", url="/data/input/demand/",
-  report=freppledb.input.views.DemandList, index=110, model=Demand,
-  dependencies=[Item, Location, Customer]
+  "sales", "sales order", url="/data/input/salesorder/",
+  report=freppledb.input.views.SalesOrderList, index=110, model=SalesOrder,
+  dependencies=[Location, Customer]
+  )
+
+menu.addItem(
+  "sales", "sales order items", url="/data/input/salesorderitem/",
+  report=freppledb.input.views.SalesOrderItemList, index=111, model=SalesOrderItem,
+  dependencies=[SalesOrder, Item]
   )
 menu.addItem(
   "sales", "delivery order", url="/data/input/deliveryorder/",
@@ -91,11 +105,11 @@ menu.addItem(
   "sales", "locations", url="/data/input/location/",
   report=freppledb.input.views.LocationList, index=1150, model=Location
   )
-
 menu.addItem(
   "sales", "item locations", url="/data/input/itemlocation/",
-  report=freppledb.input.views.ItemLocationList, index=1151, model=Location
-  )
+  report=freppledb.input.views.ItemLocationList, index=1151, model=Location,
+  dependencies = [Item, Location]
+)
 menu.addItem(
   "sales", "customer", url="/data/input/customer/",
   report=freppledb.input.views.CustomerList, index=1200, model=Customer

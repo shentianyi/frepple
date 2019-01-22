@@ -31,6 +31,13 @@ class ItemType(BaseEnum):
     RM = _('RM')
 
 
+class SalesOrderStatus(BaseEnum):
+    open = _('open')
+    close = _('close')
+    canceled = _('canceled')
+    invoiced = _('invoiced')
+
+
 class RelationType(BaseEnum):
     """物料替代关系类型"""
     successor = _('successor')

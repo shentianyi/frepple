@@ -55,7 +55,8 @@ from freppledb.input import enum
 from freppledb.input.enum import LockType
 from freppledb.input.forms import ForecastUploadForm
 from freppledb.input.models import Resource, Operation, Location, SetupMatrix, SetupRule, ItemSuccessor, ItemCustomer, \
-    ForecastYear, ForecastVersion, Forecast, ForecastCommentOperation, ItemLocation
+    ForecastYear, ForecastVersion, Forecast, ForecastCommentOperation, ItemLocation, SalesOrder, InventoryParameter, \
+    SalesOrderItem
 from freppledb.input.models import Skill, Buffer, Customer, Demand, DeliveryOrder
 from freppledb.input.models import Item, OperationResource, OperationMaterial
 from freppledb.input.models import Calendar, CalendarBucket, ManufacturingOrder, SubOperation
@@ -747,6 +748,43 @@ class BufferList(GridReport):
     )
 
 
+class InventoryParameterList(GridReport):
+    title = _("inventory parameters")
+    basequeryset = InventoryParameter.objects.all()
+    model = InventoryParameter
+    frozenColumns = 1
+    help_url = 'user-guide/modeling-wizard/master-data/buffers.html'
+
+    rows = (
+        GridFieldInteger('id', title=_('id'), key=True, formatter='detail', extra='"role":"input/itemlocation"'),
+        GridFieldText('item_display', title=_('item_display'), field_name='item__nr', editable=False),
+        GridFieldText('location_display', title=_('location_display'), field_name='location__nr', editable=False),
+
+        # 因为是id 让外键永远不显示
+        GridFieldText('item', title=_('item_id'), field_name='item_id', editable=False, hidden=True),
+        GridFieldText('location', title=_('location_id'), field_name='location_id', editable=False, hidden=True),
+
+        GridFieldInteger('rop_cover_period', title=_('rop cover period'), field_name='rop_cover_period',
+                         editable=False),
+        GridFieldInteger('safetystock_cover_period', title=_('safetystock cover period'),
+                         field_name='safetystock_cover_period', editable=False),
+        GridFieldNumber('safetysotck_min_qty', title=_('safety stock min qty'), field_name='safetysotck_min_qty',
+                        editable=False),
+        GridFieldNumber('safetysotck_max_qty', title=_('safety sotck max qty'), field_name='safetysotck_max_qty',
+                        editable=False),
+        GridFieldNumber('safetystock_qty_by_system', title=_('system safety stock'),
+                        field_name='safetystock_qty_by_system', editable=False),
+        GridFieldNumber('service_level', title=_('service level'), field_name='service_level', editable=False),
+        GridFieldCreateOrUpdateDate('created_at', title=_('created_at'), editable=False),
+        GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at'), editable=False),
+
+        # CMARK 必须有为了弹框查询
+        GridFieldText('_pk', field_name='id', editable=False, hidden=True),
+        GridFieldText('_nk', field_name='nr', editable=False, hidden=True),
+
+    )
+
+
 class SetupMatrixList(GridReport):
     '''
     A list report to show setup matrices.
@@ -1299,7 +1337,6 @@ class EnumView(View):
                 # t = Item.type_status[value]
                 t = enum.ItemTypyStatus.to_dic()[value]
                 dic = la_enum.tuple2select(t) if t != None else None
-
                 return HttpResponse(json.dumps(dic, cls=DjangoJSONEncoder),
                                     content_type='application/json')
         else:
@@ -1381,10 +1418,8 @@ class ItemLocationList(GridReport):
         GridFieldText('location_display', title=_('location_display'), field_name='location__nr', editable=False),
 
         # 因为是id 让外键永远不显示
-        GridFieldInteger('item', title=_('item'), field_name='item__nr', formatter='detail', editable=False,
-                         hidden=True),
-        GridFieldInteger('location', title=_('location'), field_name='location__nr', formatter='detail',
-                         editable=False, hidden=True),
+        GridFieldText('item', title=_('item_id'), field_name='item_id', editable=False, hidden=True),
+        GridFieldText('location', title=_('location_id'), field_name='location_id', editable=False, hidden=True),
         GridFieldChoice('type', title=_('type'), choices=enum.ItemType.to_tuple(), editable=False),
         GridFieldText('status', field_name='status', title=_('status'), editable=False),
         GridFieldChoice('plan_strategy', title=_('plan strategy'), choices=enum.ItemProductStrategy.to_tuple(),
@@ -1492,17 +1527,17 @@ class ItemMainData(View):
 
         if item_location:
             item_location = item_location.first()
+            data["project_nr"] = item_location.project_nr
             data["lock_types"]["current"] = item_location.lock_type
 
             data["statuses"]["current"] = item_location.status
 
             data["plan_strategies"]["current"] = item_location.plan_strategy
 
-            data["location"] = item_location.location.nr
+            data["location"] = {"id": item_location.location.id, "nr": item_location.location.nr}
             data["inventory_qty"] = item_location.inventory_qty
             data["available_inventory"] = item_location.available_inventory
             data["inventory_cost"] = item_location.inventory_cost
-            data["project_nr"] = item_location.project_nr
             data["description"] = item_location.description
             data["price_abc"] = item_location.price_abc
             data["qty_abc"] = item_location.qty_abc
@@ -1614,6 +1649,7 @@ class MainSupplierData(View):
                                 content_type='application/json')
 
         data = {
+            # 前置期栏item_location数据
             "product_time": None,
             "load_time": None,
             "transit_time": None,
@@ -1621,7 +1657,8 @@ class MainSupplierData(View):
             "plan_supplier_date": None,
             "plan_load_date": None,
             "plan_receive_date": None,
-            "totall_lead_time": None,
+            "total_lead_time": None,
+            # 供应商信息item_supplier数据
             "supplier_id": None,
             "name": None,
             "nr": None,
@@ -1631,6 +1668,7 @@ class MainSupplierData(View):
             "lock_expire_at": None,
             "plan_list_date": None,
             "plan_delist_date": None,
+            # 包装
             "moq": None,
             "mpq": None,
             "pallet_num": None,
@@ -1656,27 +1694,28 @@ class MainSupplierData(View):
             data["plan_load_date"] = item_location.plan_load_date
             data["plan_receive_date"] = item_location.plan_receive_date
             lead_time = item_location.wd2cd()
-            data["totall_lead_time"] = decimal2float(lead_time)
+            data["total_lead_time"] = decimal2float(lead_time)
+            data["moq"] = decimal2float(item_location.moq)
+            data["mpq"] = decimal2float(item_location.mpq)
+            data["pallet_num"] = decimal2float(item_location.pallet_num)
+            # TODO 手工MOQ暂时无数据
+            data["MOQ"] = 0
+            data["order_unit_qty"] = decimal2float(item_location.order_unit_qty)
+            data["outer_package_num"] = decimal2float(item_location.outer_package_num)
+            data["order_max_qty"] = decimal2float(item_location.order_max_qty)
+            data["description"] = item_location.description
 
         if item_supplier:
             data["supplier_id"] = item_supplier.supplier.id
             data["name"] = item_supplier.supplier.name
             data["nr"] = item_supplier.supplier.nr
             data["cost"] = decimal2float(item_supplier.cost)
-            data["cost_unit"] =  decimal2float(item_supplier.cost_unit)
+            data["cost_unit"] = decimal2float(item_supplier.cost_unit)
             data["earliest_order_date"] = item_supplier.earliest_order_date
             data["lock_expire_at"] = item.lock_expire_at
             data["plan_list_date"] = item_supplier.plan_list_date
             data["plan_delist_date"] = item_supplier.plan_delist_date
-            data["moq"] = decimal2float(item_supplier.moq)
-            data["mpq"] = decimal2float(item_supplier.mpq)
-            data["pallet_num"] = decimal2float(item_supplier.pallet_num)
-            # TODO 手工MOQ暂时无数据
-            data["MOQ"] = 0
-            data["order_unit_qty"] = decimal2float(item_supplier.order_unit_qty)
-            data["outer_package_num"] = decimal2float(item_supplier.outer_package_num)
-            data["order_max_qty"] = decimal2float(item_supplier.order_max_qty)
-            data["description"] = item_supplier.description
+
         message.result = True
         message.code = 200
         message.message = "相应数据查询成功"
@@ -1694,21 +1733,18 @@ class MainSupplierData(View):
             save_point = transaction.savepoint()
             try:
                 item = Item.objects.get(id=id)
-                item_supplier = ItemSupplier.objects.filter(item=id, effective_start__lte=current_time,
-                                                            effective_end__gte=current_time).order_by('priority',
-                                                                                                      '-ratio',
-                                                                                                      'id').first()
-
-                item_supplier.plan_supplier_date = data['plan_supplier_date']
-                item_supplier.plan_load_date = data['plan_load_date']
-                item_supplier.plan_receive_date = data['plan_receive_date']
-                item_supplier.earliest_order_date = data['earliest_order_date']
+                item_location = ItemLocation.objects.get(item_id=id)
+                item_supplier = ItemSupplier.objects.get(item_id=id)
+                item_location.plan_supplier_date = data['plan_supplier_date']
+                item_location.plan_load_date = data['plan_load_date']
+                item_location.plan_receive_date = data['plan_receive_date']
+                item_location.earliest_order_date = data['earliest_order_date']
                 item.lock_expire_at = data['lock_expire_at']
                 item_supplier.plan_list_date = data['plan_list_date']
                 item_supplier.plan_delist_date = data['plan_delist_date']
+                item_location.save()
                 item_supplier.save()
                 item.save()
-
             except Exception as e:
                 message.result = False
                 message.code = 404
@@ -1732,7 +1768,7 @@ class ItemSimulation(View):
         message = ResponseMessage()
         current_time = timezone.now()
 
-        item_supplier = ItemSupplier.objects.filter(item=id, effective_start__lte=current_time,
+        item_supplier = ItemSupplier.objects.filter(item_id=id, effective_start__lte=current_time,
                                                     effective_end__gte=current_time).order_by('priority', '-ratio',
                                                                                               'id').first()
         if item_supplier is None:
@@ -2363,6 +2399,7 @@ class ForecastList(GridReport):
         GridFieldText('year', title=_('year'), editable=False),
         GridFieldInteger('date_number', title=_('date_number'), editable=False),
         GridFieldText('date_type', title=_('date_type'), editable=False),
+        GridFieldInteger('priority', title=_('priority'), editable=False),
         GridFieldNumber('ratio', title=_('forecast ratio'),
                         extra='"formatoptions":{"suffix":" %","defaultValue":"100.00"}', editable=False),
         GridFieldNumber('normal_qty', title=_('normal qty'), editable=False),
@@ -2686,6 +2723,63 @@ class DemandList(GridReport):
                 "function": "grid.setStatus('canceled')"
             },
         ]
+
+
+class SalesOrderList(GridReport):
+    title = _("sales orders")
+    basequeryset = SalesOrder.objects.all()
+    model = SalesOrder
+    frozenColumns = 1
+    rows = (
+        GridFieldInteger('id', title=_('id'), key=True, formatter='detail', extra='"role":"input/salesorder"'),
+        GridFieldText('nr', title=_('item nr'), editable=False),
+        GridFieldText('location_display', title=_('location_display'), field_name='location__nr', editable=False),
+        GridFieldText('customer_display', title=_('customer_display'), field_name='customer__nr', editable=False),
+
+        # 因为是id 让外键永远不显示
+        GridFieldText('location', title=_('location_id'), field_name='location_id', editable=False, hidden=True),
+        GridFieldText('customer', title=_('customer_id'), field_name='customer_id', editable=False, hidden=True),
+        GridFieldText('status', field_name='status', title=_('status'), editable=False),
+        GridFieldNumber('max_lateness', title=_('max lateness'), editable=False),
+        GridFieldNumber('min_shipment', title=_('min shipment'), editable=False),
+        GridFieldCreateOrUpdateDate('created_at', title=_('created_at'), editable=False),
+        GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at'), editable=False),
+        GridFieldText('_pk', field_name='name', editable=False, hidden=True),
+        GridFieldText('_nk', field_name='name', editable=False, hidden=True),
+
+    )
+
+
+class SalesOrderItemList(GridReport):
+    title = _("sales order items")
+    basequeryset = SalesOrderItem.objects.all()
+    model = SalesOrderItem
+    frozenColumns = 1
+    rows = (
+        GridFieldInteger('id', title=_('id'), key=True, formatter='detail', extra='"role":"input/salesorder"'),
+        GridFieldText('line_no', title=_('line no'), editable=False),
+        GridFieldText('sales_order_display', title=_('sales_order_display'), field_name='salesorder__nr',
+                      editable=False),
+        GridFieldText('item_display', title=_('item_display'), field_name='item__nr', editable=False),
+
+        # 因为是id 让外键永远不显示
+
+        GridFieldText('sales_order', title=_('sales_order_id'), field_name='salesorder_id', editable=False,
+                      hidden=True),
+        GridFieldText('item', title=_('item_id'), field_name='item_id', editable=False, hidden=True),
+        GridFieldInteger('qty', title=_('qty'),  editable=False),
+        GridFieldNumber('schedule_qty', title=_('schedule qty'), editable=False),
+        GridFieldNumber('deliver_qty', title=_('deliver qty'), editable=False),
+        GridFieldDateTime('due', title=_('due'), editable=False),
+        GridFieldInteger('priority', title=_('priority'),  editable=False),
+        GridFieldText('status', field_name='status', title=_('status'), editable=False),
+        GridFieldNumber('max_lateness', title=_('max lateness'), editable=False),
+        GridFieldNumber('min_shipment', title=_('min shipment'), editable=False),
+        GridFieldCreateOrUpdateDate('created_at', title=_('created_at'), editable=False),
+        GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at'), editable=False),
+        GridFieldText('_pk', field_name='name', editable=False, hidden=True),
+        GridFieldText('_nk', field_name='name', editable=False, hidden=True),
+    )
 
 
 class CalendarList(GridReport):

@@ -18,7 +18,7 @@
 from django.utils.translation import ugettext_lazy as _
 
 from freppledb.input.models import Resource, Operation, Location, SetupMatrix, SetupRule, ItemSuccessor, ItemCustomer, \
-    ForecastYear, Forecast, ForecastVersion, ItemLocation
+    ForecastYear, Forecast, ForecastVersion, ItemLocation, InventoryParameter, SalesOrder, SalesOrderItem
 from freppledb.input.models import Buffer, Customer, Demand, Item, OperationResource
 from freppledb.input.models import OperationMaterial, Skill, ResourceSkill, Supplier
 from freppledb.input.models import Calendar, CalendarBucket, ManufacturingOrder, SubOperation
@@ -373,6 +373,19 @@ class Buffer_admin(MultiDBModelAdmin):
 data_site.register(Buffer, Buffer_admin)
 
 
+class InventoryParameter_admin(MultiDBModelAdmin):
+    model = InventoryParameter
+    raw_id_fields = ('location', 'item')
+    save_on_top = True
+    tabs = [
+        {"name": 'edit', "label": _("edit"), "view": "admin:input_inventoryparameter_change",
+         "permissions": "input.change_inventoryparameter"},
+    ]
+
+
+data_site.register(InventoryParameter, InventoryParameter_admin)
+
+
 class SetupRule_inline(MultiDBTabularInline):
     model = SetupRule
     extra = 3
@@ -670,3 +683,29 @@ class Demand_admin(MultiDBModelAdmin):
 
 
 data_site.register(Demand, Demand_admin)
+
+
+class SalesOrder_admin(MultiDBModelAdmin):
+    model = SalesOrder
+    raw_id_fields = ('customer', 'location')
+    save_on_top = True
+    tabs = [
+        {"name": 'edit', "label": _("edit"), "view": "admin:input_salesorder_change",
+         "permissions": "input.change_salesorder"},
+    ]
+
+
+data_site.register(SalesOrder, SalesOrder_admin)
+
+
+class SalesOrderItem_admin(MultiDBModelAdmin):
+    model = SalesOrderItem
+    raw_id_fields = ('sales_order', 'item')
+    save_on_top = True
+    tabs = [
+        {"name": 'edit', "label": _("edit"), "view": "admin:input_salesorderitem_change",
+         "permissions": "input.change_salesorderitem"},
+    ]
+
+
+data_site.register(SalesOrderItem, SalesOrderItem_admin)

@@ -354,13 +354,9 @@ class Item(AuditModel, HierarchyModel):
 
 class ItemLocation(AuditModel):
     """物料地点"""
-    # # 设置外键显示的值
-    # display_key = 'nr'
-    # # 设置外键导入的值
-    # foreign_input_key = 'nr'
     id = models.AutoField(_('id'), help_text=_('Unique identifier'), primary_key=True)
     item = models.ForeignKey(
-        Item, verbose_name=_('sale item'),
+        Item, verbose_name=_('item'),
         db_index=True, related_name='itemlocation_item',
         null=False, blank=False, on_delete=models.CASCADE)
 
@@ -787,6 +783,49 @@ class Buffer(AuditModel):
         verbose_name = _('buffer')
         verbose_name_plural = _('buffers')
         ordering = ['name']
+        unique_together = (('item', 'location'),)
+
+
+class InventoryParameter(AuditModel):
+    """库存参数"""
+
+    id = models.AutoField(_('id'), help_text=_('Unique identifier'), primary_key=True)
+    item = models.ForeignKey(
+        Item, verbose_name=_('item'),
+        related_name='inventoryparameter_item',
+        null=False, blank=False, on_delete=models.CASCADE)
+
+    location = models.ForeignKey(
+        Location, verbose_name=_('location'),
+        related_name='inventoryparameter_location',
+        null=False, blank=False, on_delete=models.CASCADE)
+    rop_cover_period = models.IntegerField(_('rop cover period'))
+    safetystock_cover_period = models.IntegerField(_('safetystock cover period'))
+    safetysotck_min_qty = models.DecimalField(_('safety sotck min qty'), max_digits=20, decimal_places=8)
+    safetysotck_max_qty = models.DecimalField(_('safety sotck max qty'), max_digits=20, decimal_places=8)
+    safetystock_qty_by_system = models.DecimalField(_('system safety stock'), max_digits=20, decimal_places=8)
+    service_level = models.DecimalField(_('service level'), max_digits=20, decimal_places=8)
+
+    class Manager(MultiDBManager):
+        def get_by_natural_key(self, item, location):
+            return self.get(item=item, location=location)
+
+    def natural_key(self):
+        return self.item, self.location
+
+    objects = Manager()
+
+    def __str__(self):
+        return "%s - %s" % (
+            self.item.nr if self.item else None,
+            self.location.nr if self.location else None
+        )
+
+    class Meta(AuditModel.Meta):
+        db_table = 'inventoryparameter'
+        verbose_name = _('inventory parameter')
+        verbose_name_plural = _('inventory parameters')
+        ordering = ['id']
         unique_together = (('item', 'location'),)
 
 
@@ -1318,7 +1357,7 @@ class ItemSupplier(AuditModel):
         _('effective end'), null=True, blank=True,
         help_text=_('Validity end date')
     )
-    description = models.CharField(_('descriptiony'), max_length=500, null=True, blank=True)
+    description = models.CharField(_('description'), max_length=500, null=True, blank=True)
 
     class Manager(MultiDBManager):
         def get_by_natural_key(self, item, supplier):
@@ -1576,7 +1615,10 @@ class Forecast(AuditModel, ForecastCommentOperation):
 
     date_type = models.CharField(
         _('date_type'), max_length=20, choices=enum.DateType.to_tuple(), default='W')
-
+    priority = models.IntegerField(
+        _('priority'), default=0,
+        help_text=_('Priority of the demand (lower numbers indicate more important demands)')
+    )
     ratio = models.DecimalField(_('forecast ratio'), max_digits=20, decimal_places=8, default=100)
     normal_qty = models.DecimalField(_('normal qty'), max_digits=20, decimal_places=8, default=0)
     new_product_plan_qty = models.DecimalField(_('new product plan qty'), max_digits=20, decimal_places=8, default=0)
@@ -1722,6 +1764,63 @@ class Demand(AuditModel, HierarchyModel):
         verbose_name = _('sales order')
         verbose_name_plural = _('sales orders')
         ordering = ['name']
+
+
+class SalesOrder(AuditModel):
+    id = models.AutoField(_('id'), help_text=_('Unique identifier'), primary_key=True)
+    nr = models.CharField(_('nr'), max_length=300, db_index=True, unique=True, null=True, blank=True)
+    location = models.ForeignKey(
+        Location, verbose_name=_('location'),
+        db_index=True, related_name='salesorder_location',
+        null=False, blank=False, on_delete=models.CASCADE)
+    customer = models.ForeignKey(
+        Customer, verbose_name=_('customer'),
+        db_index=True, related_name='salesorder_customer',
+        null=True, blank=True, on_delete=models.CASCADE)
+    status = models.CharField(_('status'), max_length=20, null=True, blank=True,
+                              choices=enum.SalesOrderStatus.to_tuple())
+    max_lateness = models.DecimalField(_('max lateness'), max_digits=20, decimal_places=8, null=True, blank=True)
+    min_shipment = models.DecimalField(_('min shipment'), max_digits=20, decimal_places=8, null=True, blank=True)
+
+    def __str__(self):
+        return self.id
+
+    class Meta(AuditModel.Meta):
+        db_table = 'salesorder'
+        verbose_name = _('sales order')
+        verbose_name_plural = _('sales orders')
+        ordering = ['id']
+
+
+class SalesOrderItem(AuditModel):
+    id = models.AutoField(_('id'), primary_key=True)
+    line_no = models.CharField(_('line no'), max_length=300, null=True, blank=True)
+    sales_order = models.ForeignKey(
+        SalesOrder, verbose_name=_('sales order'),
+        db_index=True, related_name='salesorderitem_saleorder',
+        null=True, blank=True, on_delete=models.CASCADE)
+    item = models.ForeignKey(
+        Item, verbose_name=_('item'),
+        db_index=True, related_name='salesorderitem_item',
+        null=False, blank=False, on_delete=models.CASCADE)
+    qty = models.DecimalField(_('qty'), max_digits=20, null=True, blank=True, decimal_places=8)
+    schedule_qty = models.DecimalField(_('schedule qty'), max_digits=20, null=True, blank=True, decimal_places=8)
+    deliver_qty = models.DecimalField(_('deliver qty'), max_digits=20, null=True, blank=True, decimal_places=8)
+    due = models.DateTimeField(_('due'), null=True, blank=True, db_index=True)
+    priority = models.IntegerField(_('priority'), default=0, blank=True, null=True)
+    status = models.CharField(_('status'), max_length=20, null=True, blank=True,
+                              choices=enum.SalesOrderStatus.to_tuple())
+    max_lateness = models.DecimalField(_('max lateness'), max_digits=20, null=True, blank=True, decimal_places=8)
+    min_shipment = models.DecimalField(_('min shipment'), max_digits=20, null=True, blank=True, decimal_places=8)
+
+    def __str__(self):
+        return self.id
+
+    class Meta(AuditModel.Meta):
+        db_table = 'sales_order_item'
+        verbose_name = _('sales order item')
+        verbose_name_plural = _('sales orders items')
+        ordering = ['id']
 
 
 class OperationPlan(AuditModel):

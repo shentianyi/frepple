@@ -334,7 +334,7 @@ msgstr "退市计划"
 
 #: input/view.py:910
 msgid "item_display"
-msgstr "物料编码"
+msgstr "物料"
 
 #: input/models.py:911
 msgid "supplier_display"
@@ -390,6 +390,7 @@ msgstr "销售物料"
 #: input/views.py:916
 msgid "sale_item_display"
 msgstr "销售物料"
+
 
 #: input/models.py:976 input/views.py:916
 msgid "product item"
@@ -2432,6 +2433,38 @@ msgstr ""
 msgid "sales orders"
 msgstr "销售订单"
 
+#: input/views.py:2742
+msgid "max lateness"
+msgstr "最大延期天数"
+
+#: input/views.py:2743
+msgid "min shipment"
+msgstr "最小运输量"
+
+#: input/views.py:767
+msgid "rop cover period"
+msgstr "ROP覆盖天数"
+
+#: input/views.py:768
+msgid "safetysotck cover period"
+msgstr "SS覆盖天数"
+
+#: input/views.py:769
+msgid "safety stock min qty"
+msgstr "最小安全库存量"
+
+#: input/views.py:770
+msgid "safety stock max qty"
+msgstr "最大安全库存量"
+
+#: input/views.py:771
+msgid "system safety stock"
+msgstr "系统安全库存量"
+
+#: input/views.py:772
+msgid "service level"
+msgstr "服务级别"
+
 #: forecast/views.py:1165 input/models.py:175 input/models.py:252
 #: input/models.py:454 input/models.py:522 input/models.py:823
 #: input/models.py:909 input/views.py:699 input/views.py:726 input/views.py:820
@@ -3415,6 +3448,33 @@ msgstr "配送订单"
 #: input/models.py:1052 input/models.py:1388
 msgid "customer shipment"
 msgstr "客户的货物"
+
+msgid "sales order items"
+msgstr "销售订单项"
+
+msgid "line no"
+msgstr "行号"
+
+msgid "sales_order_display"
+msgstr "销售订单"
+
+msgid "qty"
+msgstr "订单数量"
+
+msgid "schedule qty"
+msgstr "计划数量"
+
+msgid "deliver qty"
+msgstr "发运数量"
+
+msgid "due"
+msgstr "交期"
+
+msgid "max lateness"
+msgstr "最大延期天数"
+
+msgid "min shipment"
+msgstr "最小运输量"
 
 #: input/models.py:1057 input/models.py:1193 input/models.py:1241
 #: input/views.py:1435 input/views.py:1676 input/views.py:1912
