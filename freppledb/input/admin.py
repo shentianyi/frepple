@@ -18,7 +18,7 @@
 from django.utils.translation import ugettext_lazy as _
 
 from freppledb.input.models import Resource, Operation, Location, SetupMatrix, SetupRule, ItemSuccessor, ItemCustomer, \
-    ForecastYear, Forecast, ForecastVersion
+    ForecastYear, Forecast, ForecastVersion, ItemLocation
 from freppledb.input.models import Buffer, Customer, Demand, Item, OperationResource
 from freppledb.input.models import OperationMaterial, Skill, ResourceSkill, Supplier
 from freppledb.input.models import Calendar, CalendarBucket, ManufacturingOrder, SubOperation
@@ -43,7 +43,8 @@ class CalendarBucket_admin(MultiDBModelAdmin):
         (None, {'fields': ('calendar', ('startdate', 'enddate'), 'value', 'priority')}),
         (_('repeating pattern'), {
             'fields': (
-            ('starttime', 'endtime'), ('monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday')),
+                ('starttime', 'endtime'),
+                ('monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday')),
         }),
     )
     tabs = [
@@ -148,7 +149,7 @@ data_site.register(Supplier, Supplier_admin)
 class OperationMaterial_inline(MultiDBTabularInline):
     model = OperationMaterial
     fields = (
-    'item', 'operation', 'quantity', 'quantity_fixed', 'type', 'transferbatch', 'effective_start', 'effective_end')
+        'item', 'operation', 'quantity', 'quantity_fixed', 'type', 'transferbatch', 'effective_start', 'effective_end')
     raw_id_fields = ('operation', 'item',)
     extra = 0
     exclude = ('source',)
@@ -183,6 +184,27 @@ class Item_admin(MultiDBModelAdmin):
 
 
 data_site.register(Item, Item_admin)
+
+
+class ItemLocation_admin(MultiDBModelAdmin):
+    model = ItemLocation
+    save_on_top = True
+    raw_id_fields = ('item', 'location')
+    exclude = ('source',)
+    tabs = [
+        {"name": 'edit', "label": _("edit"), "view": "admin:input_itemlocation_change",
+         "permissions": "input.change_itemlocation"},
+        {"name": 'supplypath', "label": _("supply path"), "view": "supplypath_item"},
+        {"name": 'whereused', "label": _("where used"), "view": "whereused_item"},
+        {"name": 'plan', "label": _("plan"), "view": "output_demand_plandetail"},
+        {"name": 'plandetail', "label": _("delivery orders"), "view": "input_deliveryorder_by_item"},
+        {"name": 'purchaseorders', "label": _("purchase orders"), "view": "input_purchaseorder_by_item"},
+        {"name": 'comments', "label": _("comments"), "view": "admin:input_item_comment"},
+        {"name": 'history', "label": _("History"), "view": "admin:input_item_history"},
+    ]
+
+
+data_site.register(ItemLocation, ItemLocation_admin)
 
 
 class ItemCustomer_admin(MultiDBModelAdmin):
@@ -248,16 +270,18 @@ data_site.register(ItemSupplier, ItemSupplier_admin)
 
 
 class ItemDistribution_admin(MultiDBModelAdmin):
-  model = ItemDistribution
-  save_on_top = True
-  raw_id_fields = ('item', 'origin', 'destination', 'resource')
-  # exclude = ('id')
-  tabs = [
-    {"name": 'edit', "label": _("edit"), "view": "admin:input_itemdistribution_change", "permissions": "input.change_itemdistribution"},
-    {"name": 'comments', "label": _("comments"), "view": "admin:input_itemdistribution_comment"},
-    #. Translators: Translation included with Django
-    {"name": 'history',"label": _("History"), "view": "admin:input_itemdistribution_history"},
-  ]
+    model = ItemDistribution
+    save_on_top = True
+    raw_id_fields = ('item', 'origin', 'destination', 'resource')
+    # exclude = ('id')
+    tabs = [
+        {"name": 'edit', "label": _("edit"), "view": "admin:input_itemdistribution_change",
+         "permissions": "input.change_itemdistribution"},
+        {"name": 'comments', "label": _("comments"), "view": "admin:input_itemdistribution_comment"},
+        # . Translators: Translation included with Django
+        {"name": 'history', "label": _("History"), "view": "admin:input_itemdistribution_history"},
+    ]
+
 
 data_site.register(ItemDistribution, ItemDistribution_admin)
 
@@ -443,6 +467,7 @@ class Resource_admin(MultiDBModelAdmin):
 
 data_site.register(Resource, Resource_admin)
 
+
 class ForecastYear_admin(MultiDBModelAdmin):
     model = ForecastYear
     raw_id_fields = ('item', 'location', 'customer')
@@ -469,9 +494,10 @@ class ForecastVersion_admin(MultiDBModelAdmin):
 
 data_site.register(ForecastVersion, ForecastVersion_admin)
 
+
 class Forecast_admin(MultiDBModelAdmin):
     model = Forecast
-    raw_id_fields = ('item', 'location', 'customer','version')
+    raw_id_fields = ('item', 'location', 'customer', 'version')
     save_on_top = True
     exclude = ('source', 'create_user')
     tabs = [
@@ -480,9 +506,10 @@ class Forecast_admin(MultiDBModelAdmin):
     ]
 
     def save_model(self, request, obj, form, change):
-      # Tell Django to save objects to the 'other' database.
-      obj.create_user = request.user
-      super().save_model(request,obj,form,change)
+        # Tell Django to save objects to the 'other' database.
+        obj.create_user = request.user
+        super().save_model(request, obj, form, change)
+
 
 data_site.register(Forecast, Forecast_admin)
 
@@ -559,7 +586,7 @@ class DistributionOrder_admin(MultiDBModelAdmin):
     fieldsets = (
         (None, {
             'fields': (
-            'reference', 'item', 'origin', 'destination', 'quantity', 'shipping_date', 'receipt_date', 'status',)}),
+                'reference', 'item', 'origin', 'destination', 'quantity', 'shipping_date', 'receipt_date', 'status',)}),
     )
     exclude = (
         'type', 'source', 'criticality', 'delay', 'operation', 'owner', 'color',
@@ -581,7 +608,7 @@ class PurchaseOrder_admin(MultiDBModelAdmin):
     fieldsets = (
         (None, {
             'fields': (
-            'reference', 'item', 'location', 'supplier', 'quantity', 'ordering_date', 'receipt_date', 'status',)}),
+                'reference', 'item', 'location', 'supplier', 'quantity', 'ordering_date', 'receipt_date', 'status',)}),
     )
     exclude = (
         'type', 'source', 'criticality', 'delay', 'operation', 'owner', 'color',

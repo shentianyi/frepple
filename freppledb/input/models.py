@@ -283,8 +283,7 @@ class Customer(AuditModel, HierarchyModel):
 
 
 class Item(AuditModel, HierarchyModel):
-
-    type_status = {'FG': enum.FgStatus.to_tuple(), 'RM': enum.RmStatus.to_tuple(), 'WIP': ()}
+    # type_status = {'FG': enum.FgStatus.to_tuple(), 'RM': enum.RmStatus.to_tuple(), 'WIP': ()}
 
     # Database fields
     # 设置外键显示的值
@@ -297,7 +296,8 @@ class Item(AuditModel, HierarchyModel):
     barcode = models.CharField(_('barcode'), max_length=300, db_index=True, null=True, blank=True)
     type = models.CharField(_('type'), max_length=20, choices=enum.ItemType.to_tuple(), null=False, blank=False)
     status = models.CharField(_('status'), max_length=20, null=True, blank=True, choices=enum.FgStatus.to_tuple())
-    plan_strategy = models.CharField(_('plan strategy'), max_length=20, null=True, blank=True, choices=enum.ItemProductStrategy.to_tuple())
+    plan_strategy = models.CharField(_('plan strategy'), max_length=20, null=True, blank=True,
+                                     choices=enum.ItemProductStrategy.to_tuple())
     lock_type = models.CharField(_('lock type'), max_length=20, null=True, blank=True, choices=enum.LockType.to_tuple(),
                                  default="unlocked")
     lock_expire_at = models.DateField(_('lock expire at'), null=True, blank=True)
@@ -352,6 +352,109 @@ class Item(AuditModel, HierarchyModel):
         ordering = ['id']
 
 
+class ItemLocation(AuditModel):
+    """物料地点"""
+    # # 设置外键显示的值
+    # display_key = 'nr'
+    # # 设置外键导入的值
+    # foreign_input_key = 'nr'
+    id = models.AutoField(_('id'), help_text=_('Unique identifier'), primary_key=True)
+    item = models.ForeignKey(
+        Item, verbose_name=_('sale item'),
+        db_index=True, related_name='itemlocation_item',
+        null=False, blank=False, on_delete=models.CASCADE)
+
+    location = models.ForeignKey(
+        Location, verbose_name=_('location'),
+        db_index=True, related_name='itemlocation_location',
+        null=False, blank=False, on_delete=models.CASCADE)
+    type = models.CharField(_('type'), max_length=20, choices=enum.ItemType.to_tuple(), null=False, blank=False)
+    status = models.CharField(_('status'), max_length=20, null=True, blank=True, choices=enum.FgStatus.to_tuple())
+    plan_strategy = models.CharField(_('plan strategy'), max_length=20, null=True, blank=True,
+                                     choices=enum.ItemProductStrategy.to_tuple())
+    lock_type = models.CharField(_('lock type'), max_length=20, null=True, blank=True, choices=enum.LockType.to_tuple(),
+                                 default="unlocked")
+    lock_expire_at = models.DateField(_('lock expire at'), null=True, blank=True)
+    inventory_qty = models.DecimalField(_('inventory qty'), max_digits=20, decimal_places=8, null=True, blank=True)
+    available_inventory = models.DecimalField(_('available inventory'), max_digits=20, decimal_places=8, null=True,
+                                              blank=True)
+    inventory_cost = models.DecimalField(_('inventory cost'), max_digits=20, decimal_places=8, null=True, blank=True)
+    price_abc = models.CharField(_('price abc'), max_length=20, null=True, blank=True, choices=enum.AbcType.to_tuple())
+    qty_abc = models.CharField(_('qty abc'), max_length=20, null=True, blank=True, choices=enum.AbcType.to_tuple())
+
+    cost = models.DecimalField(
+        _('cost'), null=True, blank=True,
+        max_digits=20, decimal_places=8)
+    gross_weight = models.DecimalField(_('gross weight'), max_digits=20, decimal_places=8, null=True, blank=True)
+    net_weight = models.DecimalField(_('net weight'), max_digits=20, decimal_places=8, null=True, blank=True)
+    physical_unit = models.CharField(_('physical unit'), max_length=20, null=True, blank=True)
+    project_nr = models.CharField(_('project nr'), max_length=300, primary_key=False, db_index=True, null=True,
+                                  blank=True, )
+    moq = models.DecimalField(_('MOQ'), max_digits=20, decimal_places=8)
+
+    order_unit_qty = models.DecimalField(_('order unit qty'), max_digits=20, decimal_places=8, default=0)
+    order_max_qty = models.DecimalField(_('order max qty'), max_digits=20, decimal_places=8, default=0)
+    product_time = models.DecimalField(_('product time'), max_digits=20, decimal_places=8, default=0, null=True,
+                                       blank=True)
+    load_time = models.DecimalField(_('load time'), null=True, max_digits=20, decimal_places=8, default=0,
+                                    blank=True)
+    transit_time = models.DecimalField(_('transit time'), max_digits=20, decimal_places=8, default=0, null=True,
+                                       blank=True)
+    receive_time = models.DecimalField(_('receive time'), max_digits=20, decimal_places=8, default=0, null=True,
+                                       blank=True)
+    mpq = models.DecimalField(_('mpq'), max_digits=20, decimal_places=8, null=True, blank=True)
+    earliest_order_date = models.DateField(_('earliest order date'), null=True, blank=True)
+    plan_supplier_date = models.DateField(_('plan supplier date'), null=True, blank=True)
+    plan_load_date = models.DateField(_('plan load date'), null=True, blank=True)
+    plan_receive_date = models.DateField(_('plan receive date'), null=True, blank=True)
+
+    outer_package_num = models.IntegerField(_('outer package num'), null=True, blank=True)
+    pallet_num = models.IntegerField(_('pallet num'), null=True, blank=True)
+    outer_package_gross_weight = models.DecimalField(_('outer package gross weight'), max_digits=20, decimal_places=8,
+                                                     null=True, blank=True)
+    pallet_gross_weight = models.DecimalField(_('pallet gross weight'), max_digits=20, decimal_places=8, null=True,
+                                              blank=True)
+    outer_package_volume = models.DecimalField(_('outer package volume'), max_digits=20, decimal_places=8, null=True,
+                                               blank=True)
+    pallet_volume = models.DecimalField(_('pallet volume'), max_digits=20, decimal_places=8, null=True, blank=True)
+    plan_list_date = models.DateField(_('plan list date'), db_index=True, null=True, blank=True, )
+    plan_delist_date = models.DateField(_('plan delist date'), db_index=True, null=True, blank=True)
+    category = models.CharField(_('category'), max_length=300, null=True, blank=True, db_index=True)
+    subcategory = models.CharField(_('subcategory'), max_length=300, null=True, blank=True, db_index=True)
+    description = models.CharField(_('description'), max_length=500, null=True, blank=True)
+
+    def __str__(self):
+        return '%s - %s' % (
+            self.item.nr if self.item else 'No item',
+            self.location.nr if self.location else 'Any location'
+        )
+
+    class Manager(MultiDBManager):
+        def get_by_natural_key(self, item, location):
+            return self.get(item=item, location=location)
+
+    def natural_key(self):
+        return self.item, self.location
+
+    objects = Manager()
+
+    class Meta(AuditModel.Meta):
+        db_table = 'itemlocation'
+        verbose_name = _('item location')
+        verbose_name_plural = _('item locations')
+        unique_together = (('item', 'location'),)
+        ordering = ['id']
+
+    def wd2cd(self):
+        calendar = self.location.available
+        return Calendar.cd(calendar, datetime.now().date(), self.total_wds())
+
+    def total_wds(self):
+        return reduce(lambda x, y: x + y, map(lambda x: x if x else 0,
+                                              [self.product_time, self.load_time, self.transit_time,
+                                               self.receive_time]))
+
+
 class ItemCustomer(AuditModel):
     id = models.AutoField(_('id'), help_text=_('Unique identifier'), primary_key=True)
     sale_item = models.ForeignKey(
@@ -400,23 +503,21 @@ class ItemCustomer(AuditModel):
             return self.get(item=sale_item, product_item=product_item, client=customer, location=location)
 
     def natural_key(self):
-        return (self.sale_item, self.product_item, self.customer, self.location)
+        return self.sale_item, self.product_item, self.customer, self.location
 
     objects = Manager()
 
     class Meta(AuditModel.Meta):
         db_table = 'itemcustomer'
         verbose_name = _('item customer')
-        verbose_name_plural = _('item customer')
+        verbose_name_plural = _('item customers')
         unique_together = (('sale_item', 'product_item', 'customer', 'location'),)
         ordering = ['id']
 
 
 class ItemSuccessor(AuditModel):
     # Database fields
-    # # 设置外键显示的值
-    # display_key = 'nr'
-    # # 设置外键导入的值
+    # 设置外键导入的值
     # foreign_input_key = 'nr'
 
     id = models.AutoField(_('id'), help_text=_('Unique identifier'), primary_key=True)
@@ -429,7 +530,8 @@ class ItemSuccessor(AuditModel):
         Item, verbose_name=_('item successor'),
         db_index=True, related_name='itemsuccessor_successor',
         null=False, blank=False, on_delete=models.CASCADE)
-
+    relation_type = models.CharField(_('relation type'), max_length=20, choices=enum.RelationType.to_tuple(),
+                                     null=False, blank=False)
     priority = models.IntegerField(_('priority'), default=0)
     ratio = models.DecimalField(
         _('ratio'), max_digits=20, decimal_places=8, default=100,
@@ -462,11 +564,11 @@ class ItemSuccessor(AuditModel):
         db_table = 'itemsuccessor'
         verbose_name = _('item successor')
         verbose_name_plural = _('item successors')
+
         ordering = ['id']
 
 
 class Operation(AuditModel):
-
     id = models.AutoField(_('id'), primary_key=True)
     nr = models.CharField(_('nr'), max_length=300, db_index=True, unique=True)
     name = models.CharField(_('name'), max_length=300, primary_key=False, db_index=True)
@@ -774,7 +876,6 @@ class SetupRule(AuditModel):
 
 
 class Resource(AuditModel, HierarchyModel):
-
     # Database fields
     id = models.AutoField(_('id'), help_text=_('Unique identifier'), primary_key=True)
 
@@ -943,7 +1044,6 @@ class ResourceSkill(AuditModel):
 
 
 class OperationMaterial(AuditModel):
-
     # Database fields
     id = models.AutoField(_('id'), primary_key=True)
     operation = models.ForeignKey(
@@ -988,7 +1088,6 @@ class OperationMaterial(AuditModel):
     )
     alternative_process_mode = models.CharField(
         _('alternative process mode'), max_length=20, null=True, blank=True, choices=enum.OperationMode.to_tuple())
-
 
     class Manager(MultiDBManager):
         def get_by_natural_key(self, operation, item, effective_start):
@@ -1226,7 +1325,7 @@ class ItemSupplier(AuditModel):
             return self.get(item=item, supplier=supplier)
 
     def natural_key(self):
-        return (self.item, self.supplier)
+        return self.item, self.supplier
 
     objects = Manager()
 
@@ -1876,7 +1975,6 @@ class DistributionOrder(OperationPlan):
     receipt_date = AliasDateTimeField(db_column='enddate', verbose_name=_('receipt date'), null=True, blank=True)
 
     class DistributionOrderManager(OperationPlan.Manager):
-
         def get_queryset(self):
             return super(DistributionOrder.DistributionOrderManager, self).get_queryset() \
                 .filter(type='DO')
@@ -1900,7 +1998,6 @@ class PurchaseOrder(OperationPlan):
     receipt_date = AliasDateTimeField(db_column='enddate', verbose_name=_('receipt date'), null=True, blank=True)
 
     class PurchaseOrderManager(OperationPlan.Manager):
-
         def get_queryset(self):
             return super(PurchaseOrder.PurchaseOrderManager, self).get_queryset() \
                 .filter(type='PO')
@@ -1922,7 +2019,6 @@ class PurchaseOrder(OperationPlan):
 
 class ManufacturingOrder(OperationPlan):
     class ManufacturingOrderManager(OperationPlan.Manager):
-
         def get_queryset(self):
             return super(ManufacturingOrder.ManufacturingOrderManager, self).get_queryset() \
                 .filter(type='MO')
@@ -1947,7 +2043,6 @@ class ManufacturingOrder(OperationPlan):
 
 class DeliveryOrder(OperationPlan):
     class DeliveryOrderManager(OperationPlan.Manager):
-
         def get_queryset(self):
             return super(DeliveryOrder.DeliveryOrderManager, self).get_queryset() \
                 .filter(demand__isnull=False, owner__isnull=True)

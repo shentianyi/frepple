@@ -91,6 +91,11 @@ menu.addItem(
   "sales", "locations", url="/data/input/location/",
   report=freppledb.input.views.LocationList, index=1150, model=Location
   )
+
+menu.addItem(
+  "sales", "item locations", url="/data/input/itemlocation/",
+  report=freppledb.input.views.ItemLocationList, index=1151, model=Location
+  )
 menu.addItem(
   "sales", "customer", url="/data/input/customer/",
   report=freppledb.input.views.CustomerList, index=1200, model=Customer
