@@ -31,9 +31,24 @@ class ItemType(BaseEnum):
     RM = _('RM')
 
 
+class DeliveryOrderType(BaseEnum):
+    outbound = _('outbound')
+    inbound = _('inbound')
+    other = _('other')
+
+
+class DeliveryOrderStatus(BaseEnum):
+    open = _('open')
+    git = _('git')
+    partially_delivered = _('partially delivered')
+    fully_delivered = _('fully delivered')
+    rejected = _('rejected')
+    canceled = _('canceled')
+
+
 class SalesOrderStatus(BaseEnum):
     open = _('open')
-    close = _('close')
+    closed = _('closed')
     canceled = _('canceled')
     invoiced = _('invoiced')
 
@@ -114,3 +129,10 @@ class DateType(BaseEnum):
     W = _('W')
     M = _('M')
 
+
+class WorkOrderStatus(BaseEnum):
+    """生产工单状态"""
+    init = _('init')
+    open =_('open')
+    closed = _('closed')
+    canceled = _('canceled')

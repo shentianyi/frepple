@@ -45,3 +45,15 @@ msgstr "suboperation"
 
 msgid "operation_display"
 msgstr "operation"
+
+msgid "source_location_display"
+msgstr "source location"
+
+msgid "destination_location_display"
+msgstr "destination location"
+
+msgid "deliver_display"
+msgstr "deliver"
+
+msgid "deliver_source_display"
+msgstr "deliver source"

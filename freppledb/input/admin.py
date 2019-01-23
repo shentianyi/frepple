@@ -18,7 +18,8 @@
 from django.utils.translation import ugettext_lazy as _
 
 from freppledb.input.models import Resource, Operation, Location, SetupMatrix, SetupRule, ItemSuccessor, ItemCustomer, \
-    ForecastYear, Forecast, ForecastVersion, ItemLocation, InventoryParameter, SalesOrder, SalesOrderItem
+    ForecastYear, Forecast, ForecastVersion, ItemLocation, InventoryParameter, SalesOrder, SalesOrderItem, \
+    DeliveryOrderItem, PurchaseOrderItem, WorkOrder, WorkOrderItem
 from freppledb.input.models import Buffer, Customer, Demand, Item, OperationResource
 from freppledb.input.models import OperationMaterial, Skill, ResourceSkill, Supplier
 from freppledb.input.models import Calendar, CalendarBucket, ManufacturingOrder, SubOperation
@@ -168,7 +169,6 @@ class Item_admin(MultiDBModelAdmin):
     model = Item
     save_on_top = True
     raw_id_fields = ('owner',)
-    # inlines = [ ItemSupplier_inline, OperationMaterial_inline ]
     exclude = ('source',)
     tabs = [
         {"name": 'edit', "label": _("edit"), "view": "admin:input_item_change", "permissions": "input.change_item"},
@@ -377,6 +377,7 @@ class InventoryParameter_admin(MultiDBModelAdmin):
     model = InventoryParameter
     raw_id_fields = ('location', 'item')
     save_on_top = True
+    exclude = ('source',)
     tabs = [
         {"name": 'edit', "label": _("edit"), "view": "admin:input_inventoryparameter_change",
          "permissions": "input.change_inventoryparameter"},
@@ -616,17 +617,9 @@ data_site.register(DistributionOrder, DistributionOrder_admin)
 
 class PurchaseOrder_admin(MultiDBModelAdmin):
     model = PurchaseOrder
-    raw_id_fields = ('item', 'supplier',)
+    raw_id_fields = ('location', 'supplier')
     save_on_top = True
-    fieldsets = (
-        (None, {
-            'fields': (
-                'reference', 'item', 'location', 'supplier', 'quantity', 'ordering_date', 'receipt_date', 'status',)}),
-    )
-    exclude = (
-        'type', 'source', 'criticality', 'delay', 'operation', 'owner', 'color',
-        'origin', 'destination', 'demand', 'name', 'due', 'startdate', 'enddate'
-    )
+    exclude = ('source',)
     tabs = [
         {"name": 'edit', "label": _("edit"), "view": "admin:input_purchaseorder_change",
          "permissions": "input.change_purchaseorder"},
@@ -636,19 +629,53 @@ class PurchaseOrder_admin(MultiDBModelAdmin):
 data_site.register(PurchaseOrder, PurchaseOrder_admin)
 
 
+class PurchaseOrderItem_admin(MultiDBModelAdmin):
+    model = PurchaseOrderItem
+    raw_id_fields = ('item', 'purchase_order')
+    save_on_top = True
+    exclude = ('source',)
+    tabs = [
+        {"name": 'edit', "label": _("edit"), "view": "admin:input_purchaseorderitem_change",
+         "permissions": "input.change_purchaseorderitem"},
+    ]
+
+
+data_site.register(PurchaseOrderItem, PurchaseOrderItem_admin)
+
+
+class WorkOrder_admin(MultiDBModelAdmin):
+    model = WorkOrder
+    raw_id_fields = ('location',)
+    save_on_top = True
+    exclude = ('source',)
+    tabs = [
+        {"name": 'edit', "label": _("edit"), "view": "admin:input_workorder_change",
+         "permissions": "input.change_workorder"},
+    ]
+
+
+data_site.register(WorkOrder, WorkOrder_admin)
+
+
+class WorkOrderItem_admin(MultiDBModelAdmin):
+    model = WorkOrderItem
+    raw_id_fields = ('item', 'workorder')
+    save_on_top = True
+    exclude = ('source',)
+    tabs = [
+        {"name": 'edit', "label": _("edit"), "view": "admin:input_workorderitem_change",
+         "permissions": "input.change_workorderitem"},
+    ]
+
+
+data_site.register(WorkOrderItem, WorkOrderItem_admin)
+
+
 class DeliveryOrder_admin(MultiDBModelAdmin):
     model = DeliveryOrder
-    raw_id_fields = ('item', 'demand')
+    raw_id_fields = ('source_location', 'destination_location', 'deliver', 'deliver_source')
     save_on_top = True
-    fieldsets = (
-        (None, {
-            'fields': ('reference', 'demand', 'item', 'location', 'quantity', 'status',)}),
-    )
-    exclude = (
-        'type', 'source', 'criticality', 'delay', 'operation', 'owner', 'color'
-                                                                        'origin', 'destination', 'name', 'due',
-        'startdate', 'enddate', 'supplier'
-    )
+    exclude = ('source',)
     tabs = [
         {"name": 'edit', "label": _("edit"), "view": "admin:input_deliveryorder_change",
          "permissions": "input.change_deliveryorder"},
@@ -656,6 +683,20 @@ class DeliveryOrder_admin(MultiDBModelAdmin):
 
 
 data_site.register(DeliveryOrder, DeliveryOrder_admin)
+
+
+class DeliveryOrderItem_admin(MultiDBModelAdmin):
+    model = DeliveryOrderItem
+    raw_id_fields = ('item', 'delivery_order', 'deliver_source')
+    save_on_top = True
+    exclude = ('source',)
+    tabs = [
+        {"name": 'edit', "label": _("edit"), "view": "admin:input_deliveryorderitem_change",
+         "permissions": "input.change_deliveryorderitem"},
+    ]
+
+
+data_site.register(DeliveryOrderItem, DeliveryOrderItem_admin)
 
 
 class Demand_admin(MultiDBModelAdmin):
@@ -689,6 +730,7 @@ class SalesOrder_admin(MultiDBModelAdmin):
     model = SalesOrder
     raw_id_fields = ('customer', 'location')
     save_on_top = True
+    exclude = ('source',)
     tabs = [
         {"name": 'edit', "label": _("edit"), "view": "admin:input_salesorder_change",
          "permissions": "input.change_salesorder"},
@@ -702,6 +744,7 @@ class SalesOrderItem_admin(MultiDBModelAdmin):
     model = SalesOrderItem
     raw_id_fields = ('sales_order', 'item')
     save_on_top = True
+    exclude = ('source',)
     tabs = [
         {"name": 'edit', "label": _("edit"), "view": "admin:input_salesorderitem_change",
          "permissions": "input.change_salesorderitem"},
