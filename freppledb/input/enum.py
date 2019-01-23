@@ -123,6 +123,8 @@ class ForecastCommentStatus(BaseEnum):
     release = _('forecast release')
     confirm = _('forecast confirm')
 
+    CAN_CALCULATE_MDS_STATUS = ('confirm',)
+
 
 class DateType(BaseEnum):
     """时间类型"""

@@ -15,9 +15,10 @@
 # License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 from django.db import models
+from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
-from freppledb.common.models import User
+from freppledb.common.models import User, AuditModel, MultiDBManager
 
 import logging
 logger = logging.getLogger(__name__)
@@ -63,3 +64,28 @@ class Task(models.Model):
     # Add record to the database
     # Check if a worker is present. If not launch one.
     return 1
+
+
+class DataStagingLog(AuditModel):
+  id = models.AutoField(_('identifier'), primary_key=True, editable=False)
+  nr = models.CharField(_('nr'), max_length=300, editable=False, db_index=True)
+  create_user_nr = models.CharField(_('create_user_nr'), max_length=100,editable=False,db_index=True,blank= True, null=True)
+  input_data = models.TextField(_('input_data'),blank= True, null=True)
+  output_data = models.TextField(_('output_data'),blank= True, null=True)
+  result = models.BooleanField(_('result'), default=False)
+  message = models.TextField(_('message'),blank= True, null=True)
+  start_at = models.DateTimeField(_('start_at'),blank= True, null=True)
+  end_at = models.DateTimeField(_('end_at'),blank= True, null=True)
+
+
+  class Manager(MultiDBManager):
+    pass
+
+  objects = Manager()
+
+  class Meta(AuditModel.Meta):
+        db_table = 'data_staging_log'
+        verbose_name = _('data_staging_log')
+        verbose_name_plural = _('data_staging_logs')
+
+
