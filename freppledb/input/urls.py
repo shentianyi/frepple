@@ -62,6 +62,9 @@ urlpatterns = [
   url(r'^data/input/manufacturingorder/$', freppledb.input.views.ManufacturingOrderList.as_view(), name="input_manufacturingorder_changelist"),
   url(r'^data/input/manufacturingorder/location/(.+)/$', freppledb.input.views.ManufacturingOrderList.as_view(), name="input_manufacturingorder_by_location"),
   url(r'^data/input/purchaseorder/$', freppledb.input.views.PurchaseOrderList.as_view(), name="input_purchaseorder_changelist"),
+  url(r'^data/input/purchaseorderitem/$', freppledb.input.views.PurchaseOrderItemList.as_view(), name="input_purchaseorderitem_changelist"),
+  url(r'^data/input/workorder/$', freppledb.input.views.WorkOrderList.as_view(), name="input_workorder_changelist"),
+  url(r'^data/input/workorderitem/$', freppledb.input.views.WorkOrderItemList.as_view(), name="input_workorderitem_changelist"),
   url(r'^data/input/purchaseorder/item/(.+)/$', freppledb.input.views.PurchaseOrderList.as_view(), name="input_purchaseorder_by_item"),
   url(r'^data/input/purchaseorder/supplier/(.+)/$', freppledb.input.views.PurchaseOrderList.as_view(), name="input_purchaseorder_by_supplier"),
   url(r'^data/input/purchaseorder/location/(.+)/$', freppledb.input.views.PurchaseOrderList.as_view(), name="input_purchaseorder_by_location"),
@@ -75,6 +78,7 @@ urlpatterns = [
   url(r'^data/input/itemdistribution/$', freppledb.input.views.ItemDistributionList.as_view(), name="input_itemdistribution_changelist"),
   url(r'^data/input/deliveryorder/item/(.+)/$', freppledb.input.views.DeliveryOrderList.as_view(), name="input_deliveryorder_by_item"),
   url(r'^data/input/deliveryorder/$', freppledb.input.views.DeliveryOrderList.as_view(), name="input_deliveryorder_changelist"),
+  url(r'^data/input/deliveryorderitem/$', freppledb.input.views.DeliveryOrderItemList.as_view(), name="input_deliveryorderitem_changelist"),
 
   url(r'^data/input/forecastyear/$', freppledb.input.views.ForecastYearList.as_view(), name="input_forecastyear_changelist"),
 
@@ -88,7 +92,6 @@ urlpatterns = [
   url(r'^data/input/forecast/version/(?P<version>(.+))/$',freppledb.input.serializers.ForecastdetailVersionAPI.as_view()),
   url(r'^data/input/buffer/$', freppledb.input.views.BufferList.as_view(), name="input_buffer_changelist"),
   url(r'^data/input/inventoryparameter/$', freppledb.input.views.InventoryParameterList.as_view(), name="input_inventoryparameter_changelist"),
-
 
   # Special reports
   url(r'^supplypath/item/(.+)/$', freppledb.input.views.UpstreamItemPath.as_view(), name="supplypath_item"),
@@ -106,8 +109,6 @@ urlpatterns = [
   # REST API framework
   url(r'^api/input/resource/$', freppledb.input.serializers.ResourceAPI.as_view()),
   url(r'^api/input/location/$', freppledb.input.serializers.LocationAPI.as_view()),
-  # url(r'^api/input/location/$', freppledb.input.api.views.LocationAPI.as_view()),
-
   url(r'^api/input/customer/$', freppledb.input.serializers.CustomerAPI.as_view()),
   url(r'^api/input/demand/$', freppledb.input.serializers.DemandAPI.as_view()),
   url(r'^api/input/item/$', freppledb.input.serializers.ItemAPI.as_view()),
@@ -120,9 +121,7 @@ urlpatterns = [
   url(r'^api/input/setuprule/$', freppledb.input.serializers.SetupRuleAPI.as_view()),
   url(r'^api/input/suboperation/$', freppledb.input.serializers.SubOperationAPI.as_view()),
   url(r'^api/input/manufacturingorder/$', freppledb.input.serializers.ManufacturingOrderAPI.as_view()),
-  url(r'^api/input/purchaseorder/$', freppledb.input.serializers.PurchaseOrderAPI.as_view()),
   url(r'^api/input/distributionorder/$', freppledb.input.serializers.DistributionOrderAPI.as_view()),
-  url(r'^api/input/deliveryorder/$', freppledb.input.serializers.DeliveryOrderAPI.as_view()),
   url(r'^api/input/skill/$', freppledb.input.serializers.SkillAPI.as_view()),
   url(r'^api/input/resourceskill/$', freppledb.input.serializers.ResourceSkillAPI.as_view()),
   url(r'^api/input/supplier/$', freppledb.input.serializers.SupplierAPI.as_view()),
@@ -131,26 +130,29 @@ urlpatterns = [
   url(r'^api/input/itemcustomer/$', freppledb.input.serializers.ItemCustomerAPI.as_view()),
   url(r'^api/input/itemlocation/$', freppledb.input.serializers.ItemLocationAPI.as_view()),
   url(r'^api/input/itemsuccessor/$', freppledb.input.serializers.ItemSuccessorAPI.as_view()),
-
   url(r'^api/input/forecastyear/$', freppledb.input.serializers.ForecastYearAPI.as_view()),
   url(r'^api/input/forecastversion/$', freppledb.input.serializers.ForecastVersionAPI.as_view()),
   url(r'^api/input/forecast/$', freppledb.input.serializers.ForecastAPI.as_view()),
+  url(r'^api/input/inventoryparameter/$',freppledb.input.serializers.InventoryParameterAPI.as_view()),
+  url(r'^api/input/salesorder/$',freppledb.input.serializers.SalesOrderAPI.as_view()),
+  url(r'^api/input/salesorderitem/$',freppledb.input.serializers.SalesOrderItemAPI.as_view()),
+  url(r'^api/input/deliveryorder/$', freppledb.input.serializers.DeliveryOrderAPI.as_view()),
+  url(r'^api/input/deliveryorderitem/$', freppledb.input.serializers.DeliveryOrderItemAPI.as_view()),
+  url(r'^api/input/purchaseorder/$', freppledb.input.serializers.PurchaseOrderAPI.as_view()),
+  url(r'^api/input/purchaseorderitem/$', freppledb.input.serializers.PurchaseOrderItemAPI.as_view()),
+  url(r'^api/input/workorder/$', freppledb.input.serializers.WorkOrderAPI.as_view()),
+  url(r'^api/input/workorderitem/$', freppledb.input.serializers.WorkOrderItemAPI.as_view()),
 
+  #　CMARK 主键路由
   url(r'^api/input/buffer/(?P<pk>(.+))/$', freppledb.input.serializers.BufferdetailAPI.as_view()),
   url(r'^api/input/resource/(?P<pk>(.+))/$', freppledb.input.serializers.ResourcedetailAPI.as_view()),
   url(r'^api/input/forecastyear/(?P<pk>(.+))/$', freppledb.input.serializers.ForecastYeardetailAPI.as_view()),
   url(r'^api/input/forecastversion/(?P<pk>(.+))/$', freppledb.input.serializers.ForecastVersiondetailAPI.as_view()),
   url(r'^api/input/forecast/(?P<pk>(.+))/$', freppledb.input.serializers.ForecastdetailAPI.as_view()),
-
-  #　CMARK 主键路由
   url(r'^api/input/location/(?P<pk>(.+))/$', freppledb.input.serializers.LocationdetailAPI.as_view()),
-  #　CMARK 自然键路由
-  url(r'^api/input/nk/location/(?P<nk>(.+))/$', freppledb.input.serializers.LocationdetailNkAPI.as_view()),
   url(r'^api/input/customer/(?P<pk>(.+))/$', freppledb.input.serializers.CustomerdetailAPI.as_view()),
-  url(r'^api/input/nk/customer/(?P<nk>(.+))/$', freppledb.input.serializers.LocationdetailNkAPI.as_view()),
   url(r'^api/input/demand/(?P<pk>(.+))/$', freppledb.input.serializers.DemanddetailAPI.as_view()),
   url(r'^api/input/item/(?P<pk>(.+))/$', freppledb.input.serializers.ItemdetailAPI.as_view()),
-  url(r'^api/input/nk/item/(?P<nk>(.+))/$', freppledb.input.serializers.ItemdetailNkAPI.as_view()),
   url(r'^api/input/operationresource/(?P<pk>(.+))/$', freppledb.input.serializers.OperationResourcedetailAPI.as_view()),
   url(r'^api/input/operationmaterial/(?P<pk>(.+))/$', freppledb.input.serializers.OperationMaterialdetailAPI.as_view()),
   url(r'^api/input/calendar/(?P<pk>(.+))/$', freppledb.input.serializers.CalendardetailAPI.as_view()),
@@ -160,17 +162,29 @@ urlpatterns = [
   url(r'^api/input/setuprule/(?P<pk>(.+))/$', freppledb.input.serializers.SetupRuledetailAPI.as_view()),
   url(r'^api/input/suboperation/(?P<pk>(.+))/$', freppledb.input.serializers.SubOperationdetailAPI.as_view()),
   url(r'^api/input/manufacturingorder/(?P<pk>(.+))/$', freppledb.input.serializers.ManufacturingOrderdetailAPI.as_view()),
-  url(r'^api/input/purchaseorder/(?P<pk>(.+))/$', freppledb.input.serializers.PurchaseOrderdetailAPI.as_view()),
   url(r'^api/input/distributionorder/(?P<pk>(.+))/$', freppledb.input.serializers.DistributionOrderdetailAPI.as_view()),
-  url(r'^api/input/deliveryorder/(?P<pk>(.+))/$', freppledb.input.serializers.DeliveryOrderdetailAPI.as_view()),
   url(r'^api/input/skill/(?P<pk>(.+))/$', freppledb.input.serializers.SkilldetailAPI.as_view()),
   url(r'^api/input/resourceskill/(?P<pk>(.+))/$', freppledb.input.serializers.ResourceSkilldetailAPI.as_view()),
   url(r'^api/input/supplier/(?P<pk>(.+))/$', freppledb.input.serializers.SupplierdetailAPI.as_view()),
-  url(r'^api/input/nk/supplier/(?P<nk>(.+))/$', freppledb.input.serializers.SupplierdetailNkAPI.as_view()),
   url(r'^api/input/itemsupplier/(?P<pk>(.+))/$', freppledb.input.serializers.ItemSupplierdetailAPI.as_view()),
   url(r'^api/input/itemdistribution/(?P<pk>(.+))/$', freppledb.input.serializers.ItemDistributiondetailAPI.as_view()),
   url(r'^api/input/itemcustomer/(?P<pk>(.+))/$', freppledb.input.serializers.ItemCustomerdetailAPI.as_view()),
   url(r'^api/input/itemlocation/(?P<pk>(.+))/$', freppledb.input.serializers.ItemLocationDetailAPI.as_view()),
   url(r'^api/input/itemsuccessor/(?P<pk>(.+))/$', freppledb.input.serializers.ItemSuccessordetailAPI.as_view()),
+  url(r'^api/input/inventoryparameter/(?P<pk>(.+))/$', freppledb.input.serializers.InventoryParameterDetailAPI.as_view()),
+  url(r'^api/input/salesorder/(?P<pk>(.+))/$', freppledb.input.serializers.SalesOrderDetailAPI.as_view()),
+  url(r'^api/input/salesorderitem/(?P<pk>(.+))/$', freppledb.input.serializers.SalesOrderItemDetailAPI.as_view()),
+  url(r'^api/input/deliveryorder/(?P<pk>(.+))/$', freppledb.input.serializers.DeliveryOrderDetailAPI.as_view()),
+  url(r'^api/input/deliveryorderitem/(?P<pk>(.+))/$', freppledb.input.serializers.DeliveryOrderItemDetailAPI.as_view()),
+  url(r'^api/input/purchaseorder/(?P<pk>(.+))/$', freppledb.input.serializers.PurchaseOrderDetailAPI.as_view()),
+  url(r'^api/input/purchaseorderitem/(?P<pk>(.+))/$', freppledb.input.serializers.PurchaseOrderItemDetailAPI.as_view()),
+  url(r'^api/input/workorder/(?P<pk>(.+))/$', freppledb.input.serializers.WorkOrderDetailAPI.as_view()),
+  url(r'^api/input/workorderitem/(?P<pk>(.+))/$', freppledb.input.serializers.WorkOrderItemDetailAPI.as_view()),
 
-  ]
+  #　CMARK 自然键路由
+  url(r'^api/input/nk/location/(?P<nk>(.+))/$', freppledb.input.serializers.LocationdetailNkAPI.as_view()),
+  url(r'^api/input/nk/customer/(?P<nk>(.+))/$', freppledb.input.serializers.LocationdetailNkAPI.as_view()),
+  url(r'^api/input/nk/item/(?P<nk>(.+))/$', freppledb.input.serializers.ItemdetailNkAPI.as_view()),
+  url(r'^api/input/nk/supplier/(?P<nk>(.+))/$', freppledb.input.serializers.SupplierdetailNkAPI.as_view()),
+
+]

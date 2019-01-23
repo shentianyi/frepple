@@ -29,6 +29,45 @@ msgstr ""
 msgid "Permissions in this scenario"
 msgstr "针对此场景的权限"
 
+msgid "init"
+msgstr "新建"
+
+msgid "finished qty"
+msgstr "已生产数量"
+
+msgid "work orders"
+msgstr "生产工单"
+
+msgid "work order items"
+msgstr "生产工单项"
+
+msgid "source location"
+msgstr "来源地点"
+
+msgid "delivery orders"
+msgstr "运单"
+
+msgid "delivery order items"
+msgstr "运单项"
+
+msgid "destination location"
+msgstr "目的地点"
+
+msgid "deliver"
+msgstr "客户/供应商/地点"
+
+msgid "deliver source"
+msgstr "预测/销售订单/采购订单"
+
+msgid "schedule arrive at"
+msgstr "预计到达时间"
+
+msgid "start ship at"
+msgstr "开始发运时间"
+
+msgid "actual arrive at"
+msgstr "实际到达时间"
+
 msgid "min num per"
 msgstr "单位最小量"
 
@@ -157,6 +196,29 @@ msgstr "联系人"
 
 msgid "email"
 msgstr "邮箱"
+
+#:input/models.py:2180
+msgid "outbound"
+msgstr "发给客户"
+
+msgid "inbound"
+msgstr "来自供应商"
+
+msgid "other"
+msgstr "其它"
+
+#:input/models.py:2083
+msgid "git"
+msgstr "在途"
+
+msgid "partially delivered"
+msgstr "部分发运完成"
+
+msgid "fully delivered"
+msgstr "全部发运完成"
+
+msgid "rejected"
+msgstr "被拒绝"
 
 #: common/admin.py:39
 msgid "Important dates"
@@ -1606,7 +1668,7 @@ msgstr ""
 
 #: execute/management/commands/exporttofolder.py:532
 #: execute/management/commands/importfromfolder.py:583
-msgid "Close"
+msgid "close"
 msgstr ""
 
 #: execute/management/commands/exporttofolder.py:532
@@ -2444,6 +2506,12 @@ msgstr "最小运输量"
 #: input/views.py:767
 msgid "rop cover period"
 msgstr "ROP覆盖天数"
+
+msgid "rop"
+msgstr "ROP量"
+
+msgid "system rop"
+msgstr "系统ROP量"
 
 #: input/views.py:768
 msgid "safetysotck cover period"
@@ -3378,13 +3446,16 @@ msgstr "报价"
 
 #: input/models.py:968 input/views.py:1119
 msgid "open"
-msgstr "开放"
+msgstr ""
 
 #: input/models.py:969 input/models.py:1060 input/views.py:1124
 #: input/views.py:1450 input/views.py:1691 input/views.py:1927
 #: inventoryplanning/templates/inventoryplanning/drp.html:2070
 msgid "closed"
-msgstr "已结束"
+msgstr "关闭"
+
+msgid "invoiced"
+msgstr "开票"
 
 #: input/models.py:994 input/models.py:1144 input/views.py:1001
 #: output/widget.py:71 output/widget.py:135 quoting/views.py:51
@@ -3466,9 +3537,6 @@ msgstr "计划数量"
 
 msgid "deliver qty"
 msgstr "发运数量"
-
-msgid "due"
-msgstr "交期"
 
 msgid "max lateness"
 msgstr "最大延期天数"

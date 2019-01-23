@@ -72,7 +72,6 @@ DATABASES = {
         'FILEUPLOADFOLDER': os.path.normpath(os.path.join(FREPPLE_LOGDIR, 'data', 'default')),
         'SECRET_WEBTOKEN_KEY': SECRET_KEY,
     },
-    # # datastaging 数据库
     # 'datastage':{
     #     'ENGINE': 'django.db.backends.postgresql',
     #     'NAME': 'frepple_datastaging_dev',

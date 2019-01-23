@@ -445,6 +445,8 @@ class ItemLocationAPI(frePPleListCreateAPIView):
 class ItemLocationDetailAPI(frePPleRetrieveUpdateDestroyAPIView):
     queryset = freppledb.input.models.ItemLocation.objects.all()
     serializer_class = ItemLocationSerializer
+
+
 # CMARK end itemlocation API-----------------------------------------
 
 
@@ -847,6 +849,590 @@ class SubOperationAPI(frePPleListCreateAPIView):
 class SubOperationdetailAPI(frePPleRetrieveUpdateDestroyAPIView):
     queryset = freppledb.input.models.SubOperation.objects.all()
     serializer_class = SubOperationSerializer
+
+
+# CMARK start InventoryParameter API-------------------------------------------------------
+class InventoryParameterFilter(filters.FilterSet):
+    created_at__gte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='gte')
+    created_at__lte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='lte')
+    updated_at__gte = django_filters.DateTimeFilter(field_name="updated_at", lookup_expr='gte')
+    updated_at__lte = django_filters.DateTimeFilter(field_name="updated_at", lookup_expr='lte')
+
+    class Meta:
+        model = freppledb.input.models.InventoryParameter
+        fields = {
+            'id': ['exact', 'in'],
+            'item__nr': ['exact'],
+            'location__nr': ['exact'],
+            'rop_cover_period': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
+            'rop': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
+            'rop_by_system': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
+            'safetystock_cover_period': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
+            'safetysotck_min_qty': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
+            'safetysotck_max_qty': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
+            'safetystock_qty_by_system': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
+            'service_level': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
+        }
+        filter_fields = (
+            'id', 'item__nr', 'location__nr', 'rop_cover_period', 'rop', 'rop_by_system',
+            'safetystock_cover_period', 'safetysotck_min_qty', 'safetysotck_max_qty', 'safetystock_qty_by_system',
+            'service_level', 'created_at', 'updated_at')
+
+
+class InventoryParameterSerializer(BulkSerializerMixin, ModelSerializer):
+    item = ItemOwnerSerializer(many=False, allow_null=True)
+    location = LocationOwnerSerializer(many=False, allow_null=True)
+    # id readonly=False 不可以缺少
+    id = serializers.IntegerField(read_only=False)
+
+    class Meta:
+        model = freppledb.input.models.InventoryParameter
+        fields = '__all__'
+        list_serializer_class = BulkListSerializer
+        update_lookup_field = 'id'
+        partial = True
+
+
+class InventoryParameterAPI(frePPleListCreateAPIView):
+    queryset = freppledb.input.models.InventoryParameter.objects.all()
+    serializer_class = InventoryParameterSerializer
+    filter_class = InventoryParameterFilter
+    ordering_fields = ('id',)
+    pagination_class = CustomerNumberPagination
+
+
+class InventoryParameterDetailAPI(frePPleRetrieveUpdateDestroyAPIView):
+    queryset = freppledb.input.models.InventoryParameter.objects.all()
+    serializer_class = InventoryParameterSerializer
+
+
+# CMARK end InventoryParameter API-------------------------------------------------------
+
+# CMARK start SalesOrder API-------------------------------------------------------
+class SalesOrderFilter(filters.FilterSet):
+    created_at__gte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='gte')
+    created_at__lte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='lte')
+    updated_at__gte = django_filters.DateTimeFilter(field_name="updated_at", lookup_expr='gte')
+    updated_at__lte = django_filters.DateTimeFilter(field_name="updated_at", lookup_expr='lte')
+
+    class Meta:
+        model = freppledb.input.models.SalesOrder
+        fields = {
+            'id': ['exact', 'in'],
+            'nr': ['exact'],
+            'location__nr': ['exact'],
+            'customer__nr': ['exact'],
+            'status': ['exact'],
+            'max_lateness': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
+            'min_shipment': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
+        }
+        filter_fields = (
+            'id', 'nr', 'location__nr', 'customer__nr', 'status', 'max_lateness'
+                                                                  'min_shipment', 'created_at', 'updated_at')
+
+
+class SalesOrderOwnerSerializer(ModelSerializer):
+    location = LocationOwnerSerializer(many=False, allow_null=True)
+    customer = CustomerOwnerSerializer(many=False, allow_null=True)
+
+    class Meta:
+        model = freppledb.input.models.SalesOrder
+        fields = ('id', 'nr', 'location', 'customer')
+        # CMARK 写入参数, 用来更新外键, 如果没有这个配置, 那么产生不可写错误
+        extra_kwargs = {
+            'id': {
+                'read_only': False,
+                'required': False,
+                'allow_null': True
+            },
+            'nr': {
+                'read_only': False,
+                'required': False,
+                'allow_null': True
+            },
+            'location': {'allow_null': True},
+            'customer': {'allow_null': True},
+        }
+
+
+class SalesOrderSerializer(BulkSerializerMixin, ModelSerializer):
+    customer = CustomerOwnerSerializer(many=False, allow_null=True)
+    location = LocationOwnerSerializer(many=False, allow_null=True)
+    # id readonly=False 不可以缺少
+    id = serializers.IntegerField(read_only=False)
+
+    class Meta:
+        model = freppledb.input.models.SalesOrder
+        fields = '__all__'
+        list_serializer_class = BulkListSerializer
+        update_lookup_field = 'id'
+        partial = True
+
+
+class SalesOrderAPI(frePPleListCreateAPIView):
+    queryset = freppledb.input.models.SalesOrder.objects.all()
+    serializer_class = SalesOrderSerializer
+    filter_class = SalesOrderFilter
+    ordering_fields = ('id',)
+    pagination_class = CustomerNumberPagination
+
+
+class SalesOrderDetailAPI(frePPleRetrieveUpdateDestroyAPIView):
+    queryset = freppledb.input.models.SalesOrder.objects.all()
+    serializer_class = SalesOrderSerializer
+
+
+# CMARK end SalesOrderItem API-------------------------------------------------------
+
+
+# CMARK start SalesOrderItem API-------------------------------------------------------
+class SalesOrderItemFilter(filters.FilterSet):
+    created_at__gte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='gte')
+    created_at__lte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='lte')
+    updated_at__gte = django_filters.DateTimeFilter(field_name="updated_at", lookup_expr='gte')
+    updated_at__lte = django_filters.DateTimeFilter(field_name="updated_at", lookup_expr='lte')
+
+    class Meta:
+        model = freppledb.input.models.SalesOrderItem
+        fields = {
+            'id': ['exact', 'in'],
+            'sales_order__nr': ['exact'],
+            'item__nr': ['exact'],
+            'line_no': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
+            'qty': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
+            'schedule_qty': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
+            'deliver_qty': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
+            'due': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
+            'priority': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
+            'status': ['exact'],
+            'max_lateness': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
+            'min_shipment': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
+        }
+        filter_fields = (
+            'id', 'item__nr', 'sales_order__nr', 'line_no', 'qty', 'schedule_qty',
+            'deliver_qty', 'due', 'priority', 'status', 'max_lateness',
+            'min_shipment', 'created_at', 'updated_at')
+
+
+class SalesOrderItemSerializer(BulkSerializerMixin, ModelSerializer):
+    item = ItemOwnerSerializer(many=False, allow_null=True)
+    sales_order = SalesOrderOwnerSerializer(many=False, allow_null=True)
+    # id readonly=False 不可以缺少
+    id = serializers.IntegerField(read_only=False)
+
+    class Meta:
+        model = freppledb.input.models.SalesOrderItem
+        fields = '__all__'
+        list_serializer_class = BulkListSerializer
+        update_lookup_field = 'id'
+        partial = True
+
+
+class SalesOrderItemAPI(frePPleListCreateAPIView):
+    queryset = freppledb.input.models.SalesOrderItem.objects.all()
+    serializer_class = SalesOrderItemSerializer
+    filter_class = SalesOrderItemFilter
+    ordering_fields = ('id',)
+    pagination_class = CustomerNumberPagination
+
+
+class SalesOrderItemDetailAPI(frePPleRetrieveUpdateDestroyAPIView):
+    queryset = freppledb.input.models.SalesOrderItem.objects.all()
+    serializer_class = SalesOrderItemSerializer
+
+
+# CMARK end SalesOrderItem API-------------------------------------------------------
+
+# CMARK start DeliveryOrder API-------------------------------------------------------
+# TODO 未完成，deliver,deliver_source
+class DeliveryOrderFilter(filters.FilterSet):
+    created_at__gte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='gte')
+    created_at__lte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='lte')
+    updated_at__gte = django_filters.DateTimeFilter(field_name="updated_at", lookup_expr='gte')
+    updated_at__lte = django_filters.DateTimeFilter(field_name="updated_at", lookup_expr='lte')
+
+    class Meta:
+        model = freppledb.input.models.DeliveryOrder
+        fields = {
+            'id': ['exact', 'in'],
+            'nr': ['exact'],
+            'source_location__nr': ['exact'],
+            'destination_location__nr': ['exact'],
+            'deliver__nr': ['exact'],
+            'deliver_source__id': ['exact'],
+            'type': ['exact', 'in'],
+            'status': ['exact', 'in'],
+            'schedule_arrive_at': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
+            'start_ship_at': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
+            'actual_arrive_at': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
+            'delay': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
+        }
+        filter_fields = (
+            'id', 'nr', 'source_location__nr', 'destination_location__nr', 'deliver__nr', 'deliver_source__id', 'qty',
+            'status', 'schedule_arrive_at', 'start_ship_at', 'actual_arrive_at', 'delay',
+            'created_at', 'updated_at')
+
+
+class DeliveryOrderOwnerSerializer(ModelSerializer):
+    source_location = LocationOwnerSerializer(many=False, allow_null=True)
+    destination_location = LocationOwnerSerializer(many=False, allow_null=True)
+
+    class Meta:
+        model = freppledb.input.models.DeliveryOrder
+        fields = ('id', 'nr', 'source_location', 'destination_location')
+        # CMARK 写入参数, 用来更新外键, 如果没有这个配置, 那么产生不可写错误
+        extra_kwargs = {
+            'id': {
+                'read_only': False,
+                'required': False,
+                'allow_null': True
+            },
+            'nr': {
+                'read_only': False,
+                'required': False,
+                'allow_null': True
+            },
+            'source_location': {'allow_null': True},
+            'destination_location': {'allow_null': True}
+        }
+
+
+class DeliveryOrderSerializer(BulkSerializerMixin, ModelSerializer):
+    source_location = LocationOwnerSerializer(many=False, allow_null=True)
+    destination_location = LocationOwnerSerializer(many=False, allow_null=True)
+    # id readonly=False 不可以缺少
+    id = serializers.IntegerField(read_only=False)
+
+    class Meta:
+        model = freppledb.input.models.DeliveryOrder
+        fields = '__all__'
+        list_serializer_class = BulkListSerializer
+        update_lookup_field = 'id'
+        partial = True
+
+
+class DeliveryOrderAPI(frePPleListCreateAPIView):
+    queryset = freppledb.input.models.DeliveryOrder.objects.all()
+    serializer_class = DeliveryOrderSerializer
+    filter_class = DeliveryOrderFilter
+    ordering_fields = ('id',)
+    pagination_class = CustomerNumberPagination
+
+
+class DeliveryOrderDetailAPI(frePPleRetrieveUpdateDestroyAPIView):
+    queryset = freppledb.input.models.DeliveryOrder.objects.all()
+    serializer_class = DeliveryOrderSerializer
+
+
+# CMARK end DeliveryOrder API-------------------------------------------------------
+
+# CMARK start DeliveryOrderItem API-------------------------------------------------------
+# TODO 未完成，deliver,deliver_source
+class DeliveryOrderItemFilter(filters.FilterSet):
+    created_at__gte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='gte')
+    created_at__lte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='lte')
+    updated_at__gte = django_filters.DateTimeFilter(field_name="updated_at", lookup_expr='gte')
+    updated_at__lte = django_filters.DateTimeFilter(field_name="updated_at", lookup_expr='lte')
+
+    class Meta:
+        model = freppledb.input.models.DeliveryOrderItem
+        fields = {
+            'id': ['exact', 'in'],
+            'line_no': ['exact', 'in'],
+            'item__nr': ['exact'],
+            'delivery_order__nr': ['exact'],
+            'deliver_source__id': ['exact'],
+            'deliver_qty': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
+            'status': ['exact', 'in'],
+            'start_ship_at': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
+            'actual_arrive_at': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
+            'delay': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
+        }
+        filter_fields = (
+            'id', 'line_no', 'item__nr', 'delivery_order__nr', 'deliver_source__id', 'deliver_qty',
+            'status', 'start_ship_at', 'actual_arrive_at', 'delay',
+            'created_at', 'updated_at')
+
+
+class DeliveryOrderItemSerializer(BulkSerializerMixin, ModelSerializer):
+    item = ItemOwnerSerializer(many=False, allow_null=True)
+    delivery_order = DeliveryOrderOwnerSerializer(many=False, allow_null=True)
+    # id readonly=False 不可以缺少
+    id = serializers.IntegerField(read_only=False)
+
+    class Meta:
+        model = freppledb.input.models.DeliveryOrderItem
+        fields = '__all__'
+        list_serializer_class = BulkListSerializer
+        update_lookup_field = 'id'
+        partial = True
+
+
+class DeliveryOrderItemAPI(frePPleListCreateAPIView):
+    queryset = freppledb.input.models.DeliveryOrder.objects.all()
+    serializer_class = DeliveryOrderItemSerializer
+    filter_class = DeliveryOrderItemFilter
+    ordering_fields = ('id',)
+    pagination_class = CustomerNumberPagination
+
+
+class DeliveryOrderItemDetailAPI(frePPleRetrieveUpdateDestroyAPIView):
+    queryset = freppledb.input.models.DeliveryOrderItem.objects.all()
+    serializer_class = DeliveryOrderItemSerializer
+
+
+# CMARK end SalesOrderItem API-------------------------------------------------------
+
+# CMARK start PurchaseOrder API-------------------------------------------------------
+
+class PurchaseOrderFilter(filters.FilterSet):
+    created_at__gte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='gte')
+    created_at__lte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='lte')
+    updated_at__gte = django_filters.DateTimeFilter(field_name="updated_at", lookup_expr='gte')
+    updated_at__lte = django_filters.DateTimeFilter(field_name="updated_at", lookup_expr='lte')
+
+    class Meta:
+        model = freppledb.input.models.PurchaseOrder
+        fields = {
+            'id': ['exact', 'in'],
+            'nr': ['exact'],
+            'location__nr': ['exact'],
+            'supplier__nr': ['exact'],
+            'status': ['exact', 'in'],
+            'delay': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
+        }
+        filter_fields = (
+            'id', 'nr', 'location__nr', 'supplier__nr', 'status',
+            'delay','created_at', 'updated_at')
+
+
+class PurchaseOrderOwnerSerializer(ModelSerializer):
+    location = LocationOwnerSerializer(many=False, allow_null=True)
+    supplier = SupplierOwnerSerializer(many=False, allow_null=True)
+
+    class Meta:
+        model = freppledb.input.models.PurchaseOrder
+        fields = ('id', 'nr', 'location', 'supplier')
+        # CMARK 写入参数, 用来更新外键, 如果没有这个配置, 那么产生不可写错误
+        extra_kwargs = {
+            'id': {
+                'read_only': False,
+                'required': False,
+                'allow_null': True
+            },
+            'nr': {
+                'read_only': False,
+                'required': False,
+                'allow_null': True
+            },
+            'location': {'allow_null': True},
+            'supplier': {'allow_null': True}
+        }
+
+
+class PurchaseOrderSerializer(BulkSerializerMixin, ModelSerializer):
+    location = LocationOwnerSerializer(many=False, allow_null=True)
+    supplier = SupplierOwnerSerializer(many=False, allow_null=True)
+    # id readonly=False 不可以缺少
+    id = serializers.IntegerField(read_only=False)
+
+    class Meta:
+        model = freppledb.input.models.PurchaseOrder
+        fields = '__all__'
+        list_serializer_class = BulkListSerializer
+        update_lookup_field = 'id'
+        partial = True
+
+
+class PurchaseOrderAPI(frePPleListCreateAPIView):
+    queryset = freppledb.input.models.PurchaseOrder.objects.all()
+    serializer_class = PurchaseOrderSerializer
+    filter_class = PurchaseOrderFilter
+    ordering_fields = ('id',)
+    pagination_class = CustomerNumberPagination
+
+
+class PurchaseOrderDetailAPI(frePPleRetrieveUpdateDestroyAPIView):
+    queryset = freppledb.input.models.PurchaseOrder.objects.all()
+    serializer_class = PurchaseOrderSerializer
+
+
+# CMARK end PurchaseOrder API-------------------------------------------------------
+
+# CMARK start PurchaseOrderItem API-------------------------------------------------------
+
+class PurchaseOrderItemFilter(filters.FilterSet):
+    created_at__gte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='gte')
+    created_at__lte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='lte')
+    updated_at__gte = django_filters.DateTimeFilter(field_name="updated_at", lookup_expr='gte')
+    updated_at__lte = django_filters.DateTimeFilter(field_name="updated_at", lookup_expr='lte')
+
+    class Meta:
+        model = freppledb.input.models.PurchaseOrderItem
+        fields = {
+            'id': ['exact', 'in'],
+            'line_no': ['exact'],
+            'item__nr': ['exact'],
+            'purchase_order__nr': ['exact'],
+            'status': ['exact', 'in'],
+            'delay': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
+            'qty': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
+        }
+        filter_fields = (
+            'id', 'line_no', 'item__nr', 'purchase_order__nr', 'status',
+            'delay','qty','created_at', 'updated_at')
+
+
+class PurchaseOrderItemSerializer(BulkSerializerMixin, ModelSerializer):
+    item = ItemOwnerSerializer(many=False, allow_null=True)
+    purchase_order = PurchaseOrderOwnerSerializer(many=False, allow_null=True)
+    # id readonly=False 不可以缺少
+    id = serializers.IntegerField(read_only=False)
+
+    class Meta:
+        model = freppledb.input.models.PurchaseOrderItem
+        fields = '__all__'
+        list_serializer_class = BulkListSerializer
+        update_lookup_field = 'id'
+        partial = True
+
+
+class PurchaseOrderItemAPI(frePPleListCreateAPIView):
+    queryset = freppledb.input.models.PurchaseOrderItem.objects.all()
+    serializer_class = PurchaseOrderItemSerializer
+    filter_class = PurchaseOrderItemFilter
+    ordering_fields = ('id',)
+    pagination_class = CustomerNumberPagination
+
+
+class PurchaseOrderItemDetailAPI(frePPleRetrieveUpdateDestroyAPIView):
+    queryset = freppledb.input.models.PurchaseOrderItem.objects.all()
+    serializer_class = PurchaseOrderItemSerializer
+
+
+# CMARK end PurchaseOrderItem API-------------------------------------------------------
+
+# CMARK start WorkOrder API-------------------------------------------------------
+
+class WorkOrderFilter(filters.FilterSet):
+    created_at__gte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='gte')
+    created_at__lte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='lte')
+    updated_at__gte = django_filters.DateTimeFilter(field_name="updated_at", lookup_expr='gte')
+    updated_at__lte = django_filters.DateTimeFilter(field_name="updated_at", lookup_expr='lte')
+
+    class Meta:
+        model = freppledb.input.models.WorkOrder
+        fields = {
+            'id': ['exact', 'in'],
+            'nr': ['exact'],
+            'location__nr': ['exact'],
+            'status': ['exact', 'in'],
+            'delay': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
+        }
+        filter_fields = (
+            'id', 'nr', 'location__nr', 'status', 'delay', 'created_at', 'updated_at')
+
+
+class WorkOrderOwnerSerializer(ModelSerializer):
+    location = LocationOwnerSerializer(many=False, allow_null=True)
+
+    class Meta:
+        model = freppledb.input.models.WorkOrder
+        fields = ('id', 'nr', 'location')
+        extra_kwargs = {
+            'id': {
+                'read_only': False,
+                'required': False,
+                'allow_null': True
+            },
+            'nr': {
+                'read_only': False,
+                'required': False,
+                'allow_null': True
+            },
+            'location': {'allow_null': True},
+        }
+
+
+class WorkOrderSerializer(BulkSerializerMixin, ModelSerializer):
+    location = LocationOwnerSerializer(many=False, allow_null=True)
+    # id readonly=False 不可以缺少
+    id = serializers.IntegerField(read_only=False)
+
+    class Meta:
+        model = freppledb.input.models.WorkOrder
+        fields = '__all__'
+        list_serializer_class = BulkListSerializer
+        update_lookup_field = 'id'
+        partial = True
+
+
+class WorkOrderAPI(frePPleListCreateAPIView):
+    queryset = freppledb.input.models.WorkOrder.objects.all()
+    serializer_class = WorkOrderSerializer
+    filter_class = WorkOrderFilter
+    ordering_fields = ('id',)
+    pagination_class = CustomerNumberPagination
+
+
+class WorkOrderDetailAPI(frePPleRetrieveUpdateDestroyAPIView):
+    queryset = freppledb.input.models.WorkOrder.objects.all()
+    serializer_class = WorkOrderSerializer
+
+
+# CMARK end WorkOrder API-------------------------------------------------------
+
+# CMARK start WorkOrderItem API-------------------------------------------------------
+
+class WorkOrderItemFilter(filters.FilterSet):
+    created_at__gte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='gte')
+    created_at__lte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='lte')
+    updated_at__gte = django_filters.DateTimeFilter(field_name="updated_at", lookup_expr='gte')
+    updated_at__lte = django_filters.DateTimeFilter(field_name="updated_at", lookup_expr='lte')
+
+    class Meta:
+        model = freppledb.input.models.WorkOrderItem
+        fields = {
+            'id': ['exact', 'in'],
+            'item__nr': ['exact'],
+            'workorder__nr': ['exact'],
+            'status': ['exact', 'in'],
+            'delay': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
+            'qty': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
+            'finished_qty': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
+        }
+        filter_fields = (
+            'id', 'item__nr', 'workorder__nr','status', 'delay','qty','finished_qty', 'created_at', 'updated_at')
+
+
+class WorkOrderItemSerializer(BulkSerializerMixin, ModelSerializer):
+    workorder = WorkOrderOwnerSerializer(many=False, allow_null=True)
+    item = ItemOwnerSerializer(many=False, allow_null=True)
+    # id readonly=False 不可以缺少
+    id = serializers.IntegerField(read_only=False)
+
+    class Meta:
+        model = freppledb.input.models.WorkOrderItem
+        fields = '__all__'
+        list_serializer_class = BulkListSerializer
+        update_lookup_field = 'id'
+        partial = True
+
+
+class WorkOrderItemAPI(frePPleListCreateAPIView):
+    queryset = freppledb.input.models.WorkOrderItem.objects.all()
+    serializer_class = WorkOrderItemSerializer
+    filter_class = WorkOrderItemFilter
+    ordering_fields = ('id',)
+    pagination_class = CustomerNumberPagination
+
+
+class WorkOrderItemDetailAPI(frePPleRetrieveUpdateDestroyAPIView):
+    queryset = freppledb.input.models.WorkOrderItem.objects.all()
+    serializer_class = WorkOrderItemSerializer
+
+
+# CMARK end WorkOrderItem API-------------------------------------------------------
 
 
 class BufferFilter(filters.FilterSet):
@@ -1269,79 +1855,6 @@ class DistributionOrderdetailAPI(frePPleRetrieveUpdateDestroyAPIView):
     queryset = freppledb.input.models.DistributionOrder.objects.all()
     serializer_class = DistributionOrderSerializer
 
-
-class PurchaseOrderFilter(filters.FilterSet):
-    class Meta:
-        model = freppledb.input.models.PurchaseOrder
-        fields = {'id': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ], 'status': ['exact', 'in', ],
-                  'reference': ['exact', 'in', 'contains', ], 'item': ['exact', 'in', ],
-                  'supplier': ['exact', 'in', ], 'location': ['exact', 'in', ],
-                  'quantity': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
-                  'startdate': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
-                  'enddate': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
-                  'criticality': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
-                  'delay': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
-                  'plan': ['exact', 'in', 'contains', ],
-                  'source': ['exact', 'in', ], 'lastmodified': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ], }
-
-        filter_fields = ('id', 'reference', 'status', 'item', 'supplier', 'location', 'quantity',
-                         'startdate', 'enddate', 'criticality', 'delay', 'plan', 'source', 'lastmodified')
-
-
-class PurchaseOrderSerializer(BulkSerializerMixin, ModelSerializer):
-    class Meta:
-        model = freppledb.input.models.PurchaseOrder
-        fields = ('id', 'reference', 'status', 'item', 'supplier', 'location', 'quantity',
-                  'startdate', 'enddate', 'criticality', 'delay', 'plan', 'source', 'lastmodified')
-        list_serializer_class = BulkListSerializer
-        update_lookup_field = 'id'
-        partial = True
-
-
-class PurchaseOrderAPI(frePPleListCreateAPIView):
-    queryset = freppledb.input.models.PurchaseOrder.objects.all()
-    serializer_class = PurchaseOrderSerializer
-    filter_class = PurchaseOrderFilter
-
-
-class PurchaseOrderdetailAPI(frePPleRetrieveUpdateDestroyAPIView):
-    queryset = freppledb.input.models.PurchaseOrder.objects.all()
-    serializer_class = PurchaseOrderSerializer
-
-
-class DeliveryOrderFilter(filters.FilterSet):
-    class Meta:
-        model = freppledb.input.models.DeliveryOrder
-        fields = {'id': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ], 'status': ['exact', 'in', ],
-                  'reference': ['exact', 'in', 'contains', ], 'item': ['exact', 'in', ],
-                  'demand': ['exact', 'in', ], 'location': ['exact', 'in', ],
-                  'quantity': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
-                  'startdate': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
-                  'enddate': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
-                  'delay': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
-                  'plan': ['exact', 'in', 'contains', ],
-                  'source': ['exact', 'in', ], 'lastmodified': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ], }
-
-        filter_fields = ('id', 'reference', 'status', 'demand', 'item', 'location', 'quantity',
-                         'startdate', 'enddate', 'due', 'delay', 'plan', 'source', 'lastmodified')
-
-
-class DeliveryOrderSerializer(BulkSerializerMixin, ModelSerializer):
-    class Meta:
-        model = freppledb.input.models.DeliveryOrder
-        fields = ('id', 'reference', 'status', 'demand', 'item', 'location', 'quantity',
-                  'startdate', 'enddate', 'due', 'delay', 'plan', 'source', 'lastmodified')
-        list_serializer_class = BulkListSerializer
-        update_lookup_field = 'id'
-        partial = True
-
-
-class DeliveryOrderAPI(frePPleListCreateAPIView):
-    queryset = freppledb.input.models.DeliveryOrder.objects.all()
-    serializer_class = DeliveryOrderSerializer
-    filter_class = DeliveryOrderFilter
-
-
 # CMARK begin ForecastYear API-------------------------------------------------------
 class ForecastYearFilter(filters.FilterSet):
     class Meta:
@@ -1474,9 +1987,6 @@ class ForecastdetailVersionAPI(frePPleRetrieveUpdateDestroyAPIView):
 # CMARK end ForecastVersion API-------------------------------------------------------
 
 
-class DeliveryOrderdetailAPI(frePPleRetrieveUpdateDestroyAPIView):
-    queryset = freppledb.input.models.DeliveryOrder.objects.all()
-    serializer_class = DeliveryOrderSerializer
 
 
 class DemandFilter(filters.FilterSet):

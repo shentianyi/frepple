@@ -800,6 +800,8 @@ class InventoryParameter(AuditModel):
         related_name='inventoryparameter_location',
         null=False, blank=False, on_delete=models.CASCADE)
     rop_cover_period = models.IntegerField(_('rop cover period'))
+    rop = models.DecimalField(_('rop'), max_digits=20, decimal_places=8, null=False, blank=False)
+    rop_by_system = models.DecimalField(_('system rop'), max_digits=20, decimal_places=8, null=False, blank=False)
     safetystock_cover_period = models.IntegerField(_('safetystock cover period'))
     safetysotck_min_qty = models.DecimalField(_('safety sotck min qty'), max_digits=20, decimal_places=8)
     safetysotck_max_qty = models.DecimalField(_('safety sotck max qty'), max_digits=20, decimal_places=8)
@@ -1649,6 +1651,12 @@ class Forecast(AuditModel, ForecastCommentOperation):
         else:
             raise Exception('Error datetype in forecast')
 
+    def __str__(self):
+        return '%s - %s - %s' % (
+            self.item.nr if self.item else None,
+            self.location.nr if self.location else None,
+            self.customer.nr if self.customer else None)
+
     class Manager(MultiDBManager):
         # def get_by_natural_key(self, item, location, customer,year,date_type,date_number,version_id):
         #     return self.get(item=item, location=location, customer=customer,year=year,date_type=date_type,date_number=date_number,version_id=version_id)
@@ -1660,16 +1668,12 @@ class Forecast(AuditModel, ForecastCommentOperation):
             super(Forecast.Manager, self).bulk_create(objs, batch_size)
 
     # def natural_key(self):
-    #     return (self.item, self.location, self.customer,self.year,self.date_type,self.date_number,self.version_id)
+    #     return (self.item, self.location, self.customer, self.year, self.date_type, self.date_number, self.version_id)
 
     def set_parsed_date(self):
         self.parsed_date = Forecast.parse_date(self.date_type, self.year, self.date_number)
 
     objects = Manager()
-
-    # def __str__(self):
-    #     return '%s - %s - %s' % (
-    #         self.item.nr, self.location.nr, self.customer.nr)
 
     class Meta(AuditModel.Meta):
         db_table = 'forecast'
@@ -1768,7 +1772,7 @@ class Demand(AuditModel, HierarchyModel):
 
 class SalesOrder(AuditModel):
     id = models.AutoField(_('id'), help_text=_('Unique identifier'), primary_key=True)
-    nr = models.CharField(_('nr'), max_length=300, db_index=True, unique=True, null=True, blank=True)
+    nr = models.CharField(_('nr'), max_length=300, db_index=True, unique=True)
     location = models.ForeignKey(
         Location, verbose_name=_('location'),
         db_index=True, related_name='salesorder_location',
@@ -1783,7 +1787,7 @@ class SalesOrder(AuditModel):
     min_shipment = models.DecimalField(_('min shipment'), max_digits=20, decimal_places=8, null=True, blank=True)
 
     def __str__(self):
-        return self.id
+        return self.nr
 
     class Meta(AuditModel.Meta):
         db_table = 'salesorder'
@@ -1812,9 +1816,6 @@ class SalesOrderItem(AuditModel):
                               choices=enum.SalesOrderStatus.to_tuple())
     max_lateness = models.DecimalField(_('max lateness'), max_digits=20, null=True, blank=True, decimal_places=8)
     min_shipment = models.DecimalField(_('min shipment'), max_digits=20, null=True, blank=True, decimal_places=8)
-
-    def __str__(self):
-        return self.id
 
     class Meta(AuditModel.Meta):
         db_table = 'sales_order_item'
@@ -2092,28 +2093,137 @@ class DistributionOrder(OperationPlan):
         verbose_name_plural = _('distribution orders')
 
 
-class PurchaseOrder(OperationPlan):
-    ordering_date = AliasDateTimeField(db_column='startdate', verbose_name=_('ordering date'), null=True, blank=True)
-    receipt_date = AliasDateTimeField(db_column='enddate', verbose_name=_('receipt date'), null=True, blank=True)
+# class PurchaseOrder(OperationPlan):
+#     ordering_date = AliasDateTimeField(db_column='startdate', verbose_name=_('ordering date'), null=True, blank=True)
+#     receipt_date = AliasDateTimeField(db_column='enddate', verbose_name=_('receipt date'), null=True, blank=True)
+#
+#     class PurchaseOrderManager(OperationPlan.Manager):
+#         def get_queryset(self):
+#             return super(PurchaseOrder.PurchaseOrderManager, self).get_queryset() \
+#                 .filter(type='PO')
+#             # Note: defer screws up the model name when deleting a PO
+#             # .defer("operation", "owner", "origin", "destination")
+#
+#     objects = PurchaseOrderManager()
+#
+#     def save(self, *args, **kwargs):
+#         self.type = 'PO'
+#         self.operation = self.owner = self.origin = self.destination = None
+#         super(PurchaseOrder, self).save(*args, **kwargs)
+#
+#     class Meta:
+#         proxy = True
+#         verbose_name = _('purchase order')
+#         verbose_name_plural = _('purchase orders')
 
-    class PurchaseOrderManager(OperationPlan.Manager):
-        def get_queryset(self):
-            return super(PurchaseOrder.PurchaseOrderManager, self).get_queryset() \
-                .filter(type='PO')
-            # Note: defer screws up the model name when deleting a PO
-            # .defer("operation", "owner", "origin", "destination")
 
-    objects = PurchaseOrderManager()
+class PurchaseOrder(AuditModel):
+    id = models.AutoField(_('id'), help_text=_('Unique identifier'), primary_key=True)
+    nr = models.CharField(_('nr'), max_length=300)
+    location = models.ForeignKey(
+        Location, verbose_name=_('location'),
+        db_index=True, related_name='purchaseorder_location',
+        null=False, blank=False, on_delete=models.CASCADE)
 
-    def save(self, *args, **kwargs):
-        self.type = 'PO'
-        self.operation = self.owner = self.origin = self.destination = None
-        super(PurchaseOrder, self).save(*args, **kwargs)
+    supplier = models.ForeignKey(
+        Supplier, verbose_name=_('supplier'),
+        db_index=True, related_name='purchaseorder_supplier',
+        null=False, blank=False, on_delete=models.CASCADE)
+    status = models.CharField(_('status'), max_length=20, null=True, blank=True,
+                              choices=enum.DeliveryOrderStatus.to_tuple())
+    order_at = models.DateTimeField(_('order at'), null=True, blank=True)
+    start_ship_at = models.DateTimeField(_('start ship at'), null=True, blank=True)
+    actual_arrive_at = models.DateTimeField(_('actual arrive at'), null=True, blank=True)
+    delay = models.DecimalField(_('delay'), max_digits=20, decimal_places=8, null=True, blank=True)
 
-    class Meta:
-        proxy = True
+    def __str__(self):
+        return self.nr
+
+    class Meta(AuditModel.Meta):
+        db_table = 'purchase_order'
         verbose_name = _('purchase order')
         verbose_name_plural = _('purchase orders')
+        ordering = ['id']
+
+
+class PurchaseOrderItem(AuditModel):
+    id = models.AutoField(_('id'), help_text=_('Unique identifier'), primary_key=True)
+    line_no = models.CharField(_('line no'), max_length=300, null=True, blank=True)
+    item = models.ForeignKey(
+        Item, verbose_name=_('item'),
+        db_index=True, related_name='purchaseorderitem_item',
+        null=False, blank=False, on_delete=models.CASCADE)
+
+    purchase_order = models.ForeignKey(
+        PurchaseOrder, verbose_name=_('purchase order'),
+        db_index=True, related_name='purchaseorderitem_purchase_order',
+        null=True, blank=True, on_delete=models.CASCADE)
+    qty = models.IntegerField(_('qty'), null=True, blank=True)
+    deliver_qty = models.DecimalField(_('deliver qty'), max_digits=20, decimal_places=8, null=True, blank=True)
+    status = models.CharField(_('status'), max_length=20, null=True, blank=True,
+                              choices=enum.DeliveryOrderStatus.to_tuple())
+    start_ship_at = models.DateTimeField(_('start ship at'), null=True, blank=True)
+    actual_arrive_at = models.DateTimeField(_('actual arrive at'), null=True, blank=True)
+    delay = models.DecimalField(_('delay'), max_digits=20, decimal_places=8, null=True, blank=True)
+
+    class Meta(AuditModel.Meta):
+        db_table = 'purchase_order_item'
+        verbose_name = _('purchase order item')
+        verbose_name_plural = _('purchase order items')
+        ordering = ['id']
+
+
+class WorkOrder(AuditModel):
+    id = models.AutoField(_('id'), help_text=_('Unique identifier'), primary_key=True)
+    nr = models.CharField(_('nr'), max_length=300)
+    location = models.ForeignKey(
+        Location, verbose_name=_('location'),
+        db_index=True, related_name='workorder_location',
+        null=False, blank=False, on_delete=models.CASCADE)
+    status = models.CharField(_('status'), max_length=20, null=True, blank=True,
+                              choices=enum.WorkOrderStatus.to_tuple())
+    schedule_start_at = models.DateTimeField(_('schedule start at'), null=True, blank=True)
+    actual_start_at = models.DateTimeField(_('actual arrive at'), null=True, blank=True)
+    schedule_end_at = models.DateTimeField(_('schedule end at'), null=True, blank=True)
+    actual_end_at = models.DateTimeField(_('actual end at'), null=True, blank=True)
+    delay = models.DecimalField(_('delay'), max_digits=20, decimal_places=8, null=True, blank=True)
+
+    def __str__(self):
+        return self.nr
+
+    class Meta(AuditModel.Meta):
+        db_table = 'work_order'
+        verbose_name = _('work order')
+        verbose_name_plural = _('work orders')
+        ordering = ['id']
+
+
+class WorkOrderItem(AuditModel):
+    id = models.AutoField(_('id'), help_text=_('Unique identifier'), primary_key=True)
+    workorder = models.ForeignKey(
+        WorkOrder, verbose_name=_('work order'),
+        db_index=True, related_name='workorderitem_workorder',
+        null=True, blank=True, on_delete=models.CASCADE)
+    item = models.ForeignKey(
+        Item, verbose_name=_('item'),
+        db_index=True, related_name='workorderitem_item',
+        null=False, blank=False, on_delete=models.CASCADE)
+    status = models.CharField(_('status'), max_length=20, null=True, blank=True,
+                              choices=enum.WorkOrderStatus.to_tuple())
+    schedule_start_at = models.DateTimeField(_('schedule start at'), null=True, blank=True)
+    actual_start_at = models.DateTimeField(_('actual arrive at'), null=True, blank=True)
+    schedule_end_at = models.DateTimeField(_('schedule end at'), null=True, blank=True)
+    actual_end_at = models.DateTimeField(_('actual end at'), null=True, blank=True)
+    delay = models.DecimalField(_('delay'), max_digits=20, decimal_places=8, null=True, blank=True)
+    qty = models.DecimalField(_('qty'), max_digits=20, decimal_places=8, null=True, blank=True)
+    finished_qty = models.DecimalField(_('finished qty'), default=0, max_digits=20, decimal_places=8, null=True,
+                                       blank=True)
+
+    class Meta(AuditModel.Meta):
+        db_table = 'work_order_item'
+        verbose_name = _('work order item')
+        verbose_name_plural = _('work order items')
+        ordering = ['id']
 
 
 class ManufacturingOrder(OperationPlan):
@@ -2140,25 +2250,95 @@ class ManufacturingOrder(OperationPlan):
         verbose_name_plural = _('manufacturing orders')
 
 
-class DeliveryOrder(OperationPlan):
-    class DeliveryOrderManager(OperationPlan.Manager):
-        def get_queryset(self):
-            return super(DeliveryOrder.DeliveryOrderManager, self).get_queryset() \
-                .filter(demand__isnull=False, owner__isnull=True)
-            # Note: defer screws up the model name when deleting a PO
-            # .defer("operation", "owner", "supplier", "location", "origin", "destination")
+# class DeliveryOrder(OperationPlan):
+#     class DeliveryOrderManager(OperationPlan.Manager):
+#         def get_queryset(self):
+#             return super(DeliveryOrder.DeliveryOrderManager, self).get_queryset() \
+#                 .filter(demand__isnull=False, owner__isnull=True)
+#             # Note: defer screws up the model name when deleting a PO
+#             # .defer("operation", "owner", "supplier", "location", "origin", "destination")
+#
+#     objects = DeliveryOrderManager()
+#
+#     def save(self, *args, **kwargs):
+#         self.type = 'DLVR'
+#         self.supplier = self.origin = self.destination = self.operation = self.owner = None
+#         if self.demand:
+#             self.item = self.demand.item
+#             self.location = self.demand.location
+#         super(DeliveryOrder, self).save(*args, **kwargs)
+#
+#     class Meta:
+#         proxy = True
+#         verbose_name = _('delivery order')
+#         verbose_name_plural = _('delivery orders')
+#
 
-    objects = DeliveryOrderManager()
+class DeliveryOrder(AuditModel):
+    id = models.AutoField(_('id'), help_text=_('Unique identifier'), primary_key=True)
+    nr = models.CharField(_('nr'), max_length=300, db_index=True, unique=True)
+    source_location = models.ForeignKey(
+        Location, verbose_name=_('source location'),
+        db_index=True, related_name='deliveryorder_source_location',
+        null=True, blank=True, on_delete=models.CASCADE)
 
-    def save(self, *args, **kwargs):
-        self.type = 'DLVR'
-        self.supplier = self.origin = self.destination = self.operation = self.owner = None
-        if self.demand:
-            self.item = self.demand.item
-            self.location = self.demand.location
-        super(DeliveryOrder, self).save(*args, **kwargs)
+    destination_location = models.ForeignKey(
+        Location, verbose_name=_('destination location'),
+        db_index=True, related_name='deliveryorder_destination_location',
+        null=True, blank=True, on_delete=models.CASCADE)
 
-    class Meta:
-        proxy = True
+    type = models.CharField(_('type'), max_length=20, choices=enum.DeliveryOrderType.to_tuple(), null=True, blank=True)
+    deliver = models.ForeignKey(
+        Customer, verbose_name=_('deliver'),
+        db_index=True, related_name='deliveryorder_deliver',
+        null=True, blank=True, on_delete=models.CASCADE)
+    deliver_source = models.ForeignKey(
+        Forecast, verbose_name=_('deliver source'),
+        db_index=True, related_name='deliveryorder_deliver_source',
+        null=True, blank=True, on_delete=models.CASCADE)
+
+    status = models.CharField(_('status'), max_length=20, choices=enum.DeliveryOrderStatus.to_tuple(), null=True,
+                              blank=True)
+    schedule_arrive_at = models.DateTimeField(_('schedule arrive at'), null=True, blank=True)
+    start_ship_at = models.DateTimeField(_('start ship at'), null=True, blank=True)
+    actual_arrive_at = models.DateTimeField(_('actual arrive at'), null=True, blank=True)
+    delay = models.DecimalField(_('delay'), max_digits=20, decimal_places=8, null=True, blank=True)
+
+    def __str__(self):
+        return self.nr
+
+    class Meta(AuditModel.Meta):
+        db_table = 'deliveryorder'
         verbose_name = _('delivery order')
         verbose_name_plural = _('delivery orders')
+        ordering = ['id']
+
+
+class DeliveryOrderItem(AuditModel):
+    id = models.AutoField(_('id'), help_text=_('Unique identifier'), primary_key=True)
+    line_no = models.CharField(_('line no'), max_length=300, null=True, blank=True)
+    item = models.ForeignKey(
+        Item, verbose_name=_('item'),
+        db_index=True, related_name='deliveryorderitem_item',
+        null=False, blank=False, on_delete=models.CASCADE)
+    delivery_order = models.ForeignKey(
+        DeliveryOrder, verbose_name=_('destination order'),
+        db_index=True, related_name='deliveryorderitem_delivery_order',
+        null=True, blank=True, on_delete=models.CASCADE)
+    deliver_source = models.ForeignKey(
+        Forecast, verbose_name=_('deliver source'),
+        db_index=True, related_name='deliveryorderitem_deliver_source',
+        null=True, blank=True, on_delete=models.CASCADE)
+
+    deliver_qty = models.DecimalField(_('deliver qty'), max_digits=20, decimal_places=8, null=True, blank=True)
+    status = models.CharField(_('status'), max_length=20, choices=enum.DeliveryOrderStatus.to_tuple(), null=True,
+                              blank=True)
+    start_ship_at = models.DateTimeField(_('start ship at'), null=True, blank=True)
+    actual_arrive_at = models.DateTimeField(_('actual arrive at'), null=True, blank=True)
+    delay = models.DecimalField(_('delay'), max_digits=20, decimal_places=8, null=True, blank=True)
+
+    class Meta(AuditModel.Meta):
+        db_table = 'delivery_order_item'
+        verbose_name = _('delivery order item')
+        verbose_name_plural = _('delivery order items')
+        ordering = ['id']

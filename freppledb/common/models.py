@@ -40,8 +40,8 @@ from freppledb.input import enum
 
 logger = logging.getLogger(__name__)
 
-
 from django.forms import forms
+
 
 class HierarchyModel(models.Model):
     display_key = None
@@ -115,6 +115,7 @@ class HierarchyModel(models.Model):
 
             # Return the right value of this node + 1
             return right + 1
+
         display_key = cls.display_key if cls.display_key else 'name'
         # Load all nodes in memory
         for i in cls.objects.using(database).values(display_key, 'owner'):
@@ -230,7 +231,6 @@ class AuditModel(models.Model):
         # Call the real save() method
         super(AuditModel, self).save(*args, **kwargs)
 
-
     # CMARK 使用pk还是 input_key
     @classmethod
     def input_query_key(cls):
@@ -273,6 +273,23 @@ class Parameter(AuditModel):
                 return p.value
         except:
             return default
+
+
+class DataStagingLog(AuditModel):
+    id = models.AutoField(_('identifier'), primary_key=True)
+    nr = models.CharField(_('nr'),max_length=300, null=True, blank=True)
+    input_data = models.TextField(_('input_data'), null=True, blank=True)
+    output_data = models.TextField(_('output_data'), null=True, blank=True)
+    result = models.BooleanField(_('result'))
+    message = models.TextField(_('message'), null=True, blank=True)
+    create_user_nr = models.CharField(_('create user name'), max_length=300, null=True, blank=True)
+    start_at = models.DateTimeField(_('start_at'), editable=False, db_index=True)
+    end_at = models.DateTimeField(_('end_at'), editable=False, db_index=True)
+
+    class Meta(AuditModel.Meta):
+        db_table = 'common_datastaginglog'
+        verbose_name = _('datastaginglog')
+        verbose_name_plural = _('datastaginglogs')
 
 
 class Scenario(models.Model):
@@ -482,7 +499,7 @@ class User(AbstractUser):
         try:
             result = None
             for p in UserPreference.objects.all().using(database).filter(property=prop).filter(
-                    Q(user__isnull=True) | Q(user=self.id)).order_by('-user').only('user', 'value'):
+                            Q(user__isnull=True) | Q(user=self.id)).order_by('-user').only('user', 'value'):
                 if result:
                     result.update(p.value)
                 else:
@@ -565,7 +582,6 @@ class Comment(AuditModel):
         ('operation_forecast_release', _('operation_forecast_release')),
     )
 
-
     # class Comment(models.Model):
     id = models.AutoField(_('identifier'), primary_key=True)
     # 指向ContentType的外键
@@ -587,7 +603,8 @@ class Comment(AuditModel):
         editable=False, on_delete=models.CASCADE
     )
     # 动作
-    operation = models.TextField(_('comment operation'), blank=True, null=True,choices=operations)
+    operation = models.TextField(_('comment operation'), blank=True, null=True, choices=operations)
+
     # lastmodified = models.DateTimeField(
     #     _('last modified'), default=timezone.now, editable=False
     # )
@@ -637,7 +654,7 @@ class Bucket(AuditModel):
         db_table = 'common_bucket'
 
     @classmethod
-    def get_extra_trunc_by_shortcut(cls,date_type_short_cut):
+    def get_extra_trunc_by_shortcut(cls, date_type_short_cut):
         """
         根据时间的简写,获取数据库trunc的值, 默认返回week
         y: year
@@ -647,15 +664,15 @@ class Bucket(AuditModel):
         :param date_type_short_cut:
         :return:
         """
-        if date_type_short_cut.lower()=='w':
+        if date_type_short_cut.lower() == 'w':
             return 'week'
-        elif date_type_short_cut.lower()=='m':
+        elif date_type_short_cut.lower() == 'm':
             return 'month'
         else:
             return 'week'
 
     @classmethod
-    def get_x_time_name(cls,dt,date_type_short_cut):
+    def get_x_time_name(cls, dt, date_type_short_cut):
         """
         根据时间和时间类型, 返回x轴时间名称
         例如: 2018-52周
@@ -666,14 +683,14 @@ class Bucket(AuditModel):
         :return:
         """
         if date_type_short_cut.lower() == 'w':
-            return "%s-%s%s" %(dt.year, la_time.ios_weeknumberstr(dt),_('week'))
+            return "%s-%s%s" % (dt.year, la_time.ios_weeknumberstr(dt), _('week'))
         elif date_type_short_cut.lower() == 'm':
-            return "%s-%s" %(dt.year, _(dt.strftime('%b')))
+            return "%s-%s" % (dt.year, _(dt.strftime('%b')))
         else:
             return la_time.dt2string(dt)
 
     @classmethod
-    def get_x_text_name(cls,dt,date_type_short_cut):
+    def get_x_text_name(cls, dt, date_type_short_cut):
         """
         根据时间和时间类型, 返回x轴时间名称
         例如: 2018-52周
@@ -684,17 +701,17 @@ class Bucket(AuditModel):
         :return:
         """
         if date_type_short_cut.lower() == 'w':
-            return "%s-%s%s" %(dt.year, la_time.ios_weeknumberstr(dt),_('week'))
+            return "%s-%s%s" % (dt.year, la_time.ios_weeknumberstr(dt), _('week'))
         elif date_type_short_cut.lower() == 'm':
             if dt.month == 1:
-                return(dt.year)
+                return (dt.year)
             else:
-                return "%s" %(_(dt.strftime('%b')))
+                return "%s" % (_(dt.strftime('%b')))
         else:
             return la_time.dt2string(dt)
 
     @classmethod
-    def get_datetime_by_type(cls,dt, date_type_short_cut):
+    def get_datetime_by_type(cls, dt, date_type_short_cut):
         """
         根据时间和时间类型, 返回bucket时间
         :param datetime:
@@ -708,7 +725,6 @@ class Bucket(AuditModel):
         else:
             return dt
 
-
     @classmethod
     def get_nex_time_by_date_type(cls, t1, date_type_short_cut, step=1):
         """
@@ -718,11 +734,11 @@ class Bucket(AuditModel):
         :param step:
         :return:
         """
-        if date_type_short_cut.lower()=='w':
-            return t1+relativedelta(weeks=step)
-        elif date_type_short_cut.lower()=='m':
-            return t1+relativedelta(months=step)
-        return t1+relativedelta(weeks=step)
+        if date_type_short_cut.lower() == 'w':
+            return t1 + relativedelta(weeks=step)
+        elif date_type_short_cut.lower() == 'm':
+            return t1 + relativedelta(months=step)
+        return t1 + relativedelta(weeks=step)
 
     @classmethod
     def get_search_starttime_by_date_type(cls, dt, date_type_short_cut):
@@ -734,12 +750,11 @@ class Bucket(AuditModel):
         :param date_type_short_cut:
         :return:
         """
-        if date_type_short_cut.lower()=='w':
+        if date_type_short_cut.lower() == 'w':
             return la_time.week_search_starttime(dt)
-        elif date_type_short_cut.lower()=='m':
+        elif date_type_short_cut.lower() == 'm':
             return la_time.month_search_starttime(dt)
         return dt
-
 
     @classmethod
     def get_search_endtime_by_date_type(cls, dt, date_type_short_cut):
@@ -751,9 +766,9 @@ class Bucket(AuditModel):
         :param date_type_short_cut:
         :return:
         """
-        if date_type_short_cut.lower()=='w':
+        if date_type_short_cut.lower() == 'w':
             return la_time.week_search_endtime(dt)
-        elif date_type_short_cut.lower()=='m':
+        elif date_type_short_cut.lower() == 'm':
             return la_time.month_search_endtime(dt)
         return dt
 
@@ -765,7 +780,6 @@ class Bucket(AuditModel):
         )
 
         return date_types
-
 
 
 class BucketDetail(AuditModel):
