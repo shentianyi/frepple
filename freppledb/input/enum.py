@@ -111,8 +111,22 @@ class ForecastCommentStatus(BaseEnum):
     CAN_CALCULATE_MDS_STATUS = ('confirm',)
 
 
-class DateType(BaseEnum):
-    """时间类型"""
+class ForecastDateType(BaseEnum):
+    """预测时间类型"""
     W = _('W')
     M = _('M')
 
+
+class ParameterValueType(BaseEnum):
+    string = _('string')
+    int = _('int')
+    number = _('number')
+    datetime = _('datetime')
+
+
+class ExecuteTaskStatus(BaseEnum):
+    waiting = _('waiting')
+    processing = _('processing')
+    done = _('done')
+    failed = _('failed')
+    canceled = _('canceled')

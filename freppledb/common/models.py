@@ -16,6 +16,7 @@
 #
 from datetime import datetime
 import logging
+from decimal import Decimal
 
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
@@ -35,6 +36,7 @@ from django.utils.text import capfirst
 
 from freppledb.common.fields import JSONBField
 from freppledb.common.utils import la_time
+from freppledb.input import enum
 
 logger = logging.getLogger(__name__)
 
@@ -245,6 +247,7 @@ class Parameter(AuditModel):
     # Translators: Translation included with Django
     name = models.CharField(_('name'), max_length=60, primary_key=True)
     value = models.CharField(_('value'), max_length=1000, null=True, blank=True)
+    value_type = models.CharField(_('value_type'),max_length=100,default='string', choices= enum.ParameterValueType.to_tuple())
     description = models.CharField(_('description'), max_length=1000, null=True, blank=True)
 
     def __str__(self):
@@ -258,7 +261,16 @@ class Parameter(AuditModel):
     @staticmethod
     def getValue(key, database=DEFAULT_DB_ALIAS, default=None):
         try:
-            return Parameter.objects.using(database).get(pk=key).value
+            p= Parameter.objects.using(database).get(pk=key)
+
+            if p.value_type==enum.ParameterValueType.int.name:
+               return int(p.value)
+            elif p.value_type==enum.ParameterValueType.number.name:
+                return Decimal(p.value)
+            elif p.value_type==enum.ParameterValueType.datetime.name:
+                return la_time.string2dt(p.value)
+            else:
+                return p.value
         except:
             return default
 

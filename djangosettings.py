@@ -257,6 +257,7 @@ INSTALLED_APPS = (
     'rest_framework',
     'django_admin_bootstrapped',
     'django.contrib.admin',
+    'django_extensions'
 )
 
 # Custom attribute fields in the database
@@ -519,3 +520,10 @@ EMAIL_HOST_PASSWORD = 'Brilliantech123@'
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 # Port number for the CherryPy web server
 PORT = 8000
+
+
+
+#SHELL_PLUS 加载模块
+SHELL_PLUS_PRE_IMPORTS = [
+    ('freppledb.execute.processors.demand_mds_processor', '*'),
+]

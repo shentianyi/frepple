@@ -46,10 +46,11 @@ class Task(models.Model):
   message = models.TextField(_('message'), max_length=200, null=True, editable=False)
   logfile = models.TextField(_('log file'), max_length=200, null=True, editable=False)
   #. Translators: Translation included with Django
+  create_user_name = models.CharField(_('create_user_nr'), max_length=100,editable=False,db_index=True,blank= True, null=True)
+
   user = models.ForeignKey(
     User, verbose_name=_('user'), blank=True, null=True,
-    editable=False, on_delete=models.CASCADE
-    )
+    editable=False)
 
   def __str__(self):
     return "%s - %s - %s" % (self.id, self.name, self.status)
@@ -69,7 +70,7 @@ class Task(models.Model):
 class DataStagingLog(AuditModel):
   id = models.AutoField(_('identifier'), primary_key=True, editable=False)
   nr = models.CharField(_('nr'), max_length=300, editable=False, db_index=True)
-  create_user_nr = models.CharField(_('create_user_nr'), max_length=100,editable=False,db_index=True,blank= True, null=True)
+
   input_data = models.TextField(_('input_data'),blank= True, null=True)
   output_data = models.TextField(_('output_data'),blank= True, null=True)
   result = models.BooleanField(_('result'), default=False)
@@ -77,6 +78,16 @@ class DataStagingLog(AuditModel):
   start_at = models.DateTimeField(_('start_at'),blank= True, null=True)
   end_at = models.DateTimeField(_('end_at'),blank= True, null=True)
 
+
+  user = models.ForeignKey(
+    User, verbose_name=_('user'), blank=True, null=True,
+    editable=False)
+
+  create_user_name = models.CharField(_('create_user_nr'), max_length=100, editable=False, db_index=True, blank=True,
+                                    null=True)
+
+  task = models.ForeignKey(
+    Task, verbose_name=_('task'), blank=True, null=True,editable=False)
 
   class Manager(MultiDBManager):
     pass

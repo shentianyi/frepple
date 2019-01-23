@@ -1500,7 +1500,7 @@ class ForecastYear(AuditModel):
     date_number = models.IntegerField(_('date_number'), db_index=True)
 
     date_type = models.CharField(
-        _('date_type'), max_length=20, choices=enum.DateType.to_tuple(), default='W', null=True, blank=True)
+        _('date_type'), max_length=20, choices=enum.ForecastDateType.to_tuple(), default='W', null=True, blank=True)
 
     ratio = models.DecimalField(_('forecast ratio'), max_digits=20, decimal_places=8, default=100, null=False,
                                 blank=True)
@@ -1614,7 +1614,7 @@ class Forecast(AuditModel, ForecastCommentOperation):
     date_number = models.IntegerField(_('date_number'), db_index=True)
 
     date_type = models.CharField(
-        _('date_type'), max_length=20, choices=enum.DateType.to_tuple(), default='W')
+        _('date_type'), max_length=20, choices=enum.ForecastDateType.to_tuple(), default='W')
     priority = models.IntegerField(
         _('priority'), default=0,
         help_text=_('Priority of the demand (lower numbers indicate more important demands)')
