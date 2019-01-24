@@ -3,10 +3,10 @@
 {% load static %}
 
 {% block extrahead %}{{block.super}}
-<script type="text/javascript" src="{{STATIC_URL}}js/angular.min.js"></script>
-<script type="text/javascript" src="{{STATIC_URL}}js/angular-cookies.min.js"></script>
-<script type="text/javascript" src="{{STATIC_URL}}js/angular-gettext.min.js"></script>
-<script type="text/javascript" src="{{STATIC_URL}}js/angular-websocket.js"></script>
+<script type="text/javascript" src="{{STATIC_URL}}js/lib/angular.min.js"></script>
+<script type="text/javascript" src="{{STATIC_URL}}js/lib/angular-cookies.min.js"></script>
+<script type="text/javascript" src="{{STATIC_URL}}js/lib/angular-gettext.min.js"></script>
+<script type="text/javascript" src="{{STATIC_URL}}js/lib/angular-websocket.js"></script>
 <script type="text/javascript" src="{{STATIC_URL}}js/i18n/angular-freppletranslations.js"></script>
 
 {% if debug_js %}
@@ -36,9 +36,9 @@
 <script type="text/javascript" src="{{STATIC_URL}}operationplandetail/src/networkstatusDrv.js"></script>
 <script type="text/javascript" src="{{STATIC_URL}}operationplandetail/src/supplyinformationDrv.js"></script>
 {% else %}
-<script type="text/javascript" src="{{STATIC_URL}}js/frepple-common.min.js"></script>
-<script type="text/javascript" src="{{STATIC_URL}}js/frepple-input.min.js"></script>
-<script type="text/javascript" src="{{STATIC_URL}}js/frepple-operationplandetail.min.js"></script>
+<script type="text/javascript" src="{{STATIC_URL}}js/lib/frepple-common.min.js"></script>
+<script type="text/javascript" src="{{STATIC_URL}}js/lib/frepple-input.min.js"></script>
+<script type="text/javascript" src="{{STATIC_URL}}js/lib/frepple-operationplandetail.min.js"></script>
 {% endif %}
 
 <script type="text/javascript">

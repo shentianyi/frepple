@@ -4,90 +4,6 @@ var itemId = parseInt(window.location.pathname.split('/item_detail/')[1]);
 var locationArray = [];
 var supplierArray = [];
 
-//获取公共数据
-ItemDetail.getMainData = function () {
-    $.ajax({
-        url: '/data/input/item/maindata/' + itemId + "/",
-        type: 'application/json',
-        method: 'get',
-        success: function (data) {
-            // 填充数据
-            if (data.result) {
-                // data.content
-
-                //id 规则： item_detail + 字段名
-                // input框： 直接填充
-
-                // 下拉框： 需要匹配current， 默认选中
-
-                // 复选框： 直接checked 或者 不是
-                FillData('item_detail', data.content);
-
-                locationArray = data.content.location;
-
-                if (locationArray.length > 0) {
-                    const buffer = locationArray[0].buffer;
-                    FillData('item_detail', buffer);
-                }
-            } else {
-                // alert(data.message)
-            }
-        },
-        error: function (err) {
-            alert(err);
-        }
-    })
-};
-
-//获取主数据
-ItemDetail.getMainSuppliersData = function () {
-    $.ajax({
-        url: '/data/input/item/mainsupplierdata/' + itemId + "/",
-        type: 'application/json',
-        method: 'get',
-        success: function (data) {
-            // 填充数据
-            if (data.result) {
-                FillData('item_detail_main', data.content);
-            } else {
-                // alert(data.message)
-            }
-        },
-        error: function (err) {
-            alert(err);
-        }
-    })
-};
-
-//获取供应商数据
-ItemDetail.getSuppliersData = function () {
-    $.ajax({
-        url: '/data/input/item/suppliers/' + itemId + "/",
-        type: 'application/json',
-        method: 'get',
-        success: function (data) {
-            // 填充数据
-            if (data.result) {
-
-                FillData('item_detail_supplier', data.content[0]);
-
-                supplierArray = data.content;
-                var html = '';
-                if (supplierArray.length > 0) {
-                    for (var i = 0; i < supplierArray.length; i++) {
-                        html += "<option value=" + supplierArray[i].nr + ">" + supplierArray[i].nr + "</option>"
-                    }
-                    $("#item_detail_supplier_nr").append(html);
-                }
-            } else {
-                // alert(data.message)
-            }
-        },
-        error: function (err) {
-            alert(err);
-        }
-    })
-};
 
 //获取计划数据
 ItemDetail.getPlanData = function () {
@@ -878,4 +794,128 @@ ItemDetail.FillOption = function (id) {
     $("#" + id).append(html);
 }
 
+window.onload = function () {
+    new Vue({
+        delimiters: ['{[', ']}'],
+        name: '单个物料',
+        el: '#item-detail',
+        data() {
+            return {
+                tab: 'main',
+                name: 'Hello World',
+                publicData: {
+                    id: null,
+                    successor_nr: null,
+                    nr: null,
+                    available_inventory: null,
+                    description: null,
+                    inventory_cost: null,
+                    inventory_qty: null,
+                    locations: {current: null, value: []},
+                    lock_expire_at: null,
+                    lock_types: {current: null, values: []},
+                    plan_strategies: {current: null, values: []},
+                    price_abc: null,
+                    project_nr: null,
+                    qty_abc: null,
+                    statuses: {current: null, values: []}
+                },
+                mainData: {},
+                supplierData: {
+                    supplierSelected: '', // 选中的选项在数组中的数组下标
+                    data: []
+                }
+            }
+        },
+        created() {
+            this.getMainData();
+            this.getMainSuppliersData();
+        },
+        mounted() {
+            $(".vDateField").datetimepicker({
+                timepicker: false,
+                format: 'Y-m-d',
+                formatDate: 'Y-m-d',
+                defaultDate: new Date().format("YYYY-MM-DD"),
+            });
+        },
+        methods: {
+            // 获取公共数据
+            getMainData() {
+                const _this = this;
+                $.ajax({
+                    url: '/data/input/item/maindata/' + itemId + "/",
+                    type: 'application/json',
+                    method: 'get',
+                    success: function (data) {
+                        // 填充数据
+                        if (data.result) {
+                            _this.publicDetailData = data.content.locations;
+                            _this.publicData = data.content;
+                        } else {
+                            // alert(data.message)
+                        }
+                    },
+                    error: function (err) {
+                        alert(err);
+                    }
+                })
+            },
+            // 获取主数据TAB
+            getMainSuppliersData() {
+                const _this = this;
+                this.tab = 'main';
+                $.ajax({
+                    url: '/data/input/item/mainsupplierdata/' + itemId + "/",
+                    type: 'application/json',
+                    method: 'get',
+                    success: function (data) {
+                        // 填充数据
+                        if (data.result) {
+                            _this.mainData = data.content;
+                            // $('#item_detail_main_plan_supplier_date').datetimepicker();
+                            // FillData('item_detail_main', data.content);
+
+                        } else {
+                            // alert(data.message)
+                        }
+                    },
+                    error: function (err) {
+                        alert(err);
+                    }
+                })
+            },
+            //获取供应商数据
+            getSuppliersData() {
+                const _this = this;
+                this.tab = 'supplier';
+                $.ajax({
+                    url: '/data/input/item/suppliers/' + itemId + "/",
+                    type: 'application/json',
+                    method: 'get',
+                    success: function (data) {
+                        // 填充数据
+                        if (data.result) {
+                            // 保存的是数组下标
+                            _this.supplierData.supplierSelected = 0;
+                            _this.supplierData.data = data.content;
+                            _this.supplierData.data.push({id: 2, name: '123'});
+
+                            console.log(_this.supplierData.data[0].phone);
+
+                        } else {
+                            // alert(data.message)
+                        }
+                    },
+                    error: function (err) {
+                        alert(err);
+                    }
+                })
+            },
+            supplierChange() {
+                console.log(this.supplierData.supplierSelected);
+            }
+        }
+    });
+}
 
