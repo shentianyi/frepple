@@ -1990,39 +1990,42 @@ class ForecastdetailVersionAPI(frePPleRetrieveUpdateDestroyAPIView):
 
 
 class DemandFilter(filters.FilterSet):
+    created_at__gte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='gte')
+    created_at__lte = django_filters.DateTimeFilter(field_name="created_at", lookup_expr='lte')
+    updated_at__gte = django_filters.DateTimeFilter(field_name="updated_at", lookup_expr='gte')
+    updated_at__lte = django_filters.DateTimeFilter(field_name="updated_at", lookup_expr='lte')
+
     class Meta:
         model = freppledb.input.models.Demand
-        fields = {'name': ['exact', 'in', 'contains', ], 'description': ['exact', 'in', 'contains', ],
-                  'category': ['exact', 'in', 'contains', ], 'subcategory': ['exact', 'in', 'contains', ],
-                  'item': ['exact', 'in', ], 'customer': ['exact', 'in', ], 'location': ['exact', 'in', ],
+        fields = {
+                  'id': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],'item__nr': ['exact', 'in', ],
+                  'source__id': ['exact', 'in', ],'customer__nr': ['exact', 'in', ], 'location__nr': ['exact', 'in', ],
+                  'qty': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
+                  'schedule_qty': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
+                  'deliver_qty': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
                   'due': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ], 'status': ['exact', 'in', ],
-                  'operation': ['exact', 'in', ], 'quantity': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
                   'priority': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
-                  'delay': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
-                  'plannedquantity': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
-                  'deliverydate': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
-                  'plan': ['exact', 'in', 'contains', ], 'minshipment': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
-                  'maxlateness': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ], }
+                  'max_lateness': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ],
+                  'min_shipment': ['exact', 'in', 'gt', 'gte', 'lt', 'lte', ], }
 
-        filter_fields = ('name', 'description', 'category', 'subcategory', 'item', 'customer', 'location', 'due',
-                         'status', 'operation', 'quantity', 'priority', 'delay', 'plannedquantity', 'deliverydate',
-                         'plan', 'minshipment', 'maxlateness')
+
+        filter_fields = ('id', 'item__nr', 'source__id', 'customer__nr', 'location__nr', 'qty', 'schedule_qty', 'deliver_qty',
+                         'due','staus', 'priority', 'max_lateness', 'min_shipment','create_at','update_at')
 
 
 class DemandSerializer(BulkSerializerMixin, ModelSerializer):
     class Meta:
         model = freppledb.input.models.Demand
-        fields = ('name', 'description', 'category', 'subcategory', 'item', 'customer', 'location', 'due',
-                  'status', 'operation', 'quantity', 'priority', 'delay', 'plannedquantity', 'deliverydate', 'plan',
-                  'minshipment', 'maxlateness')
+        fields = '__all__'
         list_serializer_class = BulkListSerializer
-        update_lookup_field = 'name'
+        update_lookup_field = 'id'
         partial = True
 
 
 class DemandAPI(frePPleListCreateAPIView):
     queryset = freppledb.input.models.Demand.objects.all()
     serializer_class = DemandSerializer
+    ordering_fields = ('id',)
     filter_class = DemandFilter
 
 

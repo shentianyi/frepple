@@ -146,6 +146,37 @@ class ExecuteTaskStatus(BaseEnum):
     failed = _('failed')
 
 
+class DemandStatus(BaseEnum):
+    """需求状态"""
+    init = _('init')
+    open =_('open')
+    release = _('release')
+    closed = _('closed')
+    canceled = _('canceled')
+
+
+class DemandRequestVersionStatus(BaseEnum):
+    """需求请求版本状态"""
+    init = _('init')
+    canceled = _('canceled')
+    release = _('release')
+    closed = _('closed')
+
+class DemandRequestType(BaseEnum):
+    """需求请求类型"""
+    manufacture = _('manufacture')
+    purchase = _('purchase')
+
+
+class DemandRequestStatus(BaseEnum):
+    """需求请求状态"""
+    init = _('init')
+    canceled = _('canceled')
+    release = _('release')
+    closed = _('closed')
+
+
+
 class WorkOrderStatus(BaseEnum):
     """生产工单状态"""
     init = _('init')

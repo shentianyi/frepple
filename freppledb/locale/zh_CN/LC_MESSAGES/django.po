@@ -29,6 +29,18 @@ msgstr ""
 msgid "Permissions in this scenario"
 msgstr "针对此场景的权限"
 
+msgid "source_display"
+msgstr "需求源"
+
+msgid "manufacture"
+msgstr "生产请求"
+
+msgid "purchase"
+msgstr "采购请求"
+
+msgid "closed at"
+msgstr "关闭时间"
+
 msgid "workorder_display"
 msgstr "生产工单"
 

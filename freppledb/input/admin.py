@@ -701,17 +701,9 @@ data_site.register(DeliveryOrderItem, DeliveryOrderItem_admin)
 
 class Demand_admin(MultiDBModelAdmin):
     model = Demand
-    raw_id_fields = ('customer', 'item', 'operation', 'owner',)
-    fieldsets = (
-        (None, {'fields': (
-            'name', 'item', 'location', 'customer', 'description', 'category',
-            'subcategory', 'due', 'quantity', 'priority', 'status', 'owner'
-        )}),
-        (_('planning parameters'), {'fields': (
-            'operation', 'minshipment', 'maxlateness'
-        )}),
-    )
+    # raw_id_fields = ('item', 'source','location','customer')
     save_on_top = True
+    exclude = ('source',)
     tabs = [
         {"name": 'edit', "label": _("edit"), "view": "admin:input_demand_change", "permissions": "input.change_demand"},
         {"name": 'supplypath', "label": _("supply path"), "view": "supplypath_demand"},
@@ -724,6 +716,26 @@ class Demand_admin(MultiDBModelAdmin):
 
 
 data_site.register(Demand, Demand_admin)
+
+
+# class DemandRequestVersion_admin(MultiDBModelAdmin):
+#     model = DemandRequestVersion
+#     save_on_top = True
+#     exclude = ('source',)
+#     tabs = [
+#         {"name": 'edit', "label": _("edit"), "view": "admin:input_demandrequestversion_change",
+#          "permissions": "input.change_demandrequestversion"}
+#     ]
+#
+#     def save_model(self, request, obj, form, change):
+#         obj.create_user = request.user
+#         super().save_model(request, obj, form, change)
+#
+#
+# data_site.register(DemandRequestVersion, DemandRequestVersion_admin)
+
+
+
 
 
 class SalesOrder_admin(MultiDBModelAdmin):

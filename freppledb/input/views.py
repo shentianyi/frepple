@@ -223,7 +223,7 @@ class PathReport(GridReport):
         if Location.objects.using(db).count() > 1:
             # Multiple locations
             for i in ItemSupplier.objects.using(db).filter(
-                            Q(location__isnull=True) | Q(location__name=buffer.location.nr),
+                    Q(location__isnull=True) | Q(location__name=buffer.location.nr),
                     item__lft__lte=buffer.item.lft, item__rght__gt=buffer.item.lft
             ):
                 i.item = buffer.item
@@ -233,7 +233,7 @@ class PathReport(GridReport):
                      buffer.location.nr if buffer.location else None)
                 )
             for i in ItemDistribution.objects.using(db).filter(
-                            Q(location__isnull=True) | Q(location__name=buffer.location.nr),
+                    Q(location__isnull=True) | Q(location__name=buffer.location.nr),
                     item__lft__lte=buffer.item.lft, item__rght__gt=buffer.item.lft
             ):
                 i.item = buffer.item
@@ -242,7 +242,7 @@ class PathReport(GridReport):
                     (level, None, i, curqty, 0, None, realdepth, pushsuper, i.location.nr if i.location else None)
                 )
             for i in Operation.objects.using(db).filter(
-                            Q(location__isnull=True) | Q(location__name=buffer.location.nr),
+                    Q(location__isnull=True) | Q(location__name=buffer.location.nr),
                     item__lft__lte=buffer.item.lft, item__rght__gt=buffer.item.lft
             ):
                 i.item = buffer.item
@@ -764,12 +764,12 @@ class InventoryParameterList(GridReport):
         GridFieldText('item', title=_('item_id'), field_name='item_id', editable=False, hidden=True),
         GridFieldText('location', title=_('location_id'), field_name='location_id', editable=False, hidden=True),
         GridFieldInteger('rop_cover_period', title=_('rop cover period'), editable=False),
-        GridFieldNumber('rop', title=_('rop'),editable=False),
-        GridFieldNumber('rop_by_system', title=_('system rop'),editable=False),
-        GridFieldInteger('safetystock_cover_period', title=_('safetystock cover period'),editable=False),
+        GridFieldNumber('rop', title=_('rop'), editable=False),
+        GridFieldNumber('rop_by_system', title=_('system rop'), editable=False),
+        GridFieldInteger('safetystock_cover_period', title=_('safetystock cover period'), editable=False),
         GridFieldNumber('safetysotck_min_qty', title=_('safety stock min qty'), editable=False),
-        GridFieldNumber('safetysotck_max_qty', title=_('safety stock max qty'),editable=False),
-        GridFieldNumber('safetystock_qty_by_system', title=_('system safety stock'),editable=False),
+        GridFieldNumber('safetysotck_max_qty', title=_('safety stock max qty'), editable=False),
+        GridFieldNumber('safetystock_qty_by_system', title=_('system safety stock'), editable=False),
         GridFieldNumber('service_level', title=_('service level'), editable=False),
         GridFieldCreateOrUpdateDate('created_at', title=_('created_at'), editable=False),
         GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at'), editable=False),
@@ -1492,41 +1492,53 @@ class ItemMainData(View):
         item_location = ItemLocation.objects.filter(item=item)
         lock_types = {"current": None, "values": la_enum.tuple2select(enum.LockType.to_tuple())}
 
-        # item_statuses = {"current": item.status, "values": la_enum.tuple2select(Item.type_status[item.type])}
         # statuses = {"current": None,
         #             "values": la_enum.tuple2select(enum.ItemTypyStatus.to_dic()[item.type])}
 
         plan_strategies = {"current": None,
                            "values": la_enum.tuple2select(enum.ItemProductStrategy.to_tuple())}
 
-        location = []
-        detail = {"lock_types": lock_types, "plan_strategies": plan_strategies}
-        adict = {}
-        for i in item_location:
-            print(i.type)
-            print(Item.type_status[i.type])
-            adict["id"] = i.location.id
-            adict["nr"] = i.location.nr
-            detail["lock_types"]["current"] = i.lock_type
-            detail["statuses"] = {"current": i.status,
-                                             "values": la_enum.tuple2select(Item.type_status[i.type])}
-            detail["plan_strategies"]["current"] = i.plan_strategy
-            detail["inventory_qty"] = i.inventory_qty
-            detail["available_inventory"] = i.available_inventory
-            detail["inventory_cost"] = i.inventory_cost
-            detail["price_abc"] = i.price_abc
-            detail["qty_abc"] = i.qty_abc
-            detail["description"] = i.description
-            detail["project_nr"] = i.project_nr
-            adict["detail"] = detail
-            location.append(adict)
-
         data = {
             "id": item.id,
             "nr": item.nr,
             "successor_nr": successor_nr,
-            "locations": location
+            "project_nr": None,
+            "inventory_qty": None,
+            "available_inventory": None,
+            "inventory_cost": None,
+            "location": [],
+            "lock_types": lock_types,
+            "lock_expire_at": None,
+            "plan_strategies": plan_strategies,
+            "statuses": None,
+            "price_abc": None,
+            "qty_abc": None,
+            "description": None,
         }
+        adict = {}
+        location = []
+        for i in item_location:
+            adict["id"] = i.location.id
+            adict["nr"] = i.location.nr
+            location.append(adict)
+        data["location"] = location
+
+        if item_location:
+            item_location = item_location.first()
+            data["project_nr"] = item_location.project_nr
+            data["lock_types"]["current"] = item_location.lock_type
+
+            data["statuses"] = {"current": item_location.status,
+                                "values": la_enum.tuple2select(Item.type_status[item_location.type])}
+
+            data["plan_strategies"]["current"] = item_location.plan_strategy
+
+            data["inventory_qty"] = item_location.inventory_qty
+            data["available_inventory"] = item_location.available_inventory
+            data["inventory_cost"] = item_location.inventory_cost
+            data["description"] = item_location.description
+            data["price_abc"] = item_location.price_abc
+            data["qty_abc"] = item_location.qty_abc
 
         message.result = True
         message.code = 200
@@ -2550,167 +2562,60 @@ class ForecastCommentView(View):
             #     i=1
 
 
-class DemandList(GridReport):
-    '''
-    A list report to show sales orders.
-    '''
-    template = 'input/demand.html'
-    title = _("sales orders")
-    basequeryset = Demand.objects.all()
-    model = Demand
-    frozenColumns = 1
-    help_url = 'user-guide/modeling-wizard/master-data/sales-orders.html'
-
-    rows = (
-        # . Translators: Translation included with Django
-
-        GridFieldText('name', title=_('name'), key=True, formatter='detail', extra='"role":"input/demand"'),
-        GridFieldText('item', title=_('item'), field_name='item__name', formatter='detail',
-                      extra='"role":"input/item"'),
-        GridFieldText('location', title=_('location'), field_name='location__name', formatter='detail',
-                      extra='"role":"input/location"'),
-        GridFieldText('customer', title=_('customer'), field_name='customer__name', formatter='detail',
-                      extra='"role":"input/customer"'),
-        GridFieldChoice('status', title=_('status'), choices=Demand.demandstatus),
-        GridFieldNumber('quantity', title=_('quantity')),
-        GridFieldDateTime('due', title=_('due')),
-        GridFieldDuration('delay', title=_('delay'), editable=False, extra='"formatter":delayfmt'),
-        GridFieldNumber('plannedquantity', title=_('planned quantity'), editable=False,
-                        extra='"formatoptions":{"defaultValue":""}, "cellattr":plannedquantitycellattr'),
-        GridFieldDateTime('deliverydate', title=_('delivery date'), editable=False),
-        GridFieldText('description', title=_('description'), initially_hidden=True),
-        GridFieldText('category', title=_('category'), initially_hidden=True),
-        GridFieldText('subcategory', title=_('subcategory'), initially_hidden=True),
-        GridFieldText('operation', title=_('delivery operation'), field_name='operation__name', formatter='detail',
-                      extra='"role":"input/operation"', initially_hidden=True),
-        GridFieldInteger('priority', title=_('priority')),
-        GridFieldText('owner', title=_('owner'), field_name='owner__name', formatter='detail',
-                      extra='"role":"input/demand"', initially_hidden=True),
-        GridFieldDuration('maxlateness', title=_('maximum lateness'), initially_hidden=True),
-        GridFieldNumber('minshipment', title=_('minimum shipment'), initially_hidden=True),
-        GridFieldText('source', title=_('source')),
-        GridFieldLastModified('lastmodified'),
-        # Optional fields referencing the item
-        GridFieldText(
-            'item__description', title=string_concat(_('item'), ' - ', _('description')),
-            initially_hidden=True, editable=False
-        ),
-        GridFieldText(
-            'item__category', title=string_concat(_('item'), ' - ', _('category')),
-            initially_hidden=True, editable=False
-        ),
-        GridFieldText(
-            'item__subcategory', title=string_concat(_('item'), ' - ', _('subcategory')),
-            initially_hidden=True, editable=False
-        ),
-        GridFieldText(
-            'item__owner', title=string_concat(_('item'), ' - ', _('owner')),
-            field_name='item__owner__name', initially_hidden=True, editable=False
-        ),
-        GridFieldCurrency(
-            'item__cost', title=string_concat(_('item'), ' - ', _('cost')),
-            initially_hidden=True, editable=False
-        ),
-        GridFieldText(
-            'item__source', title=string_concat(_('item'), ' - ', _('source')),
-            initially_hidden=True, editable=False
-        ),
-        GridFieldLastModified(
-            'item__lastmodified', title=string_concat(_('item'), ' - ', _('last modified')),
-            initially_hidden=True, editable=False
-        ),
-        # Optional fields referencing the location
-        GridFieldText(
-            'location__description', title=string_concat(_('location'), ' - ', _('description')),
-            initially_hidden=True, editable=False
-        ),
-        GridFieldText(
-            'location__category', title=string_concat(_('location'), ' - ', _('category')),
-            initially_hidden=True, editable=False
-        ),
-        GridFieldText(
-            'location__subcategory', title=string_concat(_('location'), ' - ', _('subcategory')),
-            initially_hidden=True, editable=False
-        ),
-        GridFieldText(
-            'location__available', title=string_concat(_('location'), ' - ', _('available')),
-            initially_hidden=True, field_name='location__available__name', formatter='detail',
-            extra='"role":"input/calendar"', editable=False
-        ),
-        GridFieldText(
-            'location__owner', title=string_concat(_('location'), ' - ', _('owner')),
-            initially_hidden=True, field_name='location__owner__name', formatter='detail',
-            extra='"role":"input/location"', editable=False
-        ),
-        GridFieldText(
-            'location__source', title=string_concat(_('location'), ' - ', _('source')),
-            initially_hidden=True, editable=False
-        ),
-        GridFieldLastModified(
-            'location__lastmodified', title=string_concat(_('location'), ' - ', _('last modified')),
-            initially_hidden=True, editable=False
-        ),
-        # Optional fields referencing the customer
-        GridFieldText(
-            'customer__description', title=string_concat(_('customer'), ' - ', _('description')),
-            initially_hidden=True, editable=False
-        ),
-        GridFieldText(
-            'customer__category', title=string_concat(_('customer'), ' - ', _('category')),
-            initially_hidden=True, editable=False
-        ),
-        GridFieldText(
-            'customer__subcategory', title=string_concat(_('customer'), ' - ', _('subcategory')),
-            initially_hidden=True, editable=False
-        ),
-        GridFieldText(
-            'customer__owner', title=string_concat(_('customer'), ' - ', _('owner')),
-            initially_hidden=True, field_name='customer__owner__name', formatter='detail',
-            extra='"role":"input/customer"', editable=False
-        ),
-        GridFieldText(
-            'customer__source', title=string_concat(_('customer'), ' - ', _('source')),
-            initially_hidden=True, editable=False
-        ),
-        GridFieldLastModified(
-            'customer__lastmodified', title=string_concat(_('customer'), ' - ', _('last modified')),
-            initially_hidden=True, editable=False
-        ),
-    )
-
-    if settings.ERP_CONNECTOR:
-        actions = [{
-            "name": 'erp_incr_export',
-            "label": format_lazy("export to {erp}", erp=settings.ERP_CONNECTOR),
-            "function": "ERPconnection.SODepExport(jQuery('#grid'),'SO')"
-        }]
-    else:
-        actions = [
-            {
-                "name": 'inquiry',
-                "label": format_lazy(_("change status to {status}"), status=_("inquiry")),
-                "function": "grid.setStatus('inquiry')"
-            },
-            {
-                "name": 'quote',
-                "label": format_lazy(_("change status to {status}"), status=_("quote")),
-                "function": "grid.setStatus('quote')"
-            },
-            {
-                "name": 'open',
-                "label": format_lazy(_("change status to {status}"), status=_("open")),
-                "function": "grid.setStatus('open')"
-            },
-            {
-                "name": 'closed',
-                "label": format_lazy(_("change status to {status}"), status=_("closed")),
-                "function": "grid.setStatus('closed')"},
-            {
-                "name": 'canceled',
-                "label": format_lazy(_("change status to {status}"), status=_("canceled")),
-                "function": "grid.setStatus('canceled')"
-            },
-        ]
+# class DemandList(GridReport):
+#     title = _("demands")
+#     basequeryset = Demand.objects.all()
+#     model = Demand
+#     frozenColumns = 1
+#     rows = (
+#         # . Translators: Translation included with Django
+#         GridFieldInteger('id', title=_('id'), key=True, formatter='detail',
+#                          extra='"role":"input/demand"', editable=False),
+#         GridFieldText('item_display', title=_('item_display'), field_name='item__nr', editable=False),
+#         GridFieldText('source_display', title=_('source_display'), field_name='source__id', editable=False),
+#         GridFieldText('location_display', title=_('location_display'), field_name='location__nr', editable=False),
+#         GridFieldText('customer_display', title=_('customer_display'), field_name='customer__nr', editable=False),
+#
+#         GridFieldText('item', title=_('item_id'), field_name='item_id', editable=False, hidden=True),
+#         GridFieldText('source', title=_('source_id'), field_name='source_id', editable=False, hidden=True),
+#         GridFieldText('location', title=_('location_id'), field_name='location_id', editable=False, hidden=True),
+#         GridFieldText('customer', title=_('customer_id'), field_name='customer_id', editable=False, hidden=True),
+#         GridFieldNumber('qty', title=_('qty'), editable=False),
+#         GridFieldNumber('schedule_qty', title=_('schedule qty'), editable=False),
+#         GridFieldNumber('deliver qty', title=_('deliver qty'), editable=False),
+#         GridFieldDateTime('due', title=_('due'),editable=False),
+#         GridFieldNumber('quantity', title=_('quantity'),editable=False),
+#         GridFieldChoice('status', title=_('status'), choices=enum.DemandStatus.to_tuple(),editable=False),
+#         GridFieldNumber('max_lateness', title=_('max lateness'),editable=False),
+#         GridFieldNumber('min_shipment', title=_('min shipment'),editable=False),
+#         GridFieldDateTime('closed_at', title=_('closed_at'),editable=False),
+#         GridFieldCreateOrUpdateDate('created_at', title=_('created_at'), editable=False),
+#         GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at'), editable=False),
+#     )
+#
+#
+# class DemandRequestVersionList(GridReport):
+#     title = _("demand request versions")
+#     basequeryset = DemandRequestVersion.objects.all().order_by('-created_at')
+#     model = DemandRequestVersion
+#     frozenColumns = 1
+#
+#     rows = (
+#         GridFieldInteger('id', title=_('id'), key=True, formatter='detail',
+#                          extra='"role":"input/demand"', editable=False),
+#         GridFieldText('nr', title=_('version nr'), editable=False),
+#         GridFieldChoice('status', title=_('status'), choices=enum.DemandRequestVersionStatus.to_tuple(), editable=False),
+#         GridFieldText('status_value', title=_('status_value'), field_name='status', editable=False, hidden=True,
+#                       search=False),
+#         GridFieldText('create_user_display', title=_('create_user_display'), field_name='create_user__username',
+#                       editable=False),
+#         GridFieldText('create_user', title=_('create_user_id'), field_name='create_user_id', editable=False,
+#                       hidden=True, search=False),
+#         GridFieldCreateOrUpdateDate('created_at', title=_('created_at'), editable=False),
+#         GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at'), editable=False),
+#         GridFieldText('_pk', field_name='nr', editable=False, hidden=True, search=False),
+#         GridFieldText('_nk', field_name='nr', editable=False, hidden=True, search=False),
+#     )
 
 
 class SalesOrderList(GridReport):
@@ -2727,7 +2632,7 @@ class SalesOrderList(GridReport):
         # 因为是id 让外键永远不显示
         GridFieldText('location', title=_('location_id'), field_name='location_id', editable=False, hidden=True),
         GridFieldText('customer', title=_('customer_id'), field_name='customer_id', editable=False, hidden=True),
-        GridFieldChoice('status', title=_('status'), choices=enum.SalesOrderStatus.to_tuple(),  editable=False),
+        GridFieldChoice('status', title=_('status'), choices=enum.SalesOrderStatus.to_tuple(), editable=False),
         GridFieldNumber('max_lateness', title=_('max lateness'), editable=False),
         GridFieldNumber('min_shipment', title=_('min shipment'), editable=False),
         GridFieldCreateOrUpdateDate('created_at', title=_('created_at'), editable=False),
@@ -2751,11 +2656,11 @@ class SalesOrderItemList(GridReport):
         GridFieldText('sales_order', title=_('sales_order_id'), field_name='sales_order_id', editable=False,
                       hidden=True),
         GridFieldText('item', title=_('item_id'), field_name='item_id', editable=False, hidden=True),
-        GridFieldInteger('qty', title=_('qty'),  editable=False),
+        GridFieldInteger('qty', title=_('qty'), editable=False),
         GridFieldNumber('schedule_qty', title=_('schedule qty'), editable=False),
         GridFieldNumber('deliver_qty', title=_('deliver qty'), editable=False),
         GridFieldDateTime('due', title=_('due'), editable=False),
-        GridFieldInteger('priority', title=_('priority'),  editable=False),
+        GridFieldInteger('priority', title=_('priority'), editable=False),
         GridFieldChoice('status', title=_('status'), choices=enum.SalesOrderStatus.to_tuple(), editable=False),
         GridFieldNumber('max_lateness', title=_('max lateness'), editable=False),
         GridFieldNumber('min_shipment', title=_('min shipment'), editable=False),
@@ -3792,8 +3697,10 @@ class PurchaseOrderItemList(GridReport):
         GridFieldText('line_no', title=_('line no'), editable=False),
         GridFieldText('item_display', title=_('item_display'), field_name='item__nr', editable=False),
         GridFieldText('item', title=_('item_id'), field_name='item_id', editable=False, hidden=True),
-        GridFieldText('purchase_order_display', title=_('purchase_order_display'), field_name='purchase_order__id', editable=False),
-        GridFieldText('purchase_order', title=_('purchase_order_id'), field_name='purchase_order_id', editable=False, hidden=True),
+        GridFieldText('purchase_order_display', title=_('purchase_order_display'), field_name='purchase_order__id',
+                      editable=False),
+        GridFieldText('purchase_order', title=_('purchase_order_id'), field_name='purchase_order_id', editable=False,
+                      hidden=True),
         GridFieldInteger('qty', title=_('qty'), editable=False),
         GridFieldNumber('deliver_qty', title=_('deliver qty'), editable=False),
         GridFieldChoice('status', title=_('status'), choices=enum.DeliveryOrderStatus.to_tuple(), editable=False),
@@ -4033,15 +3940,21 @@ class DeliveryOrderList(GridReport):
         GridFieldInteger('id', title=_('identifier'), initially_hidden=True, key=True, formatter='detail',
                          extra='role:"input/deliveryorder"'),
         GridFieldText('nr', title=_('nr'), editable=False),
-        GridFieldText('source_location_display', title=_('source_location_display'), field_name='source_location__nr', editable=False),
-        GridFieldText('source_location', title=_('source_location_id'), field_name='source_location_id', editable=False, hidden=True),
-        GridFieldText('destination_location_display', title=_('destination_location_display'), field_name='destination_location__nr', editable=False),
-        GridFieldText('destination_location', title=_('destination_location_id'), field_name='destination_location_id', editable=False, hidden=True),
+        GridFieldText('source_location_display', title=_('source_location_display'), field_name='source_location__nr',
+                      editable=False),
+        GridFieldText('source_location', title=_('source_location_id'), field_name='source_location_id', editable=False,
+                      hidden=True),
+        GridFieldText('destination_location_display', title=_('destination_location_display'),
+                      field_name='destination_location__nr', editable=False),
+        GridFieldText('destination_location', title=_('destination_location_id'), field_name='destination_location_id',
+                      editable=False, hidden=True),
         GridFieldChoice('type', title=_('type'), choices=enum.DeliveryOrderType.to_tuple(), editable=False),
         GridFieldText('deliver_display', title=_('deliver_display'), field_name='deliver__nr', editable=False),
         GridFieldText('deliver', title=_('deliver_id'), field_name='deliver_id', editable=False, hidden=True),
-        GridFieldText('deliver_source_display', title=_('deliver_source_display'), field_name='deliver_source_id', editable=False),
-        GridFieldText('deliver_source', title=_('deliver_source_id'), field_name='deliver_source_id', editable=False, hidden=True),
+        GridFieldText('deliver_source_display', title=_('deliver_source_display'), field_name='deliver_source_id',
+                      editable=False),
+        GridFieldText('deliver_source', title=_('deliver_source_id'), field_name='deliver_source_id', editable=False,
+                      hidden=True),
         GridFieldChoice('status', title=_('status'), choices=enum.DeliveryOrderStatus.to_tuple(), editable=False),
         GridFieldDateTime('schedule_arrive_at', title=_('schedule arrive at'), editable=False),
         GridFieldDateTime('start_ship_at', title=_('start ship at'), editable=False),
@@ -4070,10 +3983,14 @@ class DeliveryOrderItemList(GridReport):
         GridFieldText('line_no', title=_('line no'), editable=False),
         GridFieldText('item_display', title=_('item_display'), field_name='item__nr', editable=False),
         GridFieldText('item', title=_('item_id'), field_name='item_id', editable=False, hidden=True),
-        GridFieldText('delivery_order_display', title=_('delivery_order_display'), field_name='delivery_order__id', editable=False),
-        GridFieldText('delivery_order', title=_('delivery_order_id'), field_name='delivery_order_id', editable=False, hidden=True),
-        GridFieldText('deliver_source_display', title=_('deliver_source_display'), field_name='deliver_source__id', editable=False),
-        GridFieldText('deliver_source', title=_('deliver_source_id'), field_name='deliver_source_id', editable=False, hidden=True),
+        GridFieldText('delivery_order_display', title=_('delivery_order_display'), field_name='delivery_order__id',
+                      editable=False),
+        GridFieldText('delivery_order', title=_('delivery_order_id'), field_name='delivery_order_id', editable=False,
+                      hidden=True),
+        GridFieldText('deliver_source_display', title=_('deliver_source_display'), field_name='deliver_source__id',
+                      editable=False),
+        GridFieldText('deliver_source', title=_('deliver_source_id'), field_name='deliver_source_id', editable=False,
+                      hidden=True),
         GridFieldNumber('deliver_qty', title=_('deliver qty'), editable=False),
         GridFieldChoice('status', title=_('status'), choices=enum.DeliveryOrderStatus.to_tuple(), editable=False),
         GridFieldDateTime('start_ship_at', title=_('start ship at'), editable=False),

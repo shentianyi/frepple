@@ -10,11 +10,13 @@
     // 替代物料号
     "successor_nr": "B",
     // 仓库代码
-    "location": [
+    "location":
       {
-        "id": 1,  // 地点id
-        "nr": "beijing",  // 地点代码
-        "detail": {
+        "id": 1,
+        // 地点id
+        "nr": "beijing"
+        // 地点代码
+      },
           //库存数量
           "inventory_qty": 0,
           // 可用库存
@@ -63,6 +65,3 @@
           "description": null
         }
       }
-    ]
-  }
-}

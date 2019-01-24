@@ -1688,86 +1688,95 @@ class Forecast(AuditModel, ForecastCommentOperation):
         super(Forecast, self).save(*args, **kwargs)
 
 
-class Demand(AuditModel, HierarchyModel):
-    # Status
-    demandstatus = (
-        ('inquiry', _('inquiry')),
-        ('quote', _('quote')),
-        ('open', _('open')),
-        ('closed', _('closed')),
-        ('canceled', _('canceled')),
-    )
 
-    # Database fields
-    description = models.CharField(
-        _('description'), max_length=500, null=True, blank=True
-    )
-    category = models.CharField(
-        _('category'), max_length=300, null=True, blank=True, db_index=True
-    )
-    subcategory = models.CharField(
-        _('subcategory'), max_length=300, null=True, blank=True, db_index=True
-    )
-    customer = models.ForeignKey(
-        Customer, verbose_name=_('customer'),
-        db_index=True, on_delete=models.CASCADE
-    )
+class Demand(AuditModel):
+    id = models.AutoField(_('id'), help_text=_('Unique identifier'), primary_key=True)
     item = models.ForeignKey(
-        Item, verbose_name=_('item'), db_index=True, on_delete=models.CASCADE
+        Item, verbose_name=_('item'), db_index=True, on_delete=models.CASCADE, related_name='demand_item',
+    )
+    source = models.ForeignKey(
+        Forecast, verbose_name=_('source'),
+        db_index=True, on_delete=models.CASCADE, related_name='demand_source',
     )
     location = models.ForeignKey(
         Location, verbose_name=_('location'),
-        db_index=True, on_delete=models.CASCADE
+        db_index=True, on_delete=models.CASCADE, related_name='demand_location',
     )
-    due = models.DateTimeField(_('due'), help_text=_('Due date of the demand'), db_index=True)
-    status = models.CharField(
-        _('status'), max_length=10, null=True, blank=True,
-        choices=demandstatus, default='open',
-        help_text=_('Status of the demand. Only "open" demands are planned'),
+    customer = models.ForeignKey(
+        Customer, verbose_name=_('customer'), null=True, blank=True,
+        db_index=True, on_delete=models.CASCADE, related_name='demand_customer',
     )
-    operation = models.ForeignKey(
-        Operation,
-        verbose_name=_('delivery operation'), null=True, blank=True,
-        related_name='used_demand', on_delete=models.CASCADE,
-        help_text=_('Operation used to satisfy this demand')
-    )
-    quantity = models.DecimalField(
-        _('quantity'), max_digits=20, decimal_places=8, default=1
-    )
-    priority = models.IntegerField(
-        _('priority'), default=10,
-        help_text=_('Priority of the demand (lower numbers indicate more important demands)')
-    )
-    minshipment = models.DecimalField(
-        _('minimum shipment'), null=True, blank=True,
-        max_digits=20, decimal_places=8,
-        help_text=_('Minimum shipment quantity when planning this demand')
-    )
-    maxlateness = models.DurationField(
-        _('maximum lateness'), null=True, blank=True,
-        help_text=_("Maximum lateness allowed when planning this demand")
-    )
-    delay = models.DurationField(
-        _('delay'), null=True, blank=True, editable=False
-    )
-    plannedquantity = models.DecimalField(
-        _('planned quantity'), max_digits=20, decimal_places=8, null=True, blank=True, editable=False,
-        help_text=_('Quantity planned for delivery')
-    )
-    deliverydate = models.DateTimeField(
-        _('delivery date'), help_text=_('Delivery date of the demand'), null=True, blank=True, editable=False,
-    )
-    plan = JSONBField(default="{}", null=True, blank=True, editable=False)
+    qty = models.DecimalField(_('qty'), db_index=True, max_digits=20, decimal_places=8, null=True, blank=True)
+    schedule_qty = models.DecimalField(_('schedule qty'), db_index=True, max_digits=20, decimal_places=8, null=True,
+                                       blank=True)
+    deliver_qty = models.DecimalField(_('deliver qty'), db_index=True, max_digits=20, decimal_places=8, null=True,
+                                      blank=True)
+    due = models.DateTimeField(_('due'), null=True, blank=True)
+    priority = models.IntegerField(_('priority'), null=True, blank=True, default=0)
+    status = models.CharField(_('status'), max_length=20, null=True, blank=True, choices=enum.DemandStatus.to_tuple())
+    max_lateness = models.DecimalField(_('max lateness'), max_digits=20, decimal_places=8, null=True, blank=True)
+    min_shipment = models.DecimalField(_('min shipment'), max_digits=20, decimal_places=8, null=True, blank=True)
+    closed_at = models.DateTimeField(_('closed at'), db_index=True,null=True,blank=True)
 
     # Convenience methods
     def __str__(self):
-        return self.name
+        return "%s - %s - %s" % (self.item, self.source, self.location)
 
     class Meta(AuditModel.Meta):
         db_table = 'demand'
-        verbose_name = _('sales order')
-        verbose_name_plural = _('sales orders')
-        ordering = ['name']
+        verbose_name = _('demand')
+        verbose_name_plural = _('demands')
+        ordering = ['id']
+
+
+class DemandRequestVersion(AuditModel):
+    id = models.AutoField(_('id'), help_text=_('Unique identifier'), primary_key=True)
+    nr = models.CharField(_('nr'), max_length=300, editable=False, db_index=True)
+    status = models.CharField(_('status'), max_length=20, choices=enum.DemandRequestVersionStatus.to_tuple())
+    create_user = models.ForeignKey(
+        User, verbose_name=_('create_user'),
+        db_index=True, related_name='demandrequest_create_user',
+        null=False, blank=False, on_delete=models.CASCADE
+    )
+
+    def __str__(self):
+        return self.nr
+
+    class Meta(AuditModel.Meta):
+        db_table = 'demand_request_version'
+        verbose_name = _('demand request version')
+        verbose_name_plural = _('demand request versions')
+
+
+class DemandRequest(AuditModel):
+    id = models.AutoField(_('id'), help_text=_('Unique identifier'), primary_key=True)
+    demand = models.ForeignKey(
+        Demand, verbose_name=_('demand'), db_index=True, on_delete=models.CASCADE, related_name='demandrequest_demand',
+    )
+    item = models.ForeignKey(
+        Forecast, verbose_name=_('item'),
+        db_index=True, on_delete=models.CASCADE, related_name='demandrequest_item',
+    )
+    location = models.ForeignKey(
+        Location, verbose_name=_('location'),
+        db_index=True, on_delete=models.CASCADE, related_name='demandrequest_location',
+    )
+    type = models.CharField(_('type'), max_length=20, choices=enum.DemandRequestType.to_tuple())
+    qty = models.DecimalField(_('qty'), db_index=True, max_digits=20, decimal_places=8, null=True, blank=True)
+    due = models.DateTimeField(_('due'), null=True, blank=True)
+    status = models.CharField(_('status'), max_length=20, null=True, blank=True,
+                              choices=enum.DemandStatus.to_tuple())
+    priority = models.IntegerField(_('priority'), null=True, blank=True, default=0)
+    max_lateness = models.DecimalField(_('max lateness'), max_digits=20, decimal_places=8, null=True, blank=True)
+    min_shipment = models.DecimalField(_('min shipment'), max_digits=20, decimal_places=8, null=True, blank=True)
+    closed_at = models.DateTimeField(_('closed at'), db_index=True,null=True,blank=True)
+    version = models.ForeignKey(DemandRequestVersion, verbose_name=_('demand request version'),
+                                db_index=True, related_name='demandrequest_demandversion', on_delete=models.CASCADE)
+
+    class Meta(AuditModel.Meta):
+        db_table = 'demand_request'
+        verbose_name = _('demand request')
+        verbose_name_plural = _('demand requests')
 
 
 class SalesOrder(AuditModel):
@@ -1794,6 +1803,7 @@ class SalesOrder(AuditModel):
         verbose_name = _('sales order')
         verbose_name_plural = _('sales orders')
         ordering = ['id']
+
 
 
 class SalesOrderItem(AuditModel):
@@ -1918,10 +1928,11 @@ class OperationPlan(AuditModel):
         null=True, blank=True, db_index=True, on_delete=models.CASCADE
     )
     # Used for delivery operationplans
-    demand = models.ForeignKey(
-        Demand, verbose_name=_('demand'),
-        null=True, blank=True, db_index=True, on_delete=models.CASCADE
-    )
+    # TODO 这里为demand
+    # demand = models.ForeignKey(
+    #     SalesOrder, verbose_name=_('demand'),
+    #     null=True, blank=True, db_index=True, on_delete=models.CASCADE
+    # )
     due = models.DateTimeField(
         _('due'), help_text=_('Due date of the demand/forecast'),
         null=True, blank=True, editable=False

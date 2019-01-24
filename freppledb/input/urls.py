@@ -30,7 +30,8 @@ urlpatterns = [
   url(r'^data/input/resource/$', freppledb.input.views.ResourceList.as_view(), name="input_resource_changelist"),
   url(r'^data/input/location/$', freppledb.input.views.LocationList.as_view(), name="input_location_changelist"),
   url(r'^data/input/customer/$', freppledb.input.views.CustomerList.as_view(), name="input_customer_changelist"),
-  url(r'^data/input/demand/$', freppledb.input.views.DemandList.as_view(), name="input_demand_changelist"),
+  # 需求，用户不可见
+  # url(r'^data/input/demand/$', freppledb.input.views.DemandList.as_view(), name="input_demand_changelist"),
   url(r'^data/input/salesorder/$', freppledb.input.views.SalesOrderList.as_view(), name="input_salesorder_changelist"),
   url(r'^data/input/salesorderitem/$', freppledb.input.views.SalesOrderItemList.as_view(), name="input_salesorderitem_changelist"),
   url(r'^data/input/item/$', freppledb.input.views.ItemList.as_view(), name="input_item_changelist"),
