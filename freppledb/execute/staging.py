@@ -5,6 +5,7 @@
 # 加载参数
 # 运算
 # 写入运算结果
+import logging
 import traceback
 from uuid import uuid1
 
@@ -13,13 +14,22 @@ from django.utils import timezone
 from freppledb.execute.models import DataStagingLog, Task
 from freppledb.input.enum import ExecuteTaskStatus
 
+logger = logging.getLogger(__name__)
+
 
 class StagingProcessor:
     def __init__(self, user=None, run_background=True, *args, **kwargs):
         self.nr = uuid1()
         self.user = user
         self.run_background = run_background
-        self.parameter = {'user': user, 'run_background': run_background}
+        # origin 原始参数
+        # middle 中间参数
+        self.parameter = {'origin': {'user': user,
+                                     'run_background': run_background,
+                                     'args': args,
+                                     'kwargs': kwargs},
+                          'middle': {}}
+
         self.init_staging_log(args, kwargs)
         if self.run_background:
             self.init_task(args, kwargs)
@@ -64,9 +74,10 @@ class StagingProcessor:
             self.log.message = traceback.format_exc()
 
             if self.task:
-                self.task.message = traceback.format_exc()
+                self.task.message = e  # traceback.format_exc()
                 self.task.finished = timezone.now()
                 self.task.status = ExecuteTaskStatus.failed.name
+            logger.error(traceback.format_exc())
 
         self.write_log(args, kwargs)
         self.update_task(args, kwargs)
@@ -90,3 +101,7 @@ class StagingProcessor:
 
     def write_log(self, *args, **kwargs):
         self.log.save()
+
+    def set_parameter(self, type, **kwargs):
+        for k, v in kwargs.items():
+            self.parameter[type][k] = v

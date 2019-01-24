@@ -1687,6 +1687,14 @@ class Forecast(AuditModel, ForecastCommentOperation):
         self.set_parsed_date()
         super(Forecast, self).save(*args, **kwargs)
 
+    def qty(self):
+        """
+        计算过的qty
+        :return:
+        """
+        return self.normal_qty*self.ratio/100 + self.new_product_plan_qty + self.promotion_qty
+
+
 
 class Demand(AuditModel, HierarchyModel):
     # Status
