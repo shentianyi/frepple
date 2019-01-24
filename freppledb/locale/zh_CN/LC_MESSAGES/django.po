@@ -2495,14 +2495,6 @@ msgstr ""
 msgid "sales orders"
 msgstr "销售订单"
 
-#: input/views.py:2742
-msgid "max lateness"
-msgstr "最大延期天数"
-
-#: input/views.py:2743
-msgid "min shipment"
-msgstr "最小运输量"
-
 #: input/views.py:767
 msgid "rop cover period"
 msgstr "ROP覆盖天数"
@@ -2528,10 +2520,6 @@ msgstr "最大安全库存量"
 #: input/views.py:771
 msgid "system safety stock"
 msgstr "系统安全库存量"
-
-#: input/views.py:772
-msgid "service level"
-msgstr "服务级别"
 
 #: forecast/views.py:1165 input/models.py:175 input/models.py:252
 #: input/models.py:454 input/models.py:522 input/models.py:823
