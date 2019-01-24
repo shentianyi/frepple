@@ -49,7 +49,7 @@ class Task(models.Model):
   create_user_name = models.CharField(_('create_user_nr'), max_length=100,editable=False,db_index=True,blank= True, null=True)
 
   user = models.ForeignKey(
-    User, verbose_name=_('user'), blank=True, null=True,
+    User, verbose_name=_('user'), blank=True, null=True, on_delete=models.CASCADE,
     editable=False)
 
   def __str__(self):
@@ -80,14 +80,14 @@ class DataStagingLog(AuditModel):
 
 
   user = models.ForeignKey(
-    User, verbose_name=_('user'), blank=True, null=True,
+    User, verbose_name=_('user'), blank=True, null=True, on_delete=models.CASCADE,
     editable=False)
 
   create_user_name = models.CharField(_('create_user_nr'), max_length=100, editable=False, db_index=True, blank=True,
                                     null=True)
 
   task = models.ForeignKey(
-    Task, verbose_name=_('task'), blank=True, null=True,editable=False)
+    Task, verbose_name=_('task'), blank=True, null=True,editable=False, on_delete=models.CASCADE)
 
   class Manager(MultiDBManager):
     pass

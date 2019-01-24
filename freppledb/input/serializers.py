@@ -868,14 +868,14 @@ class InventoryParameterFilter(filters.FilterSet):
             'rop': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
             'rop_by_system': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
             'safetystock_cover_period': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
-            'safetysotck_min_qty': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
-            'safetysotck_max_qty': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
+            'safetystock_min_qty': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
+            'safetystock_max_qty': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
             'safetystock_qty_by_system': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
             'service_level': ['exact', 'in', 'gt', 'gte', 'lt', 'lte'],
         }
         filter_fields = (
             'id', 'item__nr', 'location__nr', 'rop_cover_period', 'rop', 'rop_by_system',
-            'safetystock_cover_period', 'safetysotck_min_qty', 'safetysotck_max_qty', 'safetystock_qty_by_system',
+            'safetystock_cover_period', 'safetystock_min_qty', 'safetystock_max_qty', 'safetystock_qty_by_system',
             'service_level', 'created_at', 'updated_at')
 
 

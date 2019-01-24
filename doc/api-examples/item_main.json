@@ -5,60 +5,64 @@
   "content": {
     // 物料id
     "id": 1,
-     // 物料编码
+    // 物料编码
     "nr": "A",
-     // 替代物料号
+    // 替代物料号
     "successor_nr": "B",
-    // 项目号
-    "project_nr":"ABC",
     // 仓库代码
-    "location": {
-      "id": 1,
-      "nr": "beijing"
-    },
-      //库存数量
-    "inventory_qty": 0,
-     // 可用库存
-    "available_inventory": 0,
-    // 库存金额
-    "inventory_cost": 0,
-      // 锁定类型
-    "lock_types": {
-      "current": "FG",
-      "values": [
-        {
-          "value": "locked",
-          "text": "locked"
+    "location": [
+      {
+        "id": 1,  // 地点id
+        "nr": "beijing",  // 地点代码
+        "detail": {
+          //库存数量
+          "inventory_qty": 0,
+          // 可用库存
+          "available_inventory": 0,
+          // 库存金额
+          "inventory_cost": 0,
+          // 锁定类型
+          "lock_types": {
+            "current": "FG",
+            "values": [
+              {
+                "value": "locked",
+                "text": "locked"
+              }
+            ]
+          },
+          // 到期时间
+          "lock_expire_at": null,
+          //计划策略
+          "plan_strategies": {
+            "current": null,
+            "values": [
+              {
+                "value": "MTS",
+                "text": "MTS"
+              }
+            ]
+          },
+          // 物料状态
+          "statuses": {
+            "current": "S2",
+            "values": [
+              {
+                "value": "S0",
+                "text": "S0"
+              }
+            ]
+          },
+          // 物料ABC货值
+          "price_abc": null,
+          // 物料ABC数量
+          "qty_abc": null,
+          // 项目号
+          "project_nr": "ABC",
+          // 物料描述信息
+          "description": null
         }
-      ]
-    },
-    // 到期时间
-    "lock_expire_at": null,
-      //计划策略
-    "plan_strategies": {
-      "current": null,
-      "values": [
-        {
-          "value": "MTS",
-          "text": "MTS"
-        }
-      ]
-    },
-      // 物料状态
-    "statuses": {
-      "current": "S2",
-      "values": [
-        {
-          "value": "S0",
-          "text": "S0"
-        }
-      ]
-    },
-    // 物料ABC货值
-    "price_abc": null,
-     // 物料ABC数量
-    "qty_abc": null,
-    // 物料描述信息
-    "description": null
+      }
+    ]
   }
 }

@@ -29,8 +29,38 @@ msgstr ""
 msgid "Permissions in this scenario"
 msgstr "针对此场景的权限"
 
+msgid "workorder_display"
+msgstr "生产工单"
+
+msgid "work order"
+msgstr "生产工单"
+
+msgid "purchase order items"
+msgstr "采购订单项"
+
+msgid "schedule start at"
+msgstr "计划开始时间"
+
+msgid "actual start at"
+msgstr "实际开始时间"
+
+msgid "schedule end at"
+msgstr "计划结束时间"
+
+msgid "actual end at"
+msgstr "实际结束时间"
+
+msgid "order at"
+msgstr "下单时间"
+
+msgid "purchase_order_display"
+msgstr "采购订单"
+
 msgid "init"
 msgstr "新建"
+
+msgid "inventory parameters"
+msgstr "库存参数 "
 
 msgid "finished qty"
 msgstr "已生产数量"
@@ -44,6 +74,9 @@ msgstr "生产工单项"
 msgid "source location"
 msgstr "来源地点"
 
+msgid "source_location_display"
+msgstr "来源地点"
+
 msgid "delivery orders"
 msgstr "运单"
 
@@ -53,10 +86,19 @@ msgstr "运单项"
 msgid "destination location"
 msgstr "目的地点"
 
+msgid "destination_location_display"
+msgstr "目的地点"
+
 msgid "deliver"
 msgstr "客户/供应商/地点"
 
+msgid "deliver_display"
+msgstr "客户/供应商/地点"
+
 msgid "deliver source"
+msgstr "预测/销售订单/采购订单"
+
+msgid "deliver_source_display"
 msgstr "预测/销售订单/采购订单"
 
 msgid "schedule arrive at"
@@ -2495,14 +2537,6 @@ msgstr ""
 msgid "sales orders"
 msgstr "销售订单"
 
-#: input/views.py:2742
-msgid "max lateness"
-msgstr "最大延期天数"
-
-#: input/views.py:2743
-msgid "min shipment"
-msgstr "最小运输量"
-
 #: input/views.py:767
 msgid "rop cover period"
 msgstr "ROP覆盖天数"
@@ -2514,7 +2548,7 @@ msgid "system rop"
 msgstr "系统ROP量"
 
 #: input/views.py:768
-msgid "safetysotck cover period"
+msgid "safetystock cover period"
 msgstr "SS覆盖天数"
 
 #: input/views.py:769
@@ -2528,10 +2562,6 @@ msgstr "最大安全库存量"
 #: input/views.py:771
 msgid "system safety stock"
 msgstr "系统安全库存量"
-
-#: input/views.py:772
-msgid "service level"
-msgstr "服务级别"
 
 #: forecast/views.py:1165 input/models.py:175 input/models.py:252
 #: input/models.py:454 input/models.py:522 input/models.py:823
@@ -3537,6 +3567,12 @@ msgstr "计划数量"
 
 msgid "deliver qty"
 msgstr "发运数量"
+
+msgid "delivery_order_display"
+msgstr "运单"
+
+msgid "delivery order"
+msgstr "运单"
 
 msgid "max lateness"
 msgstr "最大延期天数"

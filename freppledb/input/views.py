@@ -768,7 +768,7 @@ class InventoryParameterList(GridReport):
         GridFieldNumber('rop_by_system', title=_('system rop'),editable=False),
         GridFieldInteger('safetystock_cover_period', title=_('safetystock cover period'),editable=False),
         GridFieldNumber('safetysotck_min_qty', title=_('safety stock min qty'), editable=False),
-        GridFieldNumber('safetysotck_max_qty', title=_('safety sotck max qty'),editable=False),
+        GridFieldNumber('safetysotck_max_qty', title=_('safety stock max qty'),editable=False),
         GridFieldNumber('safetystock_qty_by_system', title=_('system safety stock'),editable=False),
         GridFieldNumber('service_level', title=_('service level'), editable=False),
         GridFieldCreateOrUpdateDate('created_at', title=_('created_at'), editable=False),
@@ -1492,46 +1492,41 @@ class ItemMainData(View):
         item_location = ItemLocation.objects.filter(item=item)
         lock_types = {"current": None, "values": la_enum.tuple2select(enum.LockType.to_tuple())}
 
-        statuses = {"current": None,
-                    "values": la_enum.tuple2select(enum.ItemTypyStatus.to_dic()[item.type])}
+        # item_statuses = {"current": item.status, "values": la_enum.tuple2select(Item.type_status[item.type])}
+        # statuses = {"current": None,
+        #             "values": la_enum.tuple2select(enum.ItemTypyStatus.to_dic()[item.type])}
 
         plan_strategies = {"current": None,
                            "values": la_enum.tuple2select(enum.ItemProductStrategy.to_tuple())}
+
+        location = []
+        detail = {"lock_types": lock_types, "plan_strategies": plan_strategies}
+        adict = {}
+        for i in item_location:
+            print(i.type)
+            print(Item.type_status[i.type])
+            adict["id"] = i.location.id
+            adict["nr"] = i.location.nr
+            detail["lock_types"]["current"] = i.lock_type
+            detail["statuses"] = {"current": i.status,
+                                             "values": la_enum.tuple2select(Item.type_status[i.type])}
+            detail["plan_strategies"]["current"] = i.plan_strategy
+            detail["inventory_qty"] = i.inventory_qty
+            detail["available_inventory"] = i.available_inventory
+            detail["inventory_cost"] = i.inventory_cost
+            detail["price_abc"] = i.price_abc
+            detail["qty_abc"] = i.qty_abc
+            detail["description"] = i.description
+            detail["project_nr"] = i.project_nr
+            adict["detail"] = detail
+            location.append(adict)
 
         data = {
             "id": item.id,
             "nr": item.nr,
             "successor_nr": successor_nr,
-            "project_nr": None,
-            "inventory_qty": None,
-            "available_inventory": None,
-            "inventory_cost": None,
-            "location": None,
-            "lock_types": lock_types,
-            "lock_expire_at": None,
-            "plan_strategies": plan_strategies,
-            "statuses": statuses,
-            "price_abc": None,
-            "qty_abc": None,
-            "description": None,
+            "locations": location
         }
-
-        if item_location:
-            item_location = item_location.first()
-            data["project_nr"] = item_location.project_nr
-            data["lock_types"]["current"] = item_location.lock_type
-
-            data["statuses"]["current"] = item_location.status
-
-            data["plan_strategies"]["current"] = item_location.plan_strategy
-
-            data["location"] = {"id": item_location.location.id, "nr": item_location.location.nr}
-            data["inventory_qty"] = item_location.inventory_qty
-            data["available_inventory"] = item_location.available_inventory
-            data["inventory_cost"] = item_location.inventory_cost
-            data["description"] = item_location.description
-            data["price_abc"] = item_location.price_abc
-            data["qty_abc"] = item_location.qty_abc
 
         message.result = True
         message.code = 200
@@ -3800,7 +3795,7 @@ class PurchaseOrderItemList(GridReport):
         GridFieldText('purchase_order_display', title=_('purchase_order_display'), field_name='purchase_order__id', editable=False),
         GridFieldText('purchase_order', title=_('purchase_order_id'), field_name='purchase_order_id', editable=False, hidden=True),
         GridFieldInteger('qty', title=_('qty'), editable=False),
-        GridFieldNumber('deliver_qty', title=_('deliver_qty'), editable=False),
+        GridFieldNumber('deliver_qty', title=_('deliver qty'), editable=False),
         GridFieldChoice('status', title=_('status'), choices=enum.DeliveryOrderStatus.to_tuple(), editable=False),
         GridFieldDateTime('start_ship_at', title=_('start ship at'), editable=False),
         GridFieldDateTime('actual_arrive_at', title=_('actual arrive at'), editable=False),

@@ -283,7 +283,7 @@ class Customer(AuditModel, HierarchyModel):
 
 
 class Item(AuditModel, HierarchyModel):
-    # type_status = {'FG': enum.FgStatus.to_tuple(), 'RM': enum.RmStatus.to_tuple(), 'WIP': ()}
+    type_status = {'FG': enum.FgStatus.to_tuple(), 'RM': enum.RmStatus.to_tuple(), 'WIP': ()}
 
     # Database fields
     # 设置外键显示的值
@@ -803,8 +803,8 @@ class InventoryParameter(AuditModel):
     rop = models.DecimalField(_('rop'), max_digits=20, decimal_places=8, null=False, blank=False)
     rop_by_system = models.DecimalField(_('system rop'), max_digits=20, decimal_places=8, null=False, blank=False)
     safetystock_cover_period = models.IntegerField(_('safetystock cover period'))
-    safetysotck_min_qty = models.DecimalField(_('safety sotck min qty'), max_digits=20, decimal_places=8)
-    safetysotck_max_qty = models.DecimalField(_('safety sotck max qty'), max_digits=20, decimal_places=8)
+    safetystock_min_qty = models.DecimalField(_('safety stock min qty'), max_digits=20, decimal_places=8)
+    safetystock_max_qty = models.DecimalField(_('safety stock max qty'), max_digits=20, decimal_places=8)
     safetystock_qty_by_system = models.DecimalField(_('system safety stock'), max_digits=20, decimal_places=8)
     service_level = models.DecimalField(_('service level'), max_digits=20, decimal_places=8)
 
@@ -2330,7 +2330,7 @@ class DeliveryOrderItem(AuditModel):
         db_index=True, related_name='deliveryorderitem_item',
         null=False, blank=False, on_delete=models.CASCADE)
     delivery_order = models.ForeignKey(
-        DeliveryOrder, verbose_name=_('destination order'),
+        DeliveryOrder, verbose_name=_('delivery order'),
         db_index=True, related_name='deliveryorderitem_delivery_order',
         null=True, blank=True, on_delete=models.CASCADE)
     deliver_source = models.ForeignKey(
