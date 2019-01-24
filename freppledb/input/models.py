@@ -283,7 +283,7 @@ class Customer(AuditModel, HierarchyModel):
 
 
 class Item(AuditModel, HierarchyModel):
-    # type_status = {'FG': enum.FgStatus.to_tuple(), 'RM': enum.RmStatus.to_tuple(), 'WIP': ()}
+    type_status = {'FG': enum.FgStatus.to_tuple(), 'RM': enum.RmStatus.to_tuple(), 'WIP': ()}
 
     # Database fields
     # 设置外键显示的值
