@@ -1,10 +1,8 @@
 {% extends "admin/base_site_nav.html" %}
 {% load i18n %}
 
-{% block extrahead %}{{block.super}}
-
-<script src="{{STATIC_URL}}js/item_detail.js" type="application/javascript"></script>
-
+{% block extrastyle %}
+{{block.super}}
 <style type="text/css">
     #item-detail .input-group-addon {
         background: transparent;
@@ -115,6 +113,7 @@
 {% endblock %}
 
 {% block content %}
+
 <!--主页面内容-->
 <div id="item-detail" class="row" style="margin: 30px 0 0 0">
     <form class="form-cls" id="main_form">
@@ -133,6 +132,7 @@
                     <!--<input class="form-control" id="item_detail_location_nr" type="text" name="item_detail_location_nr">-->
                     <select class="form-control" name="item_detail_location" id="item_detail_location"
                             onchange="ItemDetail.locationChange()">
+                        <!--<option v-for="item in " :value=""></option>-->
                     </select>
                 </div>
             </div>
@@ -257,35 +257,35 @@
                    data-toggle="tab">主数据</a></li>
             <li role="presentation">
                 <a href="#supplier" aria-controls="supplier" role="tab" data-toggle="tab"
-                   onclick="ItemDetail.getSuppliersData()">供应商</a>
+                   @click="getSuppliersData()">供应商</a>
             </li>
             <li role="presentation">
                 <a href="#plan" aria-controls="plan" role="tab" data-toggle="tab"
-                   onclick="ItemDetail.getPlanData()">计划</a></li>
+                   @click="ItemDetail.getPlanData()">计划</a></li>
             <li role="presentation">
                 <a href="#simulation" aria-controls="simulation" role="tab" data-toggle="tab"
-                   onclick="ItemDetail.getSimulationData()">模拟</a>
+                   @click="ItemDetail.getSimulationData()">模拟</a>
             </li>
             <li role="presentation">
                 <a href="#forecast" aria-controls="forecast" role="tab" data-toggle="tab"
-                   onclick="ItemDetail.getForecastGridData(), ItemDetail.getForecastChartData()">预测</a>
+                   @click="ItemDetail.getForecastGridData(), ItemDetail.getForecastChartData()">预测</a>
             </li>
         </ul>
 
         <div class="tab-content">
-            <div role="tabpanel" class="tab-pane active" id="main">
+            <div role="tabpanel" class="tab-pane" id="main" v-if="tab === 'main'" :class="tab === 'main' ? 'active': null">
                 {% include "input/item/item_main.html" %}
             </div>
-            <div role="tabpanel" class="tab-pane" id="supplier">
+            <div role="tabpanel" class="tab-pane" id="supplier" v-else-if="tab === 'supplier'" :class="tab === 'supplier' ? 'active': null">
                 {% include "input/item/item_supplier.html" %}
             </div>
-            <div role="tabpanel" class="tab-pane" id="plan">
+            <div role="tabpanel" class="tab-pane" id="plan" v-else-if="tab === 'plan'" :class="tab === 'plan' ? 'active': null">
                 {% include "input/item/item_plan.html" %}
             </div>
-            <div role="tabpanel" class="tab-pane" id="simulation">
+            <div role="tabpanel" class="tab-pane" id="simulation" v-else-if="tab === 'simulation'" :class="tab === 'simulation' ? 'active': null">
                 {% include "input/item/item_simulation.html" %}
             </div>
-            <div role="tabpanel" class="tab-pane" id="forecast">
+            <div role="tabpanel" class="tab-pane" id="forecast" v-else-if="tab === 'forecast'" :class="tab === 'forecast' ? 'active': null">
                 {% include "input/item/item_forecast.html" %}
             </div>
         </div>
@@ -303,12 +303,13 @@
         </button>
     </div>
 </div>
+{% endblock %}
 
-<script type="application/javascript">
-    ItemDetail.getMainData();
-    ItemDetail.getMainSuppliersData();
-</script>
 
+{% block extrahead %}
+{{block.super}}
+<script type="text/javascript" src="{{STATIC_URL}}js/lib/vue.min.js"></script>
+<script type="text/javascript" src="{{STATIC_URL}}js/item_detail.js" ></script>
 {% endblock %}
 
 

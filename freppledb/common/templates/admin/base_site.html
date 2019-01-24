@@ -4,7 +4,7 @@
 {% block title %}{% if title %}{{title|capfirst}} - {% endif %}frePPLe{% endblock %}
 
 <!--{{STATIC_URL}}img/frepple.svg这是logol图片位置-->
-{% block branding %}<img src="{{STATIC_URL}}img/logo.png" alt="APS Logo&nbsp;" style="margin-top: 10px;">{% endblock %}
+{% block branding %}<img src="{{STATIC_URL}}img/logo.png" alt="APS Logo&nbsp;" style="width: 100%;height: 100%;object-fit: contain;">{% endblock %}
 {% block extrastyle %}{{block.super}}
 <link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/font-awesome.min.css" />
 <link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/opensans.css" />
@@ -19,19 +19,20 @@
 
 <link rel="shortcut icon" href="{{STATIC_URL}}favicon.ico"/>
 {% endblock %}
-{% block extrahead %}{{block.super}}
+{% block extrahead %}
+{{block.super}}
 <script type="text/javascript" src="/data/jsi18n/"></script>
-<script type="text/javascript" src="{{STATIC_URL}}js/jquery-2.1.4.min.js"></script>
-<script type="text/javascript" src="{{STATIC_URL}}js/bootstrap.min.js"></script>
-<script type="text/javascript" src="{{STATIC_URL}}js/moment-with-locales.min.js"></script>
-<script type="text/javascript" src="{{STATIC_URL}}js/bootstrap-datetimepicker.min.js"></script>
-<script type="text/javascript" src="{{STATIC_URL}}js/typeahead.bundle.js"></script>
-<script type="text/javascript" src="{{STATIC_URL}}js/i18n/grid.locale-{{LANGUAGE_CODE|default:"en"}}.js"></script>
-<script type="text/javascript" src="{{STATIC_URL}}js/jquery.jqgrid.min.js"></script>
-<script type="text/javascript" src="{{STATIC_URL}}js/frepple.js"></script>
-<script type="text/javascript" src="{{STATIC_URL}}js/Sortable.min.js"></script>
-<script type="text/javascript" src="{{STATIC_URL}}js/jquery.datetimepicker.full.min.js"></script>
-<script type="text/javascript" src="{{STATIC_URL}}js/echarts.min.js"></script>
+<script type="text/javascript" src="{{STATIC_URL}}js/lib/jquery-2.1.4.min.js"></script>
+<script type="text/javascript" src="{{STATIC_URL}}js/lib/bootstrap.min.js"></script>
+<script type="text/javascript" src="{{STATIC_URL}}js/lib/moment-with-locales.min.js"></script>
+<script type="text/javascript" src="{{STATIC_URL}}js/lib/bootstrap-datetimepicker.min.js"></script>
+<script type="text/javascript" src="{{STATIC_URL}}js/lib/typeahead.bundle.js"></script>
+<script type="text/javascript" src="{{STATIC_URL}}js/i18n/grid.locale-{{LANGUAGE_CODE|default:'en'}}.js"></script>
+<script type="text/javascript" src="{{STATIC_URL}}js/lib/jquery.jqgrid.min.js"></script>
+<script type="text/javascript" src="{{STATIC_URL}}js/lib/frepple.js"></script>
+<script type="text/javascript" src="{{STATIC_URL}}js/lib/Sortable.min.js"></script>
+<script type="text/javascript" src="{{STATIC_URL}}js/lib/jquery.datetimepicker.full.min.js"></script>
+<script type="text/javascript" src="{{STATIC_URL}}js/lib/echarts.min.js"></script>
 <script type="text/javascript" src="{{STATIC_URL}}js/i18n/intro.en.js"></script>
 <script type="text/javascript" src="{{STATIC_URL}}js/base.js"></script>
 <script type="text/javascript">
@@ -58,6 +59,7 @@ $(function() {
         var _this = $($('.datetime')[i])
         _this.html(_this.html().replace("Date:", "").replace("Time:", ""));
     }
+
 
     // 时间选择器
     $(".vDateField").datetimepicker({
