@@ -728,13 +728,15 @@ class Bucket(AuditModel):
     @classmethod
     def get_nex_time_by_date_type(cls, t1, date_type_short_cut, step=1):
         """
-        根据时间类型获取下一个时间, 默认按周
+        根据时间类型获取下一个时间, 默认按周. step 默认 1
         :param t1:
         :param date_type_short_cut:
         :param step:
         :return:
         """
-        if date_type_short_cut.lower() == 'w':
+        if date_type_short_cut.lower()=='d':
+            return t1+relativedelta(days=step)
+        elif date_type_short_cut.lower() == 'w':
             return t1 + relativedelta(weeks=step)
         elif date_type_short_cut.lower() == 'm':
             return t1 + relativedelta(months=step)
@@ -771,6 +773,8 @@ class Bucket(AuditModel):
         elif date_type_short_cut.lower() == 'm':
             return la_time.month_search_endtime(dt)
         return dt
+
+
 
     @classmethod
     def chioce_date_type(cls):

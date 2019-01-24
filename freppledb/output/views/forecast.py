@@ -604,6 +604,7 @@ class ForecastItemGraph(View):
         date_type = request.GET.get('date_type', 'W')
         if date_type.isspace():
             date_type = "W"
+
         date_type_full = Bucket.get_extra_trunc_by_shortcut(date_type)
 
         # 初始化查询时间
