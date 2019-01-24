@@ -57,3 +57,12 @@ msgstr "deliver"
 
 msgid "deliver_source_display"
 msgstr "deliver source"
+
+msgid "delivery_order_display"
+msgstr "delivery order"
+
+msgid "purchase_order_display"
+msgstr "purchase order"
+
+msgid "workorder_display"
+msgstr "workorder"
