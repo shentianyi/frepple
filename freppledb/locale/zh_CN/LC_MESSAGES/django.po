@@ -74,6 +74,9 @@ msgstr "新建"
 msgid "inventory parameters"
 msgstr "库存参数 "
 
+msgid "inventory parameter"
+msgstr "库存参数 "
+
 msgid "finished qty"
 msgstr "已生产数量"
 

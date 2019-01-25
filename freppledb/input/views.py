@@ -767,8 +767,8 @@ class InventoryParameterList(GridReport):
         GridFieldNumber('rop', title=_('rop'), editable=False),
         GridFieldNumber('rop_by_system', title=_('system rop'), editable=False),
         GridFieldInteger('safetystock_cover_period', title=_('safetystock cover period'), editable=False),
-        GridFieldNumber('safetysotck_min_qty', title=_('safety stock min qty'), editable=False),
-        GridFieldNumber('safetysotck_max_qty', title=_('safety stock max qty'), editable=False),
+        GridFieldNumber('safetystock_min_qty', title=_('safety stock min qty'), editable=False),
+        GridFieldNumber('safetystock_max_qty', title=_('safety stock max qty'), editable=False),
         GridFieldNumber('safetystock_qty_by_system', title=_('system safety stock'), editable=False),
         GridFieldNumber('service_level', title=_('service level'), editable=False),
         GridFieldCreateOrUpdateDate('created_at', title=_('created_at'), editable=False),
@@ -1491,9 +1491,6 @@ class ItemMainData(View):
         item_location = ItemLocation.objects.filter(item=item)
         lock_types = {"current": None, "values": la_enum.tuple2select(enum.LockType.to_tuple())}
 
-        # statuses = {"current": None,
-        #             "values": la_enum.tuple2select(enum.ItemTypyStatus.to_dic()[item.type])}
-
         plan_strategies = {"current": None,
                            "values": la_enum.tuple2select(enum.ItemProductStrategy.to_tuple())}
 
@@ -1528,10 +1525,10 @@ class ItemMainData(View):
             data["lock_types"]["current"] = item_location.lock_type
 
             data["statuses"] = {"current": item_location.status,
-                                "values": la_enum.tuple2select(Item.type_status[item_location.type])}
+                                "values": la_enum.tuple2select(enum.ItemTypyStatus.to_dic()[item_location.type])}
 
             data["plan_strategies"]["current"] = item_location.plan_strategy
-
+            data["lock_expire_at"] = item_location.lock_expire_at
             data["inventory_qty"] = item_location.inventory_qty
             data["available_inventory"] = item_location.available_inventory
             data["inventory_cost"] = item_location.inventory_cost
@@ -1589,6 +1586,58 @@ class ItemMainData(View):
                 message.message = "数据保存成功"
                 return HttpResponse(json.dumps(message.__dict__, cls=DjangoJSONEncoder, ensure_ascii=False),
                                     content_type='application/json')
+
+
+class MainDataEnum(View):
+    def get(self, request, *args, **kwargs):
+        message = ResponseMessage()
+        location_id = request.GET.get('location_id', None)
+        pid = request.GET.get('id', None)
+        data = {
+            "project_nr": None,
+            "inventory_qty": None,
+            "available_inventory": None,
+            "inventory_cost": None,
+            "lock_types": None,
+            "lock_expire_at": None,
+            "plan_strategies": None,
+            "statuses": None,
+            "price_abc": None,
+            "qty_abc": None,
+            "description": None,
+        }
+
+        if location_id and pid:
+            item_location = ItemLocation.objects.filter(item_id=pid, location_id=location_id).first()
+            if item_location:
+                data["id"] = pid
+                data["location_id"] = location_id
+                data["inventory_qty"] = item_location.inventory_qty
+                data["available_inventory"] = item_location.available_inventory
+                data["inventory_cost"] = item_location.inventory_cost
+                data["project_nr"] = item_location.project_nr
+                data["lock_types"] = {"current": item_location.lock_type,
+                                      "values": la_enum.tuple2select(enum.LockType.to_tuple())}
+                data["lock_expire_at"] = item_location.lock_expire_at
+                data["statuses"] = {"current": item_location.status,
+                                    "values": la_enum.tuple2select(enum.ItemTypyStatus.to_dic()[item_location.type])}
+                data["plan_strategies"] = {"current": item_location.plan_strategy,
+                                           "values": la_enum.tuple2select(enum.ItemProductStrategy.to_tuple())}
+                data["price_abc"] = item_location.price_abc
+                data["qty_abc"] = item_location.qty_abc
+                data["description"] = item_location.description
+            message.result = True
+            message.code = 200
+            message.message = "相应数据查询成功"
+            message.content = data
+            return HttpResponse(json.dumps(message.__dict__, cls=DjangoJSONEncoder, ensure_ascii=False),
+                                content_type='application/json')
+        else:
+            message.result = True
+            message.code = 404
+            message.message = "请传入location_id值"
+            return HttpResponse(json.dumps(message.__dict__, cls=DjangoJSONEncoder, ensure_ascii=False),
+                                content_type='application/json')
 
 
 # 代号　GET_ITEM_SUPPLIERS_DATA_API
@@ -1769,7 +1818,7 @@ class MainSupplierData(View):
         message.message = "相应数据查询成功"
         message.content = data
         return HttpResponse(json.dumps(message.__dict__, cls=DjangoJSONEncoder, ensure_ascii=False),
-                                content_type='application/json')
+                            content_type='application/json')
 
     def post(self, request, pid, *args, **kwargs):
         message = ResponseMessage()
