@@ -36,17 +36,17 @@ urlpatterns = [
   url(r'^data/input/salesorderitem/$', freppledb.input.views.SalesOrderItemList.as_view(), name="input_salesorderitem_changelist"),
   url(r'^data/input/item/$', freppledb.input.views.ItemList.as_view(), name="input_item_changelist"),
   # TODO CMARK 物料详细页面
-  url(r'^data/input/item_detail/(?P<id>(.+))/$', freppledb.input.views.ItemDetail.as_view(),name="input_item_detail"),
+  url(r'^data/input/item_detail/(?P<pid>(.+))/$', freppledb.input.views.ItemDetail.as_view(),name="input_item_detail"),
   # 单个物料头部公共数据
-  url(r'^data/input/item/maindata/(?P<id>(.+))/$', freppledb.input.views.ItemMainData.as_view(),name="input_item_detail_maindata"),
+  url(r'^data/input/item/maindata/(?P<pid>(.+))/$', freppledb.input.views.ItemMainData.as_view(),name="input_item_detail_maindata"),
   # 单个物料供应商界面主数据
-  url(r'^data/input/item/suppliers/(?P<id>(.+))/$', freppledb.input.views.ItemSupplierData.as_view(),name="input_item_detail_supplierdata"),
+  url(r'^data/input/item/suppliers/(?P<pid>(.+))/$', freppledb.input.views.ItemSupplierData.as_view(),name="input_item_detail_supplierdata"),
   # 单个物料主数据界面前置期+供应商+包装部分数据
-  url(r'^data/input/item/mainsupplierdata/(?P<id>(.+))/$', freppledb.input.views.MainSupplierData.as_view(),name="input_item_detail_mainsupplierdata"),
+  url(r'^data/input/item/mainsupplierdata/(?P<pid>(.+))/$', freppledb.input.views.MainSupplierData.as_view(),name="input_item_detail_mainsupplierdata"),
   # 获取单个物料模拟主数据列表
-  url(r'^data/input/item/simulationdata/(?P<id>(.+))/$', freppledb.input.views.ItemSimulation.as_view(),name="input_item_detail_simulationdata"),
+  url(r'^data/input/item/simulationdata/(?P<pid>(.+))/$', freppledb.input.views.ItemSimulation.as_view(),name="input_item_detail_simulationdata"),
   # 获取单个物料计划主数据
-  url(r'^data/input/item/plandata/(?P<id>(.+))/$', freppledb.input.views.ItemPlan.as_view(),name="input_item_detail_plan"),
+  url(r'^data/input/item/plandata/(?P<pid>(.+))/$', freppledb.input.views.ItemPlan.as_view(),name="input_item_detail_plan"),
 
   url(r'^data/input/itemcustomer/$', freppledb.input.views.ItemCustomerList.as_view(), name="input_itemcustomer_changelist"),
   url(r'^data/input/itemlocation/$', freppledb.input.views.ItemLocationList.as_view(), name="input_itemlocation_changelist"),

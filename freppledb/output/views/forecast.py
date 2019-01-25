@@ -36,7 +36,7 @@ from freppledb.common.models import Bucket
 from freppledb.common.utils import la_time, la_enum
 from freppledb.common.utils.la_field import decimal2calculate
 from freppledb.input.models import Forecast, ForecastYear, Item, Location, Customer, ForecastCommentOperation, \
-    ItemSupplier, Calendar
+    ItemSupplier, Calendar, ItemLocation
 
 
 class ForecastCompare(View):
@@ -475,11 +475,8 @@ class ForecastItem(View):
         if item_id is None or location_id in [None, "null"]:
             return JsonResponse({"result": False, "code": 404, "message": "无数据"}, safe=False)
 
-        item = Item.objects.filter(id=item_id).first()
-
-        location = Location.objects.filter(id=location_id).first()
-
-        if item is None or location is None:
+        item_location = ItemLocation.objects.filter(item_id=item_id, location_id=location_id).first()
+        if item_location is None:
             return JsonResponse({"result": False, "code": 200, "message": "参数错误,数据未找到"}, safe=False)
 
         # 初始化时间类型, 默认周
@@ -514,10 +511,10 @@ class ForecastItem(View):
         cursor.execute(forecast_query,
                        [date_type_full, ForecastCommentOperation.compare_report_status, search_start_time,
                         search_end_time,
-                        item.id,
-                        location.id, ForecastCommentOperation.compare_report_status, search_start_time,
+                        item_id,
+                        location_id, ForecastCommentOperation.compare_report_status, search_start_time,
                         search_end_time,
-                        item.id, location.id])
+                        item_id, location_id])
 
         # 返回值
         message = {
@@ -526,9 +523,9 @@ class ForecastItem(View):
             "message": None,
             "content": {
                 "location": {
-                    "id": location.id,
-                    "nr": location.nr,
-                    "name": location.name
+                    "id": item_location.location.id,
+                    "nr": item_location.location.nr,
+                    "name": item_location.location.name
                 },
                 "data": []
             },
@@ -593,11 +590,8 @@ class ForecastItemGraph(View):
         if item_id is None or location_id in [None, "null"]:
             return JsonResponse({"result": False, "code": 404, "message": "无数据"}, safe=False)
 
-        item = Item.objects.filter(id=item_id).first()
-
-        location = Location.objects.filter(id=location_id).first()
-
-        if item is None or location is None:
+        item_location = ItemLocation.objects.filter(item_id=item_id, location_id=location_id).first()
+        if item_location is None:
             return JsonResponse({"result": False, "code": 200, "message": "参数错误,数据未找到"}, safe=False)
 
         # 初始化时间类型, 默认周
@@ -632,10 +626,10 @@ class ForecastItemGraph(View):
         cursor.execute(forecast_query,
                        [date_type_full, ForecastCommentOperation.compare_report_status, search_start_time,
                         search_end_time,
-                        item.id,
-                        location.id, ForecastCommentOperation.compare_report_status, search_start_time,
+                        item_id,
+                        location_id, ForecastCommentOperation.compare_report_status, search_start_time,
                         search_end_time,
-                        item.id, location.id])
+                        item_id, location_id])
 
         # 返回值
         message = {
@@ -741,16 +735,14 @@ class PlanItemGraph(View):
         if item_id is None or location_id in [None, "null"]:
             return JsonResponse({"result": False, "code": 404, "message": "无数据"}, safe=False)
 
-        item = Item.objects.filter(id=item_id).first()
-        item_supplier = ItemSupplier.objects.filter(item=request.GET.get('id', None),
+        item_supplier = ItemSupplier.objects.filter(item_id=item_id,location_id=location_id,
                                                     effective_start__lte=datetime.now(),
                                                     effective_end__gte=datetime.now()).order_by('priority', '-ratio',
                                                                                                 'id').first()
 
-        location = Location.objects.filter(id=location_id).first()
-
-        if item is None or location is None:
-            return JsonResponse({"result": False, "code": 404, "message": "参数错误,数据未找到"}, safe=False)
+        item_location = ItemLocation.objects.filter(item_id=item_id, location_id=location_id).first()
+        if item_location is None:
+            return JsonResponse({"result": False, "code": 200, "message": "参数错误,数据未找到"}, safe=False)
 
         # 初始化时间类型, 默认周
         date_type = request.GET.get('date_type', 'W')
@@ -830,10 +822,10 @@ class PlanItemGraph(View):
         cursor.execute(forecast_query,
                        [date_type_full, ForecastCommentOperation.compare_report_status, search_start_time,
                         search_end_time,
-                        item.id,
-                        location.id, ForecastCommentOperation.compare_report_status, search_start_time,
+                        item_id,
+                        location_id, ForecastCommentOperation.compare_report_status, search_start_time,
                         search_end_time,
-                        item.id, location.id])
+                        item_id, location_id])
 
         rows = cursor.fetchall()
         while start_time < current_date:

@@ -223,7 +223,7 @@ class PathReport(GridReport):
         if Location.objects.using(db).count() > 1:
             # Multiple locations
             for i in ItemSupplier.objects.using(db).filter(
-                    Q(location__isnull=True) | Q(location__name=buffer.location.nr),
+                            Q(location__isnull=True) | Q(location__name=buffer.location.nr),
                     item__lft__lte=buffer.item.lft, item__rght__gt=buffer.item.lft
             ):
                 i.item = buffer.item
@@ -233,7 +233,7 @@ class PathReport(GridReport):
                      buffer.location.nr if buffer.location else None)
                 )
             for i in ItemDistribution.objects.using(db).filter(
-                    Q(location__isnull=True) | Q(location__name=buffer.location.nr),
+                            Q(location__isnull=True) | Q(location__name=buffer.location.nr),
                     item__lft__lte=buffer.item.lft, item__rght__gt=buffer.item.lft
             ):
                 i.item = buffer.item
@@ -242,7 +242,7 @@ class PathReport(GridReport):
                     (level, None, i, curqty, 0, None, realdepth, pushsuper, i.location.nr if i.location else None)
                 )
             for i in Operation.objects.using(db).filter(
-                    Q(location__isnull=True) | Q(location__name=buffer.location.nr),
+                            Q(location__isnull=True) | Q(location__name=buffer.location.nr),
                     item__lft__lte=buffer.item.lft, item__rght__gt=buffer.item.lft
             ):
                 i.item = buffer.item
@@ -1474,11 +1474,11 @@ class ItemDetail(View):
 # 代号：GET_ITEM_MAIN_DATA_API
 # 单个物料头部公共数据
 class ItemMainData(View):
-    def get(self, request, id, *args, **kwargs):
+    def get(self, request, pid, *args, **kwargs):
         message = ResponseMessage()
         try:
-            item = Item.objects.get(id=id)
-        except:
+            item = Item.objects.get(id=pid)
+        except Item.DoesNotExist:
             message.result = False
             message.code = 404
             message.message = "没有对应的物料"
@@ -1595,51 +1595,62 @@ class ItemMainData(View):
 # 代号　GET_ITEM_SUPPLIERS_DATA_API
 # 获取单个物料供应商界面主数据
 class ItemSupplierData(View):
-    def get(self, request, id, *args, **kwargs):
+    def get(self, request, pid, *args, **kwargs):
         message = ResponseMessage()
-        try:
-            supplier = ItemSupplier.objects.all().order_by('priority', '-ratio', 'id').filter(item=id)
-        except Exception as e:
+        location_id = request.GET.get('location_id', None)
+        if location_id:
+            try:
+                supplier = ItemSupplier.objects.all().filter(item_id=pid, location_id=location_id).order_by('priority',
+                                                                                                            '-ratio',
+                                                                                                            'id')
+            except ItemSupplier.DoesNotExist:
+                message.result = False
+                message.code = 404
+                message.message = "供应商不存在"
+                return HttpResponse(json.dumps(message.__dict__, cls=DjangoJSONEncoder, ensure_ascii=False),
+                                    content_type='application/json')
+            data = []
+            for f in supplier:
+                supplier_dict = {
+                    "id": f.supplier.id,
+                    "name": f.supplier.name,
+                    "nr": f.supplier.nr,
+                    "country": f.supplier.country,
+                    "city": f.supplier.city,
+                    "address": f.supplier.address,
+                    "phone": f.supplier.phone,
+                    "telephone": f.supplier.telephone,
+                    "email": f.supplier.email,
+                    "contact": f.supplier.contact,
+                    "cost": decimal2float(f.cost),
+                    "cost_unit": decimal2float(f.cost_unit),
+                    "supplier_item_nr": f.supplier_item_nr
+                }
+                data.append(supplier_dict)
+                message.result = True
+                message.code = 200
+                message.message = "相应数据查询成功"
+                message.content = data
+                return HttpResponse(json.dumps(message.__dict__, cls=DjangoJSONEncoder, ensure_ascii=False),
+                                    content_type='application/json')
+        else:
             message.result = False
-            message.code = 404
-            message.message = "供应商不存在"
+            message.code = 200
+            message.message = "数据不存在"
             return HttpResponse(json.dumps(message.__dict__, cls=DjangoJSONEncoder, ensure_ascii=False),
                                 content_type='application/json')
-        data = []
-        for f in supplier:
-            supplier_dict = {
-                "id": f.supplier.id,
-                "name": f.supplier.name,
-                "nr": f.supplier.nr,
-                "country": f.supplier.country,
-                "city": f.supplier.city,
-                "address": f.supplier.address,
-                "phone": f.supplier.phone,
-                "telephone": f.supplier.telephone,
-                "email": f.supplier.email,
-                "contact": f.supplier.contact,
-                "cost": decimal2float(f.cost),
-                "cost_unit": decimal2float(f.cost_unit),
-                "supplier_item_nr": f.supplier_item_nr
-            }
-            data.append(supplier_dict)
-        message.result = True
-        message.code = 200
-        message.message = "相应数据查询成功"
-        message.content = data
-        return HttpResponse(json.dumps(message.__dict__, cls=DjangoJSONEncoder, ensure_ascii=False),
-                            content_type='application/json')
 
 
 # 代号：GET_ITEM_MAIN_SUPPLIER_DATA_API
 # 获取单个物料主数据页，前置期+供应商+包装部分
 class MainSupplierData(View):
-    def get(self, request, id, *args, **kwargs):
+    def get(self, request, pid, *args, **kwargs):
         message = ResponseMessage()
         current_time = timezone.now()
+        location_id = request.GET.get("location_id", None)
         try:
-            item = Item.objects.get(id=id)
-        except Exception as e:
+            item = Item.objects.get(id=pid)
+        except Item.DoesNotExist:
             message.result = False
             message.code = 404
             message.message = "没有对应的物料"
@@ -1677,42 +1688,43 @@ class MainSupplierData(View):
             "order_max_qty": None,
             "description": None
         }
-        item_supplier = ItemSupplier.objects.filter(item=id, effective_start__lte=current_time,
-                                                    effective_end__gte=current_time).order_by('priority', '-ratio',
-                                                                                              'id').first()
-        item_location = ItemLocation.objects.filter(item=item)
+        if location_id:
+            item_supplier = ItemSupplier.objects.filter(item_id=pid, location_id=location_id,
+                                                        effective_start__lte=current_time,
+                                                        effective_end__gte=current_time).order_by('priority', '-ratio',
+                                                                                                  'id').first()
+            item_location = ItemLocation.objects.filter(item_id=pid, location_id=location_id).first()
+            if item_location:
+                item_location = item_location
+                data["product_time"] = decimal2float(item_location.product_time)
+                data["load_time"] = decimal2float(item_location.load_time)
+                data["transit_time"] = decimal2float(item_location.transit_time)
+                data["receive_time"] = decimal2float(item_location.receive_time)
+                data["plan_supplier_date"] = item_location.plan_supplier_date
+                data["plan_load_date"] = item_location.plan_load_date
+                data["plan_receive_date"] = item_location.plan_receive_date
+                lead_time = item_location.wd2cd()
+                data["total_lead_time"] = decimal2float(lead_time)
+                data["moq"] = decimal2float(item_location.moq)
+                data["mpq"] = decimal2float(item_location.mpq)
+                data["pallet_num"] = decimal2float(item_location.pallet_num)
+                # TODO 手工MOQ暂时无数据
+                data["MOQ"] = 0
+                data["order_unit_qty"] = decimal2float(item_location.order_unit_qty)
+                data["outer_package_num"] = decimal2float(item_location.outer_package_num)
+                data["order_max_qty"] = decimal2float(item_location.order_max_qty)
+                data["description"] = item_location.description
 
-        if item_location:
-            item_location = item_location.first()
-            data["product_time"] = decimal2float(item_location.product_time)
-            data["load_time"] = decimal2float(item_location.load_time)
-            data["transit_time"] = decimal2float(item_location.transit_time)
-            data["receive_time"] = decimal2float(item_location.receive_time)
-            data["plan_supplier_date"] = item_location.plan_supplier_date
-            data["plan_load_date"] = item_location.plan_load_date
-            data["plan_receive_date"] = item_location.plan_receive_date
-            lead_time = item_location.wd2cd()
-            data["total_lead_time"] = decimal2float(lead_time)
-            data["moq"] = decimal2float(item_location.moq)
-            data["mpq"] = decimal2float(item_location.mpq)
-            data["pallet_num"] = decimal2float(item_location.pallet_num)
-            # TODO 手工MOQ暂时无数据
-            data["MOQ"] = 0
-            data["order_unit_qty"] = decimal2float(item_location.order_unit_qty)
-            data["outer_package_num"] = decimal2float(item_location.outer_package_num)
-            data["order_max_qty"] = decimal2float(item_location.order_max_qty)
-            data["description"] = item_location.description
-
-        if item_supplier:
-            data["supplier_id"] = item_supplier.supplier.id
-            data["name"] = item_supplier.supplier.name
-            data["nr"] = item_supplier.supplier.nr
-            data["cost"] = decimal2float(item_supplier.cost)
-            data["cost_unit"] = decimal2float(item_supplier.cost_unit)
-            data["earliest_order_date"] = item_supplier.earliest_order_date
-            data["lock_expire_at"] = item.lock_expire_at
-            data["plan_list_date"] = item_supplier.plan_list_date
-            data["plan_delist_date"] = item_supplier.plan_delist_date
+            if item_supplier:
+                data["supplier_id"] = item_supplier.supplier.id
+                data["name"] = item_supplier.supplier.name
+                data["nr"] = item_supplier.supplier.nr
+                data["cost"] = decimal2float(item_supplier.cost)
+                data["cost_unit"] = decimal2float(item_supplier.cost_unit)
+                data["earliest_order_date"] = item_supplier.earliest_order_date
+                data["lock_expire_at"] = item.lock_expire_at
+                data["plan_list_date"] = item_supplier.plan_list_date
+                data["plan_delist_date"] = item_supplier.plan_delist_date
 
         message.result = True
         message.code = 200
@@ -1721,7 +1733,7 @@ class MainSupplierData(View):
         return HttpResponse(json.dumps(message.__dict__, cls=DjangoJSONEncoder, ensure_ascii=False),
                             content_type='application/json')
 
-    def post(self, request, id, *args, **kwargs):
+    def post(self, request, pid, *args, **kwargs):
         message = ResponseMessage()
         current_time = datetime.now()
         json_data = request.body
@@ -1730,9 +1742,9 @@ class MainSupplierData(View):
             # 创建保存点
             save_point = transaction.savepoint()
             try:
-                item = Item.objects.get(id=id)
-                item_location = ItemLocation.objects.get(item_id=id)
-                item_supplier = ItemSupplier.objects.get(item_id=id)
+                item = Item.objects.get(id=pid)
+                item_location = ItemLocation.objects.get(item_id=pid)
+                item_supplier = ItemSupplier.objects.get(item_id=pid)
                 item_location.plan_supplier_date = data['plan_supplier_date']
                 item_location.plan_load_date = data['plan_load_date']
                 item_location.plan_receive_date = data['plan_receive_date']
@@ -1761,30 +1773,34 @@ class MainSupplierData(View):
 
 # 代号：GET_ITEM_SIMULATION_DATA_API
 # 获取单个物料模拟主数据列表
+# 通过ItemSupplier获取
 class ItemSimulation(View):
-    def get(self, request, id, *args, **kwargs):
+    def get(self, request, pid, *args, **kwargs):
         message = ResponseMessage()
         current_time = timezone.now()
-
-        item_supplier = ItemSupplier.objects.filter(item_id=id, effective_start__lte=current_time,
-                                                    effective_end__gte=current_time).order_by('priority', '-ratio',
-                                                                                              'id').first()
-        if item_supplier is None:
-            message.result = True
-            message.code = 200
-            message.message = "没有数据"
-            return HttpResponse(json.dumps(message.__dict__, cls=DjangoJSONEncoder, ensure_ascii=False),
-                                content_type='application/json')
-
+        location_id = request.GET.get('location_id', None)
         data = {
-            "supplier_id": item_supplier.supplier.id,
-            "nr": item_supplier.supplier.nr,
-            "name": item_supplier.supplier.name,
+            "supplier_id": None,
+            "nr": None,
+            "name": None,
             # TODO 目前订货点没有数据
-            "now_order_point": 0,
-            "moq": decimal2float(item_supplier.moq),
-            "order_max_qty": decimal2float(item_supplier.order_max_qty)
+            "now_order_point": None,
+            "moq": None,
+            "order_max_qty": None
         }
+        if location_id:
+            item_location = ItemLocation.objects.filter(item_id=pid, location_id=location_id).first()
+            item_supplier = ItemSupplier.objects.filter(item_id=pid, location_id=location_id,
+                                                        effective_start__lte=current_time,
+                                                        effective_end__gte=current_time).order_by('priority', '-ratio',
+                                                                                                  'id').first()
+            if item_supplier:
+                data['supplier_id'] = item_supplier.supplier.id
+                data['nr'] = item_supplier.supplier.nr
+                data['name'] = item_supplier.supplier.name
+            if item_location:
+                data["moq"] = item_location.moq
+                data["order_max_qty"] = decimal2float(item_location.order_max_qty)
         message.result = True
         message.code = 200
         message.message = "相应数据查询成功"
@@ -1831,31 +1847,22 @@ class ItemSimulation(View):
 # 代号：GET_ITEM_PLAN_DATA_API
 # 获取单个物料计划主数据
 class ItemPlan(View):
-    def get(self, request, id, *args, **kwargs):
+    def get(self, request, pid, *args, **kwargs):
         message = ResponseMessage()
         current_time = timezone.now()
-        item_supplier = ItemSupplier.objects.filter(item=id, effective_start__lte=current_time,
-                                                    effective_end__gte=current_time).order_by('priority', '-ratio',
-                                                                                              'id').first()
-        if item_supplier is None:
-            message.result = True
-            message.code = 200
-            message.message = "没有数据"
-            return HttpResponse(json.dumps(message.__dict__, cls=DjangoJSONEncoder, ensure_ascii=False),
-                                content_type='application/json')
-
-        lead_time = item_supplier.wd2cd()
-
+        location_id = request.GET.get('location_id', None)
         data = {
-            "supplier_id": item_supplier.supplier.id,
-            "nr": item_supplier.supplier.nr,
-            "name": item_supplier.supplier.name,
+            "supplier_id": None,
+            "nr": None,
+            "name": None,
+            # TODO 暂时无数据
             "safe_buffer": 0,
-            "moq": decimal2float(item_supplier.moq),
-            "mpq": decimal2float(item_supplier.mpq),
-            "outer_package_num": decimal2float(item_supplier.outer_package_num),
-            "pallet_num": decimal2float(item_supplier.pallet_num),
-            "lead_time": decimal2float(lead_time),
+            "moq": None,
+            "mpq": None,
+            "outer_package_num": None,
+            "pallet_num": None,
+            "lead_time": None,
+            # TODO 暂时无数据
             "per_month_sale": 0,
             "last_year_sale": 0,
             "last_month_sale": 0,
@@ -1863,6 +1870,24 @@ class ItemPlan(View):
             "now_buffer_time": 0,
             "now_order_point": 0
         }
+
+        if location_id:
+            item_location = ItemLocation.objects.filter(item_id=pid, location_id=location_id).first()
+            item_supplier = ItemSupplier.objects.filter(item=id, location_id=location_id,
+                                                        effective_start__lte=current_time,
+                                                        effective_end__gte=current_time).order_by('priority', '-ratio',
+                                                                                                  'id').first()
+            if item_location:
+                lead_time = item_location.wd2cd()
+                data["moq"] = decimal2float(item_location.moq)
+                data["mpq"] = decimal2float(item_location.mpq)
+                data["outer_package_num"]: decimal2float(item_location.outer_package_num)
+                data["pallet_num"]: decimal2float(item_location.pallet_num)
+                data["lead_time"]: decimal2float(lead_time)
+            if item_supplier:
+                data["supplier_id"]: item_supplier.supplier.id
+                data["nr"]: item_supplier.supplier.nr
+                data["name"]: item_supplier.supplier.name
 
         message.result = True
         message.code = 200
