@@ -19,7 +19,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from freppledb.input.models import Resource, Operation, Location, SetupMatrix, SetupRule, ItemSuccessor, ItemCustomer, \
     ForecastYear, Forecast, ForecastVersion, ItemLocation, InventoryParameter, SalesOrder, SalesOrderItem, \
-    DeliveryOrderItem, PurchaseOrderItem, WorkOrder, WorkOrderItem
+    DeliveryOrderItem, PurchaseOrderItem, WorkOrder, WorkOrderItem, ItemBom, ItemSafetyStock, ItemRopQty
 from freppledb.input.models import Buffer, Customer, Demand, Item, OperationResource
 from freppledb.input.models import OperationMaterial, Skill, ResourceSkill, Supplier
 from freppledb.input.models import Calendar, CalendarBucket, ManufacturingOrder, SubOperation
@@ -205,6 +205,69 @@ class ItemLocation_admin(MultiDBModelAdmin):
 
 
 data_site.register(ItemLocation, ItemLocation_admin)
+
+
+class ItemBom_admin(MultiDBModelAdmin):
+    model = ItemBom
+    save_on_top = True
+    raw_id_fields = ('item', 'item_location','parent')
+    exclude = ('source',)
+    tabs = [
+        {"name": 'edit', "label": _("edit"), "view": "admin:input_itembom_change",
+         "permissions": "input.change_itembom"},
+        {"name": 'supplypath', "label": _("supply path"), "view": "supplypath_item"},
+        {"name": 'whereused', "label": _("where used"), "view": "whereused_item"},
+        {"name": 'plan', "label": _("plan"), "view": "output_demand_plandetail"},
+        {"name": 'plandetail', "label": _("delivery orders"), "view": "input_deliveryorder_by_item"},
+        {"name": 'purchaseorders', "label": _("purchase orders"), "view": "input_purchaseorder_by_item"},
+        {"name": 'comments', "label": _("comments"), "view": "admin:input_item_comment"},
+        {"name": 'history', "label": _("History"), "view": "admin:input_item_history"},
+    ]
+
+
+data_site.register(ItemBom, ItemBom_admin)
+
+
+class ItemSafetyStock_admin(MultiDBModelAdmin):
+    model = ItemSafetyStock
+    save_on_top = True
+    raw_id_fields = ('item', 'location')
+    exclude = ('source',)
+    tabs = [
+        {"name": 'edit', "label": _("edit"), "view": "admin:input_itemsafetystock_change",
+         "permissions": "input.change_itemsafetystock"},
+        {"name": 'supplypath', "label": _("supply path"), "view": "supplypath_item"},
+        {"name": 'whereused', "label": _("where used"), "view": "whereused_item"},
+        {"name": 'plan', "label": _("plan"), "view": "output_demand_plandetail"},
+        {"name": 'plandetail', "label": _("delivery orders"), "view": "input_deliveryorder_by_item"},
+        {"name": 'purchaseorders', "label": _("purchase orders"), "view": "input_purchaseorder_by_item"},
+        {"name": 'comments', "label": _("comments"), "view": "admin:input_item_comment"},
+        {"name": 'history', "label": _("History"), "view": "admin:input_item_history"},
+    ]
+
+
+data_site.register(ItemSafetyStock, ItemSafetyStock_admin)
+
+
+class ItemRopQty_admin(MultiDBModelAdmin):
+    model = ItemRopQty
+    save_on_top = True
+    raw_id_fields = ('item', 'location')
+    exclude = ('source',)
+    tabs = [
+        {"name": 'edit', "label": _("edit"), "view": "admin:input_itemropqty_change",
+         "permissions": "input.change_itemropqty"},
+        {"name": 'supplypath', "label": _("supply path"), "view": "supplypath_item"},
+        {"name": 'whereused', "label": _("where used"), "view": "whereused_item"},
+        {"name": 'plan', "label": _("plan"), "view": "output_demand_plandetail"},
+        {"name": 'plandetail', "label": _("delivery orders"), "view": "input_deliveryorder_by_item"},
+        {"name": 'purchaseorders', "label": _("purchase orders"), "view": "input_purchaseorder_by_item"},
+        {"name": 'comments', "label": _("comments"), "view": "admin:input_item_comment"},
+        {"name": 'history', "label": _("History"), "view": "admin:input_item_history"},
+    ]
+
+
+data_site.register(ItemRopQty, ItemRopQty_admin)
 
 
 class ItemCustomer_admin(MultiDBModelAdmin):

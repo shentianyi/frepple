@@ -1325,7 +1325,8 @@ class EnumView(View):
             type = kwargs['type']
             value = kwargs['value']
             if type == 'item_status_by_type':
-                t = enum.ItemTypyStatus.to_dic()[value]
+                t = Item.type_status[value]
+                # t = enum.ItemTypyStatus.to_dic()[value]
                 dic = la_enum.tuple2select(t) if t != None else None
                 return HttpResponse(json.dumps(dic, cls=DjangoJSONEncoder),
                                     content_type='application/json')
@@ -1475,6 +1476,7 @@ class ItemDetail(View):
 class ItemMainData(View):
     def get(self, request, pid, *args, **kwargs):
         message = ResponseMessage()
+        location_id = request.GET.get('location_id', None)
         try:
             item = Item.objects.get(id=pid)
         except Item.DoesNotExist:
@@ -1488,7 +1490,6 @@ class ItemMainData(View):
         except:
             successor_nr = None
 
-        item_location = ItemLocation.objects.filter(item=item)
         lock_types = {"current": None, "values": la_enum.tuple2select(enum.LockType.to_tuple())}
 
         plan_strategies = {"current": None,
@@ -1511,30 +1512,35 @@ class ItemMainData(View):
             "qty_abc": None,
             "description": None,
         }
+        item_location = ItemLocation.objects.filter(item=item)
         location = []
         for i in item_location:
             location_dict = {}
             location_dict["id"] = i.location.id
             location_dict["nr"] = i.location.nr
             location.append(location_dict)
-        data["location"] = location
+
+        if location_id:
+            item_location = ItemLocation.objects.filter(item_id=pid, location_id=location_id)
 
         if item_location:
             item_location = item_location.first()
-            data["project_nr"] = item_location.project_nr
-            data["lock_types"]["current"] = item_location.lock_type
+        current_location = item_location.location.id
+        data["location"] = {"current":current_location,"values":location}
+        data["project_nr"] = item_location.project_nr
+        data["lock_types"]["current"] = item_location.lock_type
 
-            data["statuses"] = {"current": item_location.status,
-                                "values": la_enum.tuple2select(enum.ItemTypyStatus.to_dic()[item_location.type])}
+        data["statuses"] = {"current": item_location.status,
+                            "values": la_enum.tuple2select(enum.ItemTypyStatus.to_dic()[item_location.type])}
 
-            data["plan_strategies"]["current"] = item_location.plan_strategy
-            data["lock_expire_at"] = item_location.lock_expire_at
-            data["inventory_qty"] = item_location.inventory_qty
-            data["available_inventory"] = item_location.available_inventory
-            data["inventory_cost"] = item_location.inventory_cost
-            data["description"] = item_location.description
-            data["price_abc"] = item_location.price_abc
-            data["qty_abc"] = item_location.qty_abc
+        data["plan_strategies"]["current"] = item_location.plan_strategy
+        data["lock_expire_at"] = item_location.lock_expire_at
+        data["inventory_qty"] = item_location.inventory_qty
+        data["available_inventory"] = item_location.available_inventory
+        data["inventory_cost"] = item_location.inventory_cost
+        data["description"] = item_location.description
+        data["price_abc"] = item_location.price_abc
+        data["qty_abc"] = item_location.qty_abc
 
         message.result = True
         message.code = 200
@@ -1588,57 +1594,6 @@ class ItemMainData(View):
                                     content_type='application/json')
 
 
-class MainDataEnum(View):
-    def get(self, request, pid, *args, **kwargs):
-        message = ResponseMessage()
-        location_id = request.GET.get('location_id', None)
-        data = {
-            "project_nr": None,
-            "inventory_qty": None,
-            "available_inventory": None,
-            "inventory_cost": None,
-            "lock_types": None,
-            "lock_expire_at": None,
-            "plan_strategies": None,
-            "statuses": None,
-            "price_abc": None,
-            "qty_abc": None,
-            "description": None,
-        }
-
-        if location_id and pid:
-            item_location = ItemLocation.objects.filter(item_id=pid, location_id=location_id).first()
-            if item_location:
-                data["id"] = pid
-                data["location_id"] = location_id
-                data["inventory_qty"] = item_location.inventory_qty
-                data["available_inventory"] = item_location.available_inventory
-                data["inventory_cost"] = item_location.inventory_cost
-                data["project_nr"] = item_location.project_nr
-                data["lock_types"] = {"current": item_location.lock_type,
-                                      "values": la_enum.tuple2select(enum.LockType.to_tuple())}
-                data["lock_expire_at"] = item_location.lock_expire_at
-                data["statuses"] = {"current": item_location.status,
-                                    "values": la_enum.tuple2select(enum.ItemTypyStatus.to_dic()[item_location.type])}
-                data["plan_strategies"] = {"current": item_location.plan_strategy,
-                                           "values": la_enum.tuple2select(enum.ItemProductStrategy.to_tuple())}
-                data["price_abc"] = item_location.price_abc
-                data["qty_abc"] = item_location.qty_abc
-                data["description"] = item_location.description
-            message.result = True
-            message.code = 200
-            message.message = "相应数据查询成功"
-            message.content = data
-            return HttpResponse(json.dumps(message.__dict__, cls=DjangoJSONEncoder, ensure_ascii=False),
-                                content_type='application/json')
-        else:
-            message.result = True
-            message.code = 404
-            message.message = "请传入location_id值"
-            return HttpResponse(json.dumps(message.__dict__, cls=DjangoJSONEncoder, ensure_ascii=False),
-                                content_type='application/json')
-
-
 # 代号　GET_ITEM_SUPPLIERS_DATA_API
 # 获取单个物料供应商界面主数据
 class ItemSupplierData(View):
@@ -1656,7 +1611,8 @@ class ItemSupplierData(View):
                 message.message = "供应商不存在"
                 return HttpResponse(json.dumps(message.__dict__, cls=DjangoJSONEncoder, ensure_ascii=False),
                                     content_type='application/json')
-            data = []
+            data = {"current": None,
+                    "values": []}
             for f in supplier:
                 supplier_dict = {
                     "id": f.supplier.id,
@@ -1673,7 +1629,7 @@ class ItemSupplierData(View):
                     "cost_unit": decimal2float(f.cost_unit),
                     "supplier_item_nr": f.supplier_item_nr
                 }
-                data.append(supplier_dict)
+                data["values"].append(supplier_dict)
             message.result = True
             message.code = 200
             message.message = "相应数据查询成功"

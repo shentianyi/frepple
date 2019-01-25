@@ -451,6 +451,71 @@ class ItemLocation(AuditModel):
                                                self.receive_time]))
 
 
+class ItemBom(AuditModel):
+    """物料bom"""
+    id = models.AutoField(_('id'), help_text=_('Unique identifier'), primary_key=True)
+    nr = models.CharField(_('nr'), max_length=300, db_index=True, unique=True)
+    item = models.ForeignKey(
+        Item, verbose_name=_('item'), on_delete=models.CASCADE, related_name="itembom_item")
+    item_location = models.ForeignKey(
+        ItemLocation, verbose_name=_('item location'), on_delete=models.CASCADE, related_name="itembom_item_location")
+    parent = models.ForeignKey(
+        Item, verbose_name=_('owner'),
+        null=True, blank=True, on_delete=models.CASCADE, related_name="itembom_parent"
+    )
+    qty = models.DecimalField(_('qty'),max_digits=20,decimal_places=8)
+    effective_start = models.DateField(_('effective start'), null=True, blank=True)
+    effective_end = models.DateField(_('effective end'), null=True, blank=True)
+
+    def __str__(self):
+        return self.nr
+
+    class Meta(AuditModel.Meta):
+        db_table = 'item_bom'
+        verbose_name = _('item bom')
+        verbose_name_plural = _('item boms')
+        unique_together = (('item', 'parent'),)
+        ordering = ['id']
+
+
+class ItemSafetyStock(AuditModel):
+    """物料安全库存记录"""
+    id = models.AutoField(_('id'), help_text=_('Unique identifier'), primary_key=True)
+    item = models.ForeignKey(
+        Item, verbose_name=_('item'), on_delete=models.CASCADE, related_name="itemsafetystock_item")
+    location = models.ForeignKey(
+        Location, verbose_name=_('location'), on_delete=models.CASCADE, related_name="itemsafetystock_location")
+    qty = models.DecimalField(_('safety stock qty'),max_digits=20,decimal_places=8)
+
+    def __str__(self):
+        return '%s - %s' % (self.item, self.location)
+
+    class Meta(AuditModel.Meta):
+        db_table = 'item_safety_stock'
+        verbose_name = _('item safety stock')
+        verbose_name_plural = _('item safety stocks')
+        ordering = ['id']
+
+
+class ItemRopQty(AuditModel):
+    """物料安全库存记录"""
+    id = models.AutoField(_('id'), help_text=_('Unique identifier'), primary_key=True)
+    item = models.ForeignKey(
+        Item, verbose_name=_('item'), on_delete=models.CASCADE, related_name="itemropqty_item")
+    location = models.ForeignKey(
+        Location, verbose_name=_('location'), on_delete=models.CASCADE, related_name="itemropqty_location")
+    qty = models.DecimalField(_('rop qty'), max_digits=20,decimal_places=8)
+
+    def __str__(self):
+        return '%s - %s' % (self.item, self.location)
+
+    class Meta(AuditModel.Meta):
+        db_table = 'item_rop_qty'
+        verbose_name = _('item rop qty')
+        verbose_name_plural = _('item rop qtys')
+        ordering = ['id']
+
+
 class ItemCustomer(AuditModel):
     id = models.AutoField(_('id'), help_text=_('Unique identifier'), primary_key=True)
     sale_item = models.ForeignKey(
