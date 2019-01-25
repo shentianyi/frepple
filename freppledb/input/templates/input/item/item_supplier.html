@@ -9,15 +9,14 @@
 
 <form class="form-span">
     <h3>供应商</h3>
-    <p>{[ typeof supplierData.data[0] ]}</p>
     <div class="row">
         <div class="col-md-6">
             <div class="input-group">
                 <span class="input-group-addon">供应商代码：</span>
                 <!--<input class="form-control" id="item_detail_supplier_nr" type="text" name="item_detail_supplier_nr">-->
                 <select class="form-control" name="item_detail_supplier_nr" id="item_detail_supplier_nr"
-                        @change="supplierChange" v-model="supplierData.supplierSelected">
-                    <option v-for="(item, index) in supplierData.data" :key="item.id" :value="index">{[ item.name ]}</option>
+                        v-model="supplierSelected">
+                    <option v-for="(item, index) in supplierData" :key="item.id" :value="index">{[ item.nr ]}</option>
                 </select>
             </div>
         </div>
@@ -29,6 +28,7 @@
                            id="item_detail_supplier_phone"
                            type="text"
                            name="phone_supplier"
+                           v-model="supplierData[supplierSelected].phone"
                     >
                 </div>
             </div>
@@ -39,6 +39,7 @@
                            id="item_detail_supplier_telephone"
                            type="text"
                            name="item_detail_supplier_tel"
+                           v-model="supplierData[supplierSelected].telephone"
                     >
                 </div>
             </div>
@@ -52,6 +53,7 @@
                        id="item_detail_supplier_name"
                        type="text"
                        name="item_detail_supplier_name"
+                       v-model="supplierData[supplierSelected].name"
                 >
             </div>
         </div>
@@ -62,6 +64,7 @@
                        id="item_detail_supplier_email"
                        type="text"
                        name="item_detail_supplier_email"
+                       v-model="supplierData[supplierSelected].email"
                 >
             </div>
         </div>
@@ -74,6 +77,7 @@
                        id="item_detail_supplier_country"
                        type="text"
                        name="item_detail_supplier_country"
+                       v-model="supplierData[supplierSelected].country"
                 >
             </div>
         </div>
@@ -84,6 +88,7 @@
                        id="item_detail_supplier_contact"
                        type="text"
                        name="item_detail_supplier_contact"
+                       v-model="supplierData[supplierSelected].contact"
                 >
             </div>
         </div>
@@ -96,6 +101,7 @@
                        id="item_detail_supplier_city"
                        type="text"
                        name="item_detail_supplier_city"
+                       v-model="supplierData[supplierSelected].city"
                 >
             </div>
         </div>
@@ -112,6 +118,7 @@
                        id="item_detail_supplier_cost"
                        type="text"
                        name="item_detail_supplier_cost"
+                       v-model="supplierData[supplierSelected].cost"
                 >
                 <span class="input-group-addon unit">CNY</span>
             </div>
@@ -123,6 +130,7 @@
                        id="item_detail_supplier_supplier_item_nr"
                        type="text"
                        name="item_detail_supplier_supplier_item_nr"
+                       v-model="supplierData[supplierSelected].supplier_item_nr"
                 >
             </div>
         </div>
@@ -135,6 +143,7 @@
                        id="item_detail_supplier_cost_unit"
                        type="text"
                        name="item_detail_supplier_cost_unit"
+                       v-model="supplierData[supplierSelected].cost_unit"
                 >
             </div>
         </div>

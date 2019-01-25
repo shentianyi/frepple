@@ -122,7 +122,9 @@
                 <div class="input-group">
                     <span class="input-group-addon">产品描述：</span>
                     <input class="form-control" id="item_detail_description" type="text"
-                           name="item_detail_description">
+                           name="item_detail_description"
+                           v-model="publicData.description"
+                    >
                 </div>
             </div>
 
@@ -131,8 +133,10 @@
                     <span class="input-group-addon">仓库代码：</span>
                     <!--<input class="form-control" id="item_detail_location_nr" type="text" name="item_detail_location_nr">-->
                     <select class="form-control" name="item_detail_location" id="item_detail_location"
-                            onchange="ItemDetail.locationChange()">
-                        <!--<option v-for="item in " :value=""></option>-->
+                            @change="locationChange"
+                            v-model="publicData.location.current"
+                    >
+                        <option v-for="item in publicData.location.values" :key="item.id" :value="item.id">{[ item.nr ]}</option>
                     </select>
                 </div>
             </div>
@@ -141,7 +145,9 @@
                 <div class="input-group">
                     <span class="input-group-addon">库存数量：</span>
                     <input class="form-control" id="item_detail_total_qty" type="text"
-                           name="item_detail_total_qty">
+                           name="item_detail_total_qty"
+                           v-model="publicData.inventory_qty"
+                    >
                     <span class="input-group-addon unit">PCE</span>
                 </div>
             </div>
@@ -151,7 +157,10 @@
                     <span class="input-group-addon">物料锁定类型：</span>
                     <!--<input class="form-control" id="item_detail_lock_types" type="text" name="item_detail_lock_types">-->
                     <select class="form-control" name="item_detail_lock_types" id="item_detail_lock_types"
-                            onchange="ItemDetail.lockTypeChange()">
+                            onchange="ItemDetail.lockTypeChange()"
+                            v-model="publicData.lock_types.current"
+                    >
+                        <option v-for="item in publicData.lock_types.values" :key="item.value" :value="item.value">{[ item.text ]}</option>
                     </select>
                 </div>
             </div>
@@ -161,7 +170,12 @@
             <div class="col-md-3">
                 <div class="input-group">
                     <span class="input-group-addon">物料编码：</span>
-                    <input class="form-control" id="item_detail_nr" type="text" name="item_detail_nr">
+                    <input class="form-control"
+                           id="item_detail_nr"
+                           type="text"
+                           name="item_detail_nr"
+                           v-model="publicData.nr"
+                    >
                 </div>
             </div>
             <div class="col-md-3">
@@ -169,7 +183,9 @@
                     <span class="input-group-addon">替代料号：</span>
 
                     <input class="form-control" id="item_detail_successor_nr" type="text"
-                           name="item_detail_successor_nr">
+                           name="item_detail_successor_nr"
+                           v-model="publicData.successor_nr"
+                     >
                 </div>
             </div>
             <div class="col-md-3">
@@ -177,7 +193,9 @@
                     <span class="input-group-addon">可用库存：</span>
 
                     <input class="form-control" id="item_detail_available_qty" type="text"
-                           name="item_detail_available_qty">
+                           name="item_detail_available_qty"
+                           v-model="publicData.available_inventory"
+                    >
                     <span class="input-group-addon unit">PCE</span>
                 </div>
             </div>
@@ -185,13 +203,15 @@
                 <div class="input-group">
                     <span class="input-group-addon">
                         <label id="item_detail_lock_expire_at_required" class="input-required"
-                                                   title="" data-toggle="tooltip" data-original-title="该项必填"
-                                                   style="display: none"></label>
+                               title="" data-toggle="tooltip" data-original-title="该项必填"
+                               style="display: none"></label>
 
                         到期：</span>
                     <input class="form-control vDateField" id="item_detail_lock_expire_at" type="text"
                            name="item_detail_lock_expire_at"
-                           placeholder="日期">
+                           placeholder="日期"
+                           v-model="publicData.lock_expire_at"
+                    >
                 </div>
             </div>
         </div>
@@ -201,7 +221,12 @@
                     <span class="input-group-addon">计划策略：</span>
                     <!--<input class="form-control" id="item_detail_plan_strategies_current" type="text"-->
                     <!--name="plan_strategy">-->
-                    <select class="form-control" name="item_detail_plan_strategies" id="item_detail_plan_strategies">
+                    <select class="form-control"
+                            name="item_detail_plan_strategies"
+                            id="item_detail_plan_strategies"
+                            v-model="publicData.plan_strategies.current"
+                    >
+                        <option v-for="item in publicData.plan_strategies.values" :key="item.value" :value="item.value">{[ item.text ]}</option>
                     </select>
                 </div>
             </div>
@@ -209,7 +234,12 @@
                 <div class="input-group">
                     <span class="input-group-addon">物料状态：</span>
                     <!--<input class="form-control" id="status_item" type="text" name="status_item">-->
-                    <select class="form-control" name="item_detail_statuses" id="item_detail_statuses">
+                    <select class="form-control"
+                            name="item_detail_statuses"
+                            id="item_detail_statuses"
+                            v-model="publicData.statuses.current"
+                    >
+                        <option v-for="item in publicData.statuses.values" :key="item.value" :value="item.value">{[ item.text ]}</option>
                     </select>
                 </div>
             </div>
@@ -218,7 +248,9 @@
                     <span class="input-group-addon">库存金额：</span>
 
                     <input class="form-control" id="item_detail_buffer_price" type="text"
-                           name="item_detail_buffer_price">
+                           name="item_detail_buffer_price"
+                           v-model="publicData.inventory_cost"
+                    >
                     <span class="input-group-addon unit">CNY</span>
                 </div>
             </div>
@@ -226,7 +258,12 @@
                 <div class="input-group">
                     <span class="input-group-addon">物料ABC货值：</span>
 
-                    <input class="form-control" id="item_detail_price_abc" type="text" name="item_detail_price_abc">
+                    <input class="form-control"
+                           id="item_detail_price_abc"
+                           type="text"
+                           name="item_detail_price_abc"
+                           v-model="publicData.price_abc"
+                    >
                 </div>
             </div>
         </div>
@@ -244,7 +281,12 @@
             <div class="col-md-3  pull-right">
                 <div class="input-group">
                     <span class="input-group-addon">物料ABC数量：</span>
-                    <input class="form-control" id="item_detail_qty_abc" type="text" name="item_detail_qty_abc">
+                    <input class="form-control"
+                           id="item_detail_qty_abc"
+                           type="text"
+                           name="item_detail_qty_abc"
+                           v-model="publicData.qty_abc"
+                    >
                 </div>
             </div>
         </div>
@@ -254,40 +296,50 @@
         <ul class="nav nav-tabs" role="tablist">
             <li role="presentation" class="active">
                 <a href="#main" aria-controls="main" role="tab"
-                   data-toggle="tab">主数据</a></li>
+                   data-toggle="tab" @click="changeTab('main')">主数据</a></li>
             <li role="presentation">
                 <a href="#supplier" aria-controls="supplier" role="tab" data-toggle="tab"
-                   @click="getSuppliersData()">供应商</a>
+                   @click="changeTab('supplier')">供应商</a>
             </li>
             <li role="presentation">
                 <a href="#plan" aria-controls="plan" role="tab" data-toggle="tab"
-                   @click="ItemDetail.getPlanData()">计划</a></li>
+                   @click="changeTab('plan')">计划</a></li>
             <li role="presentation">
                 <a href="#simulation" aria-controls="simulation" role="tab" data-toggle="tab"
-                   @click="ItemDetail.getSimulationData()">模拟</a>
+                   @click="changeTab('simulation')">模拟</a>
             </li>
             <li role="presentation">
                 <a href="#forecast" aria-controls="forecast" role="tab" data-toggle="tab"
-                   @click="ItemDetail.getForecastGridData(), ItemDetail.getForecastChartData()">预测</a>
+                   @click="changeTab('forecast')">预测</a>
             </li>
         </ul>
 
         <div class="tab-content">
-            <div role="tabpanel" class="tab-pane" id="main" v-if="tab === 'main'" :class="tab === 'main' ? 'active': null">
-                {% include "input/item/item_main.html" %}
-            </div>
-            <div role="tabpanel" class="tab-pane" id="supplier" v-else-if="tab === 'supplier'" :class="tab === 'supplier' ? 'active': null">
-                {% include "input/item/item_supplier.html" %}
-            </div>
-            <div role="tabpanel" class="tab-pane" id="plan" v-else-if="tab === 'plan'" :class="tab === 'plan' ? 'active': null">
-                {% include "input/item/item_plan.html" %}
-            </div>
-            <div role="tabpanel" class="tab-pane" id="simulation" v-else-if="tab === 'simulation'" :class="tab === 'simulation' ? 'active': null">
-                {% include "input/item/item_simulation.html" %}
-            </div>
-            <div role="tabpanel" class="tab-pane" id="forecast" v-else-if="tab === 'forecast'" :class="tab === 'forecast' ? 'active': null">
-                {% include "input/item/item_forecast.html" %}
-            </div>
+            <main-tab inline-template v-if="tab === 'main'" ref="main">
+                <div role="tabpanel" class="tab-pane active" id="main">
+                    {% include "input/item/item_main.html" %}
+                </div>
+            </main-tab>
+            <supplier-tab inline-template v-else-if="tab === 'supplier'" ref="supplier">
+                <div role="tabpanel" class="tab-pane active" id="supplier">
+                    {% include "input/item/item_supplier.html" %}
+                </div>
+            </supplier-tab>
+            <plan-tab inline-template v-else-if="tab === 'plan'" ref="plan">
+                <div role="tabpanel" class="tab-pane active" id="plan">
+                    {% include "input/item/item_plan.html" %}
+                </div>
+            </plan-tab>
+            <simulation-tab inline-template v-else-if="tab === 'simulation'" ref="simulation">
+                <div role="tabpanel" class="tab-pane active" id="simulation">
+                    {% include "input/item/item_simulation.html" %}
+                </div>
+            </simulation-tab>
+            <forecast-tab inline-template v-else-if="tab === 'forecast'" ref="forecast">
+                <div role="tabpanel" class="tab-pane active" id="forecast">
+                    {% include "input/item/item_forecast.html" %}
+                </div>
+            </forecast-tab>
         </div>
     </div>
 
@@ -308,8 +360,8 @@
 
 {% block extrahead %}
 {{block.super}}
-<script type="text/javascript" src="{{STATIC_URL}}js/lib/vue.min.js"></script>
-<script type="text/javascript" src="{{STATIC_URL}}js/item_detail.js" ></script>
+<script type="text/javascript" src="{{STATIC_URL}}js/lib/vue.js"></script>
+<script type="text/javascript" src="{{STATIC_URL}}js/item_detail.js"></script>
 {% endblock %}
 
 

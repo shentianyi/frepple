@@ -4,10 +4,11 @@
         <!--<img src="{{STATIC_URL}}img/item/month.png">-->
         <!--</button>-->
         <select id="forecast_grid_chooseMonth" class="form-control btn btn-primary default btn-aps btn-aps-save pull-left"
+                v-model="forecastTableDateType"
                 name="forecast_grid_chooseMonth" style="width: 34px; padding:0 5px" onchange="ItemDetail.DateTypeChange('forecast', true)">
          {%for k,v in date_types%}
             <option value="{{k}}">{{v}}</option>
-            {%endfor%}
+        {%endfor%}
         </select>
         <button id="grid_chooseDayButton" class="btn btn-primary default btn-aps btn-aps-save pull-left" type="button"
                 style="margin-left: 10px">今天
@@ -36,7 +37,10 @@
         <!--<img src="{{STATIC_URL}}img/item/month.png">-->
         <!--</button>-->
         <select id="forecast_chart_chooseMonth" class="form-control btn btn-primary default btn-aps btn-aps-save pull-left"
-                name="forecast_chart_chooseMonth" style="width: 34px; padding:0 5px" onchange="ItemDetail.DateTypeChange('forecast')">
+                name="forecast_chart_chooseMonth"
+                style="width: 34px; padding:0 5px" onchange="ItemDetail.DateTypeChange('forecast')"
+                v-model="forecastChartDateType"
+        >
             {%for k,v in date_types%}
             <option value="{{k}}">{{v}}</option>
             {%endfor%}
