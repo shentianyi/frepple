@@ -1589,10 +1589,9 @@ class ItemMainData(View):
 
 
 class MainDataEnum(View):
-    def get(self, request, *args, **kwargs):
+    def get(self, request, pid, *args, **kwargs):
         message = ResponseMessage()
         location_id = request.GET.get('location_id', None)
-        pid = request.GET.get('id', None)
         data = {
             "project_nr": None,
             "inventory_qty": None,
@@ -1675,12 +1674,12 @@ class ItemSupplierData(View):
                     "supplier_item_nr": f.supplier_item_nr
                 }
                 data.append(supplier_dict)
-                message.result = True
-                message.code = 200
-                message.message = "相应数据查询成功"
-                message.content = data
-                return HttpResponse(json.dumps(message.__dict__, cls=DjangoJSONEncoder, ensure_ascii=False),
-                                    content_type='application/json')
+            message.result = True
+            message.code = 200
+            message.message = "相应数据查询成功"
+            message.content = data
+            return HttpResponse(json.dumps(message.__dict__, cls=DjangoJSONEncoder, ensure_ascii=False),
+                                content_type='application/json')
         else:
             message.result = False
             message.code = 200
@@ -2078,7 +2077,7 @@ class ItemSuccessorList(GridReport):
         GridFieldText('item_successor_display', title=_('item_successor_display'), field_name='item_successor__nr',
                       editable=False),
         # 因为是id 让外键永远不显示
-        GridFieldText('item_successor', title=_('item_successor'), field_name='item_successor_id', editable=False,
+        GridFieldText('item_successor', title=_('item successor'), field_name='item_successor_id', editable=False,
                       hidden=True),
         GridFieldChoice('relation_type', title=_('relation type'), choices=enum.RelationType.to_tuple(),
                         editable=False),

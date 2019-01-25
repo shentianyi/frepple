@@ -29,6 +29,12 @@ msgstr ""
 msgid "Permissions in this scenario"
 msgstr "针对此场景的权限"
 
+msgid "successor"
+msgstr "替代"
+
+msgid "replacement"
+msgstr "取代"
+
 msgid "source_display"
 msgstr "需求源"
 
@@ -483,6 +489,10 @@ msgid "MOQ"
 msgstr "最小起订量"
 
 #: input/models.py:976 input/views.py:916
+msgid "moq"
+msgstr "最小起订量"
+
+#: input/models.py:976 input/views.py:916
 msgid "product time"
 msgstr "生产周期"
 
@@ -541,6 +551,10 @@ msgstr "关系类型"
 
 #: input/models.py:339 input/views.py:1279
 msgid "item_successor_display"
+msgstr "替代物料"
+
+#: input/models.py:339 input/views.py:1279
+msgid "item successor"
 msgstr "替代物料"
 
 # CMARK 翻译
@@ -3402,6 +3416,10 @@ msgstr "物料供应商"
 
 #: input/views.py:1369
 msgid "item locations"
+msgstr "物料地点"
+
+#: input/views.py:1369
+msgid "item location"
 msgstr "物料地点"
 
 #: input/views.py:1392
