@@ -1325,7 +1325,6 @@ class EnumView(View):
             type = kwargs['type']
             value = kwargs['value']
             if type == 'item_status_by_type':
-                # t = Item.type_status[value]
                 t = enum.ItemTypyStatus.to_dic()[value]
                 dic = la_enum.tuple2select(t) if t != None else None
                 return HttpResponse(json.dumps(dic, cls=DjangoJSONEncoder),
@@ -1515,12 +1514,12 @@ class ItemMainData(View):
             "qty_abc": None,
             "description": None,
         }
-        adict = {}
         location = []
         for i in item_location:
-            adict["id"] = i.location.id
-            adict["nr"] = i.location.nr
-            location.append(adict)
+            location_dict = {}
+            location_dict["id"] = i.location.id
+            location_dict["nr"] = i.location.nr
+            location.append(location_dict)
         data["location"] = location
 
         if item_location:
@@ -1688,6 +1687,7 @@ class MainSupplierData(View):
             "order_max_qty": None,
             "description": None
         }
+        # 有location_id取默认值，没有则取默认第一个item_location
         if location_id:
             item_supplier = ItemSupplier.objects.filter(item_id=pid, location_id=location_id,
                                                         effective_start__lte=current_time,
@@ -1725,13 +1725,51 @@ class MainSupplierData(View):
                 data["lock_expire_at"] = item.lock_expire_at
                 data["plan_list_date"] = item_supplier.plan_list_date
                 data["plan_delist_date"] = item_supplier.plan_delist_date
+        else:
+            item_location = ItemLocation.objects.filter(item=item).first()
+            if item_location:
+                item_supplier = ItemSupplier.objects.filter(item_id=pid, location_id=item_location.location.id,
+                                                            effective_start__lte=current_time,
+                                                            effective_end__gte=current_time).order_by('priority',
+                                                                                                      '-ratio',
+                                                                                                      'id').first()
+                item_location = item_location
+                data["product_time"] = decimal2float(item_location.product_time)
+                data["load_time"] = decimal2float(item_location.load_time)
+                data["transit_time"] = decimal2float(item_location.transit_time)
+                data["receive_time"] = decimal2float(item_location.receive_time)
+                data["plan_supplier_date"] = item_location.plan_supplier_date
+                data["plan_load_date"] = item_location.plan_load_date
+                data["plan_receive_date"] = item_location.plan_receive_date
+                lead_time = item_location.wd2cd()
+                data["total_lead_time"] = decimal2float(lead_time)
+                data["moq"] = decimal2float(item_location.moq)
+                data["mpq"] = decimal2float(item_location.mpq)
+                data["pallet_num"] = decimal2float(item_location.pallet_num)
+                # TODO 手工MOQ暂时无数据
+                data["MOQ"] = 0
+                data["order_unit_qty"] = decimal2float(item_location.order_unit_qty)
+                data["outer_package_num"] = decimal2float(item_location.outer_package_num)
+                data["order_max_qty"] = decimal2float(item_location.order_max_qty)
+                data["description"] = item_location.description
+
+                if item_supplier:
+                    data["supplier_id"] = item_supplier.supplier.id
+                    data["name"] = item_supplier.supplier.name
+                    data["nr"] = item_supplier.supplier.nr
+                    data["cost"] = decimal2float(item_supplier.cost)
+                    data["cost_unit"] = decimal2float(item_supplier.cost_unit)
+                    data["earliest_order_date"] = item_supplier.earliest_order_date
+                    data["lock_expire_at"] = item.lock_expire_at
+                    data["plan_list_date"] = item_supplier.plan_list_date
+                    data["plan_delist_date"] = item_supplier.plan_delist_date
 
         message.result = True
         message.code = 200
         message.message = "相应数据查询成功"
         message.content = data
         return HttpResponse(json.dumps(message.__dict__, cls=DjangoJSONEncoder, ensure_ascii=False),
-                            content_type='application/json')
+                                content_type='application/json')
 
     def post(self, request, pid, *args, **kwargs):
         message = ResponseMessage()

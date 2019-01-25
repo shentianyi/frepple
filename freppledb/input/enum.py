@@ -65,7 +65,6 @@ class ItemTypyStatus(BaseEnum):
     RM = RmStatus.to_tuple()
     WIP = ()
 
-
 class ItemProductStrategy(BaseEnum):
     """物料计划策略"""
     MTS = _('MTS')
