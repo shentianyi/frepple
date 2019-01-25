@@ -1467,7 +1467,7 @@ class ItemDetail(View):
         # simulation: 　模拟
         # forecast:     预测
         template_name = "input/item/detail_base.html"
-        id = kwargs['id']
+        pid = kwargs['pid']
         return render(request, template_name, {'template_name': template_name, "date_types": Bucket.chioce_date_type()})
 
 
