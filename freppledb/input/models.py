@@ -295,7 +295,7 @@ class Item(AuditModel, HierarchyModel):
     name = models.CharField(_('name'), max_length=300, primary_key=False, db_index=True)
     barcode = models.CharField(_('barcode'), max_length=300, db_index=True, null=True, blank=True)
     type = models.CharField(_('type'), max_length=20, choices=enum.ItemType.to_tuple(), null=False, blank=False)
-    status = models.CharField(_('status'), max_length=20, null=True, blank=True, choices=enum.FgStatus.to_tuple())
+    status = models.CharField(_('status'), max_length=20, null=True, blank=True, choices=enum.ItemStatus.to_tuple())
     plan_strategy = models.CharField(_('plan strategy'), max_length=20, null=True, blank=True,
                                      choices=enum.ItemProductStrategy.to_tuple())
     lock_type = models.CharField(_('lock type'), max_length=20, null=True, blank=True, choices=enum.LockType.to_tuple(),

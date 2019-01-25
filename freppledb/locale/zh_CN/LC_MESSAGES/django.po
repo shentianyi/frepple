@@ -547,10 +547,6 @@ msgstr "地点"
 msgid "customer item nr"
 msgstr "客户物料编号"
 
-#: input/models.py:339 input/views.py:1279
-msgid "item successor"
-msgstr "物料替代"
-
 #: input/views.py:1903
 msgid "relation type"
 msgstr "关系类型"

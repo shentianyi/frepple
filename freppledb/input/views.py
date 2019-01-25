@@ -1325,8 +1325,8 @@ class EnumView(View):
             type = kwargs['type']
             value = kwargs['value']
             if type == 'item_status_by_type':
-                t = Item.type_status[value]
-                # t = enum.ItemTypyStatus.to_dic()[value]
+                # t = Item.type_status[value]
+                t = enum.ItemTypeStatus.to_dic()[value]
                 dic = la_enum.tuple2select(t) if t != None else None
                 return HttpResponse(json.dumps(dic, cls=DjangoJSONEncoder),
                                     content_type='application/json')
@@ -1531,7 +1531,7 @@ class ItemMainData(View):
         data["lock_types"]["current"] = item_location.lock_type
 
         data["statuses"] = {"current": item_location.status,
-                            "values": la_enum.tuple2select(enum.ItemTypyStatus.to_dic()[item_location.type])}
+                            "values": la_enum.tuple2select(enum.ItemTypeStatus.to_dic()[item_location.type])}
 
         data["plan_strategies"]["current"] = item_location.plan_strategy
         data["lock_expire_at"] = item_location.lock_expire_at

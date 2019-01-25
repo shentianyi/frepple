@@ -24,6 +24,19 @@ class RmStatus(BaseEnum):
     A3 = _('A3')
 
 
+class ItemStatus(BaseEnum):
+    """物料状态"""
+    S0 = _('S0')
+    S1 = _('S1')
+    S2 = _('S2')
+    S3 = _('S3')
+    S4 = _('S4')
+    A0 = _('A0')
+    A1 = _('A1')
+    A2 = _('A2')
+    A3 = _('A3')
+
+
 class ItemType(BaseEnum):
     """物料类型"""
     FG = _('FG')
@@ -59,7 +72,7 @@ class RelationType(BaseEnum):
     replacement = _('replacement')
 
 
-class ItemTypyStatus(BaseEnum):
+class ItemTypeStatus(BaseEnum):
     """物料类型状态关系"""
     FG = FgStatus.to_tuple()
     RM = RmStatus.to_tuple()
