@@ -56,7 +56,7 @@ from freppledb.input.enum import LockType
 from freppledb.input.forms import ForecastUploadForm
 from freppledb.input.models import Resource, Operation, Location, SetupMatrix, SetupRule, ItemSuccessor, ItemCustomer, \
     ForecastYear, ForecastVersion, Forecast, ForecastCommentOperation, ItemLocation, SalesOrder, InventoryParameter, \
-    SalesOrderItem, DeliveryOrderItem, PurchaseOrderItem, WorkOrder, WorkOrderItem
+    SalesOrderItem, DeliveryOrderItem, PurchaseOrderItem, WorkOrder, WorkOrderItem, ItemSafetyStock, ItemRopQty
 from freppledb.input.models import Skill, Buffer, Customer, Demand, DeliveryOrder
 from freppledb.input.models import Item, OperationResource, OperationMaterial
 from freppledb.input.models import Calendar, CalendarBucket, ManufacturingOrder, SubOperation
@@ -770,7 +770,47 @@ class InventoryParameterList(GridReport):
         GridFieldNumber('safetystock_min_qty', title=_('safety stock min qty'), editable=False),
         GridFieldNumber('safetystock_max_qty', title=_('safety stock max qty'), editable=False),
         GridFieldNumber('safetystock_qty_by_system', title=_('system safety stock'), editable=False),
-        GridFieldNumber('service_level', title=_('service level'), editable=False),
+        GridFieldNumber('service_level', title=_('service level'),
+                        extra='"formatoptions":{"suffix":" %","defaultValue":"100.00"}', editable=False),
+        GridFieldCreateOrUpdateDate('created_at', title=_('created_at'), editable=False),
+        GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at'), editable=False),
+    )
+
+class ItemSafetyStockList(GridReport):
+    title = _("item safety stocks")
+    basequeryset = ItemSafetyStock.objects.all()
+    model = ItemSafetyStock
+    frozenColumns = 1
+    help_url = 'user-guide/modeling-wizard/master-data/buffers.html'
+
+    rows = (
+        GridFieldInteger('id', title=_('id'), key=True, formatter='detail', extra='"role":"input/itemlocation"'),
+        GridFieldText('item_display', title=_('item_display'), field_name='item__nr', editable=False),
+        GridFieldText('location_display', title=_('location_display'), field_name='location__nr', editable=False),
+        GridFieldText('item', title=_('item_id'), field_name='item_id', editable=False, hidden=True),
+        GridFieldText('location', title=_('location_id'), field_name='location_id', editable=False, hidden=True),
+        GridFieldText('date_type', title=_('date_type'), editable=False),
+        GridFieldNumber('qty', title=_('qty'), editable=False),
+        GridFieldCreateOrUpdateDate('created_at', title=_('created_at'), editable=False),
+        GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at'), editable=False),
+    )
+
+
+class ItemRopQtyList(GridReport):
+    title = _("item rop qty")
+    basequeryset = ItemRopQty.objects.all()
+    model = ItemRopQty
+    frozenColumns = 1
+    help_url = 'user-guide/modeling-wizard/master-data/buffers.html'
+
+    rows = (
+        GridFieldInteger('id', title=_('id'), key=True, formatter='detail', extra='"role":"input/itemlocation"'),
+        GridFieldText('item_display', title=_('item_display'), field_name='item__nr', editable=False),
+        GridFieldText('location_display', title=_('location_display'), field_name='location__nr', editable=False),
+        GridFieldText('item', title=_('item_id'), field_name='item_id', editable=False, hidden=True),
+        GridFieldText('location', title=_('location_id'), field_name='location_id', editable=False, hidden=True),
+        GridFieldText('date_type', title=_('date_type'), editable=False),
+        GridFieldNumber('qty', title=_('qty'), editable=False),
         GridFieldCreateOrUpdateDate('created_at', title=_('created_at'), editable=False),
         GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at'), editable=False),
     )
@@ -1526,7 +1566,7 @@ class ItemMainData(View):
         if item_location:
             item_location = item_location.first()
         current_location = item_location.location.id
-        data["location"] = {"current":current_location,"values":location}
+        data["location"] = {"current": current_location, "values": location}
         data["project_nr"] = item_location.project_nr
         data["lock_types"]["current"] = item_location.lock_type
 
@@ -2352,10 +2392,10 @@ class ForecastVersionView(GridReport):
                 return HttpResponse(
                     json.dumps(ForecastUploader.upload_excel(request, Forecast).__dict__, ensure_ascii=False),
                     content_type='application/json')
-        # 上传文件
+
+        # 这里的post请求为删除操作
         else:
-            message = ResponseMessage(message='no excel file or file size>1')
-            return HttpResponse(json.dumps(message.__dict__, ensure_ascii=False), content_type='application/json')
+            return self.parseJSONupload(request)
 
     @classmethod
     def _generate_spreadsheet_data(reportclass, request, output, *args, **kwargs):
@@ -2363,7 +2403,7 @@ class ForecastVersionView(GridReport):
         wb = Workbook()
         # 第一个sheet是ws,不然会自动生成一个sheet表
         ws = wb.worksheets[0]
-        title = force_text(Forecast._meta.verbose_name or Forecast.title)
+        title = force_text(Forecast._meta.verbose_name)
         ws.title = title
         headerstyle = NamedStyle(name="headerstyle")
         headerstyle.fill = PatternFill(fill_type="solid", fgColor='70c4f4')

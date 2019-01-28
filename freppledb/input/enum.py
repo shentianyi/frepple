@@ -136,7 +136,6 @@ class ForecastCommentStatus(BaseEnum):
     confirm = _('forecast confirm')
 
 
-
 class ForecastDateType(BaseEnum):
     """预测时间类型"""
     W = _('W')

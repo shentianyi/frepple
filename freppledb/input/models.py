@@ -463,7 +463,7 @@ class ItemBom(AuditModel):
         Item, verbose_name=_('owner'),
         null=True, blank=True, on_delete=models.CASCADE, related_name="itembom_parent"
     )
-    qty = models.DecimalField(_('qty'),max_digits=20,decimal_places=8)
+    qty = models.DecimalField(_('qty'), max_digits=20, decimal_places=8)
     effective_start = models.DateField(_('effective start'), null=True, blank=True)
     effective_end = models.DateField(_('effective end'), null=True, blank=True)
 
@@ -485,10 +485,34 @@ class ItemSafetyStock(AuditModel):
         Item, verbose_name=_('item'), on_delete=models.CASCADE, related_name="itemsafetystock_item")
     location = models.ForeignKey(
         Location, verbose_name=_('location'), on_delete=models.CASCADE, related_name="itemsafetystock_location")
-    qty = models.DecimalField(_('safety stock qty'),max_digits=20,decimal_places=8)
+    date_type = models.CharField(
+        _('date_type'), max_length=20, choices=enum.ForecastDateType.to_tuple(), default='W', null=True, blank=True)
+    parsed_date = models.DateTimeField(_('parsed_date'), editable=False, db_index=True, default=timezone.now)
+    qty = models.DecimalField(_('safety stock qty'), max_digits=20, decimal_places=8)
 
     def __str__(self):
         return '%s - %s' % (self.item, self.location)
+
+    @classmethod
+    def _parse_date(cls, date_type, year, date_number):
+        if date_type == 'W':
+            return la_time.weeknum2dt(year, date_number)
+        elif date_type == 'M':
+            return la_time.monthnum2dt(year, date_number)
+        else:
+            raise Exception('Error datetype in forecast')
+
+    class Manager(MultiDBManager):
+        # 批量创建复写
+        def bulk_create(self, objs, batch_size=None):
+            for o in objs:
+                o.set_parsed_date()
+            super(ItemSafetyStock.Manager, self).bulk_create(objs, batch_size)
+
+    def set_parsed_date(self):
+        self.parsed_date = ItemSafetyStock._parse_date(self.date_type, timezone.now().year, timezone.now().month)
+
+    objects = Manager()
 
     class Meta(AuditModel.Meta):
         db_table = 'item_safety_stock'
@@ -498,16 +522,39 @@ class ItemSafetyStock(AuditModel):
 
 
 class ItemRopQty(AuditModel):
-    """物料安全库存记录"""
+    """物料ROP记录"""
     id = models.AutoField(_('id'), help_text=_('Unique identifier'), primary_key=True)
     item = models.ForeignKey(
         Item, verbose_name=_('item'), on_delete=models.CASCADE, related_name="itemropqty_item")
     location = models.ForeignKey(
         Location, verbose_name=_('location'), on_delete=models.CASCADE, related_name="itemropqty_location")
-    qty = models.DecimalField(_('rop qty'), max_digits=20,decimal_places=8)
+    date_type = models.CharField(
+        _('date_type'), max_length=20, choices=enum.ForecastDateType.to_tuple(), default='W', null=True, blank=True)
+    parsed_date = models.DateTimeField(_('parsed_date'), editable=False, db_index=True, default=timezone.now)
+    qty = models.DecimalField(_('rop qty'), max_digits=20, decimal_places=8)
 
     def __str__(self):
         return '%s - %s' % (self.item, self.location)
+
+    class Manager(MultiDBManager):
+        # 批量创建复写
+        def bulk_create(self, objs, batch_size=None):
+            for o in objs:
+                o.set_parsed_date()
+            super(ItemRopQty.Manager, self).bulk_create(objs, batch_size)
+
+    def set_parsed_date(self):
+        if self.date_type == "W":
+            # 如果是周,将当前时间转换为周对应的时间
+            date_number = 1
+            return la_time.weeknum2dt(timezone.now().year, date_number)
+        elif self.date_type == "M":
+            date_number = timezone.now().month
+            return la_time.weeknum2dt(timezone.now().year, date_number)
+        else:
+            raise Exception('Error datetype in forecast')
+
+    objects = Manager()
 
     class Meta(AuditModel.Meta):
         db_table = 'item_rop_qty'
@@ -849,6 +896,31 @@ class Buffer(AuditModel):
         verbose_name_plural = _('buffers')
         ordering = ['name']
         unique_together = (('item', 'location'),)
+
+
+# class Inventory(AuditModel):
+#     id = models.AutoField(_('id'), help_text=_('Unique identifier'), primary_key=True)
+#     item = models.ForeignKey(
+#         Item, verbose_name=_('item'),
+#         related_name='inventory_item',
+#         null=False, blank=False, on_delete=models.CASCADE)
+#
+#     location = models.ForeignKey(
+#         Location, verbose_name=_('location'),
+#         related_name='inventory_location',
+#         null=False, blank=False, on_delete=models.CASCADE)
+#     type = models.CharField(_('type'), max_length=20, choices=enum.CommonType.to_tuple(), null=True, blank=True)
+#     onhand = models.DecimalField(_('onhand'), max_digits=20,decimal_places=8, null=False, blank=False)
+#     category = models.CharField(_('category'), max_length=300, null=True, blank=True, db_index=True)
+#     subcategory = models.CharField(_('subcategory'), max_length=300, null=True, blank=True, db_index=True)
+#     description = models.CharField(_('description'), max_length=500, null=True, blank=True)
+#
+#     class Meta(AuditModel.Meta):
+#         db_table = 'inventory'
+#         verbose_name = _('inventory')
+#         verbose_name_plural = _('inventories')
+#         ordering = ['id']
+#         unique_together = (('item', 'location','type'),)
 
 
 class InventoryParameter(AuditModel):
@@ -1650,8 +1722,8 @@ class ForecastVersion(AuditModel, ForecastCommentOperation):
 
     class Meta(AuditModel.Meta):
         db_table = 'forecast_version'
-        verbose_name = _('forecast_version')
-        verbose_name_plural = _('forecast_versions')
+        verbose_name = _('forecast version')
+        verbose_name_plural = _('forecast versions')
 
     # comment
     comments = GenericRelation(Comment, verbose_name='forecastversion comment', related_name='forecast_version_comment',
@@ -1725,17 +1797,11 @@ class Forecast(AuditModel, ForecastCommentOperation):
             self.customer.nr if self.customer else None)
 
     class Manager(MultiDBManager):
-        # def get_by_natural_key(self, item, location, customer,year,date_type,date_number,version_id):
-        #     return self.get(item=item, location=location, customer=customer,year=year,date_type=date_type,date_number=date_number,version_id=version_id)
-
         # 批量创建复写
         def bulk_create(self, objs, batch_size=None):
             for o in objs:
                 o.set_parsed_date()
             super(Forecast.Manager, self).bulk_create(objs, batch_size)
-
-    # def natural_key(self):
-    #     return (self.item, self.location, self.customer, self.year, self.date_type, self.date_number, self.version_id)
 
     def set_parsed_date(self):
         self.parsed_date = Forecast.parse_date(self.date_type, self.year, self.date_number)
@@ -1759,9 +1825,7 @@ class Forecast(AuditModel, ForecastCommentOperation):
         计算过的qty
         :return:
         """
-        return self.normal_qty*self.ratio/100 + self.new_product_plan_qty + self.promotion_qty
-
-
+        return self.normal_qty * self.ratio / 100 + self.new_product_plan_qty + self.promotion_qty
 
 
 class Demand(AuditModel):
@@ -1791,7 +1855,7 @@ class Demand(AuditModel):
     status = models.CharField(_('status'), max_length=20, null=True, blank=True, choices=enum.DemandStatus.to_tuple())
     max_lateness = models.DecimalField(_('max lateness'), max_digits=20, decimal_places=8, null=True, blank=True)
     min_shipment = models.DecimalField(_('min shipment'), max_digits=20, decimal_places=8, null=True, blank=True)
-    closed_at = models.DateTimeField(_('closed at'), db_index=True,null=True,blank=True)
+    closed_at = models.DateTimeField(_('closed at'), db_index=True, null=True, blank=True)
 
     # Convenience methods
     def __str__(self):
@@ -1844,7 +1908,7 @@ class DemandRequest(AuditModel):
     priority = models.IntegerField(_('priority'), null=True, blank=True, default=0)
     max_lateness = models.DecimalField(_('max lateness'), max_digits=20, decimal_places=8, null=True, blank=True)
     min_shipment = models.DecimalField(_('min shipment'), max_digits=20, decimal_places=8, null=True, blank=True)
-    closed_at = models.DateTimeField(_('closed at'), db_index=True,null=True,blank=True)
+    closed_at = models.DateTimeField(_('closed at'), db_index=True, null=True, blank=True)
     version = models.ForeignKey(DemandRequestVersion, verbose_name=_('demand request version'),
                                 db_index=True, related_name='demandrequest_demandversion', on_delete=models.CASCADE)
 
@@ -1878,7 +1942,6 @@ class SalesOrder(AuditModel):
         verbose_name = _('sales order')
         verbose_name_plural = _('sales orders')
         ordering = ['id']
-
 
 
 class SalesOrderItem(AuditModel):

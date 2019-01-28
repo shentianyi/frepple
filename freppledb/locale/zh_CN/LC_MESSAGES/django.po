@@ -29,6 +29,12 @@ msgstr ""
 msgid "Permissions in this scenario"
 msgstr "针对此场景的权限"
 
+msgid "item safety stock"
+msgstr "物料安全库存"
+
+msgid "item rop qty"
+msgstr "物料ROP记录"
+
 msgid "rop qty"
 msgstr "ROP数量"
 

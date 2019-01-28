@@ -18,7 +18,8 @@ from freppledb.menu import menu
 
 import freppledb.input.views
 from freppledb.input.models import Buffer, Item, Customer, Location, Demand, ForecastYear, ForecastVersion, Forecast, \
-    InventoryParameter, SalesOrder, SalesOrderItem, DeliveryOrderItem, PurchaseOrderItem, WorkOrder, WorkOrderItem
+    InventoryParameter, SalesOrder, SalesOrderItem, DeliveryOrderItem, PurchaseOrderItem, WorkOrder, WorkOrderItem, \
+    ItemRopQty, ItemSafetyStock
 from freppledb.input.models import DistributionOrder, ManufacturingOrder, CalendarBucket
 from freppledb.input.models import PurchaseOrder, Supplier, ItemSupplier, OperationMaterial
 from freppledb.input.models import ItemDistribution, Skill, Resource, OperationResource
@@ -40,6 +41,16 @@ menu.addItem(
 menu.addItem(
     "inventory", "inventory parameters", url="/data/input/inventoryparameter/",
     report=freppledb.input.views.InventoryParameterList, index=1250, model=InventoryParameter,
+    dependencies=[Item, Location]
+)
+menu.addItem(
+    "inventory", "item safety stocks", url="/data/input/itemsafetystock/",
+    report=freppledb.input.views.ItemSafetyStockList, index=1251, model=ItemSafetyStock,
+    dependencies=[Item, Location]
+)
+menu.addItem(
+    "inventory", "item rop qty", url="/data/input/itemropqty/",
+    report=freppledb.input.views.ItemRopQtyList, index=1252, model=ItemRopQty,
     dependencies=[Item, Location]
 )
 
@@ -81,7 +92,7 @@ menu.addItem(
     dependencies=[SalesOrder, Item]
 )
 menu.addItem(
-    "sales", "delivery order", url="/data/input/deliveryorder/",
+    "sales", "delivery orders", url="/data/input/deliveryorder/",
     report=freppledb.input.views.DeliveryOrderList, index=112,
     model=DeliveryOrder, dependencies=[Location,Customer,Supplier,SalesOrder,Forecast,PurchaseOrder]
 )

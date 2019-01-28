@@ -682,6 +682,7 @@ class ForecastItemGraph(View):
                 "y": 0
             }
 
+
             total = 0
             # 赋值
             for row in rows:
@@ -695,6 +696,20 @@ class ForecastItemGraph(View):
 
             # 下一个值
             start_time = Bucket.get_nex_time_by_date_type(start_time, date_type)
+
+
+
+        # current date
+        message["content"]["serials"][0]["points"].append({
+                "x_value": datetime.now(),
+                "x_text": datetime.now(),
+                "y": None
+            })
+        message["content"]["serials"][1]["points"].append({
+                "x_value": datetime.now(),
+                "x_text": datetime.now(),
+                "y": None
+            })
 
         while current_date <= end_time:
             dispatches_points = {

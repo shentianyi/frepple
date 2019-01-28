@@ -93,6 +93,8 @@ urlpatterns = [
   url(r'^data/input/forecast/version/(?P<version>(.+))/$',freppledb.input.serializers.ForecastdetailVersionAPI.as_view()),
   url(r'^data/input/buffer/$', freppledb.input.views.BufferList.as_view(), name="input_buffer_changelist"),
   url(r'^data/input/inventoryparameter/$', freppledb.input.views.InventoryParameterList.as_view(), name="input_inventoryparameter_changelist"),
+  url(r'^data/input/itemsafetystock/$', freppledb.input.views.ItemSafetyStockList.as_view(), name="input_itemsafetystock_changelist"),
+  url(r'^data/input/itemropqty/$', freppledb.input.views.ItemRopQtyList.as_view(), name="input_itemropqty_changelist"),
 
   # Special reports
   url(r'^supplypath/item/(.+)/$', freppledb.input.views.UpstreamItemPath.as_view(), name="supplypath_item"),

@@ -104,15 +104,19 @@ class ForecastUploader:
                                     return message
 
                             elif field_name == 'customer':
-                                try:
-                                    if value not in customers:
-                                        customers[value] = \
-                                        Customer.objects.using(request.database).values('id').get(nr=value)['id']
-                                    forecast.customer_id = customers[value]
-                                except Customer.DoesNotExist as e:
-                                    message.result = False
-                                    message.message = "客户数据不存在"
-                                    return message
+                                # customer值为非必填字段
+                                if value:
+                                    try:
+                                        if value not in customers:
+                                            customers[value] = \
+                                            Customer.objects.using(request.database).values('id').get(nr=value)['id']
+                                        forecast.customer_id = customers[value]
+                                    except Customer.DoesNotExist as e:
+                                        message.result = False
+                                        message.message = "客户数据不存在"
+                                        return message
+                                else:
+                                    pass
                             elif field_name == 'year':
                                 forecast.year = value
                             elif field_name == 'date_number':
