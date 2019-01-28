@@ -35,6 +35,7 @@ from openpyxl.cell import WriteOnlyCell
 from freppledb.common.models import Bucket
 from freppledb.common.utils import la_time, la_enum
 from freppledb.common.utils.la_field import decimal2calculate
+from freppledb.common.utils.la_point import create_point
 from freppledb.input.models import Forecast, ForecastYear, Item, Location, Customer, ForecastCommentOperation, \
     ItemSupplier, Calendar, ItemLocation, ItemRopQty, ItemSafetyStock
 
@@ -730,23 +731,8 @@ class ForecastItemGraph(View):
 
         # 计算rop曲线,重新给start_time赋值
         start_time = Bucket.get_datetime_by_type(search_start_time, date_type)
-        while start_time <= end_time:
-            rop_points = {
-                "x_value": start_time,
-                "x_text": Bucket.get_x_text_name(start_time, date_type),
-                "y": 0
-            }
-            qty = 0
-            for i in rops:
-                if start_time == i.parsed_date:
-                    qty = i.qty
-            rop_points["y"] = qty
-            message["content"]["serials"][2]["points"].append(rop_points)
-            start_time = Bucket.get_nex_time_by_date_type(start_time, date_type)
-
-        # current date
-        for i in range(0, len(message["content"]["serials"])):
-            message["content"]["serials"][i]["points"].append(current_dict)
+        rop_points = create_point(start_time, end_time, date_type, rops)
+        message["content"]["serials"][2]["points"] = rop_points
 
         return JsonResponse(message, encoder=DjangoJSONEncoder, safe=False)
 
@@ -826,17 +812,17 @@ class PlanItemGraph(View):
                 "lead_time_point": lead_time_point,
                 "serials": [
                     {
-                        "serial": "预测",
+                        "serial": "Forecast",
                         "serial_type": "FORECAST",
                         "points": []
                     },
                     {
-                        "serial": "rop曲线",
+                        "serial": "Rop curve",
                         "serial_type": "ROP CURVE",
                         "points": []
                     },
                     {
-                        "serial": "安全库存",
+                        "serial": "Safe Stock",
                         "serial_type": "SAFE STOCK",
                         "points": []
                     }
@@ -898,34 +884,10 @@ class PlanItemGraph(View):
 
         # rop曲线,安全库存
         start_time = Bucket.get_datetime_by_type(search_start_time, date_type)
-        while start_time <= end_time:
-            rop_points = {
-                "x_value": start_time,
-                "x_text": Bucket.get_x_text_name(start_time, date_type),
-                "y": 0
-            }
-            safe_stock_points = {
-                "x_value": start_time,
-                "x_text": Bucket.get_x_text_name(start_time, date_type),
-                "y": 0
-            }
-            qty = 0
-            safe_stock_qty = 0
-            for i in rops:
-                if start_time == i.parsed_date:
-                    qty = i.qty
-            rop_points["y"] = qty
-            for i in safe_stock:
-                if start_time == i.parsed_date:
-                    safe_stock_qty = i.qty
-            safe_stock_points["y"] = safe_stock_qty
-            message["content"]["serials"][1]["points"].append(rop_points)
-            message["content"]["serials"][2]["points"].append(safe_stock_points)
-            start_time = Bucket.get_nex_time_by_date_type(start_time, date_type)
-
-        # current date
-        for i in range(0, len(message["content"]["serials"])):
-            message["content"]["serials"][i]["points"].append(current_dict)
+        rop_points = create_point(start_time, end_time, date_type, rops)
+        safe_stock_points = create_point(start_time, end_time, date_type, safe_stock)
+        message["content"]["serials"][1]["points"] = rop_points
+        message["content"]["serials"][2]["points"] = safe_stock_points
 
         return JsonResponse(message, encoder=DjangoJSONEncoder, safe=False)
 
