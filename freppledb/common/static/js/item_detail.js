@@ -884,13 +884,13 @@ window.onload = function () {
             //获取预测界面chart数据
             getForecastChartData(date_type, report_type) {
 
-                let datatype = this.$refs.forecast ? this.$refs.forecast.forecastChartDateType : 'W';
+                let datetype = this.$refs.forecast ? this.$refs.forecast.forecastChartDateType : 'W';
 
                 $("#main-item_detail_forecast_chart").remove();
                 $("#main-chart").append('<div id="item_detail_forecast_chart"></div>');
 
                 $.ajax({
-                    url: "/data/output/forecast/item_report/?id=" + itemId + "&location_id=" + this.publicData.location.current + "&date_type=" + datatype + "&report_type=" + (report_type ? report_type : ''),
+                    url: "/data/output/forecast/item_report/?id=" + itemId + "&location_id=" + this.publicData.location.current + "&date_type=" + datetype + "&report_type=" + (report_type ? report_type : ''),
                     type: 'application/json',
                     method: 'get',
                     success: function (data) {
@@ -902,7 +902,7 @@ window.onload = function () {
                             var xAxis = [];
                             var yFAxis = [];
                             var yDAxis = [];
-                            var currentValue = data.content.current_time_point.x_text;
+                            var currentValue = data.content.current_time_point.x_value;
                             // console.log('currentValue-----------------', currentValue);
                             // var allSeries = [];
 
@@ -922,10 +922,14 @@ window.onload = function () {
                             }
 
                             for (var i = 0; i < series[0].points.length; i++) {
-                                xAxis.push(series[0].points[i].x_text)
+                                if (datetype == 'W') {
+                                    xAxis.push(series[0].points[i].x_text);
+                                } else {
+                                    xAxis.push(series[0].points[i].x_value)
+                                }
                             }
                             // console.log('---------legendData--------', legendData);
-                            // console.log('---------xAxis--------', xAxis);
+                            console.log('---------xAxis--------', xAxis);
                             // console.log('---------yFAxis--------', yFAxis);
                             // console.log('---------yDAxis--------', yDAxis);
 
@@ -955,7 +959,21 @@ window.onload = function () {
                                     data: legendData
                                 },
                                 xAxis: {
-                                    data: xAxis
+                                    data: xAxis,
+                                    axisLabel: {
+                                        formatter: function (value) {
+                                            if (datetype == 'M') {
+                                                let date = new Date(value);
+                                                if (date.getMonth() == 0) {
+                                                    return date.getFullYear() + '年' + (date.getMonth() + 1) + '月';
+                                                } else {
+                                                    return (date.getMonth() + 1) + '月';
+                                                }
+                                            } else {
+                                                return value;
+                                            }
+                                        }
+                                    }
                                 },
                                 yAxis: {
                                     show: false,
