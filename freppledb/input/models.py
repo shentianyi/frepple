@@ -30,6 +30,7 @@ from freppledb.common.fields import JSONBField, AliasDateTimeField
 from freppledb.common.models import HierarchyModel, AuditModel, MultiDBManager, User, Comment
 from freppledb.common.utils import la_time
 from freppledb.common.utils.la_calendar import normal_calendar
+from freppledb.common.utils.la_time import dt2weekdt
 from freppledb.input import enum
 
 searchmode = (
@@ -546,6 +547,7 @@ class ItemRopQty(AuditModel):
     def set_parsed_date(self):
         if self.date_type == "W":
             # 如果是周,将当前时间转换为周对应的时间
+            date_time = dt2weekdt(timezone.now())
             date_number = 1
             return la_time.weeknum2dt(timezone.now().year, date_number)
         elif self.date_type == "M":
