@@ -503,14 +503,19 @@ class ItemSafetyStock(AuditModel):
 
     def set_parsed_date(self):
         if self.date_type == "W":
-            return dt2weekdt(timezone.now())
+            # 如果是周,将当前时间转换为周对应的时间
+            self.parsed_date = dt2weekdt(timezone.now())
         elif self.date_type == "M":
             date_number = timezone.now().month
-            return la_time.monthnum2dt(timezone.now().year, date_number)
+            self.parsed_date = la_time.monthnum2dt(timezone.now().year, date_number)
         else:
-            raise Exception('Error datetype in forecast')
+            raise Exception('Error datetype in Item Safety Stock')
 
     objects = Manager()
+
+    def save(self, *args, **kwargs):
+        self.set_parsed_date()
+        super(ItemSafetyStock, self).save(*args, **kwargs)
 
     class Meta(AuditModel.Meta):
         db_table = 'item_safety_stock'
@@ -544,14 +549,20 @@ class ItemRopQty(AuditModel):
     def set_parsed_date(self):
         if self.date_type == "W":
             # 如果是周,将当前时间转换为周对应的时间
-            return dt2weekdt(timezone.now())
+            self.parsed_date = dt2weekdt(timezone.now())
         elif self.date_type == "M":
             date_number = timezone.now().month
-            return la_time.monthnum2dt(timezone.now().year, date_number)
+            self.parsed_date = la_time.monthnum2dt(timezone.now().year, date_number)
         else:
-            raise Exception('Error datetype in forecast')
+            raise Exception('Error datetype in Item Rop Qty')
 
     objects = Manager()
+
+    def save(self, *args, **kwargs):
+        # 解析方法
+        # Call the real save() method
+        self.set_parsed_date()
+        super(ItemRopQty, self).save(*args, **kwargs)
 
     class Meta(AuditModel.Meta):
         db_table = 'item_rop_qty'

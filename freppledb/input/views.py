@@ -790,7 +790,7 @@ class ItemSafetyStockList(GridReport):
         GridFieldText('item', title=_('item_id'), field_name='item_id', editable=False, hidden=True),
         GridFieldText('location', title=_('location_id'), field_name='location_id', editable=False, hidden=True),
         GridFieldText('date_type', title=_('date_type'), editable=False),
-        GridFieldNumber('qty', title=_('qty'), editable=False),
+        GridFieldNumber('qty', title=_('safety stock qty'), editable=False),
         GridFieldCreateOrUpdateDate('created_at', title=_('created_at'), editable=False),
         GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at'), editable=False),
     )
@@ -810,7 +810,7 @@ class ItemRopQtyList(GridReport):
         GridFieldText('item', title=_('item_id'), field_name='item_id', editable=False, hidden=True),
         GridFieldText('location', title=_('location_id'), field_name='location_id', editable=False, hidden=True),
         GridFieldText('date_type', title=_('date_type'), editable=False),
-        GridFieldNumber('qty', title=_('qty'), editable=False),
+        GridFieldNumber('qty', title=_('rop qty'), editable=False),
         GridFieldCreateOrUpdateDate('created_at', title=_('created_at'), editable=False),
         GridFieldCreateOrUpdateDate('updated_at', title=_('updated_at'), editable=False),
     )
