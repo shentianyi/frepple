@@ -664,8 +664,8 @@ class ForecastItemGraph(View):
         # 以月初或者周一计算的当前的时间
         current_date = Bucket.get_datetime_by_type(current_time, date_type)
         current_dict = {
-            "x_value": current,
-            "x_text": current,
+            "x_value": datetime(current.year, current.month, current.day),
+            "x_text": datetime(current.year, current.month, current.day),
             "y": None
         }
         message['content']['current_time_point'] = current_dict
@@ -702,7 +702,7 @@ class ForecastItemGraph(View):
                 "y": None
             })
         message["content"]["serials"][1]["points"].append({
-                "x_value":datetime(current.year, current.month, current.day),
+                "x_value": datetime(current.year, current.month, current.day),
                 "x_text": datetime(current.year, current.month, current.day),
                 "y": None
             })
