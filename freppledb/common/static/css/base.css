@@ -344,3 +344,10 @@ fieldset .field-box {
 .help-block {
     white-space: nowrap;
 }
+
+
+#nav-menu-header .container-fluid, #nav-menu-header + .container-fluid {
+    max-width: 1280px;
+    margin: 0 auto;
+    box-sizing: content-box;
+}

@@ -44,11 +44,11 @@ $(function() {
 	  </div>
 
 		<div id="nav-menu" class="collapse navbar-collapse">
-			<ul class="nav navbar-nav navbar-nav-menu">
+			<ul class="nav navbar-nav navbar-nav-menu" style="margin-left: 80px">
 			  {% for group in menu %}
                 {% if group.2 %}
                   <li class="dropdown">
-                    <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" style="line-height: 60px;padding-top: 0;padding-bottom: 0;font-size: 18px">{{ group.0 }}</a>
+                    <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" style="line-height: 60px;padding-top: 0;padding-bottom: 0;font-size: 18px;color: #222222;">{{ group.0 }}</a>
                     <ul class="dropdown-menu">
                       {% for item in group.1 %}
                         {% if item.4 %}
@@ -89,7 +89,7 @@ $(function() {
             <ul class="nav navbar-nav navbar-right">
                 <li class="dropdown">
                     <a href="#" onclick="window.open('https://frepple.com/docs/{% version_short %}/{{reportclass.help_url}}');" class="dropdown-toggle" style="padding: 17px 20px;" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                        <span class="fa fa-question-circle-o" style="font-size: 26px;"></span>
+                        <span class="fa fa-question-circle" style="font-size: 26px;"></span>
                     </a>
                 </li>
             </ul>

@@ -55,18 +55,26 @@
     #tabs ul {
         float: none;
         background-color: #FFFFFF;
+        border-bottom-color: #B3BCCF;
+        /*padding: 0 10px;*/
     }
+    #tabs ul li {
+        margin: 0 20px;
+    }
+
 
     #tabs ul li a {
         border-top: 0;
-        font-size: 16px;
+        font-size: 18px;
         margin-top: 10px;
         border-bottom: 2px solid transparent;
+        color: #333333;
+        padding: 5px 12px;
     }
 
     #tabs ul li.active a, #tabs ul li a:hover {
-        border-bottom-color: #1f5aff;
-        color: #1f5aff;
+        border-bottom-color: #597EF7;
+        color: #597EF7;
     }
 
     #main {
@@ -335,7 +343,11 @@
                     {% include "input/item/item_simulation.html" %}
                 </div>
             </simulation-tab>
-            <forecast-tab inline-template v-else-if="tab === 'forecast'" ref="forecast">
+            <forecast-tab inline-template v-else-if="tab === 'forecast'"
+                          ref="forecast"
+                          @handle-table-date-change="getForecastGridData"
+                          @handle-chart-date-change="getForecastChartData"
+            >
                 <div role="tabpanel" class="tab-pane active" id="forecast">
                     {% include "input/item/item_forecast.html" %}
                 </div>
