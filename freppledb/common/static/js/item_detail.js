@@ -526,6 +526,12 @@ window.onload = function () {
                 forecastTableDateType: 'W',
                 forecastChartDateType: 'W'
             }
+        },
+        methods: {
+            changeDateType(type) {
+                let name = 'handle-' + type + '-date-change';
+                this.$emit(name);
+            }
         }
     };
 
@@ -741,6 +747,9 @@ window.onload = function () {
             getForecastGridData(date_type, report_type) {
 
                 // var DateTypeValue = $("#forecast_grid_chooseMonth").val();
+                $("#forecastGrid").GridDestroy();
+                $("#content-main-forecast").append('<table id="forecastGrid" class="table table-striped pivotgrid"></table>');
+                $("#content-main-forecast").append('<div id="forecastgridpager" class="col-md-12"></div>');
                 let datetype = this.$refs.forecast ? this.$refs.forecast.forecastTableDateType : 'W';
                 $.ajax({
                     url: '/data/output/forecast/item/?id=' + itemId + '&location_id=' + this.publicData.location.current + '&date_type=' + datetype + '&report_type=' + (report_type ? report_type : ''),
@@ -876,6 +885,9 @@ window.onload = function () {
             getForecastChartData(date_type, report_type) {
 
                 let datatype = this.$refs.forecast ? this.$refs.forecast.forecastChartDateType : 'W';
+
+                $("#main-item_detail_forecast_chart").remove();
+                $("#main-chart").append('<div id="item_detail_forecast_chart"></div>');
 
                 $.ajax({
                     url: "/data/output/forecast/item_report/?id=" + itemId + "&location_id=" + this.publicData.location.current + "&date_type=" + datatype + "&report_type=" + (report_type ? report_type : ''),
