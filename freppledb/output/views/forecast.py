@@ -36,7 +36,7 @@ from freppledb.common.models import Bucket
 from freppledb.common.utils import la_time, la_enum
 from freppledb.common.utils.la_field import decimal2calculate
 from freppledb.input.models import Forecast, ForecastYear, Item, Location, Customer, ForecastCommentOperation, \
-    ItemSupplier, Calendar, ItemLocation
+    ItemSupplier, Calendar, ItemLocation, ItemRopQty, ItemSafetyStock
 
 
 class ForecastCompare(View):
@@ -648,6 +648,11 @@ class ForecastItemGraph(View):
                         "serial": "Demand forecast",
                         "serial_type": "DEMAND FORECAST",
                         "points": []
+                    },
+                    {
+                        "serial": "Rop curve",
+                        "serial_type": "ROP CURVE",
+                        "points": []
                     }
 
                 ]
@@ -655,6 +660,10 @@ class ForecastItemGraph(View):
         }
         # 获取查询所有数据
         rows = cursor.fetchall()
+
+        # rop数据
+        rops = ItemRopQty.objects.filter(item_id=item_id, location_id=location_id, date_type=date_type)
+
         # 根据查询的开始时间,查询的结束时间, 计算出时间(列名称)
         start_time = Bucket.get_datetime_by_type(search_start_time, date_type)
         end_time = Bucket.get_datetime_by_type(search_end_time, date_type)
@@ -664,8 +673,8 @@ class ForecastItemGraph(View):
         # 以月初或者周一计算的当前的时间
         current_date = Bucket.get_datetime_by_type(current_time, date_type)
         current_dict = {
-            "x_value": datetime(current.year, current.month, current.day),
-            "x_text": datetime(current.year, current.month, current.day),
+            "x_value": current_time,
+            "x_text": current_time,
             "y": None
         }
         message['content']['current_time_point'] = current_dict
@@ -695,18 +704,6 @@ class ForecastItemGraph(View):
             # 下一个值
             start_time = Bucket.get_nex_time_by_date_type(start_time, date_type)
 
-        # current date
-        message["content"]["serials"][0]["points"].append({
-                "x_value": datetime(current.year, current.month, current.day),
-                "x_text": datetime(current.year, current.month, current.day),
-                "y": None
-            })
-        message["content"]["serials"][1]["points"].append({
-                "x_value": datetime(current.year, current.month, current.day),
-                "x_text": datetime(current.year, current.month, current.day),
-                "y": None
-            })
-
         while current_date <= end_time:
             dispatches_points = {
                 "x_value": current_date,
@@ -731,6 +728,26 @@ class ForecastItemGraph(View):
             # 下一个值
             current_date = Bucket.get_nex_time_by_date_type(current_date, date_type)
 
+        # 计算rop曲线,重新给start_time赋值
+        start_time = Bucket.get_datetime_by_type(search_start_time, date_type)
+        while start_time <= end_time:
+            rop_points = {
+                "x_value": start_time,
+                "x_text": Bucket.get_x_text_name(start_time, date_type),
+                "y": 0
+            }
+            qty = 0
+            for i in rops:
+                if start_time == i.parsed_date:
+                    qty = i.qty
+            rop_points["y"] = qty
+            message["content"]["serials"][2]["points"].append(rop_points)
+            start_time = Bucket.get_nex_time_by_date_type(start_time, date_type)
+
+        # current date
+        for i in range(0, len(message["content"]["serials"])):
+            message["content"]["serials"][i]["points"].append(current_dict)
+
         return JsonResponse(message, encoder=DjangoJSONEncoder, safe=False)
 
 
@@ -746,7 +763,7 @@ class PlanItemGraph(View):
         if item_id is None or location_id in [None, "null"]:
             return JsonResponse({"result": False, "code": 404, "message": "无数据"}, safe=False)
 
-        item_supplier = ItemSupplier.objects.filter(item_id=item_id,location_id=location_id,
+        item_supplier = ItemSupplier.objects.filter(item_id=item_id, location_id=location_id,
                                                     effective_start__lte=datetime.now(),
                                                     effective_end__gte=datetime.now()).order_by('priority', '-ratio',
                                                                                                 'id').first()
@@ -788,16 +805,15 @@ class PlanItemGraph(View):
             lead_time = current_time + relativedelta(days=lead_time_num)
             lead_time_text = Bucket.get_x_time_name(current_time + relativedelta(days=lead_time_num), date_type)
 
-        current = {
+        current_dict = {
             "x_value": current_time,
-            "x_text": current_text,
+            "x_text": current_time,
             "y": None
         }
         lead_time_point = {
             "x_value": lead_time,
             "x_text": lead_time_text,
             "y": None
-
         }
 
         # 返回值
@@ -806,15 +822,24 @@ class PlanItemGraph(View):
             "code": 200,
             "message": "相应数据查询成功",
             "content": {
-                "current_time_point": current,
+                "current_time_point": current_dict,
                 "lead_time_point": lead_time_point,
                 "serials": [
                     {
                         "serial": "预测",
                         "serial_type": "FORECAST",
                         "points": []
+                    },
+                    {
+                        "serial": "rop曲线",
+                        "serial_type": "ROP CURVE",
+                        "points": []
+                    },
+                    {
+                        "serial": "安全库存",
+                        "serial_type": "SAFE STOCK",
+                        "points": []
                     }
-
                 ]
             }
         }
@@ -839,6 +864,9 @@ class PlanItemGraph(View):
                         item_id, location_id])
 
         rows = cursor.fetchall()
+        rops = ItemRopQty.objects.filter(item_id=item_id, location_id=location_id, date_type=date_type)
+        safe_stock = ItemSafetyStock.objects.filter(item_id=item_id, location_id=location_id, date_type=date_type)
+
         while start_time < current_date:
             forecast_points = {
                 "x_value": start_time,
@@ -868,6 +896,37 @@ class PlanItemGraph(View):
             # 下一个值
             current_date = Bucket.get_nex_time_by_date_type(current_date, date_type)
 
+        # rop曲线,安全库存
+        start_time = Bucket.get_datetime_by_type(search_start_time, date_type)
+        while start_time <= end_time:
+            rop_points = {
+                "x_value": start_time,
+                "x_text": Bucket.get_x_text_name(start_time, date_type),
+                "y": 0
+            }
+            safe_stock_points = {
+                "x_value": start_time,
+                "x_text": Bucket.get_x_text_name(start_time, date_type),
+                "y": 0
+            }
+            qty = 0
+            safe_stock_qty = 0
+            for i in rops:
+                if start_time == i.parsed_date:
+                    qty = i.qty
+            rop_points["y"] = qty
+            for i in safe_stock:
+                if start_time == i.parsed_date:
+                    safe_stock_qty = i.qty
+            safe_stock_points["y"] = safe_stock_qty
+            message["content"]["serials"][1]["points"].append(rop_points)
+            message["content"]["serials"][2]["points"].append(safe_stock_points)
+            start_time = Bucket.get_nex_time_by_date_type(start_time, date_type)
+
+        # current date
+        for i in range(0, len(message["content"]["serials"])):
+            message["content"]["serials"][i]["points"].append(current_dict)
+
         return JsonResponse(message, encoder=DjangoJSONEncoder, safe=False)
 
 
@@ -880,6 +939,7 @@ class ItemBufferOperateRecords(View):
     @method_decorator(staff_member_required())
     def get(self, request, *args, **kwargs):
         item_id = request.GET.get('id', None)
+        location_id = request.GET.get('location_id', None)
         if item_id:
             return JsonResponse({"result": False, "code": 404, "message": "无数据"}, safe=False)
 
@@ -916,5 +976,5 @@ class ItemBufferOperateRecords(View):
                 "buffer": random.randint(1, 100)
             }
             i += 1
-            message["rows"].append(data)
+        message["rows"].append(data)
         return JsonResponse(message, encoder=DjangoJSONEncoder, safe=False)

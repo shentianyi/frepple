@@ -784,7 +784,7 @@ class ItemSafetyStockList(GridReport):
     help_url = 'user-guide/modeling-wizard/master-data/buffers.html'
 
     rows = (
-        GridFieldInteger('id', title=_('id'), key=True, formatter='detail', extra='"role":"input/itemlocation"'),
+        GridFieldInteger('id', title=_('id'), key=True, formatter='detail', extra='"role":"input/itemsafetystock"'),
         GridFieldText('item_display', title=_('item_display'), field_name='item__nr', editable=False),
         GridFieldText('location_display', title=_('location_display'), field_name='location__nr', editable=False),
         GridFieldText('item', title=_('item_id'), field_name='item_id', editable=False, hidden=True),
@@ -804,7 +804,7 @@ class ItemRopQtyList(GridReport):
     help_url = 'user-guide/modeling-wizard/master-data/buffers.html'
 
     rows = (
-        GridFieldInteger('id', title=_('id'), key=True, formatter='detail', extra='"role":"input/itemlocation"'),
+        GridFieldInteger('id', title=_('id'), key=True, formatter='detail', extra='"role":"input/itemropqty"'),
         GridFieldText('item_display', title=_('item_display'), field_name='item__nr', editable=False),
         GridFieldText('location_display', title=_('location_display'), field_name='location__nr', editable=False),
         GridFieldText('item', title=_('item_id'), field_name='item_id', editable=False, hidden=True),

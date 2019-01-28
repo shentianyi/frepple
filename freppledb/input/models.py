@@ -521,6 +521,7 @@ class ItemSafetyStock(AuditModel):
         db_table = 'item_safety_stock'
         verbose_name = _('item safety stock')
         verbose_name_plural = _('item safety stocks')
+        unique_together = (('item', 'location', 'parsed_date'),)
         ordering = ['id']
 
 
@@ -568,6 +569,7 @@ class ItemRopQty(AuditModel):
         db_table = 'item_rop_qty'
         verbose_name = _('item rop qty')
         verbose_name_plural = _('item rop qtys')
+        unique_together = (('item', 'location', 'parsed_date'),)
         ordering = ['id']
 
 
@@ -680,7 +682,6 @@ class ItemSuccessor(AuditModel):
         db_table = 'itemsuccessor'
         verbose_name = _('item successor')
         verbose_name_plural = _('item successors')
-
         ordering = ['id']
 
 
