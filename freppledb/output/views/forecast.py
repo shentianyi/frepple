@@ -663,12 +663,12 @@ class ForecastItemGraph(View):
         current_text = Bucket.get_x_time_name(current_time, date_type)
         # 以月初或者周一计算的当前的时间
         current_date = Bucket.get_datetime_by_type(current_time, date_type)
-        current = {
-            "x_value": current_time,
-            "x_text": current_text,
+        current_dict = {
+            "x_value": current,
+            "x_text": current,
             "y": None
         }
-        message['content']['current_time_point'] = current
+        message['content']['current_time_point'] = current_dict
 
         while start_time < current_date:
             dispatches_points = {
@@ -681,8 +681,6 @@ class ForecastItemGraph(View):
                 "x_text": Bucket.get_x_text_name(start_time, date_type),
                 "y": 0
             }
-
-
             total = 0
             # 赋值
             for row in rows:
@@ -697,17 +695,15 @@ class ForecastItemGraph(View):
             # 下一个值
             start_time = Bucket.get_nex_time_by_date_type(start_time, date_type)
 
-
-
         # current date
         message["content"]["serials"][0]["points"].append({
-                "x_value": datetime.now(),
-                "x_text": datetime.now(),
+                "x_value": datetime(current.year, current.month, current.day),
+                "x_text": datetime(current.year, current.month, current.day),
                 "y": None
             })
         message["content"]["serials"][1]["points"].append({
-                "x_value": datetime.now(),
-                "x_text": datetime.now(),
+                "x_value":datetime(current.year, current.month, current.day),
+                "x_text": datetime(current.year, current.month, current.day),
                 "y": None
             })
 

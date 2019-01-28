@@ -494,15 +494,6 @@ class ItemSafetyStock(AuditModel):
     def __str__(self):
         return '%s - %s' % (self.item, self.location)
 
-    @classmethod
-    def _parse_date(cls, date_type, year, date_number):
-        if date_type == 'W':
-            return la_time.weeknum2dt(year, date_number)
-        elif date_type == 'M':
-            return la_time.monthnum2dt(year, date_number)
-        else:
-            raise Exception('Error datetype in forecast')
-
     class Manager(MultiDBManager):
         # 批量创建复写
         def bulk_create(self, objs, batch_size=None):
@@ -511,7 +502,13 @@ class ItemSafetyStock(AuditModel):
             super(ItemSafetyStock.Manager, self).bulk_create(objs, batch_size)
 
     def set_parsed_date(self):
-        self.parsed_date = ItemSafetyStock._parse_date(self.date_type, timezone.now().year, timezone.now().month)
+        if self.date_type == "W":
+            return dt2weekdt(timezone.now())
+        elif self.date_type == "M":
+            date_number = timezone.now().month
+            return la_time.monthnum2dt(timezone.now().year, date_number)
+        else:
+            raise Exception('Error datetype in forecast')
 
     objects = Manager()
 
@@ -547,12 +544,10 @@ class ItemRopQty(AuditModel):
     def set_parsed_date(self):
         if self.date_type == "W":
             # 如果是周,将当前时间转换为周对应的时间
-            date_time = dt2weekdt(timezone.now())
-            date_number = 1
-            return la_time.weeknum2dt(timezone.now().year, date_number)
+            return dt2weekdt(timezone.now())
         elif self.date_type == "M":
             date_number = timezone.now().month
-            return la_time.weeknum2dt(timezone.now().year, date_number)
+            return la_time.monthnum2dt(timezone.now().year, date_number)
         else:
             raise Exception('Error datetype in forecast')
 
