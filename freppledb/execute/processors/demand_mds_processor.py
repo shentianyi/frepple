@@ -97,7 +97,7 @@ class DemandMdsProcessor(StagingProcessor):
             forcasts = Forecast.objects.filter(forecast_version_id=forecast_version.id, parsed_date__range=(self.demand_from_date,self.demand_end_date))
             if not self.is_simulation:
                 # 非模拟使用正常释放的forecast
-                forcasts = forcasts.filter(status__in=ForecastCommentStatus.CAN_CALCULATE_MDS_STATUS)
+                forcasts = forcasts.filter(status__in=Forecast.CAN_CALCULATE_MDS_STATUS)
 
         else:
             # 查找所有最新的预测

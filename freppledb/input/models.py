@@ -1660,6 +1660,8 @@ class ForecastVersion(AuditModel, ForecastCommentOperation):
 
 
 class Forecast(AuditModel, ForecastCommentOperation):
+    CAN_CALCULATE_MDS_STATUS = ('confirm',)
+
     id = models.AutoField(_('id'), help_text=_('Unique identifier'), primary_key=True)
 
     item = models.ForeignKey(
