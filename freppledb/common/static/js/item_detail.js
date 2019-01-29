@@ -881,6 +881,19 @@ window.onload = function () {
                     }
                 })
             },
+            getCurrentDate(currentDay, type) {
+                if (type == 'W') {
+                    currentDay = new Date(currentDay);
+                    let firstDay = new Date(currentDay.getFullYear(), 0, 1);
+                    let week = ((currentDay.getTime() - firstDay.getTime()) / (24 * 60 * 60 * 1000) + firstDay.getDay() - currentDay.getDay()) / 7 + 1;
+                    // console.log(week);
+                    return week < 10 ? '0' + week : week;
+                } else {
+                    currentDay = new Date(currentDay);
+                    return currentDay.getFullYear() + '-' + currentDay.getMonth() + 1 + '-01T00:00:00';
+
+                }
+            },
             //获取预测界面chart数据
             getForecastChartData(date_type, report_type) {
 
@@ -889,34 +902,42 @@ window.onload = function () {
                 $("#main-item_detail_forecast_chart").remove();
                 $("#main-chart").append('<div id="item_detail_forecast_chart"></div>');
 
+                let _this = this;
+
                 $.ajax({
                     url: "/data/output/forecast/item_report/?id=" + itemId + "&location_id=" + this.publicData.location.current + "&date_type=" + datetype + "&report_type=" + (report_type ? report_type : ''),
                     type: 'application/json',
                     method: 'get',
                     success: function (data) {
                         if (data.result) {
-                            const series = data.content.serials
+                            const series = data.content.serials;
                             // console.log('data-----------------', data);
 
                             var legendData = ['current_time_point'];
                             var xAxis = [];
                             var yFAxis = [];
                             var yDAxis = [];
+                            var yRAxis = [];
                             var currentValue = data.content.current_time_point.x_value;
+
+                            const currentDay = datetype == 'M' ? _this.getCurrentDate(currentValue, datetype) : (new Date(currentValue)).getFullYear() + '-' + _this.getCurrentDate(currentValue, datetype) + '周';
                             // console.log('currentValue-----------------', currentValue);
                             // var allSeries = [];
 
                             for (var i = 0; i < series.length; i++) {
                                 legendData.push(series[i].serial);
                                 if (series[i].serial_type === 'FORECAST BASIS') {
-                                    for (var k = 0; k < series[i].points.length; k++) {
+                                    for (let k = 0; k < series[i].points.length; k++) {
                                         yFAxis.push(series[i].points[k].y);
                                         // yDAxis.push(100);
                                     }
                                 } else if (series[i].serial_type === 'DEMAND FORECAST') {
-                                    for (var k = 0; k < series[i].points.length; k++) {
+                                    for (let k = 0; k < series[i].points.length; k++) {
                                         yDAxis.push(series[i].points[k].y)
-                                        // yFAxis.push(100);
+                                    }
+                                } else if (series[i].serial_type === 'ROP CURVE') {
+                                    for (let k = 0; k < series[i].points.length; k++) {
+                                        yRAxis.push(series[i].points[k].y)
                                     }
                                 }
                             }
@@ -928,27 +949,15 @@ window.onload = function () {
                                     xAxis.push(series[0].points[i].x_value)
                                 }
                             }
+
+                            // xAxis = series[0].points;
+
                             // console.log('---------legendData--------', legendData);
-                            console.log('---------xAxis--------', xAxis);
+                            // console.log('---------xAxis--------', xAxis);
                             // console.log('---------yFAxis--------', yFAxis);
                             // console.log('---------yDAxis--------', yDAxis);
 
                             var forecastChart = echarts.init(document.getElementById('item_detail_forecast_chart'));
-                            // console.log(forecastChart)
-
-                            // for (var i = 0; i < legendData.length; i++) {
-                            //     switch (legendData[i]) {
-                            //         case 'Dispatches(Forecast basis)':
-                            //             var series = {
-                            //                 name: legendData[i],
-                            //                 type: 'bar',
-                            //                 data: yFAxis,
-                            //             };
-                            //             allSeries.push(series);
-                            //         case 'Demand forecast':
-                            //
-                            //     }
-                            // }
 
                             var option = {
                                 title: {
@@ -962,21 +971,25 @@ window.onload = function () {
                                     data: xAxis,
                                     axisLabel: {
                                         formatter: function (value) {
-                                            if (datetype == 'M') {
-                                                let date = new Date(value);
-                                                if (date.getMonth() == 0) {
-                                                    return date.getFullYear() + '年' + (date.getMonth() + 1) + '月';
+                                            if (datetype === 'M') {
+                                                value = new Date(value);
+                                                if (value.getMonth() === 0) {
+                                                    return value.getFullYear() + '年' + (value.getMonth() + 1) + '月';
                                                 } else {
-                                                    return (date.getMonth() + 1) + '月';
+                                                    return (value.getMonth() + 1) + '月';
                                                 }
-                                            } else {
-                                                return value;
                                             }
-                                        }
+                                            return value;
+                                        },
+
+                                    },
+                                    axisTick: {
+                                        alignWithLabel: true
                                     }
                                 },
                                 yAxis: {
-                                    show: false,
+                                    show: true,
+                                    name: 'PCE'
                                 },
                                 dataZoom: [
                                     {
@@ -991,53 +1004,71 @@ window.onload = function () {
                                         end: 100
                                     },
                                 ],
-                                series: [{
-                                    name: 'current_time_point',
-                                    type: 'bar',
-                                    data: [],
-                                    markLine: {
-                                        symbol: "none",
-                                        lineStyle: {
+                                series: [
+                                    {
+                                        name: series[0].serial,
+                                        type: 'bar',
+                                        stack: 'total',
+                                        data: yFAxis,
+                                        itemStyle: {
                                             normal: {
-                                                type: 'solid',
+                                                color: '#B367F6',
+                                                borderColor: '#1B1B1B',
+                                                borderWidth: '1'
                                             }
                                         },
-                                        data: [
-                                            {
-                                                name: '当前值',
-                                                xAxis: currentValue
+                                        markLine: {
+                                            silent: true,
+                                            symbol: "none",
+                                            lineStyle: {
+                                                normal: {
+                                                    type: 'solid',
+                                                    color: '#231916',
+                                                    width: '2',
+                                                }
                                             },
-                                        ]
-                                    }
-                                }, {
-                                    name: 'Dispatches(Forecast basis)',
-                                    type: 'bar',
-                                    data: yFAxis,
-                                    // markLine: {
-                                    //     symbol: "none",
-                                    //     lineStyle: {
-                                    //         // type: 'solid',
-                                    //         // color: 'black',
-                                    //         // width: '5px',
-                                    //         normal: {
-                                    //             type: 'solid',
-                                    //             color: '#333',
-                                    //             width: '10',
-                                    //         }
-                                    //     },
-                                    //     data: [
-                                    //         {
-                                    //             name: '当前值',
-                                    //             xAxis: currentValue
-                                    //         },
-                                    //     ]
-                                    // }
-                                },
+                                            data: [
+                                                {
+                                                    name: '当前日期',
+                                                    xAxis: currentDay
+                                                },
+                                            ],
+                                            label: {
+                                                normal: {
+                                                    formatter: () => {
+                                                        let date = new Date(currentValue);
+                                                        return date.getFullYear() + '-' + date.getMonth() + 1 + '-' + date.getDate();
+                                                    }
+                                                },
+                                                emphasis: {
+                                                    show: false
+                                                }
+                                            },
+                                        }
+                                    },
                                     {
-                                        name: 'Demand forecast',
+                                        name: series[1].serial,
                                         type: 'bar',
                                         data: yDAxis,
+                                        stack: 'total',
+                                        itemStyle: {
+                                            normal: {
+                                                color: '#15C0E2',
+                                                borderColor: '#1B1B1B',
+                                                borderWidth: '1'
+                                            }
+                                        },
+
                                     },
+                                    {
+                                        type: 'line',
+                                        name: series[2].serial,
+                                        data: yRAxis,
+                                        itemStyle: {
+                                            color: '#F7710F'
+                                        }
+
+                                    }
                                 ],
                             };
                             forecastChart.setOption(option);
