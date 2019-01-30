@@ -1,7 +1,7 @@
 .navbar-default {
     background-color: transparent;
     border-color: transparent;
-    background-image: url("../../img/navBar_background.png");
+    background-image: url("../../../img/navBar_background.png");
 }
 
 .navbar-default .navbar-nav > li > a {

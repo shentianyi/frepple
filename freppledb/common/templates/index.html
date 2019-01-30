@@ -1,4 +1,4 @@
-<script src="../../input/static/input/src/location.js"></script>{% extends "admin/base_site_nav.html" %}
+{% extends "admin/base_site_nav.html" %}
 {% load i18n %}
 
 {% block title %}frePPLe{% endblock %}
@@ -22,6 +22,9 @@
 {% endblock %}
 
 {% block extrahead %}{{block.super}}
+<script type="text/javascript" src="{{STATIC_URL}}js/lib/angular.min.js"></script>
+<script type="text/javascript" src="{{STATIC_URL}}input/src/module.js"></script>
+<script type="text/javascript" src="{{STATIC_URL}}input/src/location.js"></script>
 <script type="text/javascript" src="/static/js/lib/d3.min.js"></script>
 <script>
 	var currency = JSON.parse('{{currency|safe}}');

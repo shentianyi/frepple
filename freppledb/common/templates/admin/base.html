@@ -1,5 +1,6 @@
-{% load i18n %}<!DOCTYPE html>
-<html lang="{{LANGUAGE_CODE|default:"en"}}">
+<!DOCTYPE html>
+{% load i18n %}
+<html lang="{{LANGUAGE_CODE|default:'en'}}">
 <head>
 <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -110,6 +111,20 @@
         </div>
     </div>
 </div> <!-- end container -->
-{% block modal %}{% endblock %}
+{% block modal %}
+<div class="modal fade" tabindex="-1" role="dialog" id="status-401">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">身份验证失败</h4>
+      </div>
+      <div class="modal-body">
+        <p>身份验证失败，即将跳转登录，请重新验证身份！</p>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+{% endblock %}
 </body>
 </html>

@@ -24,6 +24,9 @@
 
     .form-split {
         border-bottom: 1px solid #E5E9F2;
+        background-color: #FFFFFF;
+        box-shadow: 0px 2px 6px 0px rgba(216, 216, 216, 1);
+        padding: 10px 20px;
     }
 
     .form-split:last-child {
@@ -302,21 +305,21 @@
 
     <div id="tabs">
         <ul class="nav nav-tabs" role="tablist">
-            <li role="presentation" class="active">
+            <li role="presentation" :class="tab === 'main'? 'active': null">
                 <a href="#main" aria-controls="main" role="tab"
                    data-toggle="tab" @click="changeTab('main')">主数据</a></li>
-            <li role="presentation">
+            <li role="presentation" :class="tab === 'supplier'? 'active': null">
                 <a href="#supplier" aria-controls="supplier" role="tab" data-toggle="tab"
                    @click="changeTab('supplier')">供应商</a>
             </li>
-            <li role="presentation">
+            <li role="presentation" :class="tab === 'plan'? 'active': null">
                 <a href="#plan" aria-controls="plan" role="tab" data-toggle="tab"
                    @click="changeTab('plan')">计划</a></li>
-            <li role="presentation">
+            <li role="presentation" :class="tab === 'simulation'? 'active': null">
                 <a href="#simulation" aria-controls="simulation" role="tab" data-toggle="tab"
                    @click="changeTab('simulation')">模拟</a>
             </li>
-            <li role="presentation">
+            <li role="presentation" class="tab === 'forecast'? 'active': null">
                 <a href="#forecast" aria-controls="forecast" role="tab" data-toggle="tab"
                    @click="changeTab('forecast')">预测</a>
             </li>
@@ -324,22 +327,22 @@
 
         <div class="tab-content">
             <main-tab inline-template v-if="tab === 'main'" ref="main">
-                <div role="tabpanel" class="tab-pane active" id="main">
+                <div role="tabpanel" class="tab-pane active">
                     {% include "input/item/item_main.html" %}
                 </div>
             </main-tab>
             <supplier-tab inline-template v-else-if="tab === 'supplier'" ref="supplier">
-                <div role="tabpanel" class="tab-pane active" id="supplier">
+                <div role="tabpanel" class="tab-pane active">
                     {% include "input/item/item_supplier.html" %}
                 </div>
             </supplier-tab>
             <plan-tab inline-template v-else-if="tab === 'plan'" ref="plan">
-                <div role="tabpanel" class="tab-pane active" id="plan">
+                <div role="tabpanel" class="tab-pane active">
                     {% include "input/item/item_plan.html" %}
                 </div>
             </plan-tab>
             <simulation-tab inline-template v-else-if="tab === 'simulation'" ref="simulation">
-                <div role="tabpanel" class="tab-pane active" id="simulation">
+                <div role="tabpanel" class="tab-pane active">
                     {% include "input/item/item_simulation.html" %}
                 </div>
             </simulation-tab>
@@ -348,7 +351,7 @@
                           @handle-table-date-change="getForecastGridData"
                           @handle-chart-date-change="getForecastChartData"
             >
-                <div role="tabpanel" class="tab-pane active" id="forecast">
+                <div role="tabpanel" class="tab-pane active">
                     {% include "input/item/item_forecast.html" %}
                 </div>
             </forecast-tab>

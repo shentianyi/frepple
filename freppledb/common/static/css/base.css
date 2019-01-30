@@ -1,3 +1,7 @@
+html, body {
+    height: 100%;
+}
+
 body {
     min-width: 1100px;
 }
@@ -350,4 +354,9 @@ fieldset .field-box {
     max-width: 1280px;
     margin: 0 auto;
     box-sizing: content-box;
+}
+
+.modal-open{overflow:hidden;}
+.modal-open .modal {
+    background: rgba(0, 0, 0, .5);
 }

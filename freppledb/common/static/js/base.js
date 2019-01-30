@@ -34,3 +34,32 @@ $(".datetime-picker").datetimepicker({
 });
 
 $.datetimepicker.setLocale('ch');
+
+
+// ajax全局拦截器
+$.ajaxSetup({
+    cache: false,
+    complete: function (XMLHttpRequest) {
+        let res = XMLHttpRequest.responseText;
+        const status = XMLHttpRequest.status;
+        const resData = JSON.parse(res);
+        try {
+            switch (status) {
+                case 200:
+                    console.log('AJAX STATUS 200', resData);
+                    break;
+                case 401:
+                    $('#status-401').modal('show');
+
+                    let timer = window.setInterval(function () {
+                        $('#status-401').modal('hide');
+                        window.location.href = '/data/login/';
+                        window.clearInterval(timer);
+                    }, 3000);
+                    break;
+            }
+
+        } catch (e) {
+        }
+    }
+});

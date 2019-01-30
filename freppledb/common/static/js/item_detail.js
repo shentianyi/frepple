@@ -569,8 +569,9 @@ window.onload = function () {
             }
         },
         created() {
+            let tab = window.location.hash? window.location.hash: 'main';
+            this.tab = tab.replace(/#/, '');
             this.getMainData();
-            this.getMainSuppliersData();
         },
         mounted() {
             $(".vDateField").datetimepicker({
@@ -583,6 +584,7 @@ window.onload = function () {
         methods: {
             //  TAB页切换
             changeTab(tabType) {
+                window.location.hash = tabType;
                 this.tab = tabType;
                 switch (tabType) {
                     case 'main':
@@ -608,6 +610,7 @@ window.onload = function () {
             // 获取公共数据
             getMainData() {
                 const _this = this;
+
                 if (this.publicData.location.current) {
                     url = '/data/input/item/maindata/' + itemId + "/?location_id=" + this.publicData.location.current;
                 } else {
@@ -622,6 +625,7 @@ window.onload = function () {
                         if (data.result) {
                             _this.publicData = data.content;
                             _this.location_id = _this.location_id ? _this.location_id : 0;
+                            _this.changeTab(_this.tab);
                         } else {
                             // alert(data.message)
                         }
@@ -1084,7 +1088,6 @@ window.onload = function () {
             //切换仓库代码时相应数据一起变化
             locationChange() {
                 this.getMainData();
-                this.changeTab(this.tab);
             }
         }
     });

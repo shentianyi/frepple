@@ -6,14 +6,16 @@
 <!--{{STATIC_URL}}img/frepple.svg这是logol图片位置-->
 {% block branding %}<img src="{{STATIC_URL}}img/logo.png" alt="APS Logo&nbsp;" style="width: 100%;height: 100%;object-fit: contain;">{% endblock %}
 {% block extrastyle %}{{block.super}}
-<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/font-awesome.min.css" />
-<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/opensans.css" />
-<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/ui.jqgrid.min.css" />
-<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/{{request.theme}}/bootstrap.min.css" />
-<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/{{request.theme}}/theme-base.css" />
-<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/bootstrap-datetimepicker.css" />
-<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/jquery.datetimepicker.css" />
-<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/frepple-laura.css" />
+<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/lib/font-awesome.min.css" />
+<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/lib/opensans.css" />
+<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/lib/ui.jqgrid.min.css" />
+<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/theme/{{request.theme}}/bootstrap.min.css" />
+{% if request.theme == 'laura' %}
+<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/theme/{{request.theme}}/theme-base.css" />
+{% endif %}
+<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/lib/bootstrap-datetimepicker.css" />
+<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/lib/jquery.datetimepicker.css" />
+<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/lib/frepple-laura.css" />
 <link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/base.css" />
 <link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/button.css" />
 
