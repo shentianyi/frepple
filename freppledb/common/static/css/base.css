@@ -360,3 +360,9 @@ fieldset .field-box {
 .modal-open .modal {
     background: rgba(0, 0, 0, .5);
 }
+
+.alert-danger {
+    color: #a94442;
+    background-color: #f2dede;
+    border-color: #ebccd1;
+}

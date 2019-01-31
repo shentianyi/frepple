@@ -42,21 +42,27 @@ $.ajaxSetup({
     complete: function (XMLHttpRequest) {
         let res = XMLHttpRequest.responseText;
         const status = XMLHttpRequest.status;
-        const resData = JSON.parse(res);
         try {
             switch (status) {
                 case 200:
-                    console.log('AJAX STATUS 200', resData);
+                    const resData = JSON.parse(res);
+                    console.log('STATUS 200', resData);
                     break;
                 case 401:
                     $('#status-401').modal('show');
-
                     let timer = window.setInterval(function () {
                         $('#status-401').modal('hide');
-                        window.location.href = '/data/login/';
+                        window.location.href = '/data/logout/?next=/';
                         window.clearInterval(timer);
                     }, 3000);
                     break;
+                case 404:
+                    $('#status-404').modal('show');
+                    break;
+                case 500:
+                    $('#status-500').modal('show');
+                    break;
+
             }
 
         } catch (e) {

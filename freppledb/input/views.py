@@ -1553,6 +1553,8 @@ class ItemMainData(View):
             "description": None,
         }
         item_location = ItemLocation.objects.filter(item=item)
+
+        # TODO 逻辑出错
         location = []
         for i in item_location:
             location_dict = {}

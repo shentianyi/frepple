@@ -569,7 +569,7 @@ window.onload = function () {
             }
         },
         created() {
-            let tab = window.location.hash? window.location.hash: 'main';
+            let tab = window.location.hash ? window.location.hash : 'main';
             this.tab = tab.replace(/#/, '');
             this.getMainData();
         },
@@ -623,7 +623,7 @@ window.onload = function () {
                     success: function (data) {
                         // 填充数据
                         if (data.result) {
-                            _this.publicData = data.content;
+                            data.content ? _this.publicData = data.content : null;
                             _this.location_id = _this.location_id ? _this.location_id : 0;
                             _this.changeTab(_this.tab);
                         } else {
@@ -631,7 +631,7 @@ window.onload = function () {
                         }
                     },
                     error: function (err) {
-                        alert(err);
+                        // alert(err);
                     }
                 })
             },
@@ -651,13 +651,13 @@ window.onload = function () {
                     success: function (data) {
                         // 填充数据
                         if (data.result) {
-                            _this.$refs.main.mainData = data.content;
+                            _this.$refs.main.mainData = data.content ? data.content : {};
                         } else {
                             // alert(data.message)
                         }
                     },
                     error: function (err) {
-                        alert(err);
+                        // alert(err);
                     }
                 })
             },
@@ -695,7 +695,7 @@ window.onload = function () {
                         }
                     },
                     error: function (err) {
-                        alert(err);
+                        // alert(err);
                     }
                 })
             },
@@ -752,8 +752,8 @@ window.onload = function () {
 
                 // var DateTypeValue = $("#forecast_grid_chooseMonth").val();
                 $("#forecastGrid").GridDestroy();
-                $("#content-main-forecast").append('<table id="forecastGrid" class="table table-striped pivotgrid"></table>');
-                $("#content-main-forecast").append('<div id="forecastgridpager" class="col-md-12"></div>');
+                // $("#content-main-forecast").append('<table id="forecastGrid" class="table table-striped pivotgrid"></table>');
+                // $("#content-main-forecast").append('<div id="forecastgridpager" class="col-md-12"></div>');
                 let datetype = this.$refs.forecast ? this.$refs.forecast.forecastTableDateType : 'W';
                 $.ajax({
                     url: '/data/output/forecast/item/?id=' + itemId + '&location_id=' + this.publicData.location.current + '&date_type=' + datetype + '&report_type=' + (report_type ? report_type : ''),
@@ -769,14 +769,14 @@ window.onload = function () {
                                 }
                             }, {name: 'type', index: 'type'}];
                             var tableColName = ['', ''];
-                            var rowData = []
+                            var rowData = [];
                             var forecastGridData = data.content.data;
                             // console.log('---------data', data);
                             if (forecastGridData.length > 0) {
 
                                 // 七个属性
                                 // total, last_sale_qty, actual_sale_qty，new_product_plan_qty, normal_qty, promotion_qty, ratio, system_forecast_qty,
-
+                                $('#forecastTableWarning').remove();
                                 var totalRowData = {
                                     location: "仓名",
                                     type: "合计",
@@ -840,6 +840,7 @@ window.onload = function () {
 
                                 // console.log('-----------------------rowData', rowData);
                                 $("#content-main-forecast").append('<table id="forecastGrid" class="table table-striped pivotgrid"></table>');
+                                $("#content-main-forecast").append('<div id="forecastgridpager" class="col-md-12"></div>');
 
                                 jQuery("#forecastGrid").jqGrid({
                                     datatype: "local",
@@ -875,13 +876,15 @@ window.onload = function () {
                                     }
 
                                 })
+                            } else {
+                                $('#content-main-forecast').html('<div class="alert alert-danger" role="alert" id="forecastTableWarning">无表格数据，请刷新页面并重试！</div>');
                             }
                         } else {
                             // alert(data.message)
                         }
                     },
                     error: function (err) {
-                        alert(err);
+                        // alert(err);
                     }
                 })
             },
@@ -913,7 +916,7 @@ window.onload = function () {
                     type: 'application/json',
                     method: 'get',
                     success: function (data) {
-                        if (data.result) {
+                        if (data.result && data.content.serials.length) {
                             const series = data.content.serials;
                             // console.log('data-----------------', data);
 
@@ -1077,11 +1080,11 @@ window.onload = function () {
                             };
                             forecastChart.setOption(option);
                         } else {
-                            // alert(data.message)
+                            $('#item_detail_forecast_chart').html('<div class="alert alert-danger" role="alert" id="forecastTableWarning" style="margin: 0 10px">无图标数据，请刷新页面并重试！</div>');
                         }
                     },
                     error: function (err) {
-                        alert(err);
+                        // alert(err);
                     }
                 })
             },

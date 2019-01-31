@@ -319,7 +319,7 @@
                 <a href="#simulation" aria-controls="simulation" role="tab" data-toggle="tab"
                    @click="changeTab('simulation')">模拟</a>
             </li>
-            <li role="presentation" class="tab === 'forecast'? 'active': null">
+            <li role="presentation" :class="tab === 'forecast'? 'active': null">
                 <a href="#forecast" aria-controls="forecast" role="tab" data-toggle="tab"
                    @click="changeTab('forecast')">预测</a>
             </li>
