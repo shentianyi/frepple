@@ -1653,8 +1653,7 @@ class ItemSupplierData(View):
                 message.message = "供应商不存在"
                 return HttpResponse(json.dumps(message.__dict__, cls=DjangoJSONEncoder, ensure_ascii=False),
                                     content_type='application/json')
-            data = {"current": None,
-                    "values": []}
+            data = []
             for f in supplier:
                 supplier_dict = {
                     "id": f.supplier.id,
@@ -1671,7 +1670,7 @@ class ItemSupplierData(View):
                     "cost_unit": decimal2float(f.cost_unit),
                     "supplier_item_nr": f.supplier_item_nr
                 }
-                data["values"].append(supplier_dict)
+                data.append(supplier_dict)
             message.result = True
             message.code = 200
             message.message = "相应数据查询成功"
